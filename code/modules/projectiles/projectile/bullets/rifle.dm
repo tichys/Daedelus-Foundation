@@ -31,6 +31,8 @@
 /obj/projectile/bullet/rifle/a762nato
 	damage = 20
 	armor_penetration = 15
+/obj/projectile/bullet/a762/practice
+	damage = 6
 
 // Harpoons (Harpoon Gun)
 

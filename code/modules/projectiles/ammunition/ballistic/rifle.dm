@@ -21,6 +21,9 @@
 	projectile_type = /obj/projectile/bullet/rifle/a762nato
 	icon_state = "rifle-brass"
 
+/obj/item/ammo_casing/a762/practice
+	desc = "A 7.62mm practice bullet casing."
+	projectile_type = /obj/projectile/bullet/a762/practice
 
 // 5.56mm (M-90gl Carbine)
 

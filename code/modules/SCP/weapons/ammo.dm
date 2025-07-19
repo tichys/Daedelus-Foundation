@@ -244,7 +244,7 @@
 	name = "ammunition box (.454 Casull)"
 	icon_state = "ammobox_454"
 	caliber = CALIBER_357
-	ammo_type = /obj/item/ammo_casing/revolver/heavy
+	ammo_type = /obj/item/ammo_casing/a357
 	max_ammo = 60
 
 // 45acp
