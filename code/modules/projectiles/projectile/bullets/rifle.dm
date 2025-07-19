@@ -24,14 +24,6 @@
 	damage = 20
 	stamina = 80
 
-/obj/projectile/bullet/rifle/a762x54
-	damage = 20
-	armor_penetration = 15
-
-/obj/projectile/bullet/rifle/a762nato
-	damage = 20
-	armor_penetration = 15
-
 // Harpoons (Harpoon Gun)
 
 /obj/projectile/bullet/harpoon
