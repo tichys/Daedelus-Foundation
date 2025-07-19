@@ -4346,6 +4346,7 @@
 #include "code\modules\research\xenobiology\crossbreeding\stabilized.dm"
 #include "code\modules\SCP\scp012.dm"
 #include "code\modules\SCP\scp013.dm"
+#include "code\modules\SCP\scp173.dm"
 #include "code\modules\SCP\weapons\ammo.dm"
 #include "code\modules\SCP\weapons\guns.dm"
 #include "code\modules\screen_alerts\_screen_alerts.dm"
