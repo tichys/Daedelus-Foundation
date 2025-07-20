@@ -1288,6 +1288,7 @@
 #include "code\game\area\areas\mining.dm"
 #include "code\game\area\areas\misc.dm"
 #include "code\game\area\areas\shuttles.dm"
+#include "code\game\area\areas\site404.dm"
 #include "code\game\area\areas\station.dm"
 #include "code\game\area\areas\ruins\_ruins.dm"
 #include "code\game\area\areas\ruins\space.dm"
@@ -4372,6 +4373,7 @@
 #include "code\modules\shuttle\ripple.dm"
 #include "code\modules\shuttle\shuttle.dm"
 #include "code\modules\shuttle\shuttle_rotate.dm"
+#include "code\modules\shuttle\site404.dm"
 #include "code\modules\shuttle\spaceship_navigation_beacon.dm"
 #include "code\modules\shuttle\special.dm"
 #include "code\modules\shuttle\supply.dm"
@@ -4923,4 +4925,5 @@
 #include "modular_pariah\modules\indicators\code\typing_indicator.dm"
 #include "modular_pariah\modules\pixel_shift\code\pixel_shift.dm"
 #include "modular_pariah\modules\radiosound\code\headset.dm"
+
 // END_INCLUDE

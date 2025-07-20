@@ -227,6 +227,12 @@
 /area/shuttle/caravan/pirate
 	name = "Pirate Cutter"
 
+/area/shuttle/site404/lift106
+	name = "SCP-106 Access Elevator"
+
+/area/shuttle/site404/primaryelevator
+	name = "Site 404 Primary Elevator"
+
 /area/shuttle/caravan/freighter1
 	name = "Small Freighter"
 
