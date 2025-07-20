@@ -213,10 +213,6 @@
 // SCP CROSS-INTERACTIONS
 //=============================================================================
 
-// SCP-173 vs SCP-012 "On Mount Golgotha" - Sculpture is immune to memetic effects
-/mob/living/simple_animal/hostile/statue/scp173/get_req(datum/component/memetic/memecomp)
-	return FALSE // SCP-173 cannot be affected by memetic hazards
-
 // SCP-173 interactions with specific SCPs
 /mob/living/simple_animal/hostile/statue/scp173/CanAttack(atom/the_target)
 	. = ..()
