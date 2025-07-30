@@ -52,13 +52,18 @@
 	QDEL_NULL(SCP)
 	return ..()
 
+// Add cooldown variable for footstep sound
+var/last_footstep_sound = 0
+var/footstep_sound_cooldown = 10 // tenths of a second (1 second)
+
 /mob/living/simple_animal/hostile/statue/scp173/Move(NewLoc, direct)
 	if(can_be_seen(NewLoc))
 		return FALSE
 
-	// Play movement sound when not being watched
-	if(footstep_sound)
+	// Play movement sound when not being watched, with cooldown
+	if(footstep_sound && (world.time - last_footstep_sound) > footstep_sound_cooldown)
 		playsound(src, footstep_sound, 50, TRUE)
+		last_footstep_sound = world.time
 
 	// Chance to leave traces
 	if(prob(15))

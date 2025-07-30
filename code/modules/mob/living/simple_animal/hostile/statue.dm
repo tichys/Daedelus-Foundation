@@ -77,7 +77,14 @@
 	return //we're a statue we're invincible
 
 /mob/living/simple_animal/hostile/statue/Move(turf/NewLoc)
-	if(can_be_seen(NewLoc))
+	var/seen_by_live_player = FALSE
+	for(var/mob/living/carbon/human/H in viewers(world.view + 1, NewLoc))
+		if(H.client && H.stat < UNCONSCIOUS && !H.is_blind())
+			// Optionally: check if facing statue
+			if(get_dir(H, src) == H.dir)
+				seen_by_live_player = TRUE
+				break
+	if(seen_by_live_player)
 		if(client)
 			to_chat(src, span_warning("You cannot move, there are eyes on you!"))
 		return
