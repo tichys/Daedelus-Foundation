@@ -1,7 +1,7 @@
 /mob/living/simple_animal/hostile/retaliate/scp066
 	name = "ball of yarn"
 	desc = "An amorphous red mass of braided yarn and ribbon."
-	icon = 'icons/SCP/nonhumanoidscps(32x32).dmi'
+	icon = 'icons/scp/nonhumanoidscps(32x32).dmi'
 
 	icon_state = "066"
 	icon_living = "066"
@@ -74,6 +74,15 @@
 	RegisterSignal(src, COMSIG_SCP066_ERIC_EMOTE, PROC_REF(handle_eric_emote_signal))
 	RegisterSignal(src, COMSIG_SCP066_LOUD_NOISE_EMOTE, PROC_REF(handle_loud_noise_emote_signal))
 
+	// Register signals for cross-SCP interactions
+	RegisterSignal(src, COMSIG_SCP106_CORROSION_APPLIED, PROC_REF(on_corrosion_applied))
+	RegisterSignal(src, COMSIG_SCP049_CURE_STARTED, PROC_REF(on_cure_started))
+	RegisterSignal(src, COMSIG_SCP096_RAGE_TRIGGERED, PROC_REF(on_rage_triggered))
+	RegisterSignal(src, COMSIG_SCP173_EYE_CONTACT_MADE, PROC_REF(on_eye_contact))
+	RegisterSignal(src, COMSIG_SCP682_ADAPTED, PROC_REF(on_adaptation))
+	RegisterSignal(src, COMSIG_SCP035_POSSESSION_STARTED, PROC_REF(on_possession_started))
+	RegisterSignal(src, COMSIG_SCP087_EXPLORATION_STARTED, PROC_REF(on_exploration_started))
+
 
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/can_attack(atom/movable/the_target, vision_required)
 	if((world.time - emote_harmful_track) > emote_harmful_cooldown)
@@ -93,12 +102,61 @@
 	ears.adjustEarDamage(rand(10, 20))
 	shake_camera(target, 18, 5)
 
+	// Apply sanity and vision effects
+	target.adjustSanity(-15, "scp066_loud_noise")
+	target.add_sanity_effect(SANITY_EFFECT_ANXIETY, 60 SECONDS, 2)
+	target.add_sanity_effect(SANITY_EFFECT_PARANOIA, 90 SECONDS, 1)
+	// Vision effects removed (Foundation-19 style)
+
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/imitate(atom/movable/imitate_target as obj|mob)
 	var/icon/I = new /icon(imitate_target.icon, imitate_target.icon_state)
 	I.ColorTone("#891313")
 	icon = I
 	name = imitate_target.name
 	desc = "It appears to be \a [imitate_target] made out of yarn..."
+
+// Cross-SCP interaction methods
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_corrosion_applied(datum/source, mob/living/carbon/human/victim)
+	// SCP-106's corrosion can damage SCP-066
+	to_chat(victim, span_warning("The corrosive effect damages the yarn ball!"))
+	// Reduce health temporarily
+	adjustHealth(50)
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_cure_started(datum/source, mob/living/carbon/human/patient)
+	// SCP-049's cure can help resist SCP-066's effects
+	if(patient in range(5, src))
+		to_chat(patient, span_notice("The cure's power helps you resist the yarn ball's noise."))
+		patient.adjustSanity(10, "cure_protection")
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_rage_triggered(datum/source, mob/living/carbon/human/target)
+	// SCP-096's rage can be amplified by SCP-066
+	if(target in range(5, src))
+		to_chat(target, span_warning("The yarn ball's noise amplifies your rage!"))
+		target.adjustSanity(-20, "amplified_rage")
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_eye_contact(datum/source, mob/living/carbon/human/viewer)
+	// SCP-173 can appear near SCP-066
+	if(viewer in range(5, src))
+		to_chat(viewer, span_danger("You see a statue near the yarn ball!"))
+		viewer.adjustSanity(-10, "scp173_near_066")
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_adaptation(datum/source, mob/living/carbon/human/adaptor)
+	// SCP-682's adaptation can resist SCP-066's effects
+	if(adaptor in range(5, src))
+		to_chat(adaptor, span_notice("Your adaptation helps you resist the yarn ball's noise."))
+		adaptor.adjustSanity(15, "adaptation_resistance")
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_possession_started(datum/source, mob/living/carbon/human/host, datum/scp035_personality/personality)
+	// SCP-035's possession can interact with SCP-066
+	if(host in range(5, src))
+		to_chat(host, span_notice("The mask's personality finds the yarn ball's music interesting."))
+		host.adjustSanity(8, "mask_music_appreciation")
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_exploration_started(datum/source, mob/living/carbon/human/explorer, datum/scp087_level/level)
+	// SCP-087 can amplify SCP-066's effects
+	if(explorer in range(5, src))
+		to_chat(explorer, span_warning("The stairwell's psychological pressure amplifies the yarn ball's noise!"))
+		explorer.adjustSanity(-25, "amplified_noise")
 
 //Overrides
 
@@ -176,27 +234,27 @@
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/handle_attack_target_signal(datum/source, atom/A)
 	// Original LoudNoise() logic
 	playsound(src, 'sound/scp/scp066/BeethovenLOUD.ogg', 40)
-	play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
+	// play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
 
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/handle_autohiss_signal(datum/source, message, datum/language/L)
 	// Original Eric() logic
 	var/sound = pick('sound/scp/scp066/Eric1.ogg', 'sound/scp/scp066/Eric2.ogg', 'sound/scp/scp066/Eric3.ogg')
 	playsound(src, sound, 25)
-	play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
+	// play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
 
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/handle_noise_emote_signal(datum/source)
 	// Original Noise() logic
 	var/sound = pick('sound/scp/scp066/Notes1.ogg', 'sound/scp/scp066/Notes2.ogg', 'sound/scp/scp066/Notes3.ogg', 'sound/scp/scp066/Notes4.ogg', 'sound/scp/scp066/Notes5.ogg', 'sound/scp/scp066/Notes6.ogg')
 	playsound(src, sound, 25)
-	play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
+	// play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
 
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/handle_eric_emote_signal(datum/source)
 	// Original Eric() logic (duplicate, but kept for clarity of signal handling)
 	var/sound = pick('sound/scp/scp066/Eric1.ogg', 'sound/scp/scp066/Eric2.ogg', 'sound/scp/scp066/Eric3.ogg')
 	playsound(src, sound, 25)
-	play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
+	// play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
 
 /mob/living/simple_animal/hostile/retaliate/scp066/proc/handle_loud_noise_emote_signal(datum/source)
 	// Original LoudNoise() logic (duplicate, but kept for clarity of signal handling)
 	playsound(src, 'sound/scp/scp066/BeethovenLOUD.ogg', 40)
-	play_fov_effect(loc, 7, "talk", ignore_self = TRUE)
+	// play_fov_effect(loc, 7, "talk", ignore_self = TRUE)

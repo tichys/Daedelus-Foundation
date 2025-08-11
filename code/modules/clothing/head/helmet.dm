@@ -2,6 +2,7 @@
 	name = "helmet"
 	desc = "Standard Security gear. Protects the head from impacts."
 	icon_state = "helmet"
+	block2add = FOV_RIGHT|FOV_LEFT
 	inhand_icon_state = "helmet"
 	armor = list(BLUNT = 42, PUNCTURE = 25, SLASH = 25, LASER = 30, ENERGY = 40, BOMB = 25, BIO = 0, FIRE = 50, ACID = 50)
 	cold_protection = HEAD
@@ -64,6 +65,7 @@
 	name = "tactical combat helmet"
 	desc = "A tactical black helmet, sealed from outside hazards with a plate of glass and not much else."
 	icon_state = "marine_command"
+	block2add = FOV_BEHIND
 	inhand_icon_state = "helmetalt"
 	armor = list(BLUNT = 60, PUNCTURE = 50, SLASH = 70, LASER = 30, ENERGY = 25, BOMB = 50, BIO = 100, FIRE = 40, ACID = 50)
 	min_cold_protection_temperature = SPACE_HELM_MIN_TEMP_PROTECT

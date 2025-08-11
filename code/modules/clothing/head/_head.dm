@@ -42,6 +42,7 @@
 		if(H.equip_to_slot_if_possible(src, ITEM_SLOT_HEAD, 0, 1, 1))
 			H.visible_message(span_notice("[src] lands neatly on [H]'s head!"), span_notice("[src] lands perfectly onto your head!"))
 			H.update_held_items() //force update hands to prevent ghost sprites appearing when throw mode is on
+			H.update_fov_angles()
 		return
 	if(iscyborg(hit_atom))
 		var/mob/living/silicon/robot/R = hit_atom

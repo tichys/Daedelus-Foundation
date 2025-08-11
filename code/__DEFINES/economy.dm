@@ -23,6 +23,7 @@
 #define ACCOUNT_MED "MED"
 #define ACCOUNT_MED_NAME "Aether Association Funds"
 #define ACCOUNT_SRV "SRV"
+#define ACCOUNT_SRV_NAME "Service Budget"
 #define ACCOUNT_CAR "CAR"
 #define ACCOUNT_CAR_NAME "Hermes Galactic Freight Funds"
 #define ACCOUNT_SEC "SEC"
@@ -33,6 +34,10 @@
 
 #define ACCOUNT_GOV "GOV"
 #define ACCOUNT_GOV_NAME "Special Order Budget"
+
+// Foundation-specific additions
+#define ACCOUNT_RND "RND"
+#define ACCOUNT_RND_NAME "Research Department Budget"
 
 #define NO_FREEBIES "commies go home"
 

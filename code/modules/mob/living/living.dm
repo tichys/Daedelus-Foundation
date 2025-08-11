@@ -828,7 +828,7 @@
 			drag_damage(newloc, T, old_direction)
 		else
 			makeBloodTrail(newloc, T, old_direction)
-
+	update_vision_cone()
 
 ///Called by mob Move() when the lying_angle is different than zero, to better visually simulate crawling.
 /mob/living/proc/lying_angle_on_movement(direct)
@@ -845,8 +845,9 @@
 	for(var/atom/movable/AM as anything in important_recursive_contents?[RECURSIVE_CONTENTS_ACTIVE_STORAGE])
 		if(UNLINT(length(AM.atom_storage.is_using)))
 			AM.atom_storage.update_viewability()
+	update_vision_cone()
 
-/mob/living/carbon/alien/humanoid/lying_angle_on_movement(direct)
+/mob/living/carbon/alien/lying_angle_on_movement(direct)
 	return
 
 /// Take damage from being dragged while prone. Or not. You decide.
@@ -1733,6 +1734,7 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 	if(lying_angle != lying_prev)
 		update_transform()
 		lying_prev = lying_angle
+		update_cone_show()
 
 
 /**
@@ -1992,6 +1994,7 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 	else // From lying down to standing up.
 		on_standing_up()
 
+	update_cone_show()
 	UPDATE_OO_IF_PRESENT
 
 
@@ -2304,3 +2307,6 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 /mob/living/set_nutrition(change)
 	. = ..()
 	mob_mood?.update_nutrition_moodlets()
+
+
+

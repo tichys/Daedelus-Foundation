@@ -210,8 +210,6 @@
 					vary = sound_vary
 				)
 
-	if(heard_clients)
-		play_fov_effect(source, 5, "footstep", direction, ignore_self = TRUE, override_list = heard_clients)
 
 ///Prepares a footstep for machine walking
 /datum/element/footstep/proc/play_simplestep_machine(atom/movable/source, atom/oldloc, direction, forced, list/old_locs, momentum_change)

@@ -1,5 +1,7 @@
 /// Any humanoid (non-Xeno) mob, such as humans, plasmamen, lizards.
 /mob/living/carbon/human
+	fovangle = FOV_DEFAULT // our fov
+	var/STAPER = 10 // Vanderlin-main stamina/health variable
 	name = "Unknown"
 	real_name = "Unknown"
 	icon = 'icons/mob/human.dmi'

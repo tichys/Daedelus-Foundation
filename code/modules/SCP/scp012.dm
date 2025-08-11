@@ -44,6 +44,15 @@
 
 	soundloop = new(src, TRUE)
 
+	// Register signals for cross-SCP interactions
+	RegisterSignal(src, COMSIG_SCP106_CORROSION_APPLIED, PROC_REF(on_corrosion_applied))
+	RegisterSignal(src, COMSIG_SCP049_CURE_STARTED, PROC_REF(on_cure_started))
+	RegisterSignal(src, COMSIG_SCP096_RAGE_TRIGGERED, PROC_REF(on_rage_triggered))
+	RegisterSignal(src, COMSIG_SCP173_EYE_CONTACT_MADE, PROC_REF(on_eye_contact))
+	RegisterSignal(src, COMSIG_SCP682_ADAPTED, PROC_REF(on_adaptation))
+	RegisterSignal(src, COMSIG_SCP035_POSSESSION_STARTED, PROC_REF(on_possession_started))
+	RegisterSignal(src, COMSIG_SCP087_EXPLORATION_STARTED, PROC_REF(on_exploration_started))
+
 	return ..()
 
 /obj/item/paper/scp012/Destroy()
@@ -96,7 +105,62 @@
 				else
 					H.visible_message(span_notice("[H] looks at \"[name]\" and cries."), span_warning(pick(dmessages)))
 					playsound(H, "sound/voice/human/emote/[H.gender]_cry[pick(list("1","2"))].ogg", 100)
+
+		// Apply sanity and vision effects
+		H.adjustSanity(-25, "scp012_memetic_effect")
+		H.add_sanity_effect(SANITY_EFFECT_HALLUCINATIONS, 60 SECONDS, 3)
+		H.add_sanity_effect(SANITY_EFFECT_PARANOIA, 120 SECONDS, 2)
+		H.add_sanity_effect(SANITY_EFFECT_ANXIETY, 90 SECONDS, 2)
+
+		// Apply vision effects
+		// Vision effects removed (Foundation-19 style)
+
 		effect_cooldown_counter = world.time
+		// notify research via memetic component hook; SCP datum will emit COMSIG_SCP_MEMETIC_AFFECTED
+
+// Cross-SCP interaction methods
+/obj/item/paper/scp012/proc/on_corrosion_applied(datum/source, mob/living/carbon/human/victim)
+	// SCP-106's corrosion can damage SCP-012
+	to_chat(victim, span_warning("The corrosive effect damages the sheet music!"))
+	// Reduce memetic effect temporarily
+	effect_cooldown = 10 SECONDS
+
+/obj/item/paper/scp012/proc/on_cure_started(datum/source, mob/living/carbon/human/patient)
+	// SCP-049's cure can help resist SCP-012's effects
+	to_chat(patient, span_notice("The cure's power helps you resist the sheet music's influence."))
+	patient.adjustSanity(15, "cure_protection")
+	patient.remove_sanity_effect(SANITY_EFFECT_HALLUCINATIONS)
+	patient.remove_sanity_effect(SANITY_EFFECT_PARANOIA)
+
+/obj/item/paper/scp012/proc/on_rage_triggered(datum/source, mob/living/carbon/human/target)
+	// SCP-096's rage can be amplified by SCP-012
+	if(target in range(3, src))
+		to_chat(target, span_warning("The sheet music's influence amplifies your rage!"))
+		target.adjustSanity(-20, "amplified_rage")
+
+/obj/item/paper/scp012/proc/on_eye_contact(datum/source, mob/living/carbon/human/viewer)
+	// SCP-173 can appear near SCP-012
+	if(viewer in range(3, src))
+		to_chat(viewer, span_danger("You see a statue near the sheet music!"))
+		viewer.adjustSanity(-10, "scp173_near_012")
+
+/obj/item/paper/scp012/proc/on_adaptation(datum/source, mob/living/carbon/human/adaptor)
+	// SCP-682's adaptation can resist SCP-012's effects
+	if(adaptor in range(3, src))
+		to_chat(adaptor, span_notice("Your adaptation helps you resist the sheet music's influence."))
+		adaptor.adjustSanity(20, "adaptation_resistance")
+
+/obj/item/paper/scp012/proc/on_possession_started(datum/source, mob/living/carbon/human/host, datum/scp035_personality/personality)
+	// SCP-035's possession can interact with SCP-012
+	if(host in range(3, src))
+		to_chat(host, span_notice("The mask's personality finds the sheet music fascinating."))
+		host.adjustSanity(10, "mask_interest")
+
+/obj/item/paper/scp012/proc/on_exploration_started(datum/source, mob/living/carbon/human/explorer, datum/scp087_level/level)
+	// SCP-087 can amplify SCP-012's effects
+	if(explorer in range(3, src))
+		to_chat(explorer, span_warning("The stairwell's psychological pressure amplifies the sheet music's influence!"))
+		explorer.adjustSanity(-30, "amplified_memetic")
 
 // Overrides
 

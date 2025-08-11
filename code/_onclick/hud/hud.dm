@@ -49,6 +49,8 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 	var/list/atom/movable/screen/hotkeybuttons = list() //the buttons that can be used via hotkeys
 	var/list/infodisplay = list() //the screen objects that display mob info (health, alien plasma, etc...)
 	var/list/screenoverlays = list() //the screen objects used as whole screen overlays (flash, damageoverlay, etc...)
+	var/atom/movable/screen/fov
+	var/atom/movable/screen/fov_blocker
 	var/list/inv_slots[SLOTS_AMT] // /atom/movable/screen/inventory objects, ordered by their slot ID.
 	var/list/hand_slots // /atom/movable/screen/inventory/hand objects, assoc list of "[held_index]" = object
 	var/list/atom/movable/screen/plane_master/plane_masters = list() // see "appearance_flags" in the ref, assoc list of "[plane]" = object
@@ -232,6 +234,8 @@ GLOBAL_LIST_INIT(available_ui_styles, list(
 				screenmob.client.screen += hotkeybuttons
 			if(infodisplay.len)
 				screenmob.client.screen += infodisplay
+
+
 
 			screenmob.client.screen += toggle_palette
 

@@ -64,6 +64,9 @@
 	/// A lazily initiated "food" version of the clothing for moths
 	var/obj/item/food/clothing/moth_snack
 
+	/// FOV restrictions for Vanderlin-main system
+	var/block2add = null
+
 /obj/item/clothing/Initialize(mapload)
 	if(clothing_flags & VOICEBOX_TOGGLABLE)
 		actions_types += /datum/action/item_action/toggle_voice_box
@@ -297,6 +300,10 @@
 	for(var/trait in clothing_traits)
 		REMOVE_CLOTHING_TRAIT(user, trait)
 
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		H.update_fov_angles()
+
 	if(LAZYLEN(user_vars_remembered))
 		for(var/variable in user_vars_remembered)
 			if(variable in user.vars)
@@ -314,6 +321,10 @@
 
 		for(var/trait in clothing_traits)
 			ADD_CLOTHING_TRAIT(user, trait)
+
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			H.update_fov_angles()
 
 		if (LAZYLEN(user_vars_to_edit))
 			for(var/variable in user_vars_to_edit)

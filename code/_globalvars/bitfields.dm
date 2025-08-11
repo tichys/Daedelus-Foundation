@@ -27,6 +27,13 @@ GLOBAL_LIST_INIT(bitfields, generate_bitfields())
 
 	return flags
 
+DEFINE_BITFIELD(fovangle, list(
+	"FOV_DEFAULT" = FOV_DEFAULT,
+	"FOV_RIGHT" = FOV_RIGHT,
+	"FOV_LEFT" = FOV_LEFT,
+	"FOV_BEHIND" = FOV_BEHIND,
+))
+
 DEFINE_BITFIELD(admin_flags, list(
 	"ADMIN" = R_ADMIN,
 	"AUTOLOGIN" = R_AUTOADMIN,

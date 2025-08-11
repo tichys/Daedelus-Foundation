@@ -90,6 +90,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/plane_master_controller)
 		POINT_PLANE,
 		LIGHTING_PLANE,
 		LIGHTING_PLANE_ADDITIVE,
+		GAME_PLANE_FOV_HIDDEN,
 	)
 
 /// Controller of all planes we're ok with changing with colorblind logic

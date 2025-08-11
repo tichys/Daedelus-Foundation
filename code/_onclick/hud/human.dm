@@ -66,8 +66,18 @@
 /datum/hud/human/New(mob/living/carbon/human/owner)
 	..()
 
+
+
 	var/atom/movable/screen/using
 	var/atom/movable/screen/inventory/inv_box
+
+	// Vanderlin-main FOV initialization
+	fov = new /atom/movable/screen/fov()
+	fov.hud = src
+	static_inventory += fov
+	fov_blocker = new /atom/movable/screen/fov_blocker()
+	fov_blocker.hud = src
+	static_inventory += fov_blocker
 
 	using = new/atom/movable/screen/language_menu(null, src)
 	using.icon = ui_style

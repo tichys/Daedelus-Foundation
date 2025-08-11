@@ -184,6 +184,14 @@ Specifically: ZMIMIC_MAX_PLANE to (ZMIMIC_MAX_PLANE - ZMIMIC_MAX_DEPTH)
 #define CURSE_LAYER 7
 #define FOV_EFFECTS_LAYER 10000 //Blindness effects are not layer 4, they lie to you
 
+// Vanderlin-main FOV System
+#define FIELD_OF_VISION_BLOCKER_PLANE -199
+#define FIELD_OF_VISION_BLOCKER_RENDER_TARGET "*FOV_RENDER_TARGET"
+#define GAME_PLANE_FOV_HIDDEN -6
+#define GAME_PLANE_UPPER 1
+
+#define HIDDEN_PLANE 513
+
 ///--------------- FULLSCREEN RUNECHAT BUBBLES ------------
 
 ///Popup Chat Messages

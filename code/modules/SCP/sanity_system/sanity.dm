@@ -1,0 +1,104 @@
+// Sanity System Defines
+// Comprehensive sanity mechanics for Foundation-19
+
+// Sanity Constants
+#define SANITY_MAX 100
+#define SANITY_MIN 0
+#define SANITY_CRITICAL 20
+#define SANITY_LOW 40
+#define SANITY_NORMAL 60
+#define SANITY_HIGH 80
+
+// Sanity Damage Types
+#define SANITY_DAMAGE_PSYCHOLOGICAL 1
+#define SANITY_DAMAGE_MEMETIC 2
+#define SANITY_DAMAGE_HORROR 3
+#define SANITY_DAMAGE_ISOLATION 4
+#define SANITY_DAMAGE_OVERLOAD 5
+
+// Sanity Recovery Types
+#define SANITY_RECOVERY_REST 1
+#define SANITY_RECOVERY_SOCIAL 2
+#define SANITY_RECOVERY_MEDICAL 3
+#define SANITY_RECOVERY_THERAPY 4
+#define SANITY_RECOVERY_CHEMICAL 5
+
+// Sanity States
+#define SANITY_STATE_SANE "sane"
+#define SANITY_STATE_STRESSED "stressed"
+#define SANITY_STATE_DISTRESSED "distressed"
+#define SANITY_STATE_UNSTABLE "unstable"
+#define SANITY_STATE_INSANE "insane"
+#define SANITY_STATE_CATASTROPHIC "catastrophic"
+
+// Sanity Effects
+#define SANITY_EFFECT_HALLUCINATIONS 1
+#define SANITY_EFFECT_PARANOIA 2
+#define SANITY_EFFECT_ANXIETY 3
+#define SANITY_EFFECT_DEPRESSION 4
+#define SANITY_EFFECT_AGGRESSION 5
+#define SANITY_EFFECT_WITHDRAWAL 6
+#define SANITY_EFFECT_CALM 7
+#define SANITY_EFFECT_ANXIETY 8
+#define SANITY_EFFECT_PARANOIA 9
+#define SANITY_EFFECT_HALLUCINATIONS 10
+#define SANITY_EFFECT_DEPRESSION 11
+#define SANITY_EFFECT_AGGRESSION 12
+
+// Sanity Recovery Rates (per second)
+#define SANITY_RECOVERY_RATE_BASE 0.1
+#define SANITY_RECOVERY_RATE_REST 0.3
+#define SANITY_RECOVERY_RATE_SOCIAL 0.2
+#define SANITY_RECOVERY_RATE_MEDICAL 0.5
+#define SANITY_RECOVERY_RATE_THERAPY 0.4
+#define SANITY_RECOVERY_RATE_CHEMICAL 1.0
+
+// Sanity Damage Rates (per second)
+#define SANITY_DAMAGE_RATE_ISOLATION 0.05
+#define SANITY_DAMAGE_RATE_STRESS 0.1
+#define SANITY_DAMAGE_RATE_HORROR 0.2
+#define SANITY_DAMAGE_RATE_MEMETIC 0.3
+
+// Sanity Thresholds for Effects
+#define SANITY_THRESHOLD_HALLUCINATIONS 30
+#define SANITY_THRESHOLD_PARANOIA 50
+#define SANITY_THRESHOLD_ANXIETY 70
+#define SANITY_THRESHOLD_DEPRESSION 40
+#define SANITY_THRESHOLD_AGGRESSION 20
+#define SANITY_THRESHOLD_WITHDRAWAL 60
+
+// Sanity HUD Colors
+#define SANITY_COLOR_SANE "#00FF00"
+#define SANITY_COLOR_STRESSED "#FFFF00"
+#define SANITY_COLOR_DISTRESSED "#FF8000"
+#define SANITY_COLOR_UNSTABLE "#FF4000"
+#define SANITY_COLOR_INSANE "#FF0000"
+#define SANITY_COLOR_CATASTROPHIC "#800000"
+
+// Sanity Traits
+#define TRAIT_SANITY_RESISTANT "sanity_resistant"
+#define TRAIT_SANITY_VULNERABLE "sanity_vulnerable"
+#define TRAIT_SANITY_IMMUNE "sanity_immune"
+#define TRAIT_SANITY_RECOVERY_BOOST "sanity_recovery_boost"
+#define TRAIT_SANITY_DAMAGE_BOOST "sanity_damage_boost"
+
+// Sanity Chemicals
+#define SANITY_CHEM_PSICODINE "psicodine"
+#define SANITY_CHEM_ANTIPSYCHOTIC "antipsychotic"
+#define SANITY_CHEM_ANXIOLYTIC "anxiolytic"
+#define SANITY_CHEM_ANTIDEPRESSANT "antidepressant"
+#define SANITY_CHEM_SEDATIVE "sedative"
+
+// Sanity Equipment
+#define SANITY_EQUIP_THERAPY_COUCH "therapy_couch"
+#define SANITY_EQUIP_MEDITATION_CHAMBER "meditation_chamber"
+#define SANITY_EQUIP_SENSORY_DEPRIVATION "sensory_deprivation"
+#define SANITY_EQUIP_VIRTUAL_REALITY "virtual_reality"
+#define SANITY_EQUIP_BIOFEEDBACK "biofeedback"
+
+// Sanity Research
+#define SANITY_RESEARCH_PSYCHOLOGY "psychology"
+#define SANITY_RESEARCH_NEUROSCIENCE "neuroscience"
+#define SANITY_RESEARCH_PSYCHIATRY "psychiatry"
+#define SANITY_RESEARCH_THERAPY "therapy"
+#define SANITY_RESEARCH_MEDICATION "medication"

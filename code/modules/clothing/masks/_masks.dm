@@ -44,10 +44,16 @@
 		RegisterSignal(M, COMSIG_MOB_SAY, PROC_REF(handle_speech))
 	else
 		UnregisterSignal(M, COMSIG_MOB_SAY)
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		H.update_fov_angles()
 
 /obj/item/clothing/mask/unequipped(mob/M)
 	. = ..()
 	UnregisterSignal(M, COMSIG_MOB_SAY)
+	if(ishuman(M))
+		var/mob/living/carbon/human/H = M
+		H.update_fov_angles()
 
 /obj/item/clothing/mask/vv_edit_var(vname, vval)
 	if(vname == NAMEOF(src, modifies_speech) && equipped_to)

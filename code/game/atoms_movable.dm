@@ -1163,7 +1163,7 @@
 		turn_dir = -1
 
 	if(fov_effect)
-		play_fov_effect(attacked_atom, 5, "attack")
+		// play_fov_effect(attacked_atom, 5, "attack")
 
 	var/matrix/initial_transform = matrix(transform)
 	var/matrix/rotated_transform = transform.Turn(15 * turn_dir)

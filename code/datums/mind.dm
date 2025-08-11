@@ -197,6 +197,7 @@
 		new_character.client.init_verbs() // re-initialize character specific verbs
 
 	current.update_atom_languages()
+	current.update_fov_angles()
 
 	SEND_SIGNAL(src, COMSIG_MIND_TRANSFERRED, old_current)
 	SEND_SIGNAL(current, COMSIG_MOB_MIND_TRANSFERRED_INTO)

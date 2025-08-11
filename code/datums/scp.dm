@@ -70,6 +70,10 @@
 
 	RegisterSignal(parent, COMSIG_PARENT_EXAMINE, PROC_REF(OnExamine))
 
+	// Register with SCP Research subsystem if available
+	if(SSscp_research)
+		SSscp_research.register_scp(parent, src)
+
 /datum/scp/Destroy()
 	. = ..()
 	if(parent)
@@ -96,6 +100,14 @@
 	var/datum/job/job = SSjob.GetJob(H.job)
 	if(job)
 		examine_list += span_obviousnotice("You know this is SCP-[designation]!")
+
+/**
+ * Notify systems that a memetic effect fired for research tracking.
+ */
+/datum/scp/proc/notify_memetic_affected(mob/living/carbon/human/target)
+	if(!target)
+		return
+	SEND_SIGNAL(parent, COMSIG_SCP_MEMETIC_AFFECTED, target)
 
 /datum/scp/proc/has_minimum_players()
 	return length(GLOB.clients) >= min_playercount

@@ -166,6 +166,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NO_VOLUNTARY_SPEECH "no_say_typing"
 #define TRAIT_DEAF "deaf"
 #define TRAIT_NEARSIGHT "nearsighted"
+#define TRAIT_CYCLOPS_LEFT "Cyclops (Left)" //poked left eye
+#define TRAIT_CYCLOPS_RIGHT "Cyclops (Right)" //poked right eye
 #define TRAIT_FAT "fat"
 #define TRAIT_HUSK "husk"
 ///Blacklisted from being revived via defibrilator

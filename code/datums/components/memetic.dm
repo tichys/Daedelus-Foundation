@@ -54,6 +54,11 @@
 			LAZYREMOVE(affected_mobs_weakref, WEAKREF(H))
 			continue
 		call(parent, affected_proc)(H)
+		if(istype(parent, /atom))
+			var/atom/A = parent
+			if(A.SCP && istype(A.SCP, /datum/scp))
+				var/datum/scp/S = A.SCP
+				S.notify_memetic_affected(H)
 
 /datum/component/memetic/proc/saw_memetic(datum/source)
 	var/list/mob/affected_mobs = recursive_list_resolve(affected_mobs_weakref)

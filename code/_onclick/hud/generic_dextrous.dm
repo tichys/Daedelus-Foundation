@@ -8,6 +8,12 @@
 	using.screen_loc = ui_drone_drop
 	static_inventory += using
 
+
+	fov = new /atom/movable/screen/fov()
+	fov.hud = src
+	static_inventory += fov
+
+
 	pull_icon = new /atom/movable/screen/pull(null, src)
 	pull_icon.icon = ui_style
 	pull_icon.update_appearance()

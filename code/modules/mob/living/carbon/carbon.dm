@@ -24,6 +24,14 @@
 	QDEL_NULL(dna)
 	GLOB.carbon_list -= src
 
+
+
+	// Clean up any active sanity effects
+	for(var/datum/sanity_effect/effect in active_sanity_effects)
+		if(effect && !QDELETED(effect))
+			effect.remove()
+	active_sanity_effects.Cut()
+
 ///Humans need to init these early for species purposes
 /mob/living/carbon/proc/create_carbon_reagents()
 	if(reagents)
@@ -1357,3 +1365,232 @@
 		stack_trace("Something tried to drop an organ or bodypart that isn't allowed to be dropped")
 		return FALSE
 	return ..()
+
+// Sanity System Integration for Carbon Mobs
+
+/mob/living/carbon
+	var/sanity = SANITY_MAX
+	var/max_sanity = SANITY_MAX
+	var/last_sanity_update = 0
+	var/list/active_sanity_effects = list()
+	var/list/active_sanity_recovery_sources = list()
+	var/list/active_sanity_damage_sources = list()
+	var/datum/sanity_research_data/sanity_research_data
+
+/mob/living/carbon/Initialize()
+	. = ..()
+	sanity = max_sanity
+	sanity_research_data = new /datum/sanity_research_data(src)
+	SSsanity.sanity_research_data[src] = sanity_research_data
+
+
+
+/mob/living/carbon/Destroy()
+	// Clean up sanity research data
+	if(sanity_research_data)
+		SSsanity.sanity_research_data -= src
+		qdel(sanity_research_data)
+		sanity_research_data = null
+
+
+
+	// Clean up any active sanity effects
+	for(var/datum/sanity_effect/effect in active_sanity_effects)
+		if(effect && !QDELETED(effect))
+			effect.remove()
+	active_sanity_effects.Cut()
+
+	. = ..()
+
+// Sanity adjustment methods
+/mob/living/carbon/proc/adjustSanity(amount, reason = "unknown")
+	if(!sanity_research_data)
+		return
+
+	var/old_sanity = sanity
+	sanity = clamp(sanity + amount, SANITY_MIN, max_sanity)
+
+	// Record the change for research
+	sanity_research_data.record_sanity_change(old_sanity, sanity, reason)
+
+	// Update last sanity update time
+	last_sanity_update = world.time
+
+	// Emit signal for other systems
+	SEND_SIGNAL(src, COMSIG_CARBON_SANITY_UPDATE, old_sanity, sanity, reason)
+
+	// Apply sanity-based effects
+	apply_sanity_effects()
+
+	// Update HUD if available
+	update_sanity_hud()
+
+/mob/living/carbon/proc/setSanity(amount, reason = "set")
+	adjustSanity(amount - sanity, reason)
+
+/mob/living/carbon/proc/getSanityState()
+	if(sanity >= SANITY_HIGH)
+		return SANITY_STATE_SANE
+	else if(sanity >= SANITY_NORMAL)
+		return SANITY_STATE_STRESSED
+	else if(sanity >= SANITY_LOW)
+		return SANITY_STATE_DISTRESSED
+	else if(sanity >= SANITY_CRITICAL)
+		return SANITY_STATE_UNSTABLE
+	else if(sanity >= 10)
+		return SANITY_STATE_INSANE
+	else
+		return SANITY_STATE_CATASTROPHIC
+
+/mob/living/carbon/proc/getSanityColor()
+	var/state = getSanityState()
+	switch(state)
+		if(SANITY_STATE_SANE)
+			return SANITY_COLOR_SANE
+		if(SANITY_STATE_STRESSED)
+			return SANITY_COLOR_STRESSED
+		if(SANITY_STATE_DISTRESSED)
+			return SANITY_COLOR_DISTRESSED
+		if(SANITY_STATE_UNSTABLE)
+			return SANITY_COLOR_UNSTABLE
+		if(SANITY_STATE_INSANE)
+			return SANITY_COLOR_INSANE
+		if(SANITY_STATE_CATASTROPHIC)
+			return SANITY_COLOR_CATASTROPHIC
+		else
+			return SANITY_COLOR_SANE
+
+/mob/living/carbon/proc/apply_sanity_effects()
+	var/state = getSanityState()
+	var/old_effects = active_sanity_effects.Copy()
+
+	// Clear old effects
+	for(var/datum/sanity_effect/effect in old_effects)
+		effect.remove()
+		active_sanity_effects -= effect
+
+	// Apply new effects based on sanity state
+	switch(state)
+		if(SANITY_STATE_STRESSED)
+			if(prob(10))
+				add_sanity_effect(SANITY_EFFECT_ANXIETY, 30 SECONDS, 1)
+		if(SANITY_STATE_DISTRESSED)
+			add_sanity_effect(SANITY_EFFECT_ANXIETY, 0, 2)
+			if(prob(15))
+				add_sanity_effect(SANITY_EFFECT_DEPRESSION, 45 SECONDS, 1)
+		if(SANITY_STATE_UNSTABLE)
+			add_sanity_effect(SANITY_EFFECT_ANXIETY, 0, 3)
+			add_sanity_effect(SANITY_EFFECT_DEPRESSION, 0, 2)
+			if(prob(20))
+				add_sanity_effect(SANITY_EFFECT_PARANOIA, 60 SECONDS, 1)
+		if(SANITY_STATE_INSANE)
+			add_sanity_effect(SANITY_EFFECT_ANXIETY, 0, 4)
+			add_sanity_effect(SANITY_EFFECT_DEPRESSION, 0, 3)
+			add_sanity_effect(SANITY_EFFECT_PARANOIA, 0, 2)
+			if(prob(25))
+				add_sanity_effect(SANITY_EFFECT_HALLUCINATIONS, 90 SECONDS, 1)
+		if(SANITY_STATE_CATASTROPHIC)
+			add_sanity_effect(SANITY_EFFECT_ANXIETY, 0, 5)
+			add_sanity_effect(SANITY_EFFECT_DEPRESSION, 0, 4)
+			add_sanity_effect(SANITY_EFFECT_PARANOIA, 0, 3)
+			add_sanity_effect(SANITY_EFFECT_HALLUCINATIONS, 0, 2)
+			if(prob(30))
+				add_sanity_effect(SANITY_EFFECT_AGGRESSION, 120 SECONDS, 1)
+
+/mob/living/carbon/proc/add_sanity_effect(effect_type, duration = 0, intensity = 1)
+	var/datum/sanity_effect/effect = new(src, effect_type, duration, intensity)
+	active_sanity_effects += effect
+	SSsanity.sanity_effects += effect
+
+	// Record effect for research
+	if(sanity_research_data)
+		sanity_research_data.record_effect(effect_type, intensity)
+
+/mob/living/carbon/proc/remove_sanity_effect(effect_type)
+	for(var/datum/sanity_effect/effect in active_sanity_effects)
+		if(effect.effect_type == effect_type)
+			effect.remove()
+			active_sanity_effects -= effect
+			SSsanity.sanity_effects -= effect
+
+/mob/living/carbon/proc/add_sanity_recovery_source(recovery_type, recovery_rate = SANITY_RECOVERY_RATE_BASE, duration = 0)
+	var/datum/sanity_recovery_source/source = new(src, recovery_type, recovery_rate, duration)
+	active_sanity_recovery_sources += source
+	SSsanity.sanity_recovery_sources += source
+
+/mob/living/carbon/proc/remove_sanity_recovery_source(recovery_type)
+	for(var/datum/sanity_recovery_source/source in active_sanity_recovery_sources)
+		if(source.recovery_type == recovery_type)
+			source.remove()
+			active_sanity_recovery_sources -= source
+			SSsanity.sanity_recovery_sources -= source
+
+/mob/living/carbon/proc/add_sanity_damage_source(damage_type, damage_rate = SANITY_DAMAGE_RATE_STRESS, duration = 0)
+	var/datum/sanity_damage_source/source = new(src, damage_type, damage_rate, duration)
+	active_sanity_damage_sources += source
+	SSsanity.sanity_damage_sources += source
+
+/mob/living/carbon/proc/remove_sanity_damage_source(damage_type)
+	for(var/datum/sanity_damage_source/source in active_sanity_damage_sources)
+		if(source.damage_type == damage_type)
+			source.remove()
+			active_sanity_damage_sources -= source
+			SSsanity.sanity_damage_sources -= source
+
+/mob/living/carbon/proc/update_sanity_hud()
+	// This will be implemented when we add the HUD system
+	// For now, just update the mob's appearance if needed
+	if(sanity <= SANITY_CRITICAL)
+		// Add visual effects for low sanity
+		add_client_colour(/datum/client_colour/sanity_low)
+	else
+		remove_client_colour(/datum/client_colour/sanity_low)
+
+// Sanity-related verbs
+/mob/living/carbon/verb/check_sanity()
+	set name = "Check Sanity"
+	set category = "IC"
+	set src = usr
+
+	if(usr != src)
+		return
+
+	var/state = getSanityState()
+	var/color = getSanityColor()
+
+	to_chat(usr, span_notice("Your current sanity: [sanity]/[max_sanity]"))
+	to_chat(usr, span_notice("Mental state: [state]"))
+	to_chat(usr, span_notice("Mental state color: [color]"))
+
+	if(sanity <= SANITY_CRITICAL)
+		to_chat(usr, span_danger("Your mental state is critical! Seek help immediately!"))
+
+/mob/living/carbon/verb/meditate()
+	set name = "Meditate"
+	set category = "IC"
+	set src = usr
+
+	if(usr != src)
+		return
+
+	if(stat != CONSCIOUS)
+		to_chat(usr, span_warning("You cannot meditate in your current state."))
+		return
+
+	to_chat(usr, span_notice("You begin to meditate to calm your mind..."))
+
+	if(do_after(usr, 30 SECONDS, target = usr))
+		adjustSanity(10, "meditation")
+		to_chat(usr, span_notice("You feel more mentally stable after meditating."))
+	else
+		to_chat(usr, span_warning("Your meditation was interrupted."))
+
+// Client colour for low sanity visual effects
+/datum/client_colour/sanity_low
+	colour = list(rgb(255,200,200), rgb(200,255,200), rgb(200,200,255), rgb(0,0,0))
+	priority = 5
+
+
+
+/mob/living/carbon/Initialize()
+	. = ..()

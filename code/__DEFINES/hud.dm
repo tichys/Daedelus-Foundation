@@ -71,6 +71,7 @@
 #define ui_movi "EAST-2:26,SOUTH:5"
 #define ui_acti "EAST-3:24,SOUTH:5"
 #define ui_combat_toggle "EAST-3:24,SOUTH:5"
+
 #define ui_zonesel "EAST-1:28,SOUTH:5"
 #define ui_acti_alt "EAST-1:28,SOUTH:5" //alternative intent switcher for when the interface is hidden (F12)
 #define ui_crafting "EAST-4:22,SOUTH:5"
@@ -234,3 +235,12 @@
 
 ///The default see_in_dark given to mobs
 #define NIGHTVISION_FOV_RANGE 2
+
+// Vanderlin-main FOV Angle System
+#define FOV_DEFAULT                     (1<<0)
+#define FOV_RIGHT                       (1<<1)
+#define FOV_LEFT                        (1<<2)
+#define FOV_BEHIND                      (1<<3) //180
+
+// Vanderlin-main FOV Traits
+

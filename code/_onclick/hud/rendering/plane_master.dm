@@ -141,6 +141,16 @@
 	name = "parallax whitifier plane master"
 	plane = PLANE_SPACE
 
+/atom/movable/screen/plane_master/game_world_fov_hidden
+	name = "game world fov hidden plane master"
+	plane = GAME_PLANE_FOV_HIDDEN
+	appearance_flags = PLANE_MASTER
+	blend_mode = BLEND_OVERLAY
+
+/atom/movable/screen/plane_master/game_world_fov_hidden/Initialize()
+	. = ..()
+	add_filter("FOV_hidden", 1, alpha_mask_filter(render_source = FIELD_OF_VISION_BLOCKER_RENDER_TARGET, flags = MASK_INVERSE))
+
 /atom/movable/screen/plane_master/pipecrawl
 	name = "pipecrawl plane master"
 	plane = PIPECRAWL_IMAGES_PLANE
