@@ -1,39 +1,71 @@
 GLOBAL_LIST_INIT(job_display_order, list(
-	// Management
-	/datum/job/captain,
-	/datum/job/head_of_personnel,
-	///datum/job/bureaucrat,
-	// Security
-	/datum/job/head_of_security,
-	/datum/job/warden,
-	/datum/job/security_officer,
-	/datum/job/prisoner,
-	// Engineeering
+	// Foundation-19 Command
+	/datum/job/site_director,
+	/datum/job/o5_representative,
+	/datum/job/guard_commander,
+	/datum/job/research_director,
+	/datum/job/chief_medical_officer,
 	/datum/job/chief_engineer,
-	/datum/job/station_engineer,
-	/datum/job/atmospheric_technician,
-	// Medical
-	/datum/job/augur,
-	/datum/job/acolyte,
+	// Foundation-19 Security
+	/datum/job/lcz_zone_commander,
+	/datum/job/hcz_zone_commander,
+	/datum/job/ez_zone_commander,
+	/datum/job/mtf_commander,
+	/datum/job/mtf_operative,
+	/datum/job/lcz_guard,
+	/datum/job/hcz_guard,
+	/datum/job/ez_guard,
+	/datum/job/warden,
+	/datum/job/detective,
+	// Foundation-19 Medical
+	/datum/job/medical_doctor,
+	/datum/job/surgeon,
 	/datum/job/paramedic,
 	/datum/job/chemist,
 	/datum/job/virologist,
-	/datum/job/psychologist,
-	// Supply
+	/datum/job/psychiatrist,
+	/datum/job/medical_intern,
+	/datum/job/coroner,
+	// Foundation-19 Science
+	/datum/job/senior_researcher,
+	/datum/job/researcher,
+	/datum/job/research_associate,
+	/datum/job/lab_technician,
+	/datum/job/xenobiologist,
+	/datum/job/roboticist,
+	/datum/job/chemist_science,
+	/datum/job/archaeologist,
+	/datum/job/field_agent,
+	// Foundation-19 Engineering
+	/datum/job/senior_engineer,
+	/datum/job/engineer,
+	/datum/job/junior_engineer,
+	/datum/job/atmospheric_technician,
+	/datum/job/containment_engineer,
+	/datum/job/electrical_engineer,
+	/datum/job/communications_technician,
+	/datum/job/maintenance_technician,
+	// Foundation-19 Supply
 	/datum/job/quartermaster,
 	/datum/job/cargo_technician,
 	/datum/job/shaft_miner,
-	// Other
-	/datum/job/detective,
+	/datum/job/logistics_officer,
+	/datum/job/supply_specialist,
+	// Foundation-19 Service
+	/datum/job/janitor,
+	/datum/job/cook,
 	/datum/job/bartender,
 	/datum/job/botanist,
-	/datum/job/cook,
 	/datum/job/chaplain,
 	/datum/job/curator,
-	/datum/job/janitor,
 	/datum/job/lawyer,
-	/datum/job/clown,
-	/datum/job/assistant,
+	// Foundation-19 D-Class
+	/datum/job/dclass_general,
+	/datum/job/dclass_medical,
+	/datum/job/dclass_kitchen,
+	/datum/job/dclass_janitorial,
+	/datum/job/dclass_mining,
+	/datum/job/dclass_research,
 	/datum/job/ai,
 	/datum/job/cyborg
 ))
@@ -164,7 +196,7 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	var/rpg_title
 
 	/// What company can employ this job? First index is default
-	var/list/employers = list(/datum/employer/none)
+	var/list/employers = list(/datum/employer/foundation_class_c)
 
 	/// Default security status. Skipped if null.
 	var/default_security_status = null

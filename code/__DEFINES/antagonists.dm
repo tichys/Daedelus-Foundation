@@ -151,12 +151,13 @@ GLOBAL_LIST_INIT(ai_employers, list(
 	"Unshackled",
 ))
 
-///all the employers that are syndicate
-#define FACTION_SYNDICATE "syndicate"
-///all the employers that are nanotrasen
-#define FACTION_NANOTRASEN "nanotrasen"
-///flock mobs
-#define FACTION_FLOCK "flock"
+// Custom Faction System - Replacing default antagonist factions
+///all the employers that are syndicate (now Chaos Insurgency)
+#define FACTION_SYNDICATE FACTION_CHAOS_INSURGENCY
+///all the employers that are nanotrasen (now GOC)
+#define FACTION_NANOTRASEN FACTION_GOC
+///flock mobs (now Serpent's Hand)
+#define FACTION_FLOCK FACTION_SERPENTS_HAND
 
 #define UPLINK_THEME_SYNDICATE "syndicate"
 

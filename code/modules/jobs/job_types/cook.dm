@@ -11,7 +11,7 @@
 	var/list/kitchen_areas = list(/area/station/service/kitchen)
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/foundation_service
 	)
 
 	outfits = list(

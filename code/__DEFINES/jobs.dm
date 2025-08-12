@@ -137,8 +137,17 @@
 /// Whether this job can be an intern.
 #define JOB_CAN_BE_INTERN (1<<7)
 
+// Custom Faction System - Replacing default factions with our own
 #define FACTION_NONE "None"
-#define FACTION_STATION "Station"
+#define FACTION_FOUNDATION "foundation"
+#define FACTION_GOC "goc"
+#define FACTION_SERPENTS_HAND "serpents_hand"
+#define FACTION_CHAOS_INSURGENCY "chaos_insurgency"
+#define FACTION_MCD "mcd"
+#define FACTION_UIU "uiu"
+
+// Legacy faction defines for compatibility (deprecated)
+#define FACTION_STATION FACTION_FOUNDATION
 
 /// Spawn point is always fixed.
 #define JOBSPAWN_FORCE_FIXED 0

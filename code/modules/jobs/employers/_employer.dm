@@ -3,32 +3,65 @@
 	var/short_name = ""
 	var/creator_info = ""
 
-/datum/employer/government
-	name = "The Government"
-	short_name = "Government"
-	creator_info = "The Core Worlds has sent out many agents to secure as many capable space stations as possible to provide relief from the ongoing resource scarcity back home. Regardless of what the inhabitants think."
+// Foundation Class-Based Employers
+/datum/employer/foundation_class_a
+	name = "Foundation Class A Personnel"
+	short_name = "Class A"
+	creator_info = "The highest level of Foundation personnel. Class A personnel have access to all areas and information within the Foundation. They are typically O5 Council members, Site Directors, and other high-ranking officials."
 
-/datum/employer/daedalus
-	name = "Daedalus Industries"
-	short_name = "Daedalus"
-	creator_info = "The most famous space station engineers in the Great Pool. Creators of the Resonance Drive and Resonance Gate."
+/datum/employer/foundation_class_b
+	name = "Foundation Class B Personnel"
+	short_name = "Class B"
+	creator_info = "Senior Foundation personnel with extensive access to sensitive information and areas. Class B personnel include Research Directors, Chief Medical Officers, Chief Engineers, and other department heads."
 
-/datum/employer/mars_exec
-	name = "Mars People's Coalition"
-	short_name = "MPC"
-	creator_info = "A hastily put together band of peacekeepers formed by the Red Sand Republic during it's formation shortly before the Mars Revolution. After the conclusion of the war, the MPC acts as the police force on the planet, as well as a cheap peacekeeping corps for hire. All proceeds go to various charities on Mars."
+/datum/employer/foundation_class_c
+	name = "Foundation Class C Personnel"
+	short_name = "Class C"
+	creator_info = "Standard Foundation personnel with moderate access to information and areas. Class C personnel include researchers, medical staff, engineers, security personnel, and other operational staff."
 
-/datum/employer/aether
-	name = "The Aether Association"
-	short_name = "Aether"
-	creator_info = "A mysterious society of doctors, pharmacists, and surgeons, intent on providing healthcare to every being in the Great Pool."
+/datum/employer/foundation_class_d
+	name = "Foundation Class D Personnel"
+	short_name = "Class D"
+	creator_info = "Expendable personnel used for testing and containment procedures. Class D personnel are typically death row inmates or other individuals deemed expendable by the Foundation."
 
-/datum/employer/hermes
-	name = "Hermes Galactic Freight"
-	short_name = "Hermes"
-	creator_info = "A ragtag fleet of merchants and freighters who will ship anything anywhere for the right price. They loosely follow the group's leader, a Vox named Grease Kitriki, who was previously a fierce pirate."
+/datum/employer/foundation_security
+	name = "Foundation Security Personnel"
+	short_name = "Security"
+	creator_info = "Foundation security personnel responsible for maintaining order and protecting Foundation assets. They include guards, MTF operatives, and other security-related personnel."
 
-/datum/employer/none
-	name = "None"
-	short_name = "None"
-	creator_info = "The lone wolf. Solumn wonderer. Average joe."
+/datum/employer/foundation_medical
+	name = "Foundation Medical Personnel"
+	short_name = "Medical"
+	creator_info = "Foundation medical personnel responsible for the health and well-being of Foundation staff and subjects. They include doctors, nurses, researchers, and other medical professionals."
+
+/datum/employer/foundation_science
+	name = "Foundation Science Personnel"
+	short_name = "Science"
+	creator_info = "Foundation science personnel responsible for research, analysis, and understanding of anomalous objects and phenomena. They include researchers, lab technicians, and other scientific staff."
+
+/datum/employer/foundation_engineering
+	name = "Foundation Engineering Personnel"
+	short_name = "Engineering"
+	creator_info = "Foundation engineering personnel responsible for maintaining and operating Foundation facilities and equipment. They include engineers, technicians, and other technical staff."
+
+/datum/employer/foundation_supply
+	name = "Foundation Supply Personnel"
+	short_name = "Supply"
+	creator_info = "Foundation supply personnel responsible for managing resources, logistics, and procurement. They include quartermasters, cargo technicians, and other supply-related staff."
+
+/datum/employer/foundation_service
+	name = "Foundation Service Personnel"
+	short_name = "Service"
+	creator_info = "Foundation service personnel responsible for maintaining the daily operations and quality of life within Foundation facilities. They include janitors, cooks, and other service staff."
+
+/datum/employer/foundation_mtf
+	name = "Mobile Task Force Personnel"
+	short_name = "MTF"
+	creator_info = "Specialized Foundation personnel organized into Mobile Task Forces for handling specific threats and situations. MTF personnel are highly trained and equipped for various operational scenarios."
+
+/datum/employer/foundation_admin
+	name = "Foundation Administrative Personnel"
+	short_name = "Admin"
+	creator_info = "Foundation administrative personnel responsible for managing records, communications, and bureaucratic functions. They include clerks, assistants, and other administrative staff."
+
+
