@@ -19,12 +19,12 @@
 // Now that we've replaced the default factions, we can map directly
 /datum/faction_integration/proc/initialize_faction_mappings()
 	faction_mappings = list(
-		"foundation" = FACTION_FOUNDATION,
-		"goc" = FACTION_GOC,
-		"serpents_hand" = FACTION_SERPENTS_HAND,
-		"chaos_insurgency" = FACTION_CHAOS_INSURGENCY,
-		"mcd" = FACTION_MCD,
-		"uiu" = FACTION_UIU
+		"foundation" = FACTION_STATION,
+		"goc" = FACTION_STATION,
+		"serpents_hand" = FACTION_STATION,
+		"chaos_insurgency" = FACTION_STATION,
+		"mcd" = FACTION_STATION,
+		"uiu" = FACTION_STATION
 	)
 
 // Initialize job assignments to factions
@@ -117,7 +117,7 @@
 
 // Get the game faction for a persistent faction
 /datum/faction_integration/proc/get_game_faction(persistent_faction_id)
-	return faction_mappings[persistent_faction_id] || FACTION_FOUNDATION
+	return faction_mappings[persistent_faction_id] || FACTION_STATION
 
 // Get the persistent faction for a game faction
 /datum/faction_integration/proc/get_persistent_faction(game_faction)

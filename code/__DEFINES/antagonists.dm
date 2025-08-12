@@ -152,12 +152,12 @@ GLOBAL_LIST_INIT(ai_employers, list(
 ))
 
 // Custom Faction System - Replacing default antagonist factions
-///all the employers that are syndicate (now Chaos Insurgency)
-#define FACTION_SYNDICATE FACTION_CHAOS_INSURGENCY
-///all the employers that are nanotrasen (now GOC)
-#define FACTION_NANOTRASEN FACTION_GOC
-///flock mobs (now Serpent's Hand)
-#define FACTION_FLOCK FACTION_SERPENTS_HAND
+///all the employers that are syndicate (now Station)
+#define FACTION_SYNDICATE FACTION_STATION
+///all the employers that are nanotrasen (now Station)
+#define FACTION_NANOTRASEN FACTION_STATION
+///flock mobs (now Station)
+#define FACTION_FLOCK FACTION_STATION
 
 #define UPLINK_THEME_SYNDICATE "syndicate"
 
