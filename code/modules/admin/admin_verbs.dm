@@ -87,6 +87,10 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/reset_player_progress,
 	/client/proc/view_player_progress,
 	/client/proc/persistent_progression_panel,
+	/client/proc/master_persistence_panel,
+	/client/proc/facility_persistence_panel,
+	/client/proc/scp_persistence_panel,
+	/client/proc/technology_persistence_panel,
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel))
 GLOBAL_PROTECT(admin_verbs_ban)

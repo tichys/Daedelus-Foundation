@@ -1206,6 +1206,9 @@
 #include "code\modules\SCP\persistent_progression\persistent_faction.dm"
 #include "code\modules\SCP\persistent_progression\persistent_player_data.dm"
 #include "code\modules\SCP\persistent_progression\player_verbs.dm"
+#include "code\modules\SCP\persistent_progression\facility_persistence.dm"
+#include "code\modules\SCP\persistent_progression\scp_persistence.dm"
+#include "code\modules\SCP\persistent_progression\technology_persistence.dm"
 #include "code\datums\proximity_monitor\field.dm"
 #include "code\datums\proximity_monitor\proximity_monitor.dm"
 #include "code\datums\proximity_monitor\fields\gravity.dm"
@@ -4990,4 +4993,5 @@
 #include "modular_pariah\modules\indicators\code\typing_indicator.dm"
 #include "modular_pariah\modules\pixel_shift\code\pixel_shift.dm"
 #include "modular_pariah\modules\radiosound\code\headset.dm"
+#include "code/modules/SCP/persistent_progression/tgui_master_panel.dm"
 // END_INCLUDE
