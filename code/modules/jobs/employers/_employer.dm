@@ -3,65 +3,86 @@
 	var/short_name = ""
 	var/creator_info = ""
 
-// Foundation Class-Based Employers
-/datum/employer/foundation_class_a
-	name = "Foundation Class A Personnel"
-	short_name = "Class A"
-	creator_info = "The highest level of Foundation personnel. Class A personnel have access to all areas and information within the Foundation. They are typically O5 Council members, Site Directors, and other high-ranking officials."
 
-/datum/employer/foundation_class_b
-	name = "Foundation Class B Personnel"
-	short_name = "Class B"
-	creator_info = "Senior Foundation personnel with extensive access to sensitive information and areas. Class B personnel include Research Directors, Chief Medical Officers, Chief Engineers, and other department heads."
+/datum/employer/scp
+	name = "The SCP Foundation"
+	short_name = "Foundation"
+	creator_info = "A foundation for containing anomalous entities the normal world would be better off not knowing about."
 
-/datum/employer/foundation_class_c
-	name = "Foundation Class C Personnel"
-	short_name = "Class C"
-	creator_info = "Standard Foundation personnel with moderate access to information and areas. Class C personnel include researchers, medical staff, engineers, security personnel, and other operational staff."
+/*
+/datum/employer/scp_admin
+	name = "SCP Foundation - Administrative Department"
+	short_name = "Admin Department"
+	creator_info = "The Admin Dept is headed by the O5 Council and The Administrator. Under that is a network of various regional commands and then individual sites - headed by directors who in turn have their own teams of various staff such as head of personnel, financial officers, and other coordinators who finally at the end of the totem pole are simple accountants and managers for recreational facilities."
 
-/datum/employer/foundation_class_d
-	name = "Foundation Class D Personnel"
-	short_name = "Class D"
-	creator_info = "Expendable personnel used for testing and containment procedures. Class D personnel are typically death row inmates or other individuals deemed expendable by the Foundation."
+/datum/employer/scp_tribunal
+	name = "SCP Foundation - Internal Tribunal Sub-Department"
+	short_name = "Tribunal Department"
+	creator_info = "The Internal Tribunal is the closest to a judicial branch of the Foundation. They're in charge of creating, interpreting and sentencing Foundation procedures, policies and other 'laws' made by the Foundation, including those who violate them."
 
-/datum/employer/foundation_security
-	name = "Foundation Security Personnel"
-	short_name = "Security"
-	creator_info = "Foundation security personnel responsible for maintaining order and protecting Foundation assets. They include guards, MTF operatives, and other security-related personnel."
+/datum/employer/service
+	name = "SCP Foundation - Recreation & Non-essential Resources Sub-Department"
+	short_name = "Recreation Department"
+	creator_info = "Recreation & Non-essential Resources (RNR) is a minor and lowly known sub-department that manages, employs, and otherwise takes care of all the recreational facilities - from cafes to chapels, parks and rest areas - they're all maintained by RNR."
 
-/datum/employer/foundation_medical
-	name = "Foundation Medical Personnel"
-	short_name = "Medical"
-	creator_info = "Foundation medical personnel responsible for the health and well-being of Foundation staff and subjects. They include doctors, nurses, researchers, and other medical professionals."
+/datum/employer/security
+	name = "SCP Foundation - Security Department"
+	short_name = "Security Department"
+	creator_info = "The Security Dept is the largest department in the Foundation. It comprises general, long term security personnel & several sub-departments and sub-sub departments all dedicated to various aspects of security."
 
-/datum/employer/foundation_science
-	name = "Foundation Science Personnel"
-	short_name = "Science"
-	creator_info = "Foundation science personnel responsible for research, analysis, and understanding of anomalous objects and phenomena. They include researchers, lab technicians, and other scientific staff."
+/datum/employer/internalaffairs
+	name = "SCP Foundation - External & Internal Affairs Sub-Department"
+	short_name = "Internal Affairs Department"
+	creator_info = "The External & Internal Affairs (EIA) Sub-Department is responsible for internal security, external affairs including covert and diplomatic, and enforcement of Foundation law."
 
-/datum/employer/foundation_engineering
-	name = "Foundation Engineering Personnel"
-	short_name = "Engineering"
-	creator_info = "Foundation engineering personnel responsible for maintaining and operating Foundation facilities and equipment. They include engineers, technicians, and other technical staff."
+/datum/employer/medical
+	name = "SCP Foundation - Medicinal Development & Maintenance Sub-Department"
+	short_name = "Medical Department"
+	creator_info = "Created alongside the research department in early days in order to poke and prod at the human body, the Medicinal Development & Maintenance (MDM) Sub-Department performs medical services for the Foundation, including both experiments and caring for Foundation employees who are still alive."
 
-/datum/employer/foundation_supply
-	name = "Foundation Supply Personnel"
-	short_name = "Supply"
-	creator_info = "Foundation supply personnel responsible for managing resources, logistics, and procurement. They include quartermasters, cargo technicians, and other supply-related staff."
+/datum/employer/magic
+	name = "SCP Foundation - Thaumatological & Esoteric Practices Sub-Department"
+	short_name = "Thamuatology Department"
+	creator_info = "The Thaumtological & Esoteric Practices (TEP) Sub-Department handles thamuology and other magic-like practices."
 
-/datum/employer/foundation_service
-	name = "Foundation Service Personnel"
-	short_name = "Service"
-	creator_info = "Foundation service personnel responsible for maintaining the daily operations and quality of life within Foundation facilities. They include janitors, cooks, and other service staff."
+/datum/employer/engineering
+	name = "SCP Foundation - Engineering & Technical Service Department"
+	short_name = "Engineering Department"
+	creator_info = "The Engineering & Technical Service Department handles all the logistical challenges regarding maintaining the Foundation worldwide."
 
-/datum/employer/foundation_mtf
-	name = "Mobile Task Force Personnel"
-	short_name = "MTF"
-	creator_info = "Specialized Foundation personnel organized into Mobile Task Forces for handling specific threats and situations. MTF personnel are highly trained and equipped for various operational scenarios."
+/datum/employer/logistics
+	name = "SCP Foundation - Logistics Procurement & Delivery Sub-Department"
+	short_name = "Logistics Department"
+	creator_info = "The Logistics Procurement & Delivery (LPD) Sub-Department is the source of all material - anomalous or otherwise - to sites. They assist in delivery of the anomalous, procurement of mundane resources and otherwise make the backbone of the Foundation's function."
 
-/datum/employer/foundation_admin
-	name = "Foundation Administrative Personnel"
-	short_name = "Admin"
-	creator_info = "Foundation administrative personnel responsible for managing records, communications, and bureaucratic functions. They include clerks, assistants, and other administrative staff."
+/datum/employer/communications
+	name = "SCP Foundation - Communication Management & Maintenance Sub-Department"
+	short_name = "Communications Department"
+	creator_info = "The Communication Management & Maintenance Sub-Department functions as the strongest ally to the Admin Dept - as without the constant, twenty four hour connections across the globe to relay orders and information the Foundation would have never reached the level it is as currently."
+*/
 
+/datum/employer/goc
+	name = "The Global Occult Coalition"
+	short_name = "G.O.C."
+	creator_info = "The GOC was created in the aftermath of WWII, from the remnants of defecting occultists, psychics, priests, and scientists from Nazi, Soviet, and Allied states, brought together and formed by the Allies. As the world stage broadened, so too did the number of countries that had their hands in the GOC, until it became what it is today."
+
+/datum/employer/uiu
+	name = "The Unusual Incidents Unit"
+	short_name = "U.I.U."
+	creator_info = "The Federal Bureau of Investigations Unusual Incidents Unit (UIU) is the main paranormal law enforcement agency in the United States. It handles all paranormal incidents and crime within the United States and its territories, as well as anomalous enclaves within its jurisdiction."
+
+/datum/employer/goldbaker
+	name = "Goldbaker-Reinz Ltd."
+	short_name = "Goldbaker-Reinz"
+	creator_info = "Goldbaker-Reinz Ltd. is one of the foremost insurance providers for the anomalous world. It provides insurance to both individuals and institutions, as well as reinsurance, data vending, risk analysis, and forensic & enforcement services. It is known throughout the anomalous world for always honoring the letter of its contracts in good faith."
+
+/datum/employer/mcd
+	name = "Marshall, Carter & Dark"
+	short_name = "MC&D"
+	creator_info = "Marshall, Carter & Dark is a corporation which specialize in the sale of anomalous objects for profit."
+
+/datum/employer/horizon_initiative
+	name = "Horizon Initiative"
+	short_name = "Horizon"
+	creator_info = "The 'Horizon Initiative' is a Group of Interest comprised of influential religious sects from the three major Abrahamic religions, formed to actively seek out and either retrieve or destroy anomalous objects they perceive as threats based on their religious dogma."
 
