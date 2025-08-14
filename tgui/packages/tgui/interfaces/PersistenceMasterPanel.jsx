@@ -16,11 +16,12 @@ import { Window } from '../layouts';
 
 export const PersistenceMasterPanel = (props, context) => {
   const { act, data } = useBackend(context);
-  const [activeTab, setActiveTab] = useLocalState(
-    context,
-    'activeTab',
-    'terminal',
-  );
+  const [activeTab, setActiveTab] = React.useState('terminal');
+
+  // Debug activeTab changes
+  React.useEffect(() => {
+    console.log('activeTab changed to:', activeTab, 'type:', typeof activeTab);
+  }, [activeTab]);
 
   const {
     facility_data,
@@ -313,11 +314,8 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Facility Management Interface
   const FacilityInterface = () => {
-    const [facilityActiveTab, setFacilityActiveTab] = useLocalState(
-      context,
-      'facilityActiveTab',
-      'overview',
-    );
+    const [facilityActiveTab, setFacilityActiveTab] =
+      React.useState('overview');
     const [selectedRoom, setSelectedRoom] = useLocalState(
       context,
       'facilitySelectedRoom',
@@ -902,11 +900,7 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // SCP Management Interface
   const SCPInterface = () => {
-    const [scpActiveTab, setScpActiveTab] = useLocalState(
-      context,
-      'scpActiveTab',
-      'overview',
-    );
+    const [scpActiveTab, setScpActiveTab] = React.useState('overview');
     const [selectedSCP, setSelectedSCP] = useLocalState(
       context,
       'scpSelectedSCP',
@@ -1565,11 +1559,7 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Technology Management Interface
   const TechnologyInterface = () => {
-    const [techActiveTab, setTechActiveTab] = useLocalState(
-      context,
-      'techActiveTab',
-      'overview',
-    );
+    const [techActiveTab, setTechActiveTab] = React.useState('overview');
     const [selectedProject, setSelectedProject] = useLocalState(
       context,
       'techSelectedProject',
@@ -2189,11 +2179,7 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Player Data Management Interface
   const PlayerInterface = () => {
-    const [playerActiveTab, setPlayerActiveTab] = useLocalState(
-      context,
-      'playerActiveTab',
-      'overview',
-    );
+    const [playerActiveTab, setPlayerActiveTab] = React.useState('overview');
     const [selectedPlayer, setSelectedPlayer] = useLocalState(
       context,
       'playerSelectedPlayer',
@@ -3993,11 +3979,8 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Security Management Interface
   const SecurityInterface = () => {
-    const [securityActiveTab, setSecurityActiveTab] = useLocalState(
-      context,
-      'securityActiveTab',
-      'overview',
-    );
+    const [securityActiveTab, setSecurityActiveTab] =
+      React.useState('overview');
     const [selectedIncident, setSelectedIncident] = useLocalState(
       context,
       'selectedIncident',
@@ -4111,10 +4094,10 @@ export const PersistenceMasterPanel = (props, context) => {
               padding: '10px 20px',
               cursor: 'pointer',
               borderBottom:
-                activeTab === 'access' ? '2px solid #ff6666' : 'none',
-              color: activeTab === 'access' ? '#ff6666' : '#ffffff',
+                securityActiveTab === 'access' ? '2px solid #ff6666' : 'none',
+              color: securityActiveTab === 'access' ? '#ff6666' : '#ffffff',
             }}
-            onClick={() => setActiveTab('access')}
+            onClick={() => setSecurityActiveTab('access')}
           >
             ACCESS LOGS
           </Box>
@@ -4678,11 +4661,8 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Research Management Interface
   const ResearchInterface = () => {
-    const [researchActiveTab, setResearchActiveTab] = useLocalState(
-      context,
-      'researchActiveTab',
-      'overview',
-    );
+    const [researchActiveTab, setResearchActiveTab] =
+      React.useState('overview');
     const [selectedProject, setSelectedProject] = useLocalState(
       context,
       'researchSelectedProject',
@@ -5348,11 +5328,8 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Personnel Management Interface
   const PersonnelInterface = () => {
-    const [personnelActiveTab, setPersonnelActiveTab] = useLocalState(
-      context,
-      'personnelActiveTab',
-      'overview',
-    );
+    const [personnelActiveTab, setPersonnelActiveTab] =
+      React.useState('overview');
     const [selectedEmployee, setSelectedEmployee] = useLocalState(
       context,
       'personnelSelectedEmployee',
@@ -6064,121 +6041,253 @@ export const PersistenceMasterPanel = (props, context) => {
 
         {/* Detail Modals */}
         {selectedEmployee && (
-          <Modal>
-            <Section title={`Employee Details: ${selectedEmployee}`}>
-              <Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Name:</strong> {selectedEmployee}
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '5px',
+                padding: '20px',
+                minWidth: '400px',
+                maxWidth: '600px',
+              }}
+            >
+              <Section title={`Employee Details: ${selectedEmployee}`}>
+                <Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Name:</strong> {selectedEmployee}
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Department:</strong> General
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Position:</strong> Staff
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Performance Rating:</strong> 80/100
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Clearance Level:</strong> Level 1
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Status:</strong> Active
+                  </Box>
+                  <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                    Employee details will be populated from personnel data.
+                  </Box>
                 </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Department:</strong> General
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Position:</strong> Staff
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Performance Rating:</strong> 80/100
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Clearance Level:</strong> Level 1
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Status:</strong> Active
-                </Box>
-                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
-                  Employee details will be populated from personnel data.
-                </Box>
-              </Box>
-              <Button onClick={() => setSelectedEmployee(null)}>Close</Button>
-            </Section>
-          </Modal>
+                <Button
+                  onClick={() => {
+                    console.log(
+                      'Closing employee modal, setting selectedEmployee to null',
+                    );
+                    console.log('activeTab before close:', activeTab);
+                    setSelectedEmployee(null);
+                    console.log('activeTab after close:', activeTab);
+                  }}
+                >
+                  Close
+                </Button>
+              </Section>
+            </Box>
+          </Box>
         )}
 
         {selectedDepartment && (
-          <Modal>
-            <Section title={`Department Details: ${selectedDepartment}`}>
-              <Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Department:</strong> {selectedDepartment}
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '5px',
+                padding: '20px',
+                minWidth: '400px',
+                maxWidth: '600px',
+              }}
+            >
+              <Section title={`Department Details: ${selectedDepartment}`}>
+                <Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Department:</strong> {selectedDepartment}
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Head:</strong> Department Head
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Staff Count:</strong> 0
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Budget:</strong> $100,000
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Efficiency:</strong> 85%
+                  </Box>
+                  <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                    Department details will be populated from personnel data.
+                  </Box>
                 </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Head:</strong> Department Head
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Staff Count:</strong> 0
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Budget:</strong> $100,000
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Efficiency:</strong> 85%
-                </Box>
-                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
-                  Department details will be populated from personnel data.
-                </Box>
-              </Box>
-              <Button onClick={() => setSelectedDepartment(null)}>Close</Button>
-            </Section>
-          </Modal>
+                <Button
+                  onClick={() => {
+                    console.log(
+                      'Closing department modal, setting selectedDepartment to null',
+                    );
+                    setSelectedDepartment(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </Section>
+            </Box>
+          </Box>
         )}
 
         {selectedTraining && (
-          <Modal>
-            <Section title={`Training Details: ${selectedTraining}`}>
-              <Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Program:</strong> {selectedTraining}
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '5px',
+                padding: '20px',
+                minWidth: '400px',
+                maxWidth: '600px',
+              }}
+            >
+              <Section title={`Training Details: ${selectedTraining}`}>
+                <Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Program:</strong> {selectedTraining}
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Instructor:</strong> Training Instructor
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Duration:</strong> 8 weeks
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Completion:</strong> 0%
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Status:</strong> Not Started
+                  </Box>
+                  <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                    Training details will be populated from personnel data.
+                  </Box>
                 </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Instructor:</strong> Training Instructor
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Duration:</strong> 8 weeks
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Completion:</strong> 0%
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Status:</strong> Not Started
-                </Box>
-                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
-                  Training details will be populated from personnel data.
-                </Box>
-              </Box>
-              <Button onClick={() => setSelectedTraining(null)}>Close</Button>
-            </Section>
-          </Modal>
+                <Button
+                  onClick={() => {
+                    console.log(
+                      'Closing training modal, setting selectedTraining to null',
+                    );
+                    setSelectedTraining(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </Section>
+            </Box>
+          </Box>
         )}
 
         {selectedPerformance && (
-          <Modal>
-            <Section title={`Performance Review: ${selectedPerformance}`}>
-              <Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Employee:</strong> {selectedPerformance}
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '5px',
+                padding: '20px',
+                minWidth: '400px',
+                maxWidth: '600px',
+              }}
+            >
+              <Section title={`Performance Review: ${selectedPerformance}`}>
+                <Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Employee:</strong> {selectedPerformance}
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Reviewer:</strong> Supervisor
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Rating:</strong> 85/100
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Date:</strong> Never
+                  </Box>
+                  <Box style={{ marginBottom: '10px' }}>
+                    <strong>Status:</strong> Pending
+                  </Box>
+                  <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                    Performance review details will be populated from personnel
+                    data.
+                  </Box>
                 </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Reviewer:</strong> Supervisor
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Rating:</strong> 85/100
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Date:</strong> Never
-                </Box>
-                <Box style={{ marginBottom: '10px' }}>
-                  <strong>Status:</strong> Pending
-                </Box>
-                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
-                  Performance review details will be populated from personnel
-                  data.
-                </Box>
-              </Box>
-              <Button onClick={() => setSelectedPerformance(null)}>
-                Close
-              </Button>
-            </Section>
-          </Modal>
+                <Button
+                  onClick={() => {
+                    console.log(
+                      'Closing performance modal, setting selectedPerformance to null',
+                    );
+                    setSelectedPerformance(null);
+                  }}
+                >
+                  Close
+                </Button>
+              </Section>
+            </Box>
+          </Box>
         )}
       </Box>
     );
@@ -6544,15 +6653,34 @@ export const PersistenceMasterPanel = (props, context) => {
             zIndex: 5,
           }}
         >
-          {activeTab === 'terminal' && <TerminalInterface />}
-          {activeTab === 'facility' && <FacilityInterface />}
-          {activeTab === 'scp' && <SCPInterface />}
-          {activeTab === 'technology' && <TechnologyInterface />}
-          {activeTab === 'medical' && <MedicalInterface />}
-          {activeTab === 'security' && <SecurityInterface />}
-          {activeTab === 'research' && <ResearchInterface />}
-          {activeTab === 'personnel' && <PersonnelInterface />}
-          {activeTab === 'players' && <PlayerInterface />}
+          {(() => {
+            console.log(
+              'Rendering main interface, activeTab:',
+              activeTab,
+              'type:',
+              typeof activeTab,
+            );
+
+            if (activeTab === 'terminal') return <TerminalInterface />;
+            if (activeTab === 'facility') return <FacilityInterface />;
+            if (activeTab === 'scp') return <SCPInterface />;
+            if (activeTab === 'technology') return <TechnologyInterface />;
+            if (activeTab === 'medical') return <MedicalInterface />;
+            if (activeTab === 'security') return <SecurityInterface />;
+            if (activeTab === 'research') return <ResearchInterface />;
+            if (activeTab === 'personnel') return <PersonnelInterface />;
+            if (activeTab === 'players') return <PlayerInterface />;
+
+            return (
+              <Box style={{ color: 'red', fontSize: '16px', padding: '20px' }}>
+                No interface found for tab: &quot;{activeTab}&quot; (type:{' '}
+                {typeof activeTab})
+                <br />
+                Available tabs: terminal, facility, scp, technology, medical,
+                security, research, personnel, players
+              </Box>
+            );
+          })()}
         </Box>
         <SidePanel />
 

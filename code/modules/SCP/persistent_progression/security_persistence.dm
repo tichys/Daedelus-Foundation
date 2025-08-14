@@ -398,7 +398,7 @@ SUBSYSTEM_DEF(security_persistence)
 
 	// Skip datacore loading entirely - force completely empty data
 	world.log << "Skipping datacore loading - forcing completely empty security data"
-	
+
 	// Clear any existing persistent storage to ensure only real data is used
 	world.log << "Clearing persistent storage to ensure only real data..."
 	manager.clear_persistent_storage()
