@@ -91,6 +91,10 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/facility_persistence_panel,
 	/client/proc/scp_persistence_panel,
 	/client/proc/technology_persistence_panel,
+	/client/proc/medical_persistence_panel,
+	/client/proc/security_persistence_panel,
+	/client/proc/research_persistence_panel,
+	/client/proc/personnel_persistence_panel,
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel))
 GLOBAL_PROTECT(admin_verbs_ban)
