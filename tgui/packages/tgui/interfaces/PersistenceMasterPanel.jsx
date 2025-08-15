@@ -17,6 +17,15 @@ import { Window } from '../layouts';
 export const PersistenceMasterPanel = (props, context) => {
   const { act, data } = useBackend(context);
   const [activeTab, setActiveTab] = React.useState('terminal');
+  const [facilityActiveTab, setFacilityActiveTab] = React.useState('overview');
+  const [scpActiveTab, setScpActiveTab] = React.useState('overview');
+  const [techActiveTab, setTechActiveTab] = React.useState('overview');
+  const [medicalActiveTab, setMedicalActiveTab] = React.useState('overview');
+  const [securityActiveTab, setSecurityActiveTab] = React.useState('overview');
+  const [researchActiveTab, setResearchActiveTab] = React.useState('overview');
+  const [personnelActiveTab, setPersonnelActiveTab] =
+    React.useState('overview');
+  const [playerActiveTab, setPlayerActiveTab] = React.useState('overview');
 
   // Debug activeTab changes
   React.useEffect(() => {
@@ -313,34 +322,12 @@ export const PersistenceMasterPanel = (props, context) => {
   );
 
   // Facility Management Interface
-  const FacilityInterface = () => {
-    const [facilityActiveTab, setFacilityActiveTab] =
-      React.useState('overview');
-    const [selectedRoom, setSelectedRoom] = useLocalState(
-      context,
-      'facilitySelectedRoom',
-      null,
-    );
-    const [selectedEquipment, setSelectedEquipment] = useLocalState(
-      context,
-      'facilitySelectedEquipment',
-      null,
-    );
-    const [selectedSystem, setSelectedSystem] = useLocalState(
-      context,
-      'facilitySelectedSystem',
-      null,
-    );
-    const [searchTerm, setSearchTerm] = useLocalState(
-      context,
-      'facilitySearchTerm',
-      '',
-    );
-    const [filterType, setFilterType] = useLocalState(
-      context,
-      'facilityFilterType',
-      'all',
-    );
+  const FacilityInterface = ({ facilityActiveTab, setFacilityActiveTab }) => {
+    const [selectedRoom, setSelectedRoom] = React.useState(null);
+    const [selectedEquipment, setSelectedEquipment] = React.useState(null);
+    const [selectedSystem, setSelectedSystem] = React.useState(null);
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [filterType, setFilterType] = React.useState('all');
 
     return (
       <Box
@@ -500,7 +487,10 @@ export const PersistenceMasterPanel = (props, context) => {
                 facilityActiveTab === 'overview' ? '2px solid #66ff66' : 'none',
               color: facilityActiveTab === 'overview' ? '#66ff66' : '#ffffff',
             }}
-            onClick={() => setFacilityActiveTab('overview')}
+            onClick={() => {
+              console.log('Setting facility tab to overview');
+              setFacilityActiveTab('overview');
+            }}
           >
             OVERVIEW
           </Box>
@@ -899,8 +889,7 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // SCP Management Interface
-  const SCPInterface = () => {
-    const [scpActiveTab, setScpActiveTab] = React.useState('overview');
+  const SCPInterface = ({ scpActiveTab, setScpActiveTab }) => {
     const [selectedSCP, setSelectedSCP] = useLocalState(
       context,
       'scpSelectedSCP',
@@ -1558,8 +1547,7 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // Technology Management Interface
-  const TechnologyInterface = () => {
-    const [techActiveTab, setTechActiveTab] = React.useState('overview');
+  const TechnologyInterface = ({ techActiveTab, setTechActiveTab }) => {
     const [selectedProject, setSelectedProject] = useLocalState(
       context,
       'techSelectedProject',
@@ -2178,8 +2166,7 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // Player Data Management Interface
-  const PlayerInterface = () => {
-    const [playerActiveTab, setPlayerActiveTab] = React.useState('overview');
+  const PlayerInterface = ({ playerActiveTab, setPlayerActiveTab }) => {
     const [selectedPlayer, setSelectedPlayer] = useLocalState(
       context,
       'playerSelectedPlayer',
@@ -2771,11 +2758,9 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // Medical Management Interface
-  const MedicalInterface = () => {
+  const MedicalInterface = ({ medicalActiveTab, setMedicalActiveTab }) => {
     console.log('MedicalInterface: Component is being rendered');
     console.log('MedicalInterface: selectedOutbreak =', selectedOutbreak);
-
-    const [medicalActiveTab, setMedicalActiveTab] = React.useState('overview');
     const [selectedPatient, setSelectedPatient] = React.useState(null);
     const [selectedTreatment, setSelectedTreatment] = React.useState(null);
     const [selectedOutbreak, setSelectedOutbreak] = React.useState(null);
@@ -3978,9 +3963,7 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // Security Management Interface
-  const SecurityInterface = () => {
-    const [securityActiveTab, setSecurityActiveTab] =
-      React.useState('overview');
+  const SecurityInterface = ({ securityActiveTab, setSecurityActiveTab }) => {
     const [selectedIncident, setSelectedIncident] = useLocalState(
       context,
       'selectedIncident',
@@ -4660,9 +4643,7 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // Research Management Interface
-  const ResearchInterface = () => {
-    const [researchActiveTab, setResearchActiveTab] =
-      React.useState('overview');
+  const ResearchInterface = ({ researchActiveTab, setResearchActiveTab }) => {
     const [selectedProject, setSelectedProject] = useLocalState(
       context,
       'researchSelectedProject',
@@ -5327,9 +5308,10 @@ export const PersistenceMasterPanel = (props, context) => {
   };
 
   // Personnel Management Interface
-  const PersonnelInterface = () => {
-    const [personnelActiveTab, setPersonnelActiveTab] =
-      React.useState('overview');
+  const PersonnelInterface = ({
+    personnelActiveTab,
+    setPersonnelActiveTab,
+  }) => {
     const [selectedEmployee, setSelectedEmployee] = useLocalState(
       context,
       'personnelSelectedEmployee',
@@ -6662,14 +6644,70 @@ export const PersistenceMasterPanel = (props, context) => {
             );
 
             if (activeTab === 'terminal') return <TerminalInterface />;
-            if (activeTab === 'facility') return <FacilityInterface />;
-            if (activeTab === 'scp') return <SCPInterface />;
-            if (activeTab === 'technology') return <TechnologyInterface />;
-            if (activeTab === 'medical') return <MedicalInterface />;
-            if (activeTab === 'security') return <SecurityInterface />;
-            if (activeTab === 'research') return <ResearchInterface />;
-            if (activeTab === 'personnel') return <PersonnelInterface />;
-            if (activeTab === 'players') return <PlayerInterface />;
+            if (activeTab === 'facility') {
+              return (
+                <FacilityInterface
+                  facilityActiveTab={facilityActiveTab}
+                  setFacilityActiveTab={setFacilityActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'scp') {
+              return (
+                <SCPInterface
+                  scpActiveTab={scpActiveTab}
+                  setScpActiveTab={setScpActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'technology') {
+              return (
+                <TechnologyInterface
+                  techActiveTab={techActiveTab}
+                  setTechActiveTab={setTechActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'medical') {
+              return (
+                <MedicalInterface
+                  medicalActiveTab={medicalActiveTab}
+                  setMedicalActiveTab={setMedicalActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'security') {
+              return (
+                <SecurityInterface
+                  securityActiveTab={securityActiveTab}
+                  setSecurityActiveTab={setSecurityActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'research') {
+              return (
+                <ResearchInterface
+                  researchActiveTab={researchActiveTab}
+                  setResearchActiveTab={setResearchActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'personnel') {
+              return (
+                <PersonnelInterface
+                  personnelActiveTab={personnelActiveTab}
+                  setPersonnelActiveTab={setPersonnelActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'players') {
+              return (
+                <PlayerInterface
+                  playerActiveTab={playerActiveTab}
+                  setPlayerActiveTab={setPlayerActiveTab}
+                />
+              );
+            }
 
             return (
               <Box style={{ color: 'red', fontSize: '16px', padding: '20px' }}>
