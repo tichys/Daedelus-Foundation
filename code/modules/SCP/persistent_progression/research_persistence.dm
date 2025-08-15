@@ -4,7 +4,6 @@
 SUBSYSTEM_DEF(research_persistence)
 	name = "Research Persistence"
 	wait = 600 // 1 minute
-	flags = SS_NO_INIT
 	priority = FIRE_PRIORITY_INPUT
 
 	var/datum/research_persistence_manager/manager

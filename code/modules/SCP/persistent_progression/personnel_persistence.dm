@@ -4,7 +4,6 @@
 SUBSYSTEM_DEF(personnel_persistence)
 	name = "Personnel Persistence"
 	wait = 600 // 1 minute
-	flags = SS_NO_INIT
 	priority = FIRE_PRIORITY_INPUT
 
 	var/datum/personnel_persistence_manager/manager
@@ -505,25 +504,15 @@ SUBSYSTEM_DEF(personnel_persistence)
 
 // Subsystem initialization
 /datum/controller/subsystem/personnel_persistence/Initialize()
+	world.log << "Personnel persistence subsystem initializing..."
 	manager = new /datum/personnel_persistence_manager()
+	world.log << "Personnel persistence manager created"
 
-	// Skip datacore loading entirely - force completely empty data
-	world.log << "Skipping datacore loading - forcing completely empty personnel data"
+	// Load existing personnel records from datacore
+	world.log << "Loading existing personnel records from datacore..."
+	manager.load_existing_personnel_records()
 
-	// Clear any existing persistent storage to ensure only real data is used
-	world.log << "Clearing persistent storage to ensure only real data..."
-	manager.clear_persistent_storage()
-
-	// Force empty data - no persistent storage loading at all
-	world.log << "Forcing empty personnel data - no persistent storage loading"
-	manager.personnel_records.Cut()
-	manager.assignments.Cut()
-	manager.performance_reviews.Cut()
-	manager.training_records.Cut()
-	manager.promotions.Cut()
-	manager.total_staff = 0
-	manager.active_staff = 0
-
+	world.log << "Personnel records count at initialization: [manager.personnel_records.len]"
 	return ..()
 
 /datum/controller/subsystem/personnel_persistence/fire()

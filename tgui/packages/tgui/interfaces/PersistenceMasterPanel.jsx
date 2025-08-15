@@ -16,7 +16,7 @@ import { Window } from '../layouts';
 
 export const PersistenceMasterPanel = (props, context) => {
   const { act, data } = useBackend(context);
-  const [activeTab, setActiveTab] = React.useState('terminal');
+  const [activeTab, setActiveTab] = React.useState('desktop');
   const [facilityActiveTab, setFacilityActiveTab] = React.useState('overview');
   const [scpActiveTab, setScpActiveTab] = React.useState('overview');
   const [techActiveTab, setTechActiveTab] = React.useState('overview');
@@ -27,9 +27,67 @@ export const PersistenceMasterPanel = (props, context) => {
     React.useState('overview');
   const [playerActiveTab, setPlayerActiveTab] = React.useState('overview');
 
-  // Debug activeTab changes
+  const [infrastructureActiveTab, setInfrastructureActiveTab] =
+    React.useState('overview');
+  const [analyticsActiveTab, setAnalyticsActiveTab] =
+    React.useState('overview');
+  const [scipnetCollapsed, setScipnetCollapsed] = React.useState(false);
+
+  // Notification system state
+  const [notificationsOpen, setNotificationsOpen] = React.useState(false);
+  const [notificationCount, setNotificationCount] = React.useState(0);
+  const [notificationHistory, setNotificationHistory] = React.useState([]);
+  const [notificationSettings, setNotificationSettings] = React.useState({
+    sound: true,
+    desktop: true,
+    autoHide: true,
+    maxNotifications: 50,
+  });
+
+  // Search system state
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchResults, setSearchResults] = React.useState([]);
+  const [searchCategory, setSearchCategory] = React.useState('all');
+
+  // Theme system state
+  const [currentTheme, setCurrentTheme] = React.useState('dark');
+  const [themeOpen, setThemeOpen] = React.useState(false);
+
+  // Debug activeTab changes and add test notifications
   React.useEffect(() => {
     console.log('activeTab changed to:', activeTab, 'type:', typeof activeTab);
+
+    // Add test notifications for demonstration
+    if (activeTab === 'desktop' && notificationHistory.length === 0) {
+      setTimeout(
+        () =>
+          addNotification(
+            'System Online',
+            'All persistence systems are operational',
+            'success',
+          ),
+        1000,
+      );
+      setTimeout(
+        () =>
+          addNotification(
+            'Security Alert',
+            'Unauthorized access attempt detected',
+            'warning',
+          ),
+        3000,
+      );
+      setTimeout(
+        () =>
+          addNotification(
+            'Medical Update',
+            'Patient records synchronized successfully',
+            'info',
+          ),
+        5000,
+      );
+    }
   }, [activeTab]);
 
   const {
@@ -42,12 +100,220 @@ export const PersistenceMasterPanel = (props, context) => {
     personnel_data,
     player_data,
     system_status,
-    analytics,
+    analytics_data,
+    infrastructure_data,
+
     notifications,
     personnel_details,
   } = data;
 
-  // Data status indicator
+  // Enhanced system status dashboard
+  const SystemStatusDashboard = () => {
+    const [dashboardCollapsed, setDashboardCollapsed] = React.useState(false);
+
+    const systems = [
+      { name: 'FACILITY', data: facility_data, icon: '🏢' },
+      { name: 'SCP', data: scp_data, icon: '🔒' },
+      { name: 'TECHNOLOGY', data: technology_data, icon: '⚡' },
+      { name: 'MEDICAL', data: medical_data, icon: '🏥' },
+      { name: 'SECURITY', data: security_data, icon: '🛡️' },
+      { name: 'RESEARCH', data: research_data, icon: '🔬' },
+      { name: 'PERSONNEL', data: personnel_data, icon: '👥' },
+      { name: 'PLAYER', data: player_data, icon: '🎮' },
+      { name: 'INFRASTRUCTURE', data: infrastructure_data, icon: '🏗️' },
+      { name: 'ANALYTICS', data: analytics_data, icon: '📊' },
+    ];
+
+    const onlineCount = systems.filter((sys) => sys.data).length;
+    const totalCount = systems.length;
+    const healthPercentage = (onlineCount / totalCount) * 100;
+
+    return (
+      <Box
+        style={{
+          position: 'absolute',
+          top: '70px',
+          right: '20px',
+          width: dashboardCollapsed ? '50px' : '300px',
+          background: 'rgba(0,0,0,0.8)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '8px',
+          padding: dashboardCollapsed ? '10px 5px' : '15px',
+          zIndex: 20,
+          transition: 'all 0.3s ease',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Collapse/Expand Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '5px',
+            right: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            color: 'rgba(255,255,255,0.7)',
+            zIndex: 21,
+          }}
+          onClick={() => setDashboardCollapsed(!dashboardCollapsed)}
+        >
+          {dashboardCollapsed ? '▶' : '◀'}
+        </Box>
+
+        {!dashboardCollapsed && (
+          <>
+            <Box
+              style={{
+                fontSize: '14px',
+                fontWeight: 'bold',
+                marginBottom: '15px',
+                textAlign: 'center',
+                borderBottom: '1px solid rgba(255,255,255,0.2)',
+                paddingBottom: '10px',
+              }}
+            >
+              SYSTEM STATUS DASHBOARD
+            </Box>
+
+            {/* Overall Health */}
+            <Box style={{ marginBottom: '15px' }}>
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '5px',
+                }}
+              >
+                <Box style={{ fontSize: '12px' }}>Overall Health</Box>
+                <Box
+                  style={{
+                    fontSize: '12px',
+                    color:
+                      healthPercentage > 80
+                        ? '#00ff00'
+                        : healthPercentage > 50
+                          ? '#ffff00'
+                          : '#ff0000',
+                  }}
+                >
+                  {onlineCount}/{totalCount} Online
+                </Box>
+              </Box>
+              <ProgressBar
+                value={healthPercentage}
+                maxValue={100}
+                color={
+                  healthPercentage > 80
+                    ? 'good'
+                    : healthPercentage > 50
+                      ? 'average'
+                      : 'bad'
+                }
+                style={{ height: '8px' }}
+              />
+            </Box>
+
+            {/* System Grid */}
+            <Box
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '8px',
+              }}
+            >
+              {systems.map((system, index) => (
+                <Box
+                  key={index}
+                  style={{
+                    padding: '8px',
+                    background: system.data
+                      ? 'rgba(0,255,0,0.1)'
+                      : 'rgba(255,0,0,0.1)',
+                    border: `1px solid ${system.data ? 'rgba(0,255,0,0.3)' : 'rgba(255,0,0,0.3)'}`,
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '11px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px' }}>{system.icon}</Box>
+                  <Box style={{ flex: 1 }}>
+                    <Box style={{ fontWeight: 'bold' }}>{system.name}</Box>
+                    <Box style={{ fontSize: '10px', opacity: 0.8 }}>
+                      {system.data ? 'ONLINE' : 'OFFLINE'}
+                    </Box>
+                  </Box>
+                  <Box
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: system.data ? '#00ff00' : '#ff0000',
+                      boxShadow: system.data
+                        ? '0 0 8px rgba(0,255,0,0.5)'
+                        : '0 0 8px rgba(255,0,0,0.5)',
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
+
+            {/* Quick Actions */}
+            <Box
+              style={{
+                marginTop: '15px',
+                paddingTop: '10px',
+                borderTop: '1px solid rgba(255,255,255,0.2)',
+              }}
+            >
+              <Box
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  marginBottom: '8px',
+                }}
+              >
+                Quick Actions
+              </Box>
+              <Flex wrap="wrap" style={{ gap: '5px' }}>
+                <Button
+                  onClick={() =>
+                    addNotification(
+                      'System Check',
+                      'Running full system diagnostics...',
+                      'info',
+                    )
+                  }
+                  icon="sync"
+                  color="blue"
+                  compact
+                >
+                  Check All
+                </Button>
+                <Button
+                  onClick={() =>
+                    addNotification(
+                      'Backup Initiated',
+                      'Creating system backup...',
+                      'info',
+                    )
+                  }
+                  icon="save"
+                  color="default"
+                  compact
+                >
+                  Backup
+                </Button>
+              </Flex>
+            </Box>
+          </>
+        )}
+      </Box>
+    );
+  };
+
+  // Legacy data status indicator (kept for compatibility)
   const DataStatusIndicator = ({ data, label }) => (
     <Box style={{ display: 'inline-block', marginLeft: '10px' }}>
       <Box
@@ -65,6 +331,213 @@ export const PersistenceMasterPanel = (props, context) => {
       </Box>
     </Box>
   );
+
+  // Enhanced uniform button component with maximum functionality
+  const EnhancedButton = ({
+    icon,
+    children,
+    onClick,
+    color = 'default',
+    disabled = false,
+    loading = false,
+    tooltip = '',
+    compact = false,
+    style = {},
+  }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    const [isPressed, setIsPressed] = React.useState(false);
+
+    const handleClick = () => {
+      if (!disabled && !loading) {
+        setIsPressed(true);
+        setTimeout(() => setIsPressed(false), 150);
+        onClick();
+      }
+    };
+
+    const baseStyle = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: compact ? '6px 12px' : '8px 16px',
+      borderRadius: '4px',
+      border: '1px solid',
+      fontSize: compact ? '12px' : '14px',
+      fontWeight: '500',
+      cursor: disabled || loading ? 'not-allowed' : 'pointer',
+      transition: 'all 0.2s ease',
+      opacity: disabled ? 0.5 : 1,
+      position: 'relative',
+      overflow: 'hidden',
+      ...style,
+    };
+
+    const colorStyles = {
+      default: {
+        background: isPressed
+          ? 'rgba(255,255,255,0.2)'
+          : isHovered
+            ? 'rgba(255,255,255,0.1)'
+            : 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.3)',
+        color: '#ffffff',
+      },
+      good: {
+        background: isPressed
+          ? 'rgba(0,255,0,0.3)'
+          : isHovered
+            ? 'rgba(0,255,0,0.2)'
+            : 'rgba(0,255,0,0.1)',
+        borderColor: 'rgba(0,255,0,0.5)',
+        color: '#00ff00',
+      },
+      average: {
+        background: isPressed
+          ? 'rgba(255,165,0,0.3)'
+          : isHovered
+            ? 'rgba(255,165,0,0.2)'
+            : 'rgba(255,165,0,0.1)',
+        borderColor: 'rgba(255,165,0,0.5)',
+        color: '#ffaa00',
+      },
+      bad: {
+        background: isPressed
+          ? 'rgba(255,0,0,0.3)'
+          : isHovered
+            ? 'rgba(255,0,0,0.2)'
+            : 'rgba(255,0,0,0.1)',
+        borderColor: 'rgba(255,0,0,0.5)',
+        color: '#ff6666',
+      },
+      blue: {
+        background: isPressed
+          ? 'rgba(0,150,255,0.3)'
+          : isHovered
+            ? 'rgba(0,150,255,0.2)'
+            : 'rgba(0,150,255,0.1)',
+        borderColor: 'rgba(0,150,255,0.5)',
+        color: '#66ccff',
+      },
+      purple: {
+        background: isPressed
+          ? 'rgba(150,0,255,0.3)'
+          : isHovered
+            ? 'rgba(150,0,255,0.2)'
+            : 'rgba(150,0,255,0.1)',
+        borderColor: 'rgba(150,0,255,0.5)',
+        color: '#cc66ff',
+      },
+    };
+
+    const buttonStyle = {
+      ...baseStyle,
+      ...(colorStyles[color] || colorStyles.default),
+      transform: isPressed ? 'scale(0.95)' : 'scale(1)',
+      boxShadow: isHovered ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+    };
+
+    return (
+      <Box
+        style={buttonStyle}
+        onClick={handleClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        title={tooltip}
+      >
+        {loading && (
+          <Box
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '12px',
+              height: '12px',
+              border: '2px solid transparent',
+              borderTop: '2px solid currentColor',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+            }}
+          />
+        )}
+        {icon && <Box style={{ fontSize: '14px' }}>{icon}</Box>}
+        {children && (
+          <Box style={{ opacity: loading ? 0.5 : 1 }}>{children}</Box>
+        )}
+      </Box>
+    );
+  };
+
+  // Action button with confirmation and feedback
+  const ActionButton = ({
+    action,
+    icon,
+    children,
+    color = 'default',
+    confirmMessage = null,
+    successMessage = null,
+    errorMessage = null,
+    ...props
+  }) => {
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const handleAction = async () => {
+      if (confirmMessage && !window.confirm(confirmMessage)) {
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        act(action);
+        if (successMessage) {
+          addNotification('Success', successMessage, 'success');
+        }
+      } catch (error) {
+        if (errorMessage) {
+          addNotification('Error', errorMessage, 'error');
+        }
+      } finally {
+        setTimeout(() => setIsLoading(false), 1000);
+      }
+    };
+
+    return (
+      <EnhancedButton
+        icon={icon}
+        onClick={handleAction}
+        color={color}
+        loading={isLoading}
+        {...props}
+      >
+        {children}
+      </EnhancedButton>
+    );
+  };
+
+  // Navigation button with active state
+  const NavButton = ({
+    isActive,
+    onClick,
+    icon,
+    children,
+    color = 'default',
+  }) => {
+    const buttonColor = isActive ? 'blue' : color;
+
+    return (
+      <EnhancedButton
+        icon={icon}
+        onClick={onClick}
+        color={buttonColor}
+        style={{
+          fontWeight: isActive ? 'bold' : 'normal',
+          boxShadow: isActive ? '0 0 10px rgba(0,150,255,0.5)' : 'none',
+        }}
+      >
+        {children}
+      </EnhancedButton>
+    );
+  };
 
   // Grid background pattern
   const GridBackground = () => (
@@ -106,125 +579,1014 @@ export const PersistenceMasterPanel = (props, context) => {
     />
   );
 
-  // Top navigation bar
-  const TopNavigation = () => (
+  // Notification components
+  const NotificationBell = () => (
+    <Box
+      style={{
+        position: 'relative',
+        cursor: 'pointer',
+        padding: '8px',
+        borderRadius: '4px',
+        background:
+          notificationCount > 0 ? 'rgba(255,0,0,0.2)' : 'rgba(255,255,255,0.1)',
+        border:
+          notificationCount > 0
+            ? '1px solid rgba(255,0,0,0.5)'
+            : '1px solid rgba(255,255,255,0.2)',
+        transition: 'all 0.3s ease',
+      }}
+      onClick={() => setNotificationsOpen(!notificationsOpen)}
+    >
+      <Box style={{ fontSize: '16px' }}>🔔</Box>
+      {notificationCount > 0 && (
+        <Box
+          style={{
+            position: 'absolute',
+            top: '-5px',
+            right: '-5px',
+            background: '#ff0000',
+            color: '#ffffff',
+            fontSize: '10px',
+            padding: '2px 6px',
+            borderRadius: '10px',
+            minWidth: '16px',
+            textAlign: 'center',
+            fontWeight: 'bold',
+          }}
+        >
+          {notificationCount > 99 ? '99+' : notificationCount}
+        </Box>
+      )}
+    </Box>
+  );
+
+  const NotificationPanel = () => (
+    <Box
+      style={{
+        position: 'absolute',
+        top: '60px',
+        right: '20px',
+        width: '400px',
+        maxHeight: '500px',
+        background: 'rgba(0,0,0,0.95)',
+        border: '1px solid rgba(255,255,255,0.3)',
+        borderRadius: '8px',
+        padding: '15px',
+        zIndex: 1000,
+        overflowY: 'auto',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+      }}
+    >
+      <Box
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '15px',
+          paddingBottom: '10px',
+          borderBottom: '1px solid rgba(255,255,255,0.2)',
+        }}
+      >
+        <Box style={{ fontSize: '16px', fontWeight: 'bold' }}>
+          Notifications ({notificationCount})
+        </Box>
+        <Button
+          onClick={() => setNotificationHistory([])}
+          icon="trash"
+          color="bad"
+          compact
+        >
+          Clear All
+        </Button>
+      </Box>
+
+      {notificationHistory.length === 0 ? (
+        <Box style={{ textAlign: 'center', opacity: 0.6, padding: '20px' }}>
+          No notifications
+        </Box>
+      ) : (
+        notificationHistory.map((notification, index) => (
+          <Box
+            key={index}
+            style={{
+              padding: '10px',
+              marginBottom: '8px',
+              background:
+                notification.type === 'error'
+                  ? 'rgba(255,0,0,0.1)'
+                  : notification.type === 'warning'
+                    ? 'rgba(255,165,0,0.1)'
+                    : notification.type === 'success'
+                      ? 'rgba(0,255,0,0.1)'
+                      : 'rgba(255,255,255,0.05)',
+              border: `1px solid ${
+                notification.type === 'error'
+                  ? 'rgba(255,0,0,0.3)'
+                  : notification.type === 'warning'
+                    ? 'rgba(255,165,0,0.3)'
+                    : notification.type === 'success'
+                      ? 'rgba(0,255,0,0.3)'
+                      : 'rgba(255,255,255,0.2)'
+              }`,
+              borderRadius: '4px',
+            }}
+          >
+            <Box
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
+              <Box style={{ flex: 1 }}>
+                <Box style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                  {notification.title}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                  {notification.message}
+                </Box>
+                <Box
+                  style={{ fontSize: '10px', opacity: 0.6, marginTop: '4px' }}
+                >
+                  {notification.timestamp}
+                </Box>
+              </Box>
+              <Button
+                onClick={() => {
+                  const newHistory = notificationHistory.filter(
+                    (_, i) => i !== index,
+                  );
+                  setNotificationHistory(newHistory);
+                  setNotificationCount(newHistory.length);
+                }}
+                icon="times"
+                color="transparent"
+                compact
+              />
+            </Box>
+          </Box>
+        ))
+      )}
+    </Box>
+  );
+
+  const addNotification = (title, message, type = 'info') => {
+    const newNotification = {
+      title,
+      message,
+      type,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+
+    const newHistory = [newNotification, ...notificationHistory].slice(
+      0,
+      notificationSettings.maxNotifications,
+    );
+    setNotificationHistory(newHistory);
+    setNotificationCount(newHistory.length);
+
+    // Auto-hide after 5 seconds if enabled
+    if (notificationSettings.autoHide) {
+      setTimeout(() => {
+        setNotificationHistory((prev) =>
+          prev.filter((n) => n !== newNotification),
+        );
+        setNotificationCount((prev) => Math.max(0, prev - 1));
+      }, 5000);
+    }
+  };
+
+  // Search components
+  const SearchBar = () => (
+    <Box
+      style={{
+        position: 'relative',
+        cursor: 'pointer',
+        padding: '8px',
+        borderRadius: '4px',
+        background: 'rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        transition: 'all 0.3s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+      onClick={() => setSearchOpen(!searchOpen)}
+    >
+      <Box style={{ fontSize: '14px' }}>🔍</Box>
+      <Box style={{ fontSize: '12px', opacity: 0.7 }}>Search...</Box>
+    </Box>
+  );
+
+  const SearchPanel = () => {
+    const performSearch = () => {
+      if (!searchTerm.trim()) {
+        setSearchResults([]);
+        return;
+      }
+
+      const results = [];
+      const term = searchTerm.toLowerCase();
+
+      // Search through all data sources
+      if (searchCategory === 'all' || searchCategory === 'facility') {
+        if (facility_data) {
+          // Add facility search logic here
+          results.push({
+            type: 'facility',
+            title: 'Facility System',
+            description: 'Facility management data',
+          });
+        }
+      }
+
+      if (searchCategory === 'all' || searchCategory === 'scp') {
+        if (scp_data) {
+          // Add SCP search logic here
+          results.push({
+            type: 'scp',
+            title: 'SCP Containment',
+            description: 'SCP containment protocols',
+          });
+        }
+      }
+
+      if (searchCategory === 'all' || searchCategory === 'medical') {
+        if (medical_data) {
+          // Add medical search logic here
+          results.push({
+            type: 'medical',
+            title: 'Medical Records',
+            description: 'Patient and treatment data',
+          });
+        }
+      }
+
+      if (searchCategory === 'all' || searchCategory === 'security') {
+        if (security_data) {
+          // Add security search logic here
+          results.push({
+            type: 'security',
+            title: 'Security Incidents',
+            description: 'Security and incident reports',
+          });
+        }
+      }
+
+      setSearchResults(results);
+    };
+
+    React.useEffect(() => {
+      performSearch();
+    }, [searchTerm, searchCategory]);
+
+    return (
+      <Box
+        style={{
+          position: 'absolute',
+          top: '60px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '600px',
+          maxHeight: '500px',
+          background: 'rgba(0,0,0,0.95)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '8px',
+          padding: '15px',
+          zIndex: 1000,
+          overflowY: 'auto',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        }}
+      >
+        <Box
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px',
+            paddingBottom: '10px',
+            borderBottom: '1px solid rgba(255,255,255,0.2)',
+          }}
+        >
+          <Box style={{ fontSize: '16px', fontWeight: 'bold' }}>
+            Global Search
+          </Box>
+          <Button
+            onClick={() => setSearchOpen(false)}
+            icon="times"
+            color="transparent"
+            compact
+          />
+        </Box>
+
+        {/* Search Input */}
+        <Box style={{ marginBottom: '15px' }}>
+          <Box
+            style={{
+              display: 'flex',
+              gap: '10px',
+              marginBottom: '10px',
+            }}
+          >
+            <Box
+              style={{
+                flex: 1,
+                position: 'relative',
+              }}
+            >
+              <Box
+                style={{
+                  fontSize: '14px',
+                  position: 'absolute',
+                  left: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  opacity: 0.6,
+                }}
+              >
+                🔍
+              </Box>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search across all systems..."
+                style={{
+                  width: '100%',
+                  padding: '8px 8px 8px 35px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '4px',
+                  color: '#ffffff',
+                  fontSize: '14px',
+                }}
+              />
+            </Box>
+            <select
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+              style={{
+                padding: '8px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '4px',
+                color: '#ffffff',
+                fontSize: '14px',
+              }}
+            >
+              <option value="all">All Systems</option>
+              <option value="facility">Facility</option>
+              <option value="scp">SCP</option>
+              <option value="medical">Medical</option>
+              <option value="security">Security</option>
+              <option value="technology">Technology</option>
+              <option value="research">Research</option>
+              <option value="personnel">Personnel</option>
+              <option value="player">Player Data</option>
+            </select>
+          </Box>
+        </Box>
+
+        {/* Search Results */}
+        <Box>
+          {searchResults.length === 0 ? (
+            <Box style={{ textAlign: 'center', opacity: 0.6, padding: '20px' }}>
+              {searchTerm ? 'No results found' : 'Enter a search term to begin'}
+            </Box>
+          ) : (
+            searchResults.map((result, index) => (
+              <Box
+                key={index}
+                style={{
+                  padding: '10px',
+                  marginBottom: '8px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                }}
+                onClick={() => {
+                  setActiveTab(result.type);
+                  setSearchOpen(false);
+                  addNotification(
+                    'Search Result',
+                    `Navigated to ${result.title}`,
+                    'info',
+                  );
+                }}
+              >
+                <Box style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                  {result.title}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                  {result.description}
+                </Box>
+              </Box>
+            ))
+          )}
+        </Box>
+      </Box>
+    );
+  };
+
+  // Theme components
+  const ThemeToggle = () => (
+    <Box
+      style={{
+        position: 'relative',
+        cursor: 'pointer',
+        padding: '8px',
+        borderRadius: '4px',
+        background: 'rgba(255,255,255,0.1)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        transition: 'all 0.3s ease',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+      }}
+      onClick={() => setThemeOpen(!themeOpen)}
+    >
+      <Box style={{ fontSize: '14px' }}>
+        {currentTheme === 'dark' ? '🌙' : '☀️'}
+      </Box>
+      <Box style={{ fontSize: '12px', opacity: 0.7 }}>Theme</Box>
+    </Box>
+  );
+
+  const ThemePanel = () => {
+    const themes = [
+      {
+        id: 'dark',
+        name: 'Dark Theme',
+        icon: '🌙',
+        description: 'Classic dark interface',
+      },
+      {
+        id: 'light',
+        name: 'Light Theme',
+        icon: '☀️',
+        description: 'Clean light interface',
+      },
+      {
+        id: 'blue',
+        name: 'Blue Theme',
+        icon: '🔵',
+        description: 'Professional blue interface',
+      },
+      {
+        id: 'green',
+        name: 'Green Theme',
+        icon: '🟢',
+        description: 'Medical green interface',
+      },
+      {
+        id: 'red',
+        name: 'Red Theme',
+        icon: '🔴',
+        description: 'Security red interface',
+      },
+    ];
+
+    return (
+      <Box
+        style={{
+          position: 'absolute',
+          top: '60px',
+          right: '20px',
+          width: '300px',
+          background: 'rgba(0,0,0,0.95)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '8px',
+          padding: '15px',
+          zIndex: 1000,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        }}
+      >
+        <Box
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px',
+            paddingBottom: '10px',
+            borderBottom: '1px solid rgba(255,255,255,0.2)',
+          }}
+        >
+          <Box style={{ fontSize: '16px', fontWeight: 'bold' }}>
+            Theme Selection
+          </Box>
+          <Button
+            onClick={() => setThemeOpen(false)}
+            icon="times"
+            color="transparent"
+            compact
+          />
+        </Box>
+
+        <Box style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {themes.map((theme) => (
+            <Box
+              key={theme.id}
+              style={{
+                padding: '10px',
+                background:
+                  currentTheme === theme.id
+                    ? 'rgba(255,255,255,0.1)'
+                    : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${currentTheme === theme.id ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'}`,
+                borderRadius: '4px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}
+              onClick={() => {
+                setCurrentTheme(theme.id);
+                setThemeOpen(false);
+                addNotification(
+                  'Theme Changed',
+                  `Switched to ${theme.name}`,
+                  'info',
+                );
+              }}
+            >
+              <Box style={{ fontSize: '16px' }}>{theme.icon}</Box>
+              <Box style={{ flex: 1 }}>
+                <Box style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                  {theme.name}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  {theme.description}
+                </Box>
+              </Box>
+              {currentTheme === theme.id && (
+                <Box style={{ fontSize: '12px', color: '#00ff00' }}>✓</Box>
+              )}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    );
+  };
+
+  // Desktop-style interface with icons
+  const DesktopInterface = () => (
     <Box
       style={{
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        height: '40px',
-        background: 'rgba(0,0,0,0.8)',
-        borderBottom: '1px solid rgba(255,255,255,0.2)',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 20px',
+        bottom: 0,
+        background:
+          'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        padding: '20px',
         zIndex: 10,
         fontFamily: 'monospace',
-        fontSize: '14px',
         color: '#ffffff',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Desktop Header */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '50px',
+          background: 'rgba(0,0,0,0.9)',
+          borderBottom: '2px solid rgba(255,255,255,0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          zIndex: 15,
+        }}
+      >
+        <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+          SCP FOUNDATION - PERSISTENCE CONTROL SYSTEM
+        </Box>
+        <Box style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <SearchBar />
+          <NotificationBell />
+          <ThemeToggle />
+          <Box style={{ fontSize: '14px', opacity: 0.8 }}>
+            {new Date().toLocaleString()}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Main Content Area */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '70px',
+          left: '20px',
+          right: '400px',
+          bottom: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Top Row of Icons */}
+        <Box
+          style={{
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <DesktopIcon
+            icon="🖥️"
+            label="TERMINAL"
+            onClick={() => setActiveTab('terminal')}
+            isActive={activeTab === 'terminal'}
+          />
+          <DesktopIcon
+            icon="🏢"
+            label="FACILITY"
+            onClick={() => setActiveTab('facility')}
+            isActive={activeTab === 'facility'}
+          />
+          <DesktopIcon
+            icon="🔒"
+            label="SCP CONTAINMENT"
+            onClick={() => setActiveTab('scp')}
+            isActive={activeTab === 'scp'}
+          />
+          <DesktopIcon
+            icon="⚡"
+            label="TECHNOLOGY"
+            onClick={() => setActiveTab('technology')}
+            isActive={activeTab === 'technology'}
+          />
+          <DesktopIcon
+            icon="🏥"
+            label="MEDICAL"
+            onClick={() => setActiveTab('medical')}
+            isActive={activeTab === 'medical'}
+          />
+          <DesktopIcon
+            icon="🛡️"
+            label="SECURITY"
+            onClick={() => setActiveTab('security')}
+            isActive={activeTab === 'security'}
+          />
+        </Box>
+
+        {/* Bottom Row of Icons */}
+        <Box
+          style={{
+            display: 'flex',
+            gap: '20px',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <DesktopIcon
+            icon="🎮"
+            label="PLAYER DATA"
+            onClick={() => setActiveTab('players')}
+            isActive={activeTab === 'players'}
+          />
+
+          <DesktopIcon
+            icon="🏗️"
+            label="INFRASTRUCTURE"
+            onClick={() => setActiveTab('infrastructure')}
+            isActive={activeTab === 'infrastructure'}
+          />
+          <DesktopIcon
+            icon="📊"
+            label="ANALYTICS"
+            onClick={() => setActiveTab('analytics')}
+            isActive={activeTab === 'analytics'}
+          />
+        </Box>
+      </Box>
+
+      {/* SCIPNET Panel */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '70px',
+          right: '20px',
+          width: scipnetCollapsed ? '60px' : '360px',
+          bottom: '20px',
+          background: 'rgba(0,0,0,0.8)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: scipnetCollapsed ? '10px' : '20px',
+          fontFamily: 'monospace',
+          fontSize: '12px',
+          color: '#ffffff',
+          overflowY: 'auto',
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <Box
+          style={{
+            fontSize: scipnetCollapsed ? '12px' : '16px',
+            fontWeight: 'bold',
+            marginBottom: scipnetCollapsed ? '0' : '15px',
+            textAlign: 'center',
+            borderBottom: scipnetCollapsed
+              ? 'none'
+              : '1px solid rgba(255,255,255,0.2)',
+            paddingBottom: scipnetCollapsed ? '0' : '10px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+          }}
+          onClick={() => setScipnetCollapsed(!scipnetCollapsed)}
+        >
+          {scipnetCollapsed ? (
+            <>
+              <Box style={{ transform: 'rotate(90deg)', fontSize: '14px' }}>
+                ▶
+              </Box>
+              <Box style={{ transform: 'rotate(90deg)', fontSize: '10px' }}>
+                SCIPNET
+              </Box>
+            </>
+          ) : (
+            <>
+              <Box>SCIPNET</Box>
+              <Box
+                style={{
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  padding: '2px 6px',
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '3px',
+                  marginLeft: 'auto',
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setScipnetCollapsed(true);
+                }}
+              >
+                −
+              </Box>
+            </>
+          )}
+        </Box>
+
+        {/* Redacted Information */}
+        {!scipnetCollapsed && (
+          <>
+            <Box style={{ marginBottom: '15px' }}>
+              <Box
+                style={{
+                  marginBottom: '3px',
+                  color: '#ff6666',
+                  fontSize: '11px',
+                }}
+              >
+                COUNTRY: [REDACTED]
+              </Box>
+              <Box
+                style={{
+                  marginBottom: '3px',
+                  color: '#ff6666',
+                  fontSize: '11px',
+                }}
+              >
+                REGION: [REDACTED]
+              </Box>
+              <Box
+                style={{
+                  marginBottom: '10px',
+                  color: '#ff6666',
+                  fontSize: '11px',
+                }}
+              >
+                IP ADDRESS: [REDACTED]
+              </Box>
+
+              {/* Incidents Section */}
+              <Box
+                style={{
+                  marginBottom: '15px',
+                  padding: '8px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '3px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    marginBottom: '3px',
+                  }}
+                >
+                  INCIDENTS
+                </Box>
+                <Box style={{ fontSize: '11px', opacity: 0.8 }}>
+                  0 Total Reported
+                </Box>
+              </Box>
+
+              <Box
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  marginBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    padding: '6px 10px',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '3px',
+                    opacity: 0.5,
+                    fontSize: '9px',
+                  }}
+                >
+                  RESEARCH
+                </Box>
+                <Box
+                  style={{
+                    padding: '6px 10px',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '3px',
+                    opacity: 0.5,
+                    fontSize: '9px',
+                  }}
+                >
+                  PERSONNEL
+                </Box>
+              </Box>
+            </Box>
+
+            {/* System Overview */}
+            <Box style={{ marginBottom: '15px' }}>
+              <Box
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  marginBottom: '8px',
+                }}
+              >
+                SYSTEM OVERVIEW:
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> FACILITY: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> SCP: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> TECHNOLOGY: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> MEDICAL: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> SECURITY: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> RESEARCH: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> PERSONNEL: LIVE
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>
+                <span style={{ color: '#00ff00' }}>●</span> PLAYER: LIVE
+              </Box>
+            </Box>
+
+            {/* Key Metrics */}
+            <Box style={{ marginBottom: '20px' }}>
+              <Box
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  marginBottom: '10px',
+                }}
+              >
+                KEY METRICS:
+              </Box>
+              <Box style={{ marginBottom: '5px' }}>ACTIVE THREATS: 0</Box>
+              <Box style={{ marginBottom: '5px' }}>OUTBREAKS: 0</Box>
+              <Box style={{ marginBottom: '5px' }}>BREACHES: 0</Box>
+              <Box style={{ marginBottom: '5px' }}>STAFF: 0</Box>
+              <Box style={{ marginBottom: '5px' }}>PROJECTS: 0</Box>
+              <Box style={{ marginBottom: '5px' }}>PLAYERS: 0</Box>
+            </Box>
+
+            {/* Live Alerts */}
+            <Box>
+              <Box
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  marginBottom: '10px',
+                }}
+              >
+                LIVE ALERTS:
+              </Box>
+              <Box
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(0,255,0,0.2)',
+                  border: '1px solid rgba(0,255,0,0.5)',
+                  borderRadius: '3px',
+                  fontSize: '10px',
+                }}
+              >
+                INFO: All systems operational
+              </Box>
+              <Box style={{ fontSize: '10px', opacity: 0.7, marginTop: '5px' }}>
+                No recent alerts
+              </Box>
+            </Box>
+          </>
+        )}
+      </Box>
+
+      {/* Notification Panel */}
+      {notificationsOpen && <NotificationPanel />}
+
+      {/* Search Panel */}
+      {searchOpen && <SearchPanel />}
+
+      {/* Theme Panel */}
+      {themeOpen && <ThemePanel />}
+
+      {/* System Status Dashboard */}
+      <SystemStatusDashboard />
+    </Box>
+  );
+
+  // Desktop Icon Component
+  const DesktopIcon = ({ icon, label, onClick, isActive }) => (
+    <Box
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '120px',
+        height: '120px',
+        background: isActive
+          ? 'rgba(255,255,255,0.2)'
+          : 'rgba(255,255,255,0.05)',
+        border: isActive
+          ? '2px solid rgba(255,255,255,0.8)'
+          : '2px solid rgba(255,255,255,0.2)',
+        borderRadius: '10px',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        padding: '10px',
+        textAlign: 'center',
+        backdropFilter: 'blur(10px)',
+        boxShadow: isActive
+          ? '0 8px 32px rgba(255,255,255,0.3)'
+          : '0 4px 16px rgba(0,0,0,0.3)',
+      }}
+      onClick={onClick}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'scale(1.05)';
+        e.target.style.background = 'rgba(255,255,255,0.15)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'scale(1)';
+        e.target.style.background = isActive
+          ? 'rgba(255,255,255,0.2)'
+          : 'rgba(255,255,255,0.05)';
       }}
     >
       <Box
         style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom: activeTab === 'terminal' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
+          fontSize: '32px',
+          marginBottom: '8px',
+          filter: isActive
+            ? 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
+            : 'none',
         }}
-        onClick={() => setActiveTab('terminal')}
       >
-        TERMINAL
+        {icon}
       </Box>
       <Box
         style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom: activeTab === 'facility' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
+          fontSize: '10px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          lineHeight: '1.2',
+          opacity: isActive ? 1 : 0.8,
         }}
-        onClick={() => setActiveTab('facility')}
       >
-        FACILITY
-      </Box>
-      <Box
-        style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom: activeTab === 'scp' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('scp')}
-      >
-        SCP CONTAINMENT
-      </Box>
-      <Box
-        style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom:
-            activeTab === 'technology' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('technology')}
-      >
-        TECHNOLOGY
-      </Box>
-      <Box
-        style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom: activeTab === 'medical' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('medical')}
-      >
-        MEDICAL
-      </Box>
-      <Box
-        style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom: activeTab === 'security' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('security')}
-      >
-        SECURITY
-      </Box>
-      <Box
-        style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom: activeTab === 'research' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('research')}
-      >
-        RESEARCH
-      </Box>
-      <Box
-        style={{
-          marginRight: '30px',
-          padding: '8px 0',
-          borderBottom:
-            activeTab === 'personnel' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('personnel')}
-      >
-        PERSONNEL
-      </Box>
-      <Box
-        style={{
-          padding: '8px 0',
-          borderBottom: activeTab === 'players' ? '2px solid #ffffff' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => setActiveTab('players')}
-      >
-        PLAYER DATA
+        {label}
       </Box>
     </Box>
   );
@@ -241,82 +1603,206 @@ export const PersistenceMasterPanel = (props, context) => {
         fontSize: '14px',
         color: '#ffffff',
         minHeight: '100%',
+        position: 'relative',
       }}
     >
-      {/* Welcome Section */}
+      {/* Back to Desktop Button */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          padding: '8px 16px',
+          background: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.3)',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '12px',
+          transition: 'all 0.3s ease',
+        }}
+        onClick={() => setActiveTab('desktop')}
+        onMouseEnter={(e) => {
+          e.target.style.background = 'rgba(255,255,255,0.2)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = 'rgba(255,255,255,0.1)';
+        }}
+      >
+        ← BACK TO DESKTOP
+      </Box>
       <Box style={{ marginBottom: '20px' }}>
         <Box
-          style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '5px' }}
+          style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            marginBottom: '5px',
+          }}
         >
-          WELCOME
+          TERMINAL PERSISTENCE
         </Box>
-        <Box style={{ fontSize: '16px', opacity: 0.8 }}>RESEARCHER</Box>
+        <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+          SYSTEM ACCESS & CONTROL
+        </Box>
       </Box>
 
-      {/* Terminal Tabs */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Flex align="center" style={{ marginBottom: '10px' }}>
-          <Box
-            style={{
-              padding: '8px 16px',
-              background: 'rgba(255,255,255,0.1)',
-              borderBottom: '2px solid #ffffff',
-              marginRight: '10px',
-            }}
-          >
-            TERMINAL 1
-          </Box>
-          <Box style={{ cursor: 'pointer', opacity: 0.7 }}>×</Box>
-          <Box
-            style={{
-              padding: '8px 16px',
-              background: 'rgba(255,255,255,0.05)',
-              marginLeft: '10px',
-              cursor: 'pointer',
-            }}
-          >
-            TERMINAL 2
-          </Box>
-          <Box style={{ marginLeft: '10px', cursor: 'pointer' }}>+</Box>
-        </Flex>
-      </Box>
-
-      {/* Terminal Content */}
       <Box style={{ marginBottom: '20px' }}>
         <Box style={{ marginBottom: '15px' }}>
           {Array(50).fill('─').join('')}
         </Box>
         <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
-          SCIPNET TERMINAL v4.1.3
+          TERMINAL PERSISTENCE SYSTEM
         </Box>
         <Box style={{ marginBottom: '15px' }}>
           {Array(50).fill('─').join('')}
         </Box>
       </Box>
 
-      {/* Terminal Output */}
-      <Box style={{ marginBottom: '20px', lineHeight: '1.6' }}>
-        <Box>SECURE, CONTAIN, PROTECT</Box>
-        <Box>SCP FOUNDATION DATABASE NETWORK</Box>
-        <Box>Access Time: {new Date().toLocaleString()}</Box>
-        <Box style={{ marginTop: '10px' }}>
-          Enter &apos;help&apos; for available commands or &apos;access&apos; to
-          quickly access SCP files.
+      {/* Terminal Controls */}
+      <Box style={{ marginBottom: '20px' }}>
+        <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+          TERMINAL CONTROLS:
         </Box>
-        <Box>Example: &apos;access 173&apos; to access SCP-173.</Box>
+        <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+          <ActionButton
+            action="terminal_access"
+            icon="🔓"
+            color="blue"
+            successMessage="System access granted"
+            errorMessage="Access denied"
+            tooltip="Access the main system"
+          >
+            ACCESS SYSTEM
+          </ActionButton>
+          <ActionButton
+            action="terminal_help"
+            icon="❓"
+            color="default"
+            successMessage="Help documentation loaded"
+            tooltip="View system help"
+          >
+            HELP
+          </ActionButton>
+          <ActionButton
+            action="terminal_status"
+            icon="📊"
+            color="good"
+            successMessage="System status retrieved"
+            tooltip="Check system status"
+          >
+            SYSTEM STATUS
+          </ActionButton>
+          <EnhancedButton
+            icon="🔄"
+            color="purple"
+            onClick={() => {
+              addNotification(
+                'System Refresh',
+                'Refreshing terminal data...',
+                'info',
+              );
+              setTimeout(
+                () =>
+                  addNotification(
+                    'System Refresh',
+                    'Terminal data refreshed successfully',
+                    'success',
+                  ),
+                1000,
+              );
+            }}
+            tooltip="Refresh terminal data"
+          >
+            REFRESH
+          </EnhancedButton>
+          <EnhancedButton
+            icon="⚙️"
+            color="average"
+            onClick={() => {
+              addNotification(
+                'Settings',
+                'Opening terminal settings...',
+                'info',
+              );
+            }}
+            tooltip="Terminal settings"
+          >
+            SETTINGS
+          </EnhancedButton>
+        </Flex>
       </Box>
 
-      {/* Command Prompt */}
-      <Box style={{ display: 'flex', alignItems: 'center' }}>
-        <Box style={{ marginRight: '10px' }}>admin@scipnet:~$</Box>
-        <Box
-          style={{
-            width: '8px',
-            height: '16px',
-            background: '#00ff00',
-            animation: 'blink 1s infinite',
-          }}
-        />
+      {/* Terminal Status */}
+      <Box style={{ marginBottom: '20px' }}>
+        <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+          TERMINAL STATUS:
+        </Box>
+        <Grid style={{ gap: '10px' }}>
+          <Grid.Column size={3}>
+            <Box
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '3px',
+                padding: '15px',
+                textAlign: 'center',
+              }}
+            >
+              <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>ONLINE</Box>
+              <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                SYSTEM STATUS
+              </Box>
+            </Box>
+          </Grid.Column>
+          <Grid.Column size={3}>
+            <Box
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '3px',
+                padding: '15px',
+                textAlign: 'center',
+              }}
+            >
+              <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                {new Date().toLocaleTimeString()}
+              </Box>
+              <Box style={{ fontSize: '12px', opacity: 0.7 }}>CURRENT TIME</Box>
+            </Box>
+          </Grid.Column>
+          <Grid.Column size={3}>
+            <Box
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '3px',
+                padding: '15px',
+                textAlign: 'center',
+              }}
+            >
+              <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>v4.1.3</Box>
+              <Box style={{ fontSize: '12px', opacity: 0.7 }}>VERSION</Box>
+            </Box>
+          </Grid.Column>
+          <Grid.Column size={3}>
+            <Box
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '3px',
+                padding: '15px',
+                textAlign: 'center',
+              }}
+            >
+              <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>SECURE</Box>
+              <Box style={{ fontSize: '12px', opacity: 0.7 }}>CONNECTION</Box>
+            </Box>
+          </Grid.Column>
+        </Grid>
+      </Box>
+
+      <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+        Terminal persistence system providing secure access to SCP Foundation
+        databases and control systems.
       </Box>
     </Box>
   );
@@ -340,8 +1826,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -350,10 +1861,10 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            FACILITY MANAGEMENT
+            FACILITY PERSISTENCE
           </Box>
           <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            ENGINEERING CONTROL
+            ENGINEERING & MAINTENANCE
           </Box>
         </Box>
 
@@ -372,79 +1883,104 @@ export const PersistenceMasterPanel = (props, context) => {
         {/* Facility Controls */}
         <Box style={{ marginBottom: '20px' }}>
           <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
-            SYSTEM CONTROLS:
+            FACILITY CONTROLS:
           </Box>
           <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
-            <Button
-              onClick={() => act('facility_view_status')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            <ActionButton
+              action="facility_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="Facility status retrieved"
+              tooltip="View facility status"
             >
               VIEW STATUS
-            </Button>
-            <Button
-              onClick={() => act('facility_save_data')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="facility_save_data"
+              icon="💾"
+              color="good"
+              successMessage="Facility data saved successfully"
+              errorMessage="Failed to save facility data"
+              tooltip="Save facility data"
             >
               SAVE DATA
-            </Button>
-            <Button
-              onClick={() => act('facility_load_data')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="facility_load_data"
+              icon="📂"
+              color="default"
+              successMessage="Facility data loaded successfully"
+              errorMessage="Failed to load facility data"
+              tooltip="Load facility data"
             >
               LOAD DATA
-            </Button>
-            <Button
-              onClick={() => act('facility_reset_data')}
-              style={{
-                background: 'rgba(255,0,0,0.2)',
-                border: '1px solid rgba(255,0,0,0.5)',
-                color: '#ff6666',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="facility_reset_data"
+              icon="🔄"
+              color="bad"
+              confirmMessage="Are you sure you want to reset all facility data? This action cannot be undone."
+              successMessage="Facility data reset successfully"
+              errorMessage="Failed to reset facility data"
+              tooltip="Reset all facility data (DANGEROUS)"
             >
               RESET DATA
-            </Button>
-            <Button
-              onClick={() => act('test_systems')}
-              style={{
-                background: 'rgba(255,0,255,0.2)',
-                border: '1px solid rgba(255,0,255,0.5)',
-                color: '#ff66ff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="test_systems"
+              icon="🧪"
+              color="purple"
+              successMessage="System tests completed"
+              tooltip="Run system diagnostics"
             >
               TEST SYSTEMS
-            </Button>
+            </ActionButton>
+            <EnhancedButton
+              icon="🔧"
+              color="average"
+              onClick={() => {
+                addNotification(
+                  'Maintenance',
+                  'Scheduling facility maintenance...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Maintenance',
+                      'Maintenance scheduled successfully',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Schedule maintenance"
+            >
+              MAINTENANCE
+            </EnhancedButton>
+            <EnhancedButton
+              icon="⚡"
+              color="blue"
+              onClick={() => {
+                addNotification(
+                  'Power Systems',
+                  'Checking power grid status...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Power Systems',
+                      'Power grid operational',
+                      'success',
+                    ),
+                  1200,
+                );
+              }}
+              tooltip="Power grid status"
+            >
+              POWER GRID
+            </EnhancedButton>
           </Flex>
         </Box>
 
@@ -477,228 +2013,59 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                facilityActiveTab === 'overview' ? '2px solid #66ff66' : 'none',
-              color: facilityActiveTab === 'overview' ? '#66ff66' : '#ffffff',
-            }}
-            onClick={() => {
-              console.log('Setting facility tab to overview');
-              setFacilityActiveTab('overview');
-            }}
+          <NavButton
+            isActive={facilityActiveTab === 'overview'}
+            onClick={() => setFacilityActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                facilityActiveTab === 'rooms' ? '2px solid #66ff66' : 'none',
-              color: facilityActiveTab === 'rooms' ? '#66ff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={facilityActiveTab === 'rooms'}
             onClick={() => setFacilityActiveTab('rooms')}
+            icon="🏠"
           >
             ROOMS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                facilityActiveTab === 'equipment'
-                  ? '2px solid #66ff66'
-                  : 'none',
-              color: facilityActiveTab === 'equipment' ? '#66ff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={facilityActiveTab === 'equipment'}
             onClick={() => setFacilityActiveTab('equipment')}
+            icon="⚙️"
           >
             EQUIPMENT
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                facilityActiveTab === 'systems' ? '2px solid #66ff66' : 'none',
-              color: facilityActiveTab === 'systems' ? '#66ff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={facilityActiveTab === 'systems'}
             onClick={() => setFacilityActiveTab('systems')}
+            icon="🔧"
           >
             SYSTEMS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                facilityActiveTab === 'maintenance'
-                  ? '2px solid #66ff66'
-                  : 'none',
-              color:
-                facilityActiveTab === 'maintenance' ? '#66ff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={facilityActiveTab === 'maintenance'}
             onClick={() => setFacilityActiveTab('maintenance')}
+            icon="🔨"
           >
             MAINTENANCE
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
         {facilityActiveTab === 'overview' && (
           <Box>
-            <Section title="Facility System Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ff66',
-                      }}
-                    >
-                      FACILITY HEALTH
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {facility_data?.facility_health || 0}%
-                    </Box>
-                    <ProgressBar
-                      value={facility_data?.facility_health || 0}
-                      maxValue={100}
-                      color={
-                        facility_data?.facility_health >= 80
-                          ? 'good'
-                          : facility_data?.facility_health >= 60
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff6666',
-                      }}
-                    >
-                      CONTAINMENT STABILITY
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {facility_data?.containment_stability || 0}%
-                    </Box>
-                    <ProgressBar
-                      value={facility_data?.containment_stability || 0}
-                      maxValue={100}
-                      color={
-                        facility_data?.containment_stability >= 90
-                          ? 'good'
-                          : facility_data?.containment_stability >= 70
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ffff',
-                      }}
-                    >
-                      POWER EFFICIENCY
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {facility_data?.power_efficiency
-                        ? Math.round(facility_data.power_efficiency * 100)
-                        : 0}
-                      %
-                    </Box>
-                    <ProgressBar
-                      value={
-                        facility_data?.power_efficiency
-                          ? facility_data.power_efficiency * 100
-                          : 0
-                      }
-                      maxValue={100}
-                      color={
-                        facility_data?.power_efficiency >= 0.8
-                          ? 'good'
-                          : facility_data?.power_efficiency >= 0.6
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      MAINTENANCE LEVEL
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {facility_data?.maintenance_level || 0}%
-                    </Box>
-                    <ProgressBar
-                      value={facility_data?.maintenance_level || 0}
-                      maxValue={100}
-                      color={
-                        facility_data?.maintenance_level >= 80
-                          ? 'good'
-                          : facility_data?.maintenance_level >= 60
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-              </Grid>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              Facility system overview - all systems operational.
+            </Box>
           </Box>
         )}
 
@@ -922,8 +2289,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -932,9 +2324,11 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            SCP CONTAINMENT
+            SCP PERSISTENCE
           </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>SECURITY CONTROL</Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            CONTAINMENT & SECURITY
+          </Box>
         </Box>
 
         <Box style={{ marginBottom: '20px' }}>
@@ -952,65 +2346,85 @@ export const PersistenceMasterPanel = (props, context) => {
         {/* SCP Controls */}
         <Box style={{ marginBottom: '20px' }}>
           <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
-            CONTAINMENT CONTROLS:
+            SCP CONTROLS:
           </Box>
           <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
-            <Button
-              onClick={() => act('scp_view_status')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            <ActionButton
+              action="scp_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="SCP status retrieved"
+              tooltip="View SCP containment status"
             >
               VIEW STATUS
-            </Button>
-            <Button
-              onClick={() => act('scp_add_instance')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="scp_add_instance"
+              icon="🔒"
+              color="purple"
+              successMessage="SCP instance added successfully"
+              errorMessage="Failed to add SCP instance"
+              tooltip="Add new SCP instance"
             >
               ADD SCP
-            </Button>
-            <Button
-              onClick={() => act('scp_add_research')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="scp_add_research"
+              icon="🔬"
+              color="default"
+              successMessage="Research project added successfully"
+              errorMessage="Failed to add research project"
+              tooltip="Add new research project"
             >
               ADD RESEARCH
-            </Button>
-            <Button
-              onClick={() => act('scp_save_data')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="scp_save_data"
+              icon="💾"
+              color="good"
+              successMessage="SCP data saved successfully"
+              errorMessage="Failed to save SCP data"
+              tooltip="Save SCP data"
             >
               SAVE DATA
-            </Button>
+            </ActionButton>
+            <EnhancedButton
+              icon="🚨"
+              color="bad"
+              onClick={() => {
+                addNotification(
+                  'Containment Alert',
+                  'Checking containment systems...',
+                  'warning',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Containment Alert',
+                      'All containment systems operational',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Emergency containment check"
+            >
+              CONTAINMENT CHECK
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📋"
+              color="average"
+              onClick={() => {
+                addNotification(
+                  'Protocol Review',
+                  'Loading containment protocols...',
+                  'info',
+                );
+              }}
+              tooltip="Review containment protocols"
+            >
+              PROTOCOLS
+            </EnhancedButton>
           </Flex>
         </Box>
 
@@ -1051,197 +2465,59 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                scpActiveTab === 'overview' ? '2px solid #ff6666' : 'none',
-              color: scpActiveTab === 'overview' ? '#ff6666' : '#ffffff',
-            }}
+          <NavButton
+            isActive={scpActiveTab === 'overview'}
             onClick={() => setScpActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                scpActiveTab === 'instances' ? '2px solid #ff6666' : 'none',
-              color: scpActiveTab === 'instances' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={scpActiveTab === 'instances'}
             onClick={() => setScpActiveTab('instances')}
+            icon="🔒"
           >
             INSTANCES
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                scpActiveTab === 'breaches' ? '2px solid #ff6666' : 'none',
-              color: scpActiveTab === 'breaches' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={scpActiveTab === 'breaches'}
             onClick={() => setScpActiveTab('breaches')}
+            icon="🚨"
           >
             BREACHES
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                scpActiveTab === 'research' ? '2px solid #ff6666' : 'none',
-              color: scpActiveTab === 'research' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={scpActiveTab === 'research'}
             onClick={() => setScpActiveTab('research')}
+            icon="🔬"
           >
             RESEARCH
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                scpActiveTab === 'protocols' ? '2px solid #ff6666' : 'none',
-              color: scpActiveTab === 'protocols' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={scpActiveTab === 'protocols'}
             onClick={() => setScpActiveTab('protocols')}
+            icon="📋"
           >
             PROTOCOLS
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
         {scpActiveTab === 'overview' && (
           <Box>
-            <Section title="SCP Containment Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff6666',
-                      }}
-                    >
-                      CONTAINMENT STABILITY
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {scp_data?.global_containment_stability || 0}%
-                    </Box>
-                    <ProgressBar
-                      value={scp_data?.global_containment_stability || 0}
-                      maxValue={100}
-                      color={
-                        scp_data?.global_containment_stability >= 90
-                          ? 'good'
-                          : scp_data?.global_containment_stability >= 70
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff6666',
-                      }}
-                    >
-                      ACTIVE BREACHES
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {scp_data?.active_breaches || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      {scp_data?.active_breaches > 0 ? 'CRITICAL' : 'SECURE'}
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ffff',
-                      }}
-                    >
-                      SCP INSTANCES
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {scp_data?.scp_instances_count || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Contained
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      RESEARCH PROGRESS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {scp_data?.research_progress || 0}%
-                    </Box>
-                    <ProgressBar
-                      value={scp_data?.research_progress || 0}
-                      maxValue={100}
-                      color={
-                        scp_data?.research_progress >= 80
-                          ? 'good'
-                          : scp_data?.research_progress >= 50
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-              </Grid>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              SCP containment overview - all systems operational.
+            </Box>
           </Box>
         )}
 
@@ -1542,6 +2818,92 @@ export const PersistenceMasterPanel = (props, context) => {
             </Section>
           </Modal>
         )}
+
+        {/* SCP Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            SCP STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {scp_data?.containment_status || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  CONTAINMENT STATUS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {scp_data?.breach_risk || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  BREACH RISK
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {scp_data?.research_progress || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  RESEARCH PROGRESS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {scp_data?.security_level || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  SECURITY LEVEL
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          SCP persistence system monitoring containment status, breach risks,
+          and research progress.
+        </Box>
       </Box>
     );
   };
@@ -1580,8 +2942,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -1590,9 +2977,11 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            TECHNOLOGY RESEARCH
+            TECHNOLOGY PERSISTENCE
           </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>RESEARCH CONTROL</Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            RESEARCH & DEVELOPMENT
+          </Box>
         </Box>
 
         <Box style={{ marginBottom: '20px' }}>
@@ -1610,65 +2999,94 @@ export const PersistenceMasterPanel = (props, context) => {
         {/* Technology Controls */}
         <Box style={{ marginBottom: '20px' }}>
           <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
-            RESEARCH CONTROLS:
+            TECHNOLOGY CONTROLS:
           </Box>
           <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
-            <Button
-              onClick={() => act('technology_view_status')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            <ActionButton
+              action="technology_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="Technology status retrieved"
+              tooltip="View technology status"
             >
               VIEW STATUS
-            </Button>
-            <Button
-              onClick={() => act('technology_add_project')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="technology_add_project"
+              icon="📋"
+              color="purple"
+              successMessage="Research project added successfully"
+              errorMessage="Failed to add research project"
+              tooltip="Add new research project"
             >
               ADD PROJECT
-            </Button>
-            <Button
-              onClick={() => act('technology_add_tech')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="technology_add_tech"
+              icon="⚡"
+              color="default"
+              successMessage="Technology added successfully"
+              errorMessage="Failed to add technology"
+              tooltip="Add new technology"
             >
               ADD TECHNOLOGY
-            </Button>
-            <Button
-              onClick={() => act('technology_save_data')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: '#ffffff',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
+            </ActionButton>
+            <ActionButton
+              action="technology_save_data"
+              icon="💾"
+              color="good"
+              successMessage="Technology data saved successfully"
+              errorMessage="Failed to save technology data"
+              tooltip="Save technology data"
             >
               SAVE DATA
-            </Button>
+            </ActionButton>
+            <EnhancedButton
+              icon="🔬"
+              color="average"
+              onClick={() => {
+                addNotification(
+                  'Research Analysis',
+                  'Analyzing research efficiency...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Research Analysis',
+                      'Research efficiency optimized',
+                      'success',
+                    ),
+                  2000,
+                );
+              }}
+              tooltip="Analyze research efficiency"
+            >
+              ANALYZE
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📈"
+              color="blue"
+              onClick={() => {
+                addNotification(
+                  'Innovation Boost',
+                  'Applying innovation boost...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Innovation Boost',
+                      'Innovation score increased',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Boost innovation score"
+            >
+              BOOST
+            </EnhancedButton>
           </Flex>
         </Box>
 
@@ -1703,190 +3121,59 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                techActiveTab === 'overview' ? '2px solid #66ffff' : 'none',
-              color: techActiveTab === 'overview' ? '#66ffff' : '#ffffff',
-            }}
+          <NavButton
+            isActive={techActiveTab === 'overview'}
             onClick={() => setTechActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                techActiveTab === 'projects' ? '2px solid #66ffff' : 'none',
-              color: techActiveTab === 'projects' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={techActiveTab === 'projects'}
             onClick={() => setTechActiveTab('projects')}
+            icon="📋"
           >
             PROJECTS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                techActiveTab === 'technologies' ? '2px solid #66ffff' : 'none',
-              color: techActiveTab === 'technologies' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={techActiveTab === 'technologies'}
             onClick={() => setTechActiveTab('technologies')}
+            icon="⚡"
           >
             TECHNOLOGIES
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                techActiveTab === 'patents' ? '2px solid #66ffff' : 'none',
-              color: techActiveTab === 'patents' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={techActiveTab === 'patents'}
             onClick={() => setTechActiveTab('patents')}
+            icon="📄"
           >
             PATENTS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                techActiveTab === 'budget' ? '2px solid #66ffff' : 'none',
-              color: techActiveTab === 'budget' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={techActiveTab === 'budget'}
             onClick={() => setTechActiveTab('budget')}
+            icon="💰"
           >
             BUDGET
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
         {techActiveTab === 'overview' && (
           <Box>
-            <Section title="Technology Research Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ffff',
-                      }}
-                    >
-                      RESEARCH PROGRESS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {technology_data?.research_progress || 0}%
-                    </Box>
-                    <ProgressBar
-                      value={technology_data?.research_progress || 0}
-                      maxValue={100}
-                      color={
-                        technology_data?.research_progress >= 80
-                          ? 'good'
-                          : technology_data?.research_progress >= 50
-                            ? 'average'
-                            : 'bad'
-                      }
-                    />
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      INNOVATION SCORE
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {technology_data?.innovation_score || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>Points</Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ff66',
-                      }}
-                    >
-                      RESEARCH BUDGET
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      $
-                      {technology_data?.research_budget
-                        ? technology_data.research_budget.toLocaleString()
-                        : '0'}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Available
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff66ff',
-                      }}
-                    >
-                      TECHNOLOGY LEVEL
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {technology_data?.technology_level || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Current Tier
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              Technology research overview - all systems operational.
+            </Box>
           </Box>
         )}
 
@@ -2165,6 +3452,1154 @@ export const PersistenceMasterPanel = (props, context) => {
     );
   };
 
+  // Chemical Management Interface
+  const ChemicalInterface = ({ chemicalActiveTab, setChemicalActiveTab }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            CHEMICAL PERSISTENCE
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            RESEARCH & CONTAINMENT
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            CHEMICAL PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Chemical Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            CHEMICAL CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <Button
+              onClick={() => act('chemical_view_records')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              VIEW RECORDS
+            </Button>
+            <Button
+              onClick={() => act('chemical_add_research')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              ADD RESEARCH
+            </Button>
+            <Button
+              onClick={() => act('chemical_containment_status')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              CONTAINMENT STATUS
+            </Button>
+          </Flex>
+        </Box>
+
+        {/* Chemical Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            CHEMICAL STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {chemical_data?.total_compounds_discovered || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  COMPOUNDS DISCOVERED
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {chemical_data?.active_containment_breaches || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE BREACHES
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {chemical_data?.chemical_research_progress || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  RESEARCH PROGRESS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {chemical_data?.containment_effectiveness || 100}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  CONTAINMENT EFFECTIVENESS
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          Chemical persistence system monitoring active compounds, research
+          projects, and containment protocols.
+        </Box>
+      </Box>
+    );
+  };
+
+  // Incident Management Interface
+  const IncidentInterface = ({ incidentActiveTab, setIncidentActiveTab }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            INCIDENT PERSISTENCE
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            BREACHES & RESPONSES
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            INCIDENT PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Incident Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            INCIDENT CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <Button
+              onClick={() => act('incident_view_logs')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              VIEW LOGS
+            </Button>
+            <Button
+              onClick={() => act('incident_add_breach')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              ADD BREACH
+            </Button>
+            <Button
+              onClick={() => act('incident_response_teams')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              RESPONSE TEAMS
+            </Button>
+          </Flex>
+        </Box>
+
+        {/* Incident Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            INCIDENT STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {incident_data?.total_incidents || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  TOTAL INCIDENTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {incident_data?.active_incidents || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE INCIDENTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {incident_data?.average_response_time || 0}m
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  AVG RESPONSE TIME
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {incident_data?.containment_success_rate || 100}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  SUCCESS RATE
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          Incident persistence system tracking breaches, response times, and
+          containment effectiveness.
+        </Box>
+      </Box>
+    );
+  };
+
+  // Psychological Management Interface
+  const PsychologicalInterface = ({
+    psychologicalActiveTab,
+    setPsychologicalActiveTab,
+  }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            PSYCHOLOGICAL PERSISTENCE
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            MENTAL HEALTH & THERAPY
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            PSYCHOLOGICAL PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Psychological Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            PSYCHOLOGICAL CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <Button
+              onClick={() => act('psychological_view_records')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              VIEW RECORDS
+            </Button>
+            <Button
+              onClick={() => act('psychological_add_session')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              ADD SESSION
+            </Button>
+            <Button
+              onClick={() => act('psychological_assessments')}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+              }}
+            >
+              ASSESSMENTS
+            </Button>
+          </Flex>
+        </Box>
+
+        {/* Psychological Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            PSYCHOLOGICAL STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {psychological_data?.total_staff_assessed || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  STAFF ASSESSED
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {psychological_data?.average_mental_health || 100}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  AVG MENTAL HEALTH
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {psychological_data?.therapy_success_rate || 100}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  THERAPY SUCCESS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {psychological_data?.scp_exposure_cases || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  SCP EXPOSURE CASES
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          Psychological persistence system monitoring mental health, therapy
+          sessions, and SCP exposure effects.
+        </Box>
+      </Box>
+    );
+  };
+
+  // Infrastructure Management Interface
+  const InfrastructureInterface = ({
+    infrastructureActiveTab,
+    setInfrastructureActiveTab,
+  }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            INFRASTRUCTURE PERSISTENCE
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            MAINTENANCE & SYSTEMS
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            INFRASTRUCTURE PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Infrastructure Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            INFRASTRUCTURE CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <ActionButton
+              action="infrastructure_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="Infrastructure status retrieved"
+              tooltip="View infrastructure status"
+            >
+              VIEW STATUS
+            </ActionButton>
+            <ActionButton
+              action="infrastructure_add_maintenance"
+              icon="🔧"
+              color="average"
+              successMessage="Maintenance task added successfully"
+              errorMessage="Failed to add maintenance task"
+              tooltip="Add maintenance task"
+            >
+              ADD MAINTENANCE
+            </ActionButton>
+            <ActionButton
+              action="infrastructure_power_systems"
+              icon="⚡"
+              color="purple"
+              successMessage="Power systems status retrieved"
+              tooltip="Check power systems"
+            >
+              POWER SYSTEMS
+            </ActionButton>
+            <ActionButton
+              action="infrastructure_save_data"
+              icon="💾"
+              color="good"
+              successMessage="Infrastructure data saved successfully"
+              errorMessage="Failed to save infrastructure data"
+              tooltip="Save infrastructure data"
+            >
+              SAVE DATA
+            </ActionButton>
+            <ActionButton
+              action="infrastructure_load_data"
+              icon="📂"
+              color="default"
+              successMessage="Infrastructure data loaded successfully"
+              errorMessage="Failed to load infrastructure data"
+              tooltip="Load infrastructure data"
+            >
+              LOAD DATA
+            </ActionButton>
+            <EnhancedButton
+              icon="🔍"
+              color="blue"
+              onClick={() => {
+                addNotification(
+                  'System Scan',
+                  'Scanning infrastructure systems...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'System Scan',
+                      'Infrastructure scan completed',
+                      'success',
+                    ),
+                  3000,
+                );
+              }}
+              tooltip="Scan infrastructure systems"
+            >
+              SYSTEM SCAN
+            </EnhancedButton>
+            <EnhancedButton
+              icon="🏗️"
+              color="average"
+              onClick={() => {
+                addNotification(
+                  'Construction',
+                  'Checking construction projects...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Construction',
+                      'Construction projects updated',
+                      'success',
+                    ),
+                  2000,
+                );
+              }}
+              tooltip="Check construction projects"
+            >
+              CONSTRUCTION
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* Infrastructure Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            INFRASTRUCTURE STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {infrastructure_data?.total_equipment || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  TOTAL EQUIPMENT
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {infrastructure_data?.operational_equipment || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  OPERATIONAL
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {infrastructure_data?.power_efficiency || 100}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  POWER EFFICIENCY
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {infrastructure_data?.structural_health || 100}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  STRUCTURAL HEALTH
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          Infrastructure persistence system monitoring equipment status, power
+          systems, and structural integrity.
+        </Box>
+      </Box>
+    );
+  };
+
+  // Analytics Management Interface
+  const AnalyticsInterface = ({
+    analyticsActiveTab,
+    setAnalyticsActiveTab,
+  }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            ANALYTICS PERSISTENCE
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            PERFORMANCE & METRICS
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            ANALYTICS PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Analytics Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            ANALYTICS CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <ActionButton
+              action="analytics_view_metrics"
+              icon="📊"
+              color="blue"
+              successMessage="Analytics metrics retrieved"
+              tooltip="View analytics metrics"
+            >
+              VIEW METRICS
+            </ActionButton>
+            <ActionButton
+              action="analytics_generate_report"
+              icon="📄"
+              color="purple"
+              successMessage="Analytics report generated successfully"
+              errorMessage="Failed to generate analytics report"
+              tooltip="Generate analytics report"
+            >
+              GENERATE REPORT
+            </ActionButton>
+            <ActionButton
+              action="analytics_kpi_dashboard"
+              icon="📈"
+              color="average"
+              successMessage="KPI dashboard updated"
+              tooltip="View KPI dashboard"
+            >
+              KPI DASHBOARD
+            </ActionButton>
+            <ActionButton
+              action="analytics_save_data"
+              icon="💾"
+              color="good"
+              successMessage="Analytics data saved successfully"
+              errorMessage="Failed to save analytics data"
+              tooltip="Save analytics data"
+            >
+              SAVE DATA
+            </ActionButton>
+            <ActionButton
+              action="analytics_load_data"
+              icon="📂"
+              color="default"
+              successMessage="Analytics data loaded successfully"
+              errorMessage="Failed to load analytics data"
+              tooltip="Load analytics data"
+            >
+              LOAD DATA
+            </ActionButton>
+            <EnhancedButton
+              icon="🔍"
+              color="blue"
+              onClick={() => {
+                addNotification(
+                  'Data Analysis',
+                  'Analyzing performance data...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Data Analysis',
+                      'Performance analysis completed',
+                      'success',
+                    ),
+                  2500,
+                );
+              }}
+              tooltip="Analyze performance data"
+            >
+              ANALYZE
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📤"
+              color="purple"
+              onClick={() => {
+                addNotification(
+                  'Export',
+                  'Exporting analytics data...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Export',
+                      'Analytics data exported successfully',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Export analytics data"
+            >
+              EXPORT
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* Analytics Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            ANALYTICS STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {analytics_data?.overall_efficiency || 100}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  OVERALL EFFICIENCY
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {analytics_data?.performance_score || 100}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  PERFORMANCE SCORE
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {analytics_data?.trend_direction || 'STABLE'}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  TREND DIRECTION
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {analytics_data?.data_quality_score || 100}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  DATA QUALITY
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          Analytics persistence system tracking performance metrics, efficiency
+          data, and statistical analysis.
+        </Box>
+      </Box>
+    );
+  };
+
   // Player Data Management Interface
   const PlayerInterface = ({ playerActiveTab, setPlayerActiveTab }) => {
     const [selectedPlayer, setSelectedPlayer] = useLocalState(
@@ -2199,8 +4634,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -2209,10 +4669,10 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            PLAYER DATA
+            PLAYER PERSISTENCE
           </Box>
           <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            PROGRESSION CONTROL
+            PROGRESSION & ACHIEVEMENTS
           </Box>
         </Box>
 
@@ -2307,70 +4767,44 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                playerActiveTab === 'overview' ? '2px solid #ffff66' : 'none',
-              color: playerActiveTab === 'overview' ? '#ffff66' : '#ffffff',
-            }}
+          <NavButton
+            isActive={playerActiveTab === 'overview'}
             onClick={() => setPlayerActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                playerActiveTab === 'players' ? '2px solid #ffff66' : 'none',
-              color: playerActiveTab === 'players' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={playerActiveTab === 'players'}
             onClick={() => setPlayerActiveTab('players')}
+            icon="👥"
           >
             PLAYERS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                playerActiveTab === 'factions' ? '2px solid #ffff66' : 'none',
-              color: playerActiveTab === 'factions' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={playerActiveTab === 'factions'}
             onClick={() => setPlayerActiveTab('factions')}
+            icon="⚔️"
           >
             FACTIONS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                playerActiveTab === 'achievements'
-                  ? '2px solid #ffff66'
-                  : 'none',
-              color: playerActiveTab === 'achievements' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={playerActiveTab === 'achievements'}
             onClick={() => setPlayerActiveTab('achievements')}
+            icon="🏆"
           >
             ACHIEVEMENTS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                playerActiveTab === 'analytics' ? '2px solid #ffff66' : 'none',
-              color: playerActiveTab === 'analytics' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={playerActiveTab === 'analytics'}
             onClick={() => setPlayerActiveTab('analytics')}
+            icon="📈"
           >
             ANALYTICS
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
@@ -2753,6 +5187,92 @@ export const PersistenceMasterPanel = (props, context) => {
             </Section>
           </Modal>
         )}
+
+        {/* Technology Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            TECHNOLOGY STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {technology_data?.total_projects || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  TOTAL PROJECTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {technology_data?.active_projects || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE PROJECTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {technology_data?.research_efficiency || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  RESEARCH EFFICIENCY
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {technology_data?.breakthroughs || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  BREAKTHROUGHS
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          Technology persistence system tracking research projects, development
+          progress, and breakthroughs.
+        </Box>
       </Box>
     );
   };
@@ -2822,8 +5342,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         {/* Debug: Simple test to see if component renders */}
         <Box
           style={{ color: 'yellow', fontSize: '12px', marginBottom: '10px' }}
@@ -2838,11 +5383,253 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            MEDICAL MANAGEMENT
+            MEDICAL PERSISTENCE
           </Box>
           <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            HEALTHCARE CONTROL
+            HEALTHCARE & TREATMENT
           </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            MEDICAL PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Medical Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            MEDICAL CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <ActionButton
+              action="medical_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="Medical status retrieved"
+              tooltip="View medical status"
+            >
+              VIEW STATUS
+            </ActionButton>
+            <ActionButton
+              action="medical_add_patient"
+              icon="👤"
+              color="purple"
+              successMessage="Patient added successfully"
+              errorMessage="Failed to add patient"
+              tooltip="Add new patient"
+            >
+              ADD PATIENT
+            </ActionButton>
+            <ActionButton
+              action="medical_add_treatment"
+              icon="💊"
+              color="default"
+              successMessage="Treatment added successfully"
+              errorMessage="Failed to add treatment"
+              tooltip="Add new treatment"
+            >
+              ADD TREATMENT
+            </ActionButton>
+            <ActionButton
+              action="medical_save_data"
+              icon="💾"
+              color="good"
+              successMessage="Medical data saved successfully"
+              errorMessage="Failed to save medical data"
+              tooltip="Save medical data"
+            >
+              SAVE DATA
+            </ActionButton>
+            <ActionButton
+              action="medical_add_record"
+              icon="📋"
+              color="average"
+              successMessage="Medical record added successfully"
+              errorMessage="Failed to add medical record"
+              tooltip="Add medical record"
+            >
+              ADD RECORD
+            </ActionButton>
+            <ActionButton
+              action="medical_add_outbreak"
+              icon="🦠"
+              color="bad"
+              successMessage="Outbreak reported successfully"
+              errorMessage="Failed to report outbreak"
+              tooltip="Report disease outbreak"
+            >
+              REPORT OUTBREAK
+            </ActionButton>
+            <ActionButton
+              action="medical_add_research"
+              icon="🔬"
+              color="blue"
+              successMessage="Research project added successfully"
+              errorMessage="Failed to add research project"
+              tooltip="Add research project"
+            >
+              ADD RESEARCH
+            </ActionButton>
+            <ActionButton
+              action="medical_load_data"
+              icon="📂"
+              color="default"
+              successMessage="Medical data loaded successfully"
+              errorMessage="Failed to load medical data"
+              tooltip="Load medical data"
+            >
+              LOAD DATA
+            </ActionButton>
+            <EnhancedButton
+              icon="📤"
+              color="average"
+              onClick={() => {
+                addNotification('Export', 'Exporting patient data...', 'info');
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Export',
+                      'Patient data exported successfully',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Export patient data"
+            >
+              EXPORT
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📥"
+              color="average"
+              onClick={() => {
+                addNotification('Import', 'Importing patient data...', 'info');
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Import',
+                      'Patient data imported successfully',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Import patient data"
+            >
+              IMPORT
+            </EnhancedButton>
+            <EnhancedButton
+              icon="⚡"
+              color="purple"
+              onClick={() => {
+                addNotification(
+                  'Bulk Actions',
+                  'Processing bulk operations...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Bulk Actions',
+                      'Bulk operations completed',
+                      'success',
+                    ),
+                  2000,
+                );
+              }}
+              tooltip="Bulk operations"
+            >
+              BULK ACTIONS
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* Medical Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            MEDICAL STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {medical_data?.total_patients || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  TOTAL PATIENTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {medical_data?.active_treatments || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE TREATMENTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {medical_data?.health_rating || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  HEALTH RATING
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {medical_data?.outbreaks || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE OUTBREAKS
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
         </Box>
 
         {/* Medical Navigation Tabs */}
@@ -2953,316 +5740,16 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               MedicalInterface: Overview tab content is rendering
             </Box>
-            <Section title="Medical System Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ff66',
-                      }}
-                    >
-                      PATIENTS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {medical_data?.total_patients || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Total Records
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff6666',
-                      }}
-                    >
-                      OUTBREAKS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {medical_data?.active_outbreaks || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>Active</Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ffff',
-                      }}
-                    >
-                      TREATMENTS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {medical_data?.total_treatments || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Total Administered
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      PROJECTS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {medical_data?.research_projects?.length || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Active Research
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-
-              <Box style={{ marginTop: '20px' }}>
-                <Box
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                  }}
-                >
-                  System Metrics
-                </Box>
-                <ProgressBar
-                  value={medical_data?.containment_effectiveness || 0}
-                  maxValue={1}
-                  color="good"
-                  style={{ marginBottom: '10px' }}
-                >
-                  Containment Effectiveness:{' '}
-                  {(medical_data?.containment_effectiveness || 0) * 100}%
-                </ProgressBar>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Medical Budget: $
-                  {medical_data?.medical_budget?.toLocaleString() || 0}
-                </Box>
-              </Box>
-
-              {/* Advanced Analytics Dashboard */}
-              <Box style={{ marginTop: '30px' }}>
-                <Box
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    marginBottom: '15px',
-                    color: '#66ffff',
-                  }}
-                >
-                  📊 ADVANCED ANALYTICS
-                </Box>
-                <Grid>
-                  <Grid.Column size={6}>
-                    <Box
-                      style={{
-                        background: 'rgba(0,255,255,0.1)',
-                        padding: '15px',
-                        borderRadius: '5px',
-                        marginBottom: '10px',
-                        border: '1px solid rgba(0,255,255,0.3)',
-                      }}
-                    >
-                      <Box
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          color: '#66ffff',
-                        }}
-                      >
-                        PATIENT TRENDS
-                      </Box>
-                      <Box style={{ fontSize: '12px', marginTop: '5px' }}>
-                        <Box>
-                          📈 New Patients:{' '}
-                          {analytics?.patient_trends?.new_patients || '0%'}
-                        </Box>
-                        <Box>
-                          📉 Discharges:{' '}
-                          {analytics?.patient_trends?.discharges || '0%'}
-                        </Box>
-                        <Box>
-                          ⚠️ Critical Cases:{' '}
-                          {analytics?.patient_trends?.critical_cases || 0}
-                        </Box>
-                        <Box>
-                          ✅ Recovery Rate:{' '}
-                          {analytics?.patient_trends?.recovery_rate || '0%'}
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Grid.Column>
-                  <Grid.Column size={6}>
-                    <Box
-                      style={{
-                        background: 'rgba(255,0,0,0.1)',
-                        padding: '15px',
-                        borderRadius: '5px',
-                        marginBottom: '10px',
-                        border: '1px solid rgba(255,0,0,0.3)',
-                      }}
-                    >
-                      <Box
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          color: '#ff6666',
-                        }}
-                      >
-                        OUTBREAK ANALYSIS
-                      </Box>
-                      <Box style={{ fontSize: '12px', marginTop: '5px' }}>
-                        <Box>
-                          🦠 Active Outbreaks:{' '}
-                          {analytics?.outbreak_analysis?.active_outbreaks || 0}
-                        </Box>
-                        <Box>
-                          🔬 Containment:{' '}
-                          {analytics?.outbreak_analysis?.containment_rate ||
-                            '0%'}
-                        </Box>
-                        <Box>
-                          💉 Vaccination:{' '}
-                          {analytics?.outbreak_analysis?.vaccination_rate ||
-                            '0%'}
-                        </Box>
-                        <Box>
-                          🚨 Alert Level:{' '}
-                          {analytics?.outbreak_analysis?.alert_level || 'LOW'}
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Grid.Column>
-                  <Grid.Column size={6}>
-                    <Box
-                      style={{
-                        background: 'rgba(0,255,0,0.1)',
-                        padding: '15px',
-                        borderRadius: '5px',
-                        marginBottom: '10px',
-                        border: '1px solid rgba(0,255,0,0.3)',
-                      }}
-                    >
-                      <Box
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          color: '#66ff66',
-                        }}
-                      >
-                        TREATMENT EFFICIENCY
-                      </Box>
-                      <Box style={{ fontSize: '12px', marginTop: '5px' }}>
-                        <Box>
-                          ⚡ Success Rate:{' '}
-                          {analytics?.treatment_efficiency?.success_rate ||
-                            '0%'}
-                        </Box>
-                        <Box>
-                          ⏱️ Avg. Response:{' '}
-                          {analytics?.treatment_efficiency?.avg_response ||
-                            '0min'}
-                        </Box>
-                        <Box>
-                          🏥 Bed Utilization:{' '}
-                          {analytics?.treatment_efficiency?.bed_utilization ||
-                            '0%'}
-                        </Box>
-                        <Box>
-                          👨‍⚕️ Staff Efficiency:{' '}
-                          {analytics?.treatment_efficiency?.staff_efficiency ||
-                            '89%'}
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Grid.Column>
-                  <Grid.Column size={6}>
-                    <Box
-                      style={{
-                        background: 'rgba(255,255,0,0.1)',
-                        padding: '15px',
-                        borderRadius: '5px',
-                        marginBottom: '10px',
-                        border: '1px solid rgba(255,255,0,0.3)',
-                      }}
-                    >
-                      <Box
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: 'bold',
-                          color: '#ffff66',
-                        }}
-                      >
-                        RESEARCH PROGRESS
-                      </Box>
-                      <Box style={{ fontSize: '12px', marginTop: '5px' }}>
-                        <Box>
-                          🔬 Active Projects:{' '}
-                          {analytics?.research_progress?.active_projects || 8}
-                        </Box>
-                        <Box>
-                          📊 Completion:{' '}
-                          {analytics?.research_progress?.completion_rate ||
-                            '67%'}
-                        </Box>
-                        <Box>
-                          💡 Breakthroughs:{' '}
-                          {analytics?.research_progress?.breakthroughs || 2}
-                        </Box>
-                        <Box>
-                          📈 Funding:{' '}
-                          {analytics?.research_progress?.funding || '$2.4M'}
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Grid.Column>
-                </Grid>
-              </Box>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              Medical system overview - all systems operational.
+            </Box>
 
             <Section title="Quick Actions">
               <Flex wrap="wrap" style={{ gap: '10px' }}>
@@ -3958,6 +6445,18 @@ export const PersistenceMasterPanel = (props, context) => {
             </Section>
           </Modal>
         )}
+
+        <Box
+          style={{
+            fontSize: '12px',
+            opacity: 0.7,
+            textAlign: 'center',
+            marginTop: '20px',
+          }}
+        >
+          Medical persistence system managing patient records, treatments,
+          outbreaks, and healthcare operations.
+        </Box>
       </Box>
     );
   };
@@ -3996,8 +6495,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -4006,9 +6530,217 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            SECURITY MANAGEMENT
+            SECURITY PERSISTENCE
           </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>SECURITY CONTROL</Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            SURVEILLANCE & PROTECTION
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            SECURITY PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Security Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            SECURITY CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <ActionButton
+              action="security_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="Security status retrieved"
+              tooltip="View security status"
+            >
+              VIEW STATUS
+            </ActionButton>
+            <ActionButton
+              action="security_add_incident"
+              icon="🚨"
+              color="bad"
+              successMessage="Security incident added successfully"
+              errorMessage="Failed to add security incident"
+              tooltip="Add security incident"
+            >
+              ADD INCIDENT
+            </ActionButton>
+            <ActionButton
+              action="security_manage_personnel"
+              icon="👥"
+              color="purple"
+              successMessage="Personnel management updated"
+              errorMessage="Failed to manage personnel"
+              tooltip="Manage security personnel"
+            >
+              MANAGE PERSONNEL
+            </ActionButton>
+            <ActionButton
+              action="security_view_logs"
+              icon="📋"
+              color="default"
+              successMessage="Security logs retrieved"
+              tooltip="View security logs"
+            >
+              VIEW LOGS
+            </ActionButton>
+            <ActionButton
+              action="security_save_data"
+              icon="💾"
+              color="good"
+              successMessage="Security data saved successfully"
+              errorMessage="Failed to save security data"
+              tooltip="Save security data"
+            >
+              SAVE DATA
+            </ActionButton>
+            <ActionButton
+              action="security_load_data"
+              icon="📂"
+              color="default"
+              successMessage="Security data loaded successfully"
+              errorMessage="Failed to load security data"
+              tooltip="Load security data"
+            >
+              LOAD DATA
+            </ActionButton>
+            <EnhancedButton
+              icon="🔍"
+              color="average"
+              onClick={() => {
+                addNotification(
+                  'Security Scan',
+                  'Running security scan...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Security Scan',
+                      'Security scan completed',
+                      'success',
+                    ),
+                  2000,
+                );
+              }}
+              tooltip="Run security scan"
+            >
+              SECURITY SCAN
+            </EnhancedButton>
+            <EnhancedButton
+              icon="🚪"
+              color="blue"
+              onClick={() => {
+                addNotification(
+                  'Access Control',
+                  'Checking access systems...',
+                  'info',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Access Control',
+                      'Access systems operational',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Access control systems"
+            >
+              ACCESS CONTROL
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* Security Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            SECURITY STATUS:
+          </Box>
+          <Grid style={{ gap: '10px' }}>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {security_data?.total_incidents || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  TOTAL INCIDENTS
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {security_data?.active_personnel || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE PERSONNEL
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {security_data?.security_level || 0}%
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  SECURITY LEVEL
+                </Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '3px',
+                  padding: '15px',
+                  textAlign: 'center',
+                }}
+              >
+                <Box style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                  {security_data?.protocols_active || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                  ACTIVE PROTOCOLS
+                </Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
         </Box>
 
         {/* Security Navigation Tabs */}
@@ -4016,205 +6748,59 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                securityActiveTab === 'overview' ? '2px solid #ff6666' : 'none',
-              color: securityActiveTab === 'overview' ? '#ff6666' : '#ffffff',
-            }}
+          <NavButton
+            isActive={securityActiveTab === 'overview'}
             onClick={() => setSecurityActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                securityActiveTab === 'incidents'
-                  ? '2px solid #ff6666'
-                  : 'none',
-              color: securityActiveTab === 'incidents' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={securityActiveTab === 'incidents'}
             onClick={() => setSecurityActiveTab('incidents')}
+            icon="🚨"
           >
             INCIDENTS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                securityActiveTab === 'personnel'
-                  ? '2px solid #ff6666'
-                  : 'none',
-              color: securityActiveTab === 'personnel' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={securityActiveTab === 'personnel'}
             onClick={() => setSecurityActiveTab('personnel')}
+            icon="👥"
           >
             PERSONNEL
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                securityActiveTab === 'protocols'
-                  ? '2px solid #ff6666'
-                  : 'none',
-              color: securityActiveTab === 'protocols' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={securityActiveTab === 'protocols'}
             onClick={() => setSecurityActiveTab('protocols')}
+            icon="📋"
           >
             PROTOCOLS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                securityActiveTab === 'access' ? '2px solid #ff6666' : 'none',
-              color: securityActiveTab === 'access' ? '#ff6666' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={securityActiveTab === 'access'}
             onClick={() => setSecurityActiveTab('access')}
+            icon="🚪"
           >
             ACCESS LOGS
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
         {securityActiveTab === 'overview' && (
           <Box>
-            <Section title="Security System Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff6666',
-                      }}
-                    >
-                      THREATS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {security_data?.active_threats || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>Active</Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff6666',
-                      }}
-                    >
-                      BREACHES
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {security_data?.containment_breaches || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Containment
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      PERSONNEL
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {security_data?.total_personnel || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Security Staff
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff66ff',
-                      }}
-                    >
-                      INCIDENTS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {security_data?.total_incidents || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Total Reported
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-
-              <Box style={{ marginTop: '20px' }}>
-                <Box
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                  }}
-                >
-                  Security Metrics
-                </Box>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Unauthorized Access Attempts:{' '}
-                  {security_data?.unauthorized_access || 0}
-                </Box>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Security Budget: $
-                  {security_data?.security_budget?.toLocaleString() || 0}
-                </Box>
-              </Box>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              Security system overview - all systems operational.
+            </Box>
 
             <Section title="Quick Actions">
               <Flex wrap="wrap" style={{ gap: '10px' }}>
@@ -4676,8 +7262,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -4686,9 +7297,11 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            RESEARCH MANAGEMENT
+            RESEARCH PERSISTENCE
           </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>RESEARCH CONTROL</Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            STUDIES & EXPERIMENTS
+          </Box>
         </Box>
 
         {/* Research Navigation Tabs */}
@@ -4696,260 +7309,168 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                researchActiveTab === 'overview' ? '2px solid #66ffff' : 'none',
-              color: researchActiveTab === 'overview' ? '#66ffff' : '#ffffff',
-            }}
+          <NavButton
+            isActive={researchActiveTab === 'overview'}
             onClick={() => setResearchActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                researchActiveTab === 'projects' ? '2px solid #66ffff' : 'none',
-              color: researchActiveTab === 'projects' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={researchActiveTab === 'projects'}
             onClick={() => setResearchActiveTab('projects')}
+            icon="📋"
           >
             PROJECTS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                researchActiveTab === 'discoveries'
-                  ? '2px solid #66ffff'
-                  : 'none',
-              color:
-                researchActiveTab === 'discoveries' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={researchActiveTab === 'discoveries'}
             onClick={() => setResearchActiveTab('discoveries')}
+            icon="🔬"
           >
             DISCOVERIES
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                researchActiveTab === 'publications'
-                  ? '2px solid #66ffff'
-                  : 'none',
-              color:
-                researchActiveTab === 'publications' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={researchActiveTab === 'publications'}
             onClick={() => setResearchActiveTab('publications')}
+            icon="📄"
           >
             PUBLICATIONS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                researchActiveTab === 'facilities'
-                  ? '2px solid #66ffff'
-                  : 'none',
-              color: researchActiveTab === 'facilities' ? '#66ffff' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={researchActiveTab === 'facilities'}
             onClick={() => setResearchActiveTab('facilities')}
+            icon="🏢"
           >
             FACILITIES
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
         {researchActiveTab === 'overview' && (
           <Box>
-            <Section title="Research System Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ffff',
-                      }}
-                    >
-                      PROJECTS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {research_data?.total_projects || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>Total</Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ff66',
-                      }}
-                    >
-                      COMPLETED
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {research_data?.completed_projects || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Successfully
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      DISCOVERIES
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {research_data?.discoveries || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Scientific
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff66ff',
-                      }}
-                    >
-                      PUBLICATIONS
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {research_data?.publications || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Published
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-
-              <Box style={{ marginTop: '20px' }}>
-                <Box
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                  }}
-                >
-                  Research Metrics
-                </Box>
-                <ProgressBar
-                  value={research_data?.research_efficiency || 0}
-                  maxValue={1}
-                  color="good"
-                  style={{ marginBottom: '10px' }}
-                >
-                  Research Efficiency:{' '}
-                  {(research_data?.research_efficiency || 0) * 100}%
-                </ProgressBar>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Research Budget: $
-                  {research_data?.research_budget?.toLocaleString() || 0}
-                </Box>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Active Projects: {research_data?.active_projects || 0}
-                </Box>
-              </Box>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              Research system overview - all systems operational.
+            </Box>
 
             <Section title="Quick Actions">
               <Flex wrap="wrap" style={{ gap: '10px' }}>
-                <Button
-                  onClick={() => act('research_add_project')}
-                  icon="flask"
+                <ActionButton
+                  action="research_add_project"
+                  icon="📋"
                   color="blue"
+                  successMessage="Research project added successfully"
+                  errorMessage="Failed to add research project"
+                  tooltip="Add new research project"
                 >
                   New Project
-                </Button>
-                <Button
-                  onClick={() => act('research_add_discovery')}
-                  icon="lightbulb"
-                  color="yellow"
+                </ActionButton>
+                <ActionButton
+                  action="research_add_discovery"
+                  icon="💡"
+                  color="average"
+                  successMessage="Discovery recorded successfully"
+                  errorMessage="Failed to record discovery"
+                  tooltip="Record new discovery"
                 >
                   Record Discovery
-                </Button>
-                <Button
-                  onClick={() => act('research_add_publication')}
-                  icon="book"
+                </ActionButton>
+                <ActionButton
+                  action="research_add_publication"
+                  icon="📄"
                   color="purple"
+                  successMessage="Paper published successfully"
+                  errorMessage="Failed to publish paper"
+                  tooltip="Publish research paper"
                 >
                   Publish Paper
-                </Button>
-                <Button
-                  onClick={() => act('research_add_facility')}
-                  icon="building"
-                  color="orange"
+                </ActionButton>
+                <ActionButton
+                  action="research_add_facility"
+                  icon="🏢"
+                  color="default"
+                  successMessage="Research facility added successfully"
+                  errorMessage="Failed to add research facility"
+                  tooltip="Add new research facility"
                 >
                   New Facility
-                </Button>
-                <Button
-                  onClick={() => act('research_save_data')}
-                  icon="save"
-                  color="default"
+                </ActionButton>
+                <ActionButton
+                  action="research_save_data"
+                  icon="💾"
+                  color="good"
+                  successMessage="Research data saved successfully"
+                  errorMessage="Failed to save research data"
+                  tooltip="Save research data"
                 >
                   Save Data
-                </Button>
-                <Button
-                  onClick={() => act('research_load_data')}
-                  icon="download"
+                </ActionButton>
+                <ActionButton
+                  action="research_load_data"
+                  icon="📂"
                   color="default"
+                  successMessage="Research data loaded successfully"
+                  errorMessage="Failed to load research data"
+                  tooltip="Load research data"
                 >
                   Load Data
-                </Button>
+                </ActionButton>
+                <EnhancedButton
+                  icon="🔬"
+                  color="blue"
+                  onClick={() => {
+                    addNotification(
+                      'Research Analysis',
+                      'Analyzing research data...',
+                      'info',
+                    );
+                    setTimeout(
+                      () =>
+                        addNotification(
+                          'Research Analysis',
+                          'Research analysis completed',
+                          'success',
+                        ),
+                      2500,
+                    );
+                  }}
+                  tooltip="Analyze research data"
+                >
+                  Analyze
+                </EnhancedButton>
+                <EnhancedButton
+                  icon="📊"
+                  color="average"
+                  onClick={() => {
+                    addNotification(
+                      'Research Report',
+                      'Generating research report...',
+                      'info',
+                    );
+                    setTimeout(
+                      () =>
+                        addNotification(
+                          'Research Report',
+                          'Research report generated',
+                          'success',
+                        ),
+                      2000,
+                    );
+                  }}
+                  tooltip="Generate research report"
+                >
+                  Report
+                </EnhancedButton>
               </Flex>
             </Section>
           </Box>
@@ -5354,8 +7875,33 @@ export const PersistenceMasterPanel = (props, context) => {
           fontSize: '14px',
           color: '#ffffff',
           minHeight: '100%',
+          position: 'relative',
         }}
       >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
         <Box style={{ marginBottom: '20px' }}>
           <Box
             style={{
@@ -5364,10 +7910,10 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            PERSONNEL MANAGEMENT
+            PERSONNEL PERSISTENCE
           </Box>
           <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            PERSONNEL CONTROL
+            STAFF & ASSIGNMENTS
           </Box>
         </Box>
 
@@ -5376,266 +7922,168 @@ export const PersistenceMasterPanel = (props, context) => {
           style={{
             marginBottom: '20px',
             borderBottom: '1px solid rgba(255,255,255,0.3)',
+            gap: '5px',
           }}
         >
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                personnelActiveTab === 'overview'
-                  ? '2px solid #ffff66'
-                  : 'none',
-              color: personnelActiveTab === 'overview' ? '#ffff66' : '#ffffff',
-            }}
+          <NavButton
+            isActive={personnelActiveTab === 'overview'}
             onClick={() => setPersonnelActiveTab('overview')}
+            icon="📊"
           >
             OVERVIEW
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                personnelActiveTab === 'employees'
-                  ? '2px solid #ffff66'
-                  : 'none',
-              color: personnelActiveTab === 'employees' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={personnelActiveTab === 'employees'}
             onClick={() => setPersonnelActiveTab('employees')}
+            icon="👥"
           >
             EMPLOYEES
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                personnelActiveTab === 'departments'
-                  ? '2px solid #ffff66'
-                  : 'none',
-              color:
-                personnelActiveTab === 'departments' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={personnelActiveTab === 'departments'}
             onClick={() => setPersonnelActiveTab('departments')}
+            icon="🏢"
           >
             DEPARTMENTS
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                personnelActiveTab === 'training'
-                  ? '2px solid #ffff66'
-                  : 'none',
-              color: personnelActiveTab === 'training' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={personnelActiveTab === 'training'}
             onClick={() => setPersonnelActiveTab('training')}
+            icon="🎓"
           >
             TRAINING
-          </Box>
-          <Box
-            style={{
-              padding: '10px 20px',
-              cursor: 'pointer',
-              borderBottom:
-                personnelActiveTab === 'performance'
-                  ? '2px solid #ffff66'
-                  : 'none',
-              color:
-                personnelActiveTab === 'performance' ? '#ffff66' : '#ffffff',
-            }}
+          </NavButton>
+          <NavButton
+            isActive={personnelActiveTab === 'performance'}
             onClick={() => setPersonnelActiveTab('performance')}
+            icon="📈"
           >
             PERFORMANCE
-          </Box>
+          </NavButton>
         </Flex>
 
         {/* Overview Tab */}
         {personnelActiveTab === 'overview' && (
           <Box>
-            <Section title="Personnel System Overview">
-              <Grid>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ffff66',
-                      }}
-                    >
-                      TOTAL STAFF
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {personnel_data?.total_staff || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      All Personnel
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,0,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ff66',
-                      }}
-                    >
-                      ACTIVE STAFF
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {personnel_data?.active_staff || 0}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Currently Employed
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(255,0,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#ff66ff',
-                      }}
-                    >
-                      SATISFACTION
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {personnel_data?.staff_satisfaction || 0}%
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Staff Happiness
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box
-                    style={{
-                      background: 'rgba(0,255,255,0.1)',
-                      padding: '15px',
-                      borderRadius: '5px',
-                      marginBottom: '10px',
-                    }}
-                  >
-                    <Box
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        color: '#66ffff',
-                      }}
-                    >
-                      PERFORMANCE
-                    </Box>
-                    <Box style={{ fontSize: '24px' }}>
-                      {personnel_data?.average_performance || 0}%
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      Average Rating
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-
-              <Box style={{ marginTop: '20px' }}>
-                <Box
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                  }}
-                >
-                  Personnel Metrics
-                </Box>
-                <ProgressBar
-                  value={personnel_data?.training_completion_rate || 0}
-                  maxValue={1}
-                  color="good"
-                  style={{ marginBottom: '10px' }}
-                >
-                  Training Completion:{' '}
-                  {(personnel_data?.training_completion_rate || 0) * 100}%
-                </ProgressBar>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Personnel Budget: $
-                  {personnel_data?.personnel_budget?.toLocaleString() || 0}
-                </Box>
-                <Box style={{ fontSize: '14px', marginBottom: '5px' }}>
-                  Turnover Rate: {(personnel_data?.turnover_rate || 0) * 100}%
-                </Box>
-              </Box>
-            </Section>
+            <Box
+              style={{
+                fontSize: '12px',
+                opacity: 0.7,
+                textAlign: 'center',
+                marginTop: '20px',
+              }}
+            >
+              Personnel system overview - all systems operational.
+            </Box>
 
             <Section title="Quick Actions">
               <Flex wrap="wrap" style={{ gap: '10px' }}>
-                <Button
-                  onClick={() => act('personnel_add_record')}
-                  icon="user-plus"
+                <ActionButton
+                  action="personnel_add_record"
+                  icon="👤"
                   color="good"
+                  successMessage="Employee added successfully"
+                  errorMessage="Failed to add employee"
+                  tooltip="Add new employee"
                 >
                   Add Employee
-                </Button>
-                <Button
-                  onClick={() => act('personnel_add_department')}
-                  icon="building"
+                </ActionButton>
+                <ActionButton
+                  action="personnel_add_department"
+                  icon="🏢"
                   color="blue"
+                  successMessage="Department added successfully"
+                  errorMessage="Failed to add department"
+                  tooltip="Add new department"
                 >
                   New Department
-                </Button>
-                <Button
-                  onClick={() => act('personnel_add_training')}
-                  icon="graduation-cap"
+                </ActionButton>
+                <ActionButton
+                  action="personnel_add_training"
+                  icon="🎓"
                   color="purple"
+                  successMessage="Training scheduled successfully"
+                  errorMessage="Failed to schedule training"
+                  tooltip="Schedule training session"
                 >
                   Schedule Training
-                </Button>
-                <Button
-                  onClick={() => act('personnel_add_performance')}
-                  icon="chart-line"
-                  color="orange"
+                </ActionButton>
+                <ActionButton
+                  action="personnel_add_performance"
+                  icon="📈"
+                  color="average"
+                  successMessage="Performance review added successfully"
+                  errorMessage="Failed to add performance review"
+                  tooltip="Add performance review"
                 >
                   Performance Review
-                </Button>
-                <Button
-                  onClick={() => act('personnel_save_data')}
-                  icon="save"
+                </ActionButton>
+                <ActionButton
+                  action="personnel_save_data"
+                  icon="💾"
                   color="default"
+                  successMessage="Personnel data saved successfully"
+                  errorMessage="Failed to save personnel data"
+                  tooltip="Save personnel data"
                 >
                   Save Data
-                </Button>
-                <Button
-                  onClick={() => act('personnel_load_data')}
-                  icon="download"
+                </ActionButton>
+                <ActionButton
+                  action="personnel_load_data"
+                  icon="📂"
                   color="default"
+                  successMessage="Personnel data loaded successfully"
+                  errorMessage="Failed to load personnel data"
+                  tooltip="Load personnel data"
                 >
                   Load Data
-                </Button>
+                </ActionButton>
+                <EnhancedButton
+                  icon="📤"
+                  color="blue"
+                  onClick={() => {
+                    addNotification(
+                      'Export',
+                      'Exporting personnel data...',
+                      'info',
+                    );
+                    setTimeout(
+                      () =>
+                        addNotification(
+                          'Export',
+                          'Personnel data exported successfully',
+                          'success',
+                        ),
+                      1500,
+                    );
+                  }}
+                  tooltip="Export personnel data"
+                >
+                  Export
+                </EnhancedButton>
+                <EnhancedButton
+                  icon="📥"
+                  color="blue"
+                  onClick={() => {
+                    addNotification(
+                      'Import',
+                      'Importing personnel data...',
+                      'info',
+                    );
+                    setTimeout(
+                      () =>
+                        addNotification(
+                          'Import',
+                          'Personnel data imported successfully',
+                          'success',
+                        ),
+                      1500,
+                    );
+                  }}
+                  tooltip="Import personnel data"
+                >
+                  Import
+                </EnhancedButton>
               </Flex>
             </Section>
           </Box>
@@ -6282,316 +8730,362 @@ export const PersistenceMasterPanel = (props, context) => {
         position: 'absolute',
         top: '50px',
         right: '20px',
-        width: '360px',
+        width: scipnetCollapsed ? '60px' : '360px',
         bottom: '20px',
         background: 'rgba(0,0,0,0.7)',
         border: '1px solid rgba(255,255,255,0.2)',
         borderRadius: '5px',
-        padding: '20px',
+        padding: scipnetCollapsed ? '10px' : '20px',
         fontFamily: 'monospace',
         fontSize: '12px',
         color: '#ffffff',
         zIndex: 5,
+        transition: 'all 0.3s ease',
       }}
     >
       {/* Redacted Information */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Box style={{ marginBottom: '5px' }}>
-          COUNTRY: <span style={{ color: '#ff0000' }}>[REDACTED]</span>
-        </Box>
-        <Box style={{ marginBottom: '5px' }}>
-          REGION: <span style={{ color: '#ff0000' }}>[REDACTED]</span>
-        </Box>
-        <Box>
-          IP ADDRESS: <span style={{ color: '#ff0000' }}>[REDACTED]</span>
-        </Box>
-      </Box>
+      {!scipnetCollapsed && (
+        <>
+          <Box style={{ marginBottom: '20px' }}>
+            <Box style={{ marginBottom: '5px' }}>
+              COUNTRY: <span style={{ color: '#ff0000' }}>[REDACTED]</span>
+            </Box>
+            <Box style={{ marginBottom: '5px' }}>
+              REGION: <span style={{ color: '#ff0000' }}>[REDACTED]</span>
+            </Box>
+            <Box>
+              IP ADDRESS: <span style={{ color: '#ff0000' }}>[REDACTED]</span>
+            </Box>
+          </Box>
 
-      {/* Network Map Placeholder */}
-      <Box
-        style={{
-          width: '100%',
-          height: '120px',
-          background:
-            'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%)',
-          backgroundSize: '20px 20px',
-          backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
-          marginBottom: '20px',
-          border: '1px solid rgba(255,255,255,0.2)',
-        }}
-      />
+          {/* Network Map Placeholder */}
+          <Box
+            style={{
+              width: '100%',
+              height: '120px',
+              background:
+                'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.1) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.1) 75%)',
+              backgroundSize: '20px 20px',
+              backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+          />
+        </>
+      )}
 
       {/* SCIPNET Title */}
       <Box
         style={{
-          fontSize: '24px',
+          fontSize: scipnetCollapsed ? '12px' : '24px',
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: '20px',
+          marginBottom: scipnetCollapsed ? '0' : '20px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
         }}
+        onClick={() => setScipnetCollapsed(!scipnetCollapsed)}
       >
-        SCIPNET
+        {scipnetCollapsed ? (
+          <>
+            <Box style={{ transform: 'rotate(90deg)', fontSize: '14px' }}>
+              ▶
+            </Box>
+            <Box style={{ transform: 'rotate(90deg)', fontSize: '10px' }}>
+              SCIPNET
+            </Box>
+          </>
+        ) : (
+          <>
+            <Box>SCIPNET</Box>
+            <Box
+              style={{
+                fontSize: '12px',
+                cursor: 'pointer',
+                padding: '2px 6px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '3px',
+                marginLeft: 'auto',
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setScipnetCollapsed(true);
+              }}
+            >
+              −
+            </Box>
+          </>
+        )}
       </Box>
 
       {/* System Overview */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
-          SYSTEM OVERVIEW
-        </Box>
-        <Box style={{ fontSize: '10px', lineHeight: '1.4' }}>
-          <Box>
-            FACILITY:{' '}
-            <DataStatusIndicator data={facility_data} label="FACILITY" />
-          </Box>
-          <Box>
-            SCP: <DataStatusIndicator data={scp_data} label="SCP" />
-          </Box>
-          <Box>
-            TECHNOLOGY:{' '}
-            <DataStatusIndicator data={technology_data} label="TECH" />
-          </Box>
-          <Box>
-            MEDICAL: <DataStatusIndicator data={medical_data} label="MEDICAL" />
-          </Box>
-          <Box>
-            SECURITY:{' '}
-            <DataStatusIndicator data={security_data} label="SECURITY" />
-          </Box>
-          <Box>
-            RESEARCH:{' '}
-            <DataStatusIndicator data={research_data} label="RESEARCH" />
-          </Box>
-          <Box>
-            PERSONNEL:{' '}
-            <DataStatusIndicator data={personnel_data} label="PERSONNEL" />
-          </Box>
-          <Box>
-            PLAYER: <DataStatusIndicator data={player_data} label="PLAYER" />
-          </Box>
-        </Box>
+      {!scipnetCollapsed && (
+        <>
+          <Box style={{ marginBottom: '20px' }}>
+            <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              SYSTEM OVERVIEW
+            </Box>
+            <Box style={{ fontSize: '10px', lineHeight: '1.4' }}>
+              <Box>
+                FACILITY:{' '}
+                <DataStatusIndicator data={facility_data} label="FACILITY" />
+              </Box>
+              <Box>
+                SCP: <DataStatusIndicator data={scp_data} label="SCP" />
+              </Box>
+              <Box>
+                TECHNOLOGY:{' '}
+                <DataStatusIndicator data={technology_data} label="TECH" />
+              </Box>
+              <Box>
+                MEDICAL:{' '}
+                <DataStatusIndicator data={medical_data} label="MEDICAL" />
+              </Box>
+              <Box>
+                SECURITY:{' '}
+                <DataStatusIndicator data={security_data} label="SECURITY" />
+              </Box>
+              <Box>
+                RESEARCH:{' '}
+                <DataStatusIndicator data={research_data} label="RESEARCH" />
+              </Box>
+              <Box>
+                PERSONNEL:{' '}
+                <DataStatusIndicator data={personnel_data} label="PERSONNEL" />
+              </Box>
+              <Box>
+                PLAYER:{' '}
+                <DataStatusIndicator data={player_data} label="PLAYER" />
+              </Box>
+            </Box>
 
-        {/* Key Metrics Summary */}
-        <Box style={{ marginTop: '10px', fontSize: '9px', opacity: 0.8 }}>
-          <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
-            KEY METRICS:
-          </Box>
-          <Box>ACTIVE THREATS: {security_data?.active_threats || 0}</Box>
-          <Box>OUTBREAKS: {medical_data?.active_outbreaks || 0}</Box>
-          <Box>BREACHES: {security_data?.containment_breaches || 0}</Box>
-          <Box>STAFF: {personnel_data?.active_staff || 0}</Box>
-          <Box>PROJECTS: {research_data?.active_projects || 0}</Box>
-          <Box>PLAYERS: {player_data?.active_players || 0}</Box>
-        </Box>
+            {/* Key Metrics Summary */}
+            <Box style={{ marginTop: '10px', fontSize: '9px', opacity: 0.8 }}>
+              <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                KEY METRICS:
+              </Box>
+              <Box>ACTIVE THREATS: {security_data?.active_threats || 0}</Box>
+              <Box>OUTBREAKS: {medical_data?.active_outbreaks || 0}</Box>
+              <Box>BREACHES: {security_data?.containment_breaches || 0}</Box>
+              <Box>STAFF: {personnel_data?.active_staff || 0}</Box>
+              <Box>PROJECTS: {research_data?.active_projects || 0}</Box>
+              <Box>PLAYERS: {player_data?.active_players || 0}</Box>
+            </Box>
 
-        {/* Real-time Notifications */}
-        <Box style={{ marginTop: '20px' }}>
-          <Box
-            style={{
-              marginBottom: '10px',
-              fontWeight: 'bold',
-              color: '#ff6666',
-            }}
-          >
-            🚨 LIVE ALERTS
-          </Box>
-          <Box style={{ fontSize: '8px', lineHeight: '1.3' }}>
-            {notifications && notifications.length > 0 ? (
-              notifications.map((notification, index) => (
-                <Box
-                  key={index}
-                  style={{
-                    background:
-                      notification.type === 'CRITICAL'
-                        ? 'rgba(255,0,0,0.2)'
-                        : notification.type === 'WARNING'
-                          ? 'rgba(255,255,0,0.2)'
-                          : 'rgba(0,255,0,0.2)',
-                    padding: '5px',
-                    marginBottom: '5px',
-                    border:
-                      notification.type === 'CRITICAL'
-                        ? '1px solid rgba(255,0,0,0.5)'
-                        : notification.type === 'WARNING'
-                          ? '1px solid rgba(255,255,0,0.5)'
-                          : '1px solid rgba(0,255,0,0.5)',
-                    borderRadius: '3px',
-                  }}
-                >
-                  <Box
-                    style={{
-                      color:
-                        notification.type === 'CRITICAL'
-                          ? '#ff6666'
-                          : notification.type === 'WARNING'
-                            ? '#ffff66'
-                            : '#66ff66',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {notification.type === 'CRITICAL'
-                      ? '⚠️ CRITICAL'
-                      : notification.type === 'WARNING'
-                        ? '⚠️ WARNING'
-                        : '✅ INFO'}
-                  </Box>
-                  <Box>{notification.message}</Box>
-                  <Box style={{ fontSize: '7px', opacity: '0.7' }}>
-                    {notification.time}
-                  </Box>
-                </Box>
-              ))
-            ) : (
+            {/* Real-time Notifications */}
+            <Box style={{ marginTop: '20px' }}>
               <Box
                 style={{
-                  background: 'rgba(0,255,0,0.2)',
-                  padding: '5px',
-                  marginBottom: '5px',
-                  border: '1px solid rgba(0,255,0,0.5)',
-                  borderRadius: '3px',
+                  marginBottom: '10px',
+                  fontWeight: 'bold',
+                  color: '#ff6666',
                 }}
               >
-                <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                  ✅ INFO
-                </Box>
-                <Box>All systems operational</Box>
-                <Box style={{ fontSize: '7px', opacity: '0.7' }}>
-                  No recent alerts
-                </Box>
+                🚨 LIVE ALERTS
               </Box>
-            )}
+              <Box style={{ fontSize: '8px', lineHeight: '1.3' }}>
+                {notifications && notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <Box
+                      key={index}
+                      style={{
+                        background:
+                          notification.type === 'CRITICAL'
+                            ? 'rgba(255,0,0,0.2)'
+                            : notification.type === 'WARNING'
+                              ? 'rgba(255,255,0,0.2)'
+                              : 'rgba(0,255,0,0.2)',
+                        padding: '5px',
+                        marginBottom: '5px',
+                        border:
+                          notification.type === 'CRITICAL'
+                            ? '1px solid rgba(255,0,0,0.5)'
+                            : notification.type === 'WARNING'
+                              ? '1px solid rgba(255,255,0,0.5)'
+                              : '1px solid rgba(0,255,0,0.5)',
+                        borderRadius: '3px',
+                      }}
+                    >
+                      <Box
+                        style={{
+                          color:
+                            notification.type === 'CRITICAL'
+                              ? '#ff6666'
+                              : notification.type === 'WARNING'
+                                ? '#ffff66'
+                                : '#66ff66',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {notification.type === 'CRITICAL'
+                          ? '⚠️ CRITICAL'
+                          : notification.type === 'WARNING'
+                            ? '⚠️ WARNING'
+                            : '✅ INFO'}
+                      </Box>
+                      <Box>{notification.message}</Box>
+                      <Box style={{ fontSize: '7px', opacity: '0.7' }}>
+                        {notification.time}
+                      </Box>
+                    </Box>
+                  ))
+                ) : (
+                  <Box
+                    style={{
+                      background: 'rgba(0,255,0,0.2)',
+                      padding: '5px',
+                      marginBottom: '5px',
+                      border: '1px solid rgba(0,255,0,0.5)',
+                      borderRadius: '3px',
+                    }}
+                  >
+                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
+                      ✅ INFO
+                    </Box>
+                    <Box>All systems operational</Box>
+                    <Box style={{ fontSize: '7px', opacity: '0.7' }}>
+                      No recent alerts
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            </Box>
           </Box>
-        </Box>
-      </Box>
 
-      {/* Hume Meter */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
-          HUME METER
-        </Box>
-        <Flex align="flex-end" style={{ height: '40px' }}>
-          {Array(20)
-            .fill(0)
-            .map((_, i) => (
+          {/* Hume Meter */}
+          <Box style={{ marginBottom: '20px' }}>
+            <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              HUME METER
+            </Box>
+            <Flex align="flex-end" style={{ height: '40px' }}>
+              {Array(20)
+                .fill(0)
+                .map((_, i) => (
+                  <Box
+                    key={i}
+                    style={{
+                      width: '3px',
+                      height: `${Math.random() * 30 + 10}px`,
+                      background: '#ffffff',
+                      margin: '0 1px',
+                      opacity: 0.8,
+                    }}
+                  />
+                ))}
+            </Flex>
+          </Box>
+
+          {/* Threat Detection */}
+          <Box style={{ marginBottom: '20px' }}>
+            <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              THREAT DETECTION
+            </Box>
+            <Flex align="center" style={{ marginBottom: '10px' }}>
               <Box
-                key={i}
                 style={{
-                  width: '3px',
-                  height: `${Math.random() * 30 + 10}px`,
-                  background: '#ffffff',
-                  margin: '0 1px',
-                  opacity: 0.8,
+                  width: '60px',
+                  height: '60px',
+                  border: '2px solid #ffffff',
+                  borderRadius: '50%',
+                  position: 'relative',
+                  marginRight: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '2px',
+                    height: '25px',
+                    background: '#ffffff',
+                    transform: 'translate(-50%, -50%) rotate(45deg)',
+                    transformOrigin: 'center',
+                    animation: 'rotate 2s linear infinite',
+                  }}
+                />
+              </Box>
+              <Box>
+                <Box>SYSTEM.STATUS</Box>
+                <Box>CRITICAL.EVENT</Box>
+                <Box>ANOMALY.DETECTED</Box>
+              </Box>
+            </Flex>
+            <Box style={{ marginBottom: '10px' }}>
+              <Box style={{ marginBottom: '5px' }}>HKG</Box>
+              <Box
+                style={{
+                  width: '100%',
+                  height: '20px',
+                  background:
+                    'linear-gradient(90deg, #ffffff 0%, #ffffff 30%, transparent 30%, transparent 100%)',
+                  border: '1px solid rgba(255,255,255,0.3)',
                 }}
               />
-            ))}
-        </Flex>
-      </Box>
+            </Box>
+          </Box>
 
-      {/* Threat Detection */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
-          THREAT DETECTION
-        </Box>
-        <Flex align="center" style={{ marginBottom: '10px' }}>
+          {/* Antimemetic Interface */}
+          <Box style={{ marginBottom: '20px' }}>
+            <Box>ANTIMEMETIC INTERFACE...</Box>
+            <Box>SCAN COMPLETE</Box>
+            <Box>DEF MODE OFF</Box>
+          </Box>
+
+          {/* Displaying File */}
+          <Box style={{ marginBottom: '20px' }}>
+            <Box>DISPLAYING FILE</Box>
+            <Box>VISIT COUNT / 86723</Box>
+          </Box>
+
+          {/* Event Log */}
+          <Box>
+            <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+              EVENT LOG
+            </Box>
+            <Box style={{ fontSize: '10px', lineHeight: '1.4' }}>
+              <Box>◆ 16:46 - ACCESSED DOCUMENT</Box>
+              <Box>◆ 16:46 - EXECUTED: ACCESS</Box>
+              <Box>◆ 16:45 - EXECUTED: ACCESS</Box>
+              <Box>◆ 16:44 - EXECUTED: HELP</Box>
+              <Box>◆ 16:44 - EXECUTED: LOGIN</Box>
+              <Box>◆ 16:32 - ALL SYSTEMS OPERATIONAL</Box>
+              <Box>◆ 16:32 - LOADING DATABASE.</Box>
+              <Box>◆ 16:32 - LOADING SITE OVERVIEW.</Box>
+              <Box>◆ 16:32 - SETTING UP EVENT.</Box>
+              <Box>◆ 16:32 - LOADING ADDITIONAL...</Box>
+            </Box>
+          </Box>
+
+          {/* Scroll indicator */}
           <Box
             style={{
-              width: '60px',
+              position: 'absolute',
+              bottom: '20px',
+              right: '20px',
+              width: '8px',
               height: '60px',
-              border: '2px solid #ffffff',
-              borderRadius: '50%',
-              position: 'relative',
-              marginRight: '15px',
+              background: 'rgba(255,255,255,0.3)',
+              borderRadius: '4px',
             }}
           >
             <Box
               style={{
                 position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: '2px',
-                height: '25px',
-                background: '#ffffff',
-                transform: 'translate(-50%, -50%) rotate(45deg)',
-                transformOrigin: 'center',
-                animation: 'rotate 2s linear infinite',
+                top: '10px',
+                right: '0',
+                fontSize: '10px',
+                transform: 'rotate(90deg)',
               }}
-            />
+            >
+              78
+            </Box>
           </Box>
-          <Box>
-            <Box>SYSTEM.STATUS</Box>
-            <Box>CRITICAL.EVENT</Box>
-            <Box>ANOMALY.DETECTED</Box>
-          </Box>
-        </Flex>
-        <Box style={{ marginBottom: '10px' }}>
-          <Box style={{ marginBottom: '5px' }}>HKG</Box>
-          <Box
-            style={{
-              width: '100%',
-              height: '20px',
-              background:
-                'linear-gradient(90deg, #ffffff 0%, #ffffff 30%, transparent 30%, transparent 100%)',
-              border: '1px solid rgba(255,255,255,0.3)',
-            }}
-          />
-        </Box>
-      </Box>
-
-      {/* Antimemetic Interface */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Box>ANTIMEMETIC INTERFACE...</Box>
-        <Box>SCAN COMPLETE</Box>
-        <Box>DEF MODE OFF</Box>
-      </Box>
-
-      {/* Displaying File */}
-      <Box style={{ marginBottom: '20px' }}>
-        <Box>DISPLAYING FILE</Box>
-        <Box>VISIT COUNT / 86723</Box>
-      </Box>
-
-      {/* Event Log */}
-      <Box>
-        <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
-          EVENT LOG
-        </Box>
-        <Box style={{ fontSize: '10px', lineHeight: '1.4' }}>
-          <Box>◆ 16:46 - ACCESSED DOCUMENT</Box>
-          <Box>◆ 16:46 - EXECUTED: ACCESS</Box>
-          <Box>◆ 16:45 - EXECUTED: ACCESS</Box>
-          <Box>◆ 16:44 - EXECUTED: HELP</Box>
-          <Box>◆ 16:44 - EXECUTED: LOGIN</Box>
-          <Box>◆ 16:32 - ALL SYSTEMS OPERATIONAL</Box>
-          <Box>◆ 16:32 - LOADING DATABASE.</Box>
-          <Box>◆ 16:32 - LOADING SITE OVERVIEW.</Box>
-          <Box>◆ 16:32 - SETTING UP EVENT.</Box>
-          <Box>◆ 16:32 - LOADING ADDITIONAL...</Box>
-        </Box>
-      </Box>
-
-      {/* Scroll indicator */}
-      <Box
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          right: '20px',
-          width: '8px',
-          height: '60px',
-          background: 'rgba(255,255,255,0.3)',
-          borderRadius: '4px',
-        }}
-      >
-        <Box
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '0',
-            fontSize: '10px',
-            transform: 'rotate(90deg)',
-          }}
-        >
-          78
-        </Box>
-      </Box>
+        </>
+      )}
     </Box>
   );
 
@@ -6623,14 +9117,13 @@ export const PersistenceMasterPanel = (props, context) => {
       >
         <GridBackground />
         <WatermarkLogo />
-        <TopNavigation />
         <Box
           style={{
             position: 'absolute',
-            top: '50px',
-            left: '20px',
-            right: '400px',
-            bottom: '20px',
+            top: '0',
+            left: '0',
+            right: '0',
+            bottom: '0',
             overflow: 'auto',
             zIndex: 5,
           }}
@@ -6643,6 +9136,7 @@ export const PersistenceMasterPanel = (props, context) => {
               typeof activeTab,
             );
 
+            if (activeTab === 'desktop') return <DesktopInterface />;
             if (activeTab === 'terminal') return <TerminalInterface />;
             if (activeTab === 'facility') {
               return (
@@ -6709,18 +9203,36 @@ export const PersistenceMasterPanel = (props, context) => {
               );
             }
 
+            if (activeTab === 'infrastructure') {
+              return (
+                <InfrastructureInterface
+                  infrastructureActiveTab={infrastructureActiveTab}
+                  setInfrastructureActiveTab={setInfrastructureActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'analytics') {
+              return (
+                <AnalyticsInterface
+                  analyticsActiveTab={analyticsActiveTab}
+                  setAnalyticsActiveTab={setAnalyticsActiveTab}
+                />
+              );
+            }
+
             return (
               <Box style={{ color: 'red', fontSize: '16px', padding: '20px' }}>
                 No interface found for tab: &quot;{activeTab}&quot; (type:{' '}
                 {typeof activeTab})
                 <br />
                 Available tabs: terminal, facility, scp, technology, medical,
-                security, research, personnel, players
+                security, research, personnel, players, infrastructure,
+                analytics
               </Box>
             );
           })()}
         </Box>
-        <SidePanel />
+        {activeTab !== 'desktop' && <SidePanel />}
 
         <style>
           {`

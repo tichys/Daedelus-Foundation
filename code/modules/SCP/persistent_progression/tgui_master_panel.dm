@@ -17,9 +17,6 @@
 	return GLOB.always_state
 
 /datum/persistent_progression_master_ui/ui_data(mob/user)
-	// Ensure subsystems are initialized
-	ensure_subsystems_initialized()
-
 	var/list/data = list()
 
 	// Facility Data
@@ -414,6 +411,75 @@
 				"date" = time2text(review.review_date, "YYYY-MM-DD"),
 				"status" = "COMPLETED"
 			))
+
+	// Chemical Data
+	var/list/chemical_data = list()
+	if(SSchemical_persistence && SSchemical_persistence.manager)
+		var/datum/chemical_persistence_manager/chemical_manager = SSchemical_persistence.manager
+		chemical_data = list(
+			"total_compounds_discovered" = chemical_manager.total_compounds_discovered,
+			"active_containment_breaches" = chemical_manager.active_containment_breaches,
+			"chemical_research_progress" = chemical_manager.chemical_research_progress,
+			"containment_effectiveness" = chemical_manager.containment_effectiveness * 100,
+			"chemical_budget" = chemical_manager.chemical_budget,
+			"research_staff_count" = chemical_manager.research_staff_count,
+		)
+	data["chemical_data"] = chemical_data
+
+	// Incident Data
+	var/list/incident_data = list()
+	if(SSincident_persistence && SSincident_persistence.manager)
+		var/datum/incident_persistence_manager/incident_manager = SSincident_persistence.manager
+		incident_data = list(
+			"total_incidents" = incident_manager.total_incidents,
+			"active_incidents" = incident_manager.active_incidents,
+			"average_response_time" = incident_manager.average_response_time,
+			"total_casualties" = incident_manager.total_casualties,
+			"total_damage_cost" = incident_manager.total_damage_cost,
+			"containment_success_rate" = incident_manager.containment_success_rate * 100,
+		)
+	data["incident_data"] = incident_data
+
+	// Psychological Data
+	var/list/psychological_data = list()
+	if(SSpsychological_persistence && SSpsychological_persistence.manager)
+		var/datum/psychological_persistence_manager/psychological_manager = SSpsychological_persistence.manager
+		psychological_data = list(
+			"total_staff_assessed" = psychological_manager.total_staff_assessed,
+			"average_mental_health" = psychological_manager.average_mental_health,
+			"stress_level" = psychological_manager.stress_level,
+			"therapy_success_rate" = psychological_manager.therapy_success_rate * 100,
+			"scp_exposure_cases" = psychological_manager.scp_exposure_cases,
+			"mental_health_budget" = psychological_manager.mental_health_budget,
+		)
+	data["psychological_data"] = psychological_data
+
+	// Infrastructure Data
+	var/list/infrastructure_data = list()
+	if(SSinfrastructure_persistence && SSinfrastructure_persistence.manager)
+		var/datum/infrastructure_persistence_manager/infrastructure_manager = SSinfrastructure_persistence.manager
+		infrastructure_data = list(
+			"total_equipment" = infrastructure_manager.total_equipment,
+			"operational_equipment" = infrastructure_manager.operational_equipment,
+			"power_efficiency" = infrastructure_manager.power_efficiency * 100,
+			"structural_health" = infrastructure_manager.structural_health,
+			"maintenance_budget" = infrastructure_manager.maintenance_budget,
+			"repair_backlog" = infrastructure_manager.repair_backlog,
+		)
+	data["infrastructure_data"] = infrastructure_data
+
+	// Analytics Data
+	var/list/analytics_data = list()
+	if(SSanalytics_persistence && SSanalytics_persistence.manager)
+		var/datum/analytics_persistence_manager/analytics_manager = SSanalytics_persistence.manager
+		analytics_data = list(
+			"overall_efficiency" = analytics_manager.overall_efficiency * 100,
+			"performance_score" = analytics_manager.performance_score,
+			"trend_direction" = analytics_manager.trend_direction,
+			"data_quality_score" = analytics_manager.data_quality_score,
+			"analytics_budget" = analytics_manager.analytics_budget,
+		)
+	data["analytics_data"] = analytics_data
 
 	// System Status
 	data["system_status"] = "operational"
@@ -1138,36 +1204,7 @@
 
 	return TRUE
 
-// Ensure all persistence subsystems are initialized
-/datum/persistent_progression_master_ui/proc/ensure_subsystems_initialized()
-	world.log << "PersistenceMasterPanel: ensure_subsystems_initialized() called"
-	// Initialize medical persistence if not already done
-	if(!SSmedical_persistence.manager)
-		// Let the subsystem handle its own initialization with real data
-		SSmedical_persistence.Initialize()
-		world.log << "PersistenceMasterPanel: Medical persistence subsystem initialized with real data"
-
-		// Log the loaded records
-		world.log << "PersistenceMasterPanel: Medical records count: [SSmedical_persistence.manager.medical_records.len], Research projects count: [SSmedical_persistence.manager.research_projects.len]"
-		to_chat(usr, "PersistenceMasterPanel: Medical records count: [SSmedical_persistence.manager.medical_records.len], Research projects count: [SSmedical_persistence.manager.research_projects.len]")
-
-	// Initialize security persistence if not already done
-	if(!SSsecurity_persistence.manager)
-		// Let the subsystem handle its own initialization with real data
-		SSsecurity_persistence.Initialize()
-		world.log << "PersistenceMasterPanel: Security persistence subsystem initialized with real data"
-
-	// Initialize research persistence if not already done
-	if(!SSresearch_persistence.manager)
-		SSresearch_persistence.manager = new /datum/research_persistence_manager()
-		SSresearch_persistence.manager.load_research_data()
-		world.log << "PersistenceMasterPanel: Initialized research persistence subsystem"
-
-	// Initialize personnel persistence if not already done
-	if(!SSpersonnel_persistence.manager)
-		// Let the subsystem handle its own initialization with real data
-		SSpersonnel_persistence.Initialize()
-		world.log << "PersistenceMasterPanel: Personnel persistence subsystem initialized with real data"
+// All persistence subsystems now initialize automatically when the game starts
 
 // Update the master persistence panel command to use TGUI
 /client/proc/master_persistence_panel()

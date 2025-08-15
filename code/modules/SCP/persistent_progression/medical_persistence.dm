@@ -4,7 +4,6 @@
 SUBSYSTEM_DEF(medical_persistence)
 	name = "Medical Persistence"
 	wait = 600 // 1 minute
-	flags = SS_NO_INIT
 	priority = FIRE_PRIORITY_INPUT
 
 	var/datum/medical_persistence_manager/manager
@@ -384,25 +383,9 @@ SUBSYSTEM_DEF(medical_persistence)
 	manager = new /datum/medical_persistence_manager()
 	world.log << "Medical persistence manager created"
 
-	// Skip datacore loading entirely - force completely empty data
-	world.log << "Skipping datacore loading - forcing completely empty medical data"
-
-	// Clear any existing persistent storage to ensure only real data is used
-	world.log << "Clearing persistent storage to ensure only real data..."
-	manager.clear_persistent_storage()
-
-	// Force empty data - no persistent storage loading at all
-	world.log << "Forcing empty medical data - no persistent storage loading"
-	manager.medical_records.Cut()
-	manager.treatment_logs.Cut()
-	manager.outbreak_records.Cut()
-	manager.research_projects.Cut()
-	manager.active_outbreaks = 0
-	manager.total_patients_treated = 0
-	manager.medical_research_progress = 0
-	manager.containment_effectiveness = 100
-	manager.medical_budget = 1000000
-	manager.medical_staff_count = 0
+	// Load existing medical records from datacore
+	world.log << "Loading existing medical records from datacore..."
+	manager.load_existing_medical_records()
 
 	world.log << "Medical records count at initialization: [manager.medical_records.len]"
 	return ..()

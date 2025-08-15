@@ -4,7 +4,6 @@
 SUBSYSTEM_DEF(security_persistence)
 	name = "Security Persistence"
 	wait = 600 // 1 minute
-	flags = SS_NO_INIT
 	priority = FIRE_PRIORITY_INPUT
 
 	var/datum/security_persistence_manager/manager
@@ -394,26 +393,15 @@ SUBSYSTEM_DEF(security_persistence)
 
 // Subsystem initialization
 /datum/controller/subsystem/security_persistence/Initialize()
+	world.log << "Security persistence subsystem initializing..."
 	manager = new /datum/security_persistence_manager()
+	world.log << "Security persistence manager created"
 
-	// Skip datacore loading entirely - force completely empty data
-	world.log << "Skipping datacore loading - forcing completely empty security data"
+	// Load existing security records from datacore
+	world.log << "Loading existing security records from datacore..."
+	manager.load_existing_security_records()
 
-	// Clear any existing persistent storage to ensure only real data is used
-	world.log << "Clearing persistent storage to ensure only real data..."
-	manager.clear_persistent_storage()
-
-	// Force empty data - no persistent storage loading at all
-	world.log << "Forcing empty security data - no persistent storage loading"
-	manager.security_records.Cut()
-	manager.security_incidents.Cut()
-	manager.access_logs.Cut()
-	manager.security_protocols.Cut()
-	manager.clearance_requests.Cut()
-	manager.active_threats = 0
-	manager.containment_breaches = 0
-	manager.unauthorized_access_attempts = 0
-
+	world.log << "Security records count at initialization: [manager.security_records.len]"
 	return ..()
 
 /datum/controller/subsystem/security_persistence/fire()
