@@ -450,9 +450,13 @@ SUBSYSTEM_DEF(budget_system)
 	var/expected_spending = (dept_budget.allocated_budget * time_elapsed) / (30 * 24 * 60 * 60 * 10) // 30 days in deciseconds
 	var/actual_spending = dept_budget.spent_budget
 
-	if(expected_spending > 0)
+	if(expected_spending > 0 && actual_spending > 0)
 		dept_budget.budget_efficiency = max(0, min(100, (expected_spending / actual_spending) * 100))
+	else if(expected_spending > 0 && actual_spending == 0)
+		// If expected spending but no actual spending, efficiency is 100% (under budget)
+		dept_budget.budget_efficiency = 100
 	else
+		// If no expected spending, efficiency is 100%
 		dept_budget.budget_efficiency = 100
 
 /datum/budget_manager/proc/update_budget_statistics()

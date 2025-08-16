@@ -8631,17 +8631,54 @@ export const PersistenceMasterPanel = (props, context) => {
           </Box>
         </Box>
 
-        <Box style={{ marginBottom: '20px' }}>
-          <Box style={{ marginBottom: '15px' }}>
-            {Array(50).fill('─').join('')}
+        {/* Budget Navigation Tabs */}
+        <Flex
+          style={{
+            marginBottom: '20px',
+            borderBottom: '1px solid rgba(255,255,255,0.3)',
+          }}
+        >
+          <Box
+            style={{
+              padding: '10px 20px',
+              cursor: 'pointer',
+              borderBottom: '2px solid #66ff66',
+              color: '#66ff66',
+            }}
+          >
+            OVERVIEW
           </Box>
-          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
-            BUDGET PERSISTENCE SYSTEM
+          <Box
+            style={{
+              padding: '10px 20px',
+              cursor: 'pointer',
+              borderBottom: 'none',
+              color: '#ffffff',
+            }}
+          >
+            TRANSACTIONS
           </Box>
-          <Box style={{ marginBottom: '15px' }}>
-            {Array(50).fill('─').join('')}
+          <Box
+            style={{
+              padding: '10px 20px',
+              cursor: 'pointer',
+              borderBottom: 'none',
+              color: '#ffffff',
+            }}
+          >
+            REQUESTS
           </Box>
-        </Box>
+          <Box
+            style={{
+              padding: '10px 20px',
+              cursor: 'pointer',
+              borderBottom: 'none',
+              color: '#ffffff',
+            }}
+          >
+            REPORTS
+          </Box>
+        </Flex>
 
         {/* Budget Overview */}
         <Box style={{ marginBottom: '30px' }}>

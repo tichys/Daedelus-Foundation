@@ -113,10 +113,8 @@
 
 		// Add research projects
 		medical_data["research_projects"] = list()
-		world.log << "Medical research projects count: [medical_manager.research_projects.len]"
 		for(var/project_id in medical_manager.research_projects)
 			var/datum/medical_research_project/project = medical_manager.research_projects[project_id]
-			world.log << "Adding research project: [project.project_name]"
 			medical_data["research_projects"] += list(list(
 				"project_name" = project.project_name,
 				"project_description" = project.project_description,
