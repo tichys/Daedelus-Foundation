@@ -5,37 +5,28 @@ body {
   font-family: 'Courier New', monospace;
   font-size: 14px;
   margin: 0;
-  padding: 6px;
+  padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 5px;
-  max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
-
-* {
-  box-sizing: border-box;
-  max-width: 100%;
 }
 
 /* Header Section */
 .header {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
-  margin-bottom: 3px;
+  margin-bottom: 5px;
   color: #ffffff;
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 16px;
   opacity: 0.8;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 /* Status Notices */
@@ -43,10 +34,9 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 5px;
-  padding: 8px;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
   text-align: center;
-  font-size: 13px;
 }
 
 .notice.red {
@@ -60,12 +50,11 @@ body {
   background: rgba(0, 255, 255, 0.1);
   border: 1px solid rgba(0, 255, 255, 0.3);
   border-radius: 5px;
-  padding: 8px;
-  margin-bottom: 15px;
+  padding: 10px;
+  margin-bottom: 20px;
   text-align: center;
   color: #66ffff;
   font-weight: bold;
-  font-size: 13px;
 }
 
 /* Department Fieldsets */
@@ -73,44 +62,34 @@ fieldset {
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid;
   border-radius: 5px;
-  display: block;
-  width: 100%;
-  max-width: 280px;
-  margin: 0;
-  padding: 6px;
-  min-height: 100px;
-  box-sizing: border-box;
-  flex: 0 0 280px;
+  display: inline-block;
+  width: 185px;
+  margin: 5px;
+  padding: 10px;
+  vertical-align: top;
 }
 
 legend {
   color: inherit;
   font-weight: bold;
   text-align: center;
-  padding: 0 8px;
-  font-size: 13px;
-  margin-bottom: 5px;
+  padding: 0 10px;
+  font-size: 14px;
 }
 
 /* Job Links */
 .job {
   display: block;
   width: 100%;
-  padding: 2px 3px;
-  margin: 1px 0;
+  padding: 5px 8px;
+  margin: 2px 0;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 3px;
   color: #ffffff;
   text-decoration: none;
   transition: all 0.3s ease;
-  font-size: 9px;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-sizing: border-box;
-  max-width: 100%;
+  font-size: 12px;
 }
 
 .job:hover {
@@ -132,14 +111,14 @@ legend {
 }
 
 /* Priority Jobs */
-.job.priority {
+.priority {
   color: #66ff66 !important;
   font-weight: bold;
   background: rgba(0, 255, 0, 0.1) !important;
   border-color: rgba(0, 255, 0, 0.3) !important;
 }
 
-.job.priority:hover {
+.priority:hover {
   background: rgba(0, 255, 0, 0.2) !important;
   border-color: rgba(0, 255, 0, 0.5) !important;
 }
@@ -149,47 +128,34 @@ legend {
   font-style: italic;
   color: #888888;
   text-align: center;
-  padding: 6px;
+  padding: 10px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 3px;
-  font-size: 10px;
 }
 
-/* Job Grid Container */
-.job-grid {
+/* Table Layout */
+.job-table {
   width: 100%;
-  max-width: 100%;
-  margin: 0;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 4px;
-  padding: 4px 0;
+  border-collapse: separate;
+  border-spacing: 10px;
 }
 
-/* Department Cards */
-.department-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid;
-  border-radius: 5px;
-  padding: 4px;
-  min-height: 60px;
-  box-sizing: border-box;
-  max-width: 100%;
-  overflow: hidden;
+.job-table td {
+  vertical-align: top;
+  padding: 0;
 }
 
-.department-header {
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 4px;
-  font-size: 10px;
-  padding: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* Responsive Design */
+@media (max-width: 800px) {
+  fieldset {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+  .job-table td {
+    display: block;
+    width: 100%;
+  }
 }
 
 /* Department Colors */
@@ -247,27 +213,4 @@ legend {
 
 .department-command legend {
   color: #ffff66;
-}
-
-/* Responsive Design */
-@media (max-width: 1000px) {
-  .job-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-}
-
-@media (max-width: 800px) {
-  .job-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .job-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .department-card {
-    min-height: auto;
-  }
 }

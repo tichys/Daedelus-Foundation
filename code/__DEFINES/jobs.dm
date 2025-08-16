@@ -141,19 +141,19 @@
 #define DEPARTMENT_UNASSIGNED "No department assigned"
 
 #define DEPARTMENT_BITFLAG_SECURITY (1<<0)
-#define DEPARTMENT_SECURITY "Foundation Security"
+#define DEPARTMENT_SECURITY "Security"
 #define DEPARTMENT_BITFLAG_MANAGEMENT (1<<1)
-#define DEPARTMENT_MANAGEMENT "Foundation Administration"
+#define DEPARTMENT_MANAGEMENT "Administration"
 #define DEPARTMENT_BITFLAG_SERVICE (1<<2)
-#define DEPARTMENT_SERVICE "Foundation Service"
+#define DEPARTMENT_SERVICE "Service"
 #define DEPARTMENT_BITFLAG_CARGO (1<<3)
-#define DEPARTMENT_CARGO "Foundation Logistics"
+#define DEPARTMENT_CARGO "Logistics"
 #define DEPARTMENT_BITFLAG_ENGINEERING (1<<4)
-#define DEPARTMENT_ENGINEERING "Foundation Engineering"
+#define DEPARTMENT_ENGINEERING "Engineering"
 #define DEPARTMENT_BITFLAG_SCIENCE (1<<5)
-#define DEPARTMENT_SCIENCE "Foundation Research"
+#define DEPARTMENT_SCIENCE "Research"
 #define DEPARTMENT_BITFLAG_MEDICAL (1<<6)
-#define DEPARTMENT_MEDICAL "Foundation Medical"
+#define DEPARTMENT_MEDICAL "Medical"
 #define DEPARTMENT_BITFLAG_SILICON (1<<7)
 #define DEPARTMENT_SILICON "Artifical Intelligence Applications"
 #define DEPARTMENT_BITFLAG_ASSISTANT (1<<8)
