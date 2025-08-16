@@ -1219,6 +1219,7 @@
 #include "code\modules\SCP\persistent_progression\psychological_persistence.dm"
 #include "code\modules\SCP\persistent_progression\infrastructure_persistence.dm"
 #include "code\modules\SCP\persistent_progression\analytics_persistence.dm"
+#include "code\modules\SCP\persistent_progression\budget_system.dm"
 #include "code\datums\proximity_monitor\field.dm"
 #include "code\datums\proximity_monitor\proximity_monitor.dm"
 #include "code\datums\proximity_monitor\fields\gravity.dm"

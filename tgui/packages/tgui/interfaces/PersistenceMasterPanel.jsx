@@ -54,6 +54,932 @@ export const PersistenceMasterPanel = (props, context) => {
   const [currentTheme, setCurrentTheme] = React.useState('dark');
   const [themeOpen, setThemeOpen] = React.useState(false);
 
+  // Research modal state
+  const [researchModalOpen, setResearchModalOpen] = React.useState(false);
+  const [researchFormData, setResearchFormData] = React.useState({
+    title: '',
+    description: '',
+    category: 'general',
+    priority: 'medium',
+    lead_researcher: '',
+    budget: '',
+    timeline: '',
+    objectives: '',
+    methodology: '',
+    expected_outcomes: '',
+    risks: '',
+    approvals: [],
+    status: 'pending',
+    progress: 0,
+    start_date: '',
+    end_date: '',
+    team_members: [],
+    equipment_needed: [],
+    funding_source: '',
+    security_clearance: 'level_1',
+    containment_requirements: '',
+    ethical_approval: false,
+    safety_protocols: '',
+  });
+
+  // SCP modal state
+  const [scpModalOpen, setScpModalOpen] = React.useState(false);
+  const [scpFormData, setScpFormData] = React.useState({
+    designation: '',
+    name: '',
+    object_class: 'safe',
+    threat_level: 'green',
+    description: '',
+    containment_procedures: '',
+    special_containment_procedures: '',
+    description_2: '',
+    addenda: '',
+    incident_reports: [],
+    testing_logs: [],
+    personnel_assignments: [],
+    location: '',
+    discovery_date: '',
+    discovery_location: '',
+    original_containment: '',
+    current_status: 'contained',
+    containment_breaches: 0,
+    last_incident: '',
+    research_clearance: 'level_1',
+    testing_authorized: false,
+    cross_testing: [],
+    related_scps: [],
+    anomalous_properties: '',
+    recovery_notes: '',
+    classification_notes: '',
+    security_clearance: 'level_1',
+    containment_cost: '',
+    maintenance_schedule: '',
+    monitoring_equipment: [],
+    emergency_protocols: '',
+    termination_attempts: [],
+    containment_effectiveness: 100,
+    risk_assessment: '',
+    personnel_requirements: '',
+    facility_requirements: '',
+    budget_allocation: '',
+    research_priorities: [],
+    containment_upgrades: [],
+    incident_history: [],
+    testing_protocols: '',
+    cross_references: [],
+    classification_review_date: '',
+    containment_review_date: '',
+    security_audit_date: '',
+    last_containment_test: '',
+    next_containment_test: '',
+    containment_rating: 'stable',
+    threat_assessment: 'low',
+    containment_priority: 'standard',
+    research_priority: 'standard',
+    security_priority: 'standard',
+    maintenance_priority: 'standard',
+    testing_priority: 'standard',
+    monitoring_priority: 'standard',
+    emergency_priority: 'standard',
+    termination_priority: 'none',
+    classification_priority: 'standard',
+    containment_priority_level: 'standard',
+    research_priority_level: 'standard',
+    security_priority_level: 'standard',
+    maintenance_priority_level: 'standard',
+    testing_priority_level: 'standard',
+    monitoring_priority_level: 'standard',
+    emergency_priority_level: 'standard',
+    termination_priority_level: 'none',
+    classification_priority_level: 'standard',
+  });
+
+  // Medical modal state
+  const [medicalModalOpen, setMedicalModalOpen] = React.useState(false);
+  const [medicalFormData, setMedicalFormData] = React.useState({
+    patient_id: '',
+    patient_name: '',
+    age: '',
+    gender: '',
+    blood_type: '',
+    medical_history: '',
+    current_condition: '',
+    symptoms: '',
+    diagnosis: '',
+    treatment_plan: '',
+    medications: [],
+    allergies: [],
+    vital_signs: {
+      temperature: '',
+      blood_pressure: '',
+      heart_rate: '',
+      respiratory_rate: '',
+      oxygen_saturation: '',
+    },
+    lab_results: [],
+    imaging_results: [],
+    procedures: [],
+    notes: '',
+    attending_physician: '',
+    department: '',
+    admission_date: '',
+    discharge_date: '',
+    room_number: '',
+    emergency_contact: '',
+    insurance_info: '',
+    next_of_kin: '',
+    special_instructions: '',
+    quarantine_status: false,
+    isolation_level: 'none',
+    infectious_disease: false,
+    disease_type: '',
+    containment_required: false,
+    containment_level: 'none',
+    security_clearance: 'level_1',
+    research_subject: false,
+    research_protocol: '',
+    experimental_treatment: false,
+    treatment_consent: false,
+    family_consent: false,
+    legal_guardian: '',
+    power_of_attorney: '',
+    do_not_resuscitate: false,
+    living_will: false,
+    organ_donor: false,
+    autopsy_authorized: false,
+    research_authorized: false,
+    experimental_authorized: false,
+    testing_authorized: false,
+    monitoring_authorized: false,
+    isolation_authorized: false,
+    quarantine_authorized: false,
+    containment_authorized: false,
+    security_authorized: false,
+    research_priority: 'standard',
+    treatment_priority: 'standard',
+    monitoring_priority: 'standard',
+    security_priority: 'standard',
+    containment_priority: 'standard',
+    isolation_priority: 'standard',
+    quarantine_priority: 'standard',
+    testing_priority: 'standard',
+    autopsy_priority: 'none',
+    research_priority_level: 'standard',
+    treatment_priority_level: 'standard',
+    monitoring_priority_level: 'standard',
+    security_priority_level: 'standard',
+    containment_priority_level: 'standard',
+    isolation_priority_level: 'standard',
+    quarantine_priority_level: 'standard',
+    testing_priority_level: 'standard',
+    autopsy_priority_level: 'none',
+  });
+
+  // Security modal state
+  const [securityModalOpen, setSecurityModalOpen] = React.useState(false);
+  const [securityFormData, setSecurityFormData] = React.useState({
+    incident_id: '',
+    incident_type: 'breach',
+    severity: 'low',
+    location: '',
+    date_time: '',
+    description: '',
+    involved_personnel: [],
+    involved_scps: [],
+    casualties: {
+      fatalities: 0,
+      injuries: 0,
+      missing: 0,
+    },
+    containment_status: 'contained',
+    threat_level: 'green',
+    response_team: '',
+    response_time: '',
+    containment_time: '',
+    investigation_status: 'pending',
+    investigation_lead: '',
+    evidence_collected: [],
+    witnesses: [],
+    security_breaches: [],
+    system_failures: [],
+    human_errors: [],
+    external_threats: [],
+    internal_threats: [],
+    anomalous_events: [],
+    containment_failures: [],
+    security_failures: [],
+    procedural_violations: [],
+    equipment_failures: [],
+    communication_failures: [],
+    coordination_failures: [],
+    response_delays: [],
+    investigation_findings: '',
+    corrective_actions: [],
+    preventive_measures: [],
+    security_upgrades: [],
+    personnel_training: [],
+    protocol_revisions: [],
+    equipment_upgrades: [],
+    system_upgrades: [],
+    facility_upgrades: [],
+    containment_upgrades: [],
+    monitoring_upgrades: [],
+    response_upgrades: [],
+    investigation_upgrades: [],
+    security_audit: false,
+    security_review: false,
+    security_assessment: false,
+    security_evaluation: false,
+    security_inspection: false,
+    security_testing: false,
+    security_monitoring: false,
+    security_tracking: false,
+    security_reporting: false,
+    security_documentation: false,
+    security_analysis: false,
+    security_planning: false,
+    security_coordination: false,
+    security_communication: false,
+    security_training: false,
+    security_awareness: false,
+    security_preparedness: false,
+    security_response: false,
+    security_recovery: false,
+    security_lessons: false,
+    security_improvements: false,
+    security_enhancements: false,
+    security_optimization: false,
+    security_modernization: false,
+    security_innovation: false,
+    security_development: false,
+    security_research: false,
+    security_testing_protocols: false,
+    security_monitoring_protocols: false,
+    security_response_protocols: false,
+    security_investigation_protocols: false,
+    security_documentation_protocols: false,
+    security_analysis_protocols: false,
+    security_planning_protocols: false,
+    security_coordination_protocols: false,
+    security_communication_protocols: false,
+    security_training_protocols: false,
+    security_awareness_protocols: false,
+    security_preparedness_protocols: false,
+    security_recovery_protocols: false,
+    security_lessons_protocols: false,
+    security_improvements_protocols: false,
+    security_enhancements_protocols: false,
+    security_optimization_protocols: false,
+    security_modernization_protocols: false,
+    security_innovation_protocols: false,
+    security_development_protocols: false,
+    security_research_protocols: false,
+  });
+
+  // Personnel modal state
+  const [personnelModalOpen, setPersonnelModalOpen] = React.useState(false);
+  const [personnelFormData, setPersonnelFormData] = React.useState({
+    employee_id: '',
+    name: '',
+    position: '',
+    department: '',
+    security_clearance: 'level_1',
+    access_level: 'basic',
+    hire_date: '',
+    supervisor: '',
+    contact_info: {
+      phone: '',
+      email: '',
+      emergency_contact: '',
+    },
+    qualifications: [],
+    certifications: [],
+    training_completed: [],
+    performance_rating: 'satisfactory',
+    status: 'active',
+    location: '',
+    schedule: '',
+    salary: '',
+    benefits: [],
+    medical_clearance: false,
+    psychological_clearance: false,
+    background_check: false,
+    drug_test: false,
+    polygraph_test: false,
+    security_interview: false,
+    clearance_review_date: '',
+    next_review_date: '',
+    incident_history: [],
+    commendations: [],
+    disciplinary_actions: [],
+    assignments: [],
+    projects: [],
+    skills: [],
+    languages: [],
+    equipment_authorized: [],
+    facility_access: [],
+    system_access: [],
+    clearance_level: 'level_1',
+    clearance_type: 'standard',
+    clearance_status: 'active',
+    clearance_expiry: '',
+    clearance_renewal: '',
+    clearance_conditions: [],
+    clearance_restrictions: [],
+    clearance_notes: '',
+    security_briefing: false,
+    security_training: false,
+    security_awareness: false,
+    security_compliance: false,
+    security_audit: false,
+    security_review: false,
+    security_assessment: false,
+    security_evaluation: false,
+    security_inspection: false,
+    security_testing: false,
+    security_monitoring: false,
+    security_tracking: false,
+    security_reporting: false,
+    security_documentation: false,
+    security_analysis: false,
+    security_planning: false,
+    security_coordination: false,
+    security_communication: false,
+    security_training_completed: false,
+    security_awareness_completed: false,
+    security_preparedness: false,
+    security_response: false,
+    security_recovery: false,
+    security_lessons: false,
+    security_improvements: false,
+    security_enhancements: false,
+    security_optimization: false,
+    security_modernization: false,
+    security_innovation: false,
+    security_development: false,
+    security_research: false,
+  });
+
+  // Technology modal state
+  const [technologyModalOpen, setTechnologyModalOpen] = React.useState(false);
+  const [technologyFormData, setTechnologyFormData] = React.useState({
+    device_id: '',
+    device_name: '',
+    device_type: 'computer',
+    manufacturer: '',
+    model: '',
+    serial_number: '',
+    location: '',
+    assigned_to: '',
+    department: '',
+    status: 'operational',
+    purchase_date: '',
+    warranty_expiry: '',
+    last_maintenance: '',
+    next_maintenance: '',
+    specifications: {
+      processor: '',
+      memory: '',
+      storage: '',
+      network: '',
+      os: '',
+    },
+    software_installed: [],
+    security_software: [],
+    access_controls: [],
+    monitoring_systems: [],
+    backup_systems: [],
+    redundancy_systems: [],
+    failover_systems: [],
+    disaster_recovery: [],
+    maintenance_schedule: '',
+    maintenance_history: [],
+    repair_history: [],
+    upgrade_history: [],
+    replacement_history: [],
+    cost_information: {
+      purchase_cost: '',
+      maintenance_cost: '',
+      operational_cost: '',
+      replacement_cost: '',
+    },
+    performance_metrics: {
+      uptime: '',
+      response_time: '',
+      throughput: '',
+      efficiency: '',
+    },
+    security_features: [],
+    vulnerabilities: [],
+    patches_installed: [],
+    updates_pending: [],
+    compliance_status: 'compliant',
+    audit_status: 'passed',
+    certification_status: 'certified',
+    testing_status: 'passed',
+    monitoring_status: 'active',
+    tracking_status: 'active',
+    reporting_status: 'active',
+    documentation_status: 'complete',
+    analysis_status: 'complete',
+    planning_status: 'complete',
+    coordination_status: 'complete',
+    communication_status: 'active',
+    training_status: 'complete',
+    awareness_status: 'complete',
+    preparedness_status: 'complete',
+    response_status: 'ready',
+    recovery_status: 'ready',
+    lessons_status: 'complete',
+    improvements_status: 'complete',
+    enhancements_status: 'complete',
+    optimization_status: 'complete',
+    modernization_status: 'complete',
+    innovation_status: 'complete',
+    development_status: 'complete',
+    research_status: 'complete',
+  });
+
+  // Analytics Report modal state
+  const [analyticsReportModalOpen, setAnalyticsReportModalOpen] =
+    React.useState(false);
+  const [analyticsReportFormData, setAnalyticsReportFormData] = React.useState({
+    report_id: '',
+    report_title: '',
+    report_type: 'performance',
+    date_range: {
+      start_date: '',
+      end_date: '',
+    },
+    metrics_included: {
+      performance_metrics: true,
+      efficiency_data: true,
+      trend_analysis: true,
+      comparative_data: true,
+      predictive_analytics: true,
+      statistical_summary: true,
+    },
+    data_sources: [],
+    filters: {
+      department: 'all',
+      facility: 'all',
+      time_period: 'monthly',
+      data_quality: 'all',
+    },
+    format: 'pdf',
+    delivery_method: 'download',
+    recipients: [],
+    custom_parameters: {
+      confidence_level: '95',
+      significance_level: '0.05',
+      sample_size: 'auto',
+      outlier_detection: true,
+      trend_forecasting: true,
+    },
+    visualization_options: {
+      charts: true,
+      graphs: true,
+      tables: true,
+      heatmaps: true,
+      dashboards: true,
+    },
+    analysis_depth: 'comprehensive',
+    priority: 'normal',
+    notes: '',
+  });
+
+  // Analytics KPI Dashboard modal state
+  const [analyticsKpiModalOpen, setAnalyticsKpiModalOpen] =
+    React.useState(false);
+  const [analyticsKpiFormData, setAnalyticsKpiFormData] = React.useState({
+    dashboard_id: '',
+    dashboard_name: '',
+    dashboard_type: 'executive',
+    kpi_categories: {
+      performance: {
+        overall_efficiency: true,
+        response_time: true,
+        throughput: true,
+        accuracy: true,
+        reliability: true,
+      },
+      operational: {
+        uptime: true,
+        maintenance_schedule: true,
+        resource_utilization: true,
+        cost_efficiency: true,
+        quality_metrics: true,
+      },
+      security: {
+        incident_rate: true,
+        response_time: true,
+        compliance_score: true,
+        threat_level: true,
+        vulnerability_status: true,
+      },
+      research: {
+        project_completion: true,
+        innovation_index: true,
+        publication_rate: true,
+        collaboration_score: true,
+        breakthrough_metrics: true,
+      },
+      personnel: {
+        productivity: true,
+        training_completion: true,
+        satisfaction_score: true,
+        retention_rate: true,
+        performance_rating: true,
+      },
+    },
+    refresh_rate: 'real_time',
+    display_options: {
+      theme: 'dark',
+      layout: 'grid',
+      animations: true,
+      interactive: true,
+      alerts: true,
+    },
+    thresholds: {
+      warning_level: '75',
+      critical_level: '90',
+      target_level: '85',
+    },
+    data_sources: [],
+    custom_widgets: [],
+    sharing_settings: {
+      public_access: false,
+      authorized_users: [],
+      export_permissions: true,
+    },
+  });
+
+  // Security Personnel Management modal state
+  const [securityPersonnelModalOpen, setSecurityPersonnelModalOpen] =
+    React.useState(false);
+  const [securityPersonnelFormData, setSecurityPersonnelFormData] =
+    React.useState({
+      operation_id: '',
+      operation_type: 'personnel_management',
+      personnel_data: {
+        total_personnel: '',
+        active_personnel: '',
+        on_duty: '',
+        off_duty: '',
+        training: '',
+        leave: '',
+        suspended: '',
+      },
+      assignments: {
+        patrol_assignments: [],
+        post_assignments: [],
+        special_assignments: [],
+        emergency_assignments: [],
+      },
+      qualifications: {
+        firearms_certified: [],
+        taser_certified: [],
+        medical_trained: [],
+        tactical_trained: [],
+        investigation_trained: [],
+      },
+      performance_metrics: {
+        response_time: '',
+        incident_resolution: '',
+        community_relations: '',
+        training_completion: '',
+        disciplinary_actions: '',
+      },
+      scheduling: {
+        shift_patterns: [],
+        overtime_hours: '',
+        vacation_requests: [],
+        sick_leave: [],
+      },
+      equipment: {
+        firearms_assigned: [],
+        body_armor: [],
+        communication_devices: [],
+        vehicles: [],
+      },
+      training_schedule: [],
+      evaluation_dates: [],
+      clearance_levels: [],
+      notes: '',
+    });
+
+  // Security Logs modal state
+  const [securityLogsModalOpen, setSecurityLogsModalOpen] =
+    React.useState(false);
+  const [securityLogsFormData, setSecurityLogsFormData] = React.useState({
+    log_id: '',
+    log_type: 'security',
+    date_range: {
+      start_date: '',
+      end_date: '',
+    },
+    log_categories: {
+      access_logs: true,
+      incident_logs: true,
+      personnel_logs: true,
+      system_logs: true,
+      alert_logs: true,
+      maintenance_logs: true,
+    },
+    filters: {
+      severity: 'all',
+      personnel: 'all',
+      location: 'all',
+      incident_type: 'all',
+    },
+    search_terms: [],
+    export_format: 'csv',
+    include_details: true,
+    include_metadata: true,
+    sort_by: 'timestamp',
+    sort_order: 'descending',
+    max_results: '1000',
+    real_time_monitoring: false,
+    alert_thresholds: {
+      critical_incidents: '5',
+      failed_access: '10',
+      system_errors: '20',
+    },
+  });
+
+  // Security Scan modal state
+  const [securityScanModalOpen, setSecurityScanModalOpen] =
+    React.useState(false);
+  const [securityScanFormData, setSecurityScanFormData] = React.useState({
+    scan_id: '',
+    scan_type: 'comprehensive',
+    target_systems: {
+      access_control: true,
+      surveillance: true,
+      communications: true,
+      databases: true,
+      networks: true,
+      physical_security: true,
+    },
+    scan_parameters: {
+      depth: 'thorough',
+      speed: 'balanced',
+      stealth: false,
+      real_time: true,
+    },
+    vulnerability_assessment: {
+      critical_vulnerabilities: true,
+      high_priority: true,
+      medium_priority: true,
+      low_priority: false,
+      informational: false,
+    },
+    threat_detection: {
+      malware_scan: true,
+      intrusion_detection: true,
+      anomaly_detection: true,
+      behavioral_analysis: true,
+      signature_matching: true,
+    },
+    physical_security: {
+      door_integrity: true,
+      camera_systems: true,
+      alarm_systems: true,
+      environmental_monitoring: true,
+      perimeter_security: true,
+    },
+    reporting: {
+      generate_report: true,
+      alert_authorities: true,
+      log_findings: true,
+      create_tickets: true,
+    },
+    scan_schedule: {
+      immediate: true,
+      scheduled: false,
+      recurring: false,
+    },
+  });
+
+  // Security Access Control modal state
+  const [securityAccessModalOpen, setSecurityAccessModalOpen] =
+    React.useState(false);
+  const [securityAccessFormData, setSecurityAccessFormData] = React.useState({
+    access_id: '',
+    access_type: 'system_management',
+    access_levels: {
+      level_1: {
+        name: 'Basic Access',
+        permissions: {
+          view_logs: true,
+          basic_reports: true,
+          self_service: true,
+        },
+        restrictions: [],
+      },
+      level_2: {
+        name: 'Supervisor Access',
+        permissions: {
+          view_logs: true,
+          basic_reports: true,
+          personnel_management: true,
+          incident_reports: true,
+          basic_analytics: true,
+        },
+        restrictions: [],
+      },
+      level_3: {
+        name: 'Manager Access',
+        permissions: {
+          view_logs: true,
+          all_reports: true,
+          personnel_management: true,
+          incident_management: true,
+          system_configuration: true,
+          analytics: true,
+        },
+        restrictions: [],
+      },
+      level_4: {
+        name: 'Administrator Access',
+        permissions: {
+          all_permissions: true,
+        },
+        restrictions: [],
+      },
+    },
+    user_management: {
+      add_users: true,
+      remove_users: true,
+      modify_permissions: true,
+      bulk_operations: true,
+    },
+    authentication: {
+      password_policy: {
+        min_length: '12',
+        complexity: 'high',
+        expiration_days: '90',
+        history_count: '5',
+      },
+      multi_factor: {
+        enabled: true,
+        methods: ['sms', 'email', 'authenticator'],
+        backup_codes: true,
+      },
+      session_management: {
+        timeout_minutes: '30',
+        concurrent_sessions: '2',
+        ip_restrictions: true,
+      },
+    },
+    access_points: {
+      doors: [],
+      elevators: [],
+      restricted_areas: [],
+      systems: [],
+      networks: [],
+    },
+    monitoring: {
+      real_time_monitoring: true,
+      access_logs: true,
+      failed_attempts: true,
+      unusual_patterns: true,
+      alerts: true,
+    },
+    emergency_protocols: {
+      lockdown_procedures: [],
+      emergency_access: [],
+      override_protocols: [],
+      backup_systems: [],
+    },
+  });
+
+  // Budget Management State
+  const [budgetModal, setBudgetModal] = React.useState(false);
+  const [budgetRequestModal, setBudgetRequestModal] = React.useState(false);
+  const [budgetTransferModal, setBudgetTransferModal] = React.useState(false);
+  const [budgetReportModal, setBudgetReportModal] = React.useState(false);
+  const [budgetFormData, setBudgetFormData] = React.useState({
+    department_id: 'supply',
+    amount: '',
+    category: 'equipment',
+    description: '',
+    transaction_type: 'EXPENSE',
+  });
+  const [budgetRequestData, setBudgetRequestData] = React.useState({
+    department_id: 'supply',
+    requested_amount: '',
+    requested_category: 'equipment',
+    justification: '',
+    priority: 1,
+  });
+  const [budgetTransferData, setBudgetTransferData] = React.useState({
+    from_department: 'supply',
+    to_department: 'security',
+    amount: '',
+    reason: '',
+  });
+
+  // Facility modal state
+  const [facilityModalOpen, setFacilityModalOpen] = React.useState(false);
+  const [facilityFormData, setFacilityFormData] = React.useState({
+    facility_id: '',
+    facility_name: '',
+    facility_type: 'site',
+    location: {
+      address: '',
+      city: '',
+      state: '',
+      country: '',
+      coordinates: '',
+    },
+    capacity: {
+      personnel: '',
+      equipment: '',
+      storage: '',
+      containment: '',
+    },
+    status: 'operational',
+    security_level: 'level_1',
+    containment_level: 'level_1',
+    construction_date: '',
+    last_renovation: '',
+    next_renovation: '',
+    departments: [],
+    personnel_assigned: [],
+    equipment_installed: [],
+    systems_installed: [],
+    security_systems: [],
+    containment_systems: [],
+    monitoring_systems: [],
+    communication_systems: [],
+    power_systems: [],
+    environmental_systems: [],
+    maintenance_systems: [],
+    backup_systems: [],
+    emergency_systems: [],
+    safety_systems: [],
+    fire_suppression: [],
+    ventilation_systems: [],
+    water_systems: [],
+    waste_systems: [],
+    telecommunications: [],
+    data_systems: [],
+    laboratory_systems: [],
+    medical_systems: [],
+    research_systems: [],
+    administrative_systems: [],
+    operational_systems: [],
+    logistical_systems: [],
+    transportation_systems: [],
+    storage_systems: [],
+    archival_systems: [],
+    security_clearance: 'level_1',
+    access_controls: [],
+    monitoring_equipment: [],
+    surveillance_systems: [],
+    alarm_systems: [],
+    response_systems: [],
+    emergency_protocols: [],
+    evacuation_procedures: [],
+    lockdown_procedures: [],
+    containment_procedures: [],
+    security_procedures: [],
+    safety_procedures: [],
+    maintenance_procedures: [],
+    operational_procedures: [],
+    administrative_procedures: [],
+    logistical_procedures: [],
+    transportation_procedures: [],
+    storage_procedures: [],
+    archival_procedures: [],
+    compliance_status: 'compliant',
+    audit_status: 'passed',
+    certification_status: 'certified',
+    testing_status: 'passed',
+    monitoring_status: 'active',
+    tracking_status: 'active',
+    reporting_status: 'active',
+    documentation_status: 'complete',
+    analysis_status: 'complete',
+    planning_status: 'complete',
+    coordination_status: 'complete',
+    communication_status: 'active',
+    training_status: 'complete',
+    awareness_status: 'complete',
+    preparedness_status: 'complete',
+    response_status: 'ready',
+    recovery_status: 'ready',
+    lessons_status: 'complete',
+    improvements_status: 'complete',
+    enhancements_status: 'complete',
+    optimization_status: 'complete',
+    modernization_status: 'complete',
+    innovation_status: 'complete',
+    development_status: 'complete',
+    research_status: 'complete',
+  });
+
   // Debug activeTab changes and add test notifications
   React.useEffect(() => {
     console.log('activeTab changed to:', activeTab, 'type:', typeof activeTab);
@@ -98,6 +1024,7 @@ export const PersistenceMasterPanel = (props, context) => {
     security_data,
     research_data,
     personnel_data,
+    budget_data,
     player_data,
     system_status,
     analytics_data,
@@ -106,212 +1033,6 @@ export const PersistenceMasterPanel = (props, context) => {
     notifications,
     personnel_details,
   } = data;
-
-  // Enhanced system status dashboard
-  const SystemStatusDashboard = () => {
-    const [dashboardCollapsed, setDashboardCollapsed] = React.useState(false);
-
-    const systems = [
-      { name: 'FACILITY', data: facility_data, icon: '🏢' },
-      { name: 'SCP', data: scp_data, icon: '🔒' },
-      { name: 'TECHNOLOGY', data: technology_data, icon: '⚡' },
-      { name: 'MEDICAL', data: medical_data, icon: '🏥' },
-      { name: 'SECURITY', data: security_data, icon: '🛡️' },
-      { name: 'RESEARCH', data: research_data, icon: '🔬' },
-      { name: 'PERSONNEL', data: personnel_data, icon: '👥' },
-      { name: 'PLAYER', data: player_data, icon: '🎮' },
-      { name: 'INFRASTRUCTURE', data: infrastructure_data, icon: '🏗️' },
-      { name: 'ANALYTICS', data: analytics_data, icon: '📊' },
-    ];
-
-    const onlineCount = systems.filter((sys) => sys.data).length;
-    const totalCount = systems.length;
-    const healthPercentage = (onlineCount / totalCount) * 100;
-
-    return (
-      <Box
-        style={{
-          position: 'absolute',
-          top: '70px',
-          right: '20px',
-          width: dashboardCollapsed ? '50px' : '300px',
-          background: 'rgba(0,0,0,0.8)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '8px',
-          padding: dashboardCollapsed ? '10px 5px' : '15px',
-          zIndex: 20,
-          transition: 'all 0.3s ease',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Collapse/Expand Button */}
-        <Box
-          style={{
-            position: 'absolute',
-            top: '5px',
-            right: '5px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.7)',
-            zIndex: 21,
-          }}
-          onClick={() => setDashboardCollapsed(!dashboardCollapsed)}
-        >
-          {dashboardCollapsed ? '▶' : '◀'}
-        </Box>
-
-        {!dashboardCollapsed && (
-          <>
-            <Box
-              style={{
-                fontSize: '14px',
-                fontWeight: 'bold',
-                marginBottom: '15px',
-                textAlign: 'center',
-                borderBottom: '1px solid rgba(255,255,255,0.2)',
-                paddingBottom: '10px',
-              }}
-            >
-              SYSTEM STATUS DASHBOARD
-            </Box>
-
-            {/* Overall Health */}
-            <Box style={{ marginBottom: '15px' }}>
-              <Box
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '5px',
-                }}
-              >
-                <Box style={{ fontSize: '12px' }}>Overall Health</Box>
-                <Box
-                  style={{
-                    fontSize: '12px',
-                    color:
-                      healthPercentage > 80
-                        ? '#00ff00'
-                        : healthPercentage > 50
-                          ? '#ffff00'
-                          : '#ff0000',
-                  }}
-                >
-                  {onlineCount}/{totalCount} Online
-                </Box>
-              </Box>
-              <ProgressBar
-                value={healthPercentage}
-                maxValue={100}
-                color={
-                  healthPercentage > 80
-                    ? 'good'
-                    : healthPercentage > 50
-                      ? 'average'
-                      : 'bad'
-                }
-                style={{ height: '8px' }}
-              />
-            </Box>
-
-            {/* System Grid */}
-            <Box
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '8px',
-              }}
-            >
-              {systems.map((system, index) => (
-                <Box
-                  key={index}
-                  style={{
-                    padding: '8px',
-                    background: system.data
-                      ? 'rgba(0,255,0,0.1)'
-                      : 'rgba(255,0,0,0.1)',
-                    border: `1px solid ${system.data ? 'rgba(0,255,0,0.3)' : 'rgba(255,0,0,0.3)'}`,
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '11px',
-                  }}
-                >
-                  <Box style={{ fontSize: '14px' }}>{system.icon}</Box>
-                  <Box style={{ flex: 1 }}>
-                    <Box style={{ fontWeight: 'bold' }}>{system.name}</Box>
-                    <Box style={{ fontSize: '10px', opacity: 0.8 }}>
-                      {system.data ? 'ONLINE' : 'OFFLINE'}
-                    </Box>
-                  </Box>
-                  <Box
-                    style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: system.data ? '#00ff00' : '#ff0000',
-                      boxShadow: system.data
-                        ? '0 0 8px rgba(0,255,0,0.5)'
-                        : '0 0 8px rgba(255,0,0,0.5)',
-                    }}
-                  />
-                </Box>
-              ))}
-            </Box>
-
-            {/* Quick Actions */}
-            <Box
-              style={{
-                marginTop: '15px',
-                paddingTop: '10px',
-                borderTop: '1px solid rgba(255,255,255,0.2)',
-              }}
-            >
-              <Box
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  marginBottom: '8px',
-                }}
-              >
-                Quick Actions
-              </Box>
-              <Flex wrap="wrap" style={{ gap: '5px' }}>
-                <Button
-                  onClick={() =>
-                    addNotification(
-                      'System Check',
-                      'Running full system diagnostics...',
-                      'info',
-                    )
-                  }
-                  icon="sync"
-                  color="blue"
-                  compact
-                >
-                  Check All
-                </Button>
-                <Button
-                  onClick={() =>
-                    addNotification(
-                      'Backup Initiated',
-                      'Creating system backup...',
-                      'info',
-                    )
-                  }
-                  icon="save"
-                  color="default"
-                  compact
-                >
-                  Backup
-                </Button>
-              </Flex>
-            </Box>
-          </>
-        )}
-      </Box>
-    );
-  };
 
   // Legacy data status indicator (kept for compatibility)
   const DataStatusIndicator = ({ data, label }) => (
@@ -1237,6 +1958,18 @@ export const PersistenceMasterPanel = (props, context) => {
             onClick={() => setActiveTab('security')}
             isActive={activeTab === 'security'}
           />
+          <DesktopIcon
+            icon="🔬"
+            label="RESEARCH"
+            onClick={() => setActiveTab('research')}
+            isActive={activeTab === 'research'}
+          />
+          <DesktopIcon
+            icon="👥"
+            label="PERSONNEL"
+            onClick={() => setActiveTab('personnel')}
+            isActive={activeTab === 'personnel'}
+          />
         </Box>
 
         {/* Bottom Row of Icons */}
@@ -1265,6 +1998,12 @@ export const PersistenceMasterPanel = (props, context) => {
             label="ANALYTICS"
             onClick={() => setActiveTab('analytics')}
             isActive={activeTab === 'analytics'}
+          />
+          <DesktopIcon
+            icon="💰"
+            label="BUDGET"
+            onClick={() => setActiveTab('budget')}
+            isActive={activeTab === 'budget'}
           />
         </Box>
       </Box>
@@ -1523,8 +2262,21 @@ export const PersistenceMasterPanel = (props, context) => {
       {/* Theme Panel */}
       {themeOpen && <ThemePanel />}
 
-      {/* System Status Dashboard */}
-      <SystemStatusDashboard />
+      {/* Debug Modal State */}
+      <Box
+        style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          background: 'red',
+          color: 'white',
+          padding: '5px',
+          zIndex: 9999,
+          fontSize: '12px',
+        }}
+      >
+        Modal State: {researchModalOpen ? 'OPEN' : 'CLOSED'}
+      </Box>
     </Box>
   );
 
@@ -1935,6 +2687,14 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               TEST SYSTEMS
             </ActionButton>
+            <EnhancedButton
+              icon="🏢"
+              color="good"
+              onClick={() => setFacilityModalOpen(true)}
+              tooltip="Open detailed facility registration form"
+            >
+              ADD FACILITY
+            </EnhancedButton>
             <EnhancedButton
               icon="🔧"
               color="average"
@@ -2358,16 +3118,14 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               VIEW STATUS
             </ActionButton>
-            <ActionButton
-              action="scp_add_instance"
+            <EnhancedButton
               icon="🔒"
               color="purple"
-              successMessage="SCP instance added successfully"
-              errorMessage="Failed to add SCP instance"
-              tooltip="Add new SCP instance"
+              onClick={() => setScpModalOpen(true)}
+              tooltip="Open detailed SCP instance creation form"
             >
               ADD SCP
-            </ActionButton>
+            </EnhancedButton>
             <ActionButton
               action="scp_add_research"
               icon="🔬"
@@ -3021,16 +3779,14 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               ADD PROJECT
             </ActionButton>
-            <ActionButton
-              action="technology_add_tech"
+            <EnhancedButton
               icon="⚡"
               color="default"
-              successMessage="Technology added successfully"
-              errorMessage="Failed to add technology"
-              tooltip="Add new technology"
+              onClick={() => setTechnologyModalOpen(true)}
+              tooltip="Open detailed technology registration form"
             >
               ADD TECHNOLOGY
-            </ActionButton>
+            </EnhancedButton>
             <ActionButton
               action="technology_save_data"
               icon="💾"
@@ -4423,25 +5179,22 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               VIEW METRICS
             </ActionButton>
-            <ActionButton
-              action="analytics_generate_report"
+            <EnhancedButton
               icon="📄"
               color="purple"
-              successMessage="Analytics report generated successfully"
-              errorMessage="Failed to generate analytics report"
-              tooltip="Generate analytics report"
+              onClick={() => setAnalyticsReportModalOpen(true)}
+              tooltip="Open detailed analytics report generation form"
             >
               GENERATE REPORT
-            </ActionButton>
-            <ActionButton
-              action="analytics_kpi_dashboard"
+            </EnhancedButton>
+            <EnhancedButton
               icon="📈"
               color="average"
-              successMessage="KPI dashboard updated"
-              tooltip="View KPI dashboard"
+              onClick={() => setAnalyticsKpiModalOpen(true)}
+              tooltip="Open detailed KPI dashboard configuration form"
             >
               KPI DASHBOARD
-            </ActionButton>
+            </EnhancedButton>
             <ActionButton
               action="analytics_save_data"
               icon="💾"
@@ -5417,16 +6170,14 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               VIEW STATUS
             </ActionButton>
-            <ActionButton
-              action="medical_add_patient"
+            <EnhancedButton
               icon="👤"
               color="purple"
-              successMessage="Patient added successfully"
-              errorMessage="Failed to add patient"
-              tooltip="Add new patient"
+              onClick={() => setMedicalModalOpen(true)}
+              tooltip="Open detailed patient registration form"
             >
               ADD PATIENT
-            </ActionButton>
+            </EnhancedButton>
             <ActionButton
               action="medical_add_treatment"
               icon="💊"
@@ -6564,35 +7315,30 @@ export const PersistenceMasterPanel = (props, context) => {
             >
               VIEW STATUS
             </ActionButton>
-            <ActionButton
-              action="security_add_incident"
+            <EnhancedButton
               icon="🚨"
               color="bad"
-              successMessage="Security incident added successfully"
-              errorMessage="Failed to add security incident"
-              tooltip="Add security incident"
+              onClick={() => setSecurityModalOpen(true)}
+              tooltip="Open detailed security incident report form"
             >
               ADD INCIDENT
-            </ActionButton>
-            <ActionButton
-              action="security_manage_personnel"
+            </EnhancedButton>
+            <EnhancedButton
               icon="👥"
               color="purple"
-              successMessage="Personnel management updated"
-              errorMessage="Failed to manage personnel"
-              tooltip="Manage security personnel"
+              onClick={() => setSecurityPersonnelModalOpen(true)}
+              tooltip="Open detailed security personnel management form"
             >
               MANAGE PERSONNEL
-            </ActionButton>
-            <ActionButton
-              action="security_view_logs"
+            </EnhancedButton>
+            <EnhancedButton
               icon="📋"
               color="default"
-              successMessage="Security logs retrieved"
-              tooltip="View security logs"
+              onClick={() => setSecurityLogsModalOpen(true)}
+              tooltip="Open detailed security logs viewer and management form"
             >
               VIEW LOGS
-            </ActionButton>
+            </EnhancedButton>
             <ActionButton
               action="security_save_data"
               icon="💾"
@@ -6616,46 +7362,16 @@ export const PersistenceMasterPanel = (props, context) => {
             <EnhancedButton
               icon="🔍"
               color="average"
-              onClick={() => {
-                addNotification(
-                  'Security Scan',
-                  'Running security scan...',
-                  'info',
-                );
-                setTimeout(
-                  () =>
-                    addNotification(
-                      'Security Scan',
-                      'Security scan completed',
-                      'success',
-                    ),
-                  2000,
-                );
-              }}
-              tooltip="Run security scan"
+              onClick={() => setSecurityScanModalOpen(true)}
+              tooltip="Open detailed security scan configuration form"
             >
               SECURITY SCAN
             </EnhancedButton>
             <EnhancedButton
               icon="🚪"
               color="blue"
-              onClick={() => {
-                addNotification(
-                  'Access Control',
-                  'Checking access systems...',
-                  'info',
-                );
-                setTimeout(
-                  () =>
-                    addNotification(
-                      'Access Control',
-                      'Access systems operational',
-                      'success',
-                    ),
-                  1500,
-                );
-              }}
-              tooltip="Access control systems"
+              onClick={() => setSecurityAccessModalOpen(true)}
+              tooltip="Open detailed access control management form"
             >
               ACCESS CONTROL
             </EnhancedButton>
@@ -7364,6 +8080,23 @@ export const PersistenceMasterPanel = (props, context) => {
             </Box>
 
             <Section title="Quick Actions">
+              <Box style={{ marginBottom: '15px' }}>
+                <EnhancedButton
+                  icon="📋"
+                  color="good"
+                  onClick={() => {
+                    console.log(
+                      'Opening research modal, current state:',
+                      researchModalOpen,
+                    );
+                    setResearchModalOpen(true);
+                    console.log('Research modal state set to true');
+                  }}
+                  tooltip="Open detailed research project creation form"
+                >
+                  📋 ADD NEW RESEARCH PROJECT
+                </EnhancedButton>
+              </Box>
               <Flex wrap="wrap" style={{ gap: '10px' }}>
                 <ActionButton
                   action="research_add_project"
@@ -7828,6 +8561,478 @@ export const PersistenceMasterPanel = (props, context) => {
     );
   };
 
+  // Budget Management Interface
+  const BudgetInterface = ({
+    budgetModal,
+    setBudgetModal,
+    budgetRequestModal,
+    setBudgetRequestModal,
+    budgetTransferModal,
+    setBudgetTransferModal,
+    budgetReportModal,
+    setBudgetReportModal,
+    budgetFormData,
+    setBudgetFormData,
+    budgetRequestData,
+    setBudgetRequestData,
+    budgetTransferData,
+    setBudgetTransferData,
+  }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            BUDGET MANAGEMENT
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            FINANCIAL CONTROL & ALLOCATION
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            BUDGET PERSISTENCE SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* Budget Overview */}
+        <Box style={{ marginBottom: '30px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            BUDGET OVERVIEW:
+          </Box>
+          <Grid>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(0,255,0,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#66ff66',
+                  }}
+                >
+                  TOTAL BUDGET
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  ${(budget_data?.total_budget || 0).toLocaleString()}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Credits</Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,165,0,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#ffaa66',
+                  }}
+                >
+                  CURRENT BALANCE
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  ${(budget_data?.current_balance || 0).toLocaleString()}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Available</Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,0,0,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#ff6666',
+                  }}
+                >
+                  MONTHLY EXPENSES
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  ${(budget_data?.monthly_expenses || 0).toLocaleString()}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Spent</Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(0,255,255,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  MONTHLY REVENUE
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  ${(budget_data?.monthly_revenue || 0).toLocaleString()}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Earned</Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        {/* Budget Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            BUDGET CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <EnhancedButton
+              icon="💰"
+              color="good"
+              onClick={() => setBudgetModal(true)}
+              tooltip="Add new transaction to budget system"
+            >
+              ADD TRANSACTION
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📋"
+              color="blue"
+              onClick={() => setBudgetRequestModal(true)}
+              tooltip="Request budget increase for department"
+            >
+              REQUEST BUDGET
+            </EnhancedButton>
+            <EnhancedButton
+              icon="🔄"
+              color="average"
+              onClick={() => setBudgetTransferModal(true)}
+              tooltip="Transfer budget between departments"
+            >
+              TRANSFER BUDGET
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📊"
+              color="purple"
+              onClick={() => setBudgetReportModal(true)}
+              tooltip="Generate comprehensive budget report"
+            >
+              BUDGET REPORT
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* Department Budgets */}
+        <Box style={{ marginBottom: '30px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            DEPARTMENT BUDGETS:
+          </Box>
+          <Grid>
+            {budget_data?.departments &&
+              Object.entries(budget_data.departments).map(([deptId, dept]) => (
+                <Grid.Column key={deptId} size={4}>
+                  <Box
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      padding: '15px',
+                      borderRadius: '5px',
+                      marginBottom: '10px',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        marginBottom: '5px',
+                      }}
+                    >
+                      {dept.name}
+                    </Box>
+                    <Box style={{ fontSize: '12px', marginBottom: '10px' }}>
+                      <Box>
+                        Allocated: ${dept.allocated?.toLocaleString() || 0}
+                      </Box>
+                      <Box>Spent: ${dept.spent?.toLocaleString() || 0}</Box>
+                      <Box>
+                        Remaining: ${dept.remaining?.toLocaleString() || 0}
+                      </Box>
+                      <Box>Efficiency: {dept.efficiency || 0}%</Box>
+                      <Box
+                        style={{
+                          color:
+                            dept.status === 'NORMAL'
+                              ? '#66ff66'
+                              : dept.status === 'WARNING'
+                                ? '#ffff00'
+                                : dept.status === 'CRITICAL'
+                                  ? '#ff6600'
+                                  : '#ff0000',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        Status: {dept.status}
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid.Column>
+              ))}
+          </Grid>
+        </Box>
+
+        {/* Recent Transactions */}
+        <Box style={{ marginBottom: '30px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            RECENT TRANSACTIONS:
+          </Box>
+          <Box
+            style={{
+              background: 'rgba(0,0,0,0.5)',
+              padding: '15px',
+              borderRadius: '5px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+            }}
+          >
+            {budget_data?.recent_transactions &&
+            budget_data.recent_transactions.length > 0 ? (
+              budget_data.recent_transactions.map((transaction, index) => (
+                <Box
+                  key={index}
+                  style={{
+                    padding: '8px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    fontSize: '12px',
+                  }}
+                >
+                  <Box
+                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <Box>
+                      <Box style={{ fontWeight: 'bold' }}>
+                        {transaction.type} - {transaction.department}
+                      </Box>
+                      <Box style={{ opacity: 0.8 }}>
+                        {transaction.description}
+                      </Box>
+                    </Box>
+                    <Box
+                      style={{
+                        color:
+                          transaction.type === 'EXPENSE'
+                            ? '#ff6666'
+                            : '#66ff66',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      ${transaction.amount?.toLocaleString() || 0}
+                    </Box>
+                  </Box>
+                  <Box style={{ fontSize: '10px', opacity: 0.6 }}>
+                    {transaction.timestamp}
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Box style={{ opacity: 0.7, textAlign: 'center' }}>
+                No recent transactions
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Budget Alerts */}
+        <Box style={{ marginBottom: '30px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            BUDGET ALERTS:
+          </Box>
+          <Box
+            style={{
+              background: 'rgba(0,0,0,0.5)',
+              padding: '15px',
+              borderRadius: '5px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+            }}
+          >
+            {budget_data?.budget_alerts &&
+            budget_data.budget_alerts.length > 0 ? (
+              budget_data.budget_alerts.map((alert, index) => (
+                <Box
+                  key={index}
+                  style={{
+                    padding: '8px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    fontSize: '12px',
+                    borderLeft: `3px solid ${
+                      alert.type === 'CRITICAL'
+                        ? '#ff0000'
+                        : alert.type === 'WARNING'
+                          ? '#ffff00'
+                          : '#00ff00'
+                    }`,
+                  }}
+                >
+                  <Box
+                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <Box>
+                      <Box
+                        style={{
+                          fontWeight: 'bold',
+                          color:
+                            alert.type === 'CRITICAL'
+                              ? '#ff6666'
+                              : alert.type === 'WARNING'
+                                ? '#ffff66'
+                                : '#66ff66',
+                        }}
+                      >
+                        {alert.type} - {alert.department}
+                      </Box>
+                      <Box style={{ opacity: 0.8 }}>{alert.message}</Box>
+                    </Box>
+                    <Box style={{ fontSize: '10px', opacity: 0.6 }}>
+                      Severity: {alert.severity}/5
+                    </Box>
+                  </Box>
+                  <Box style={{ fontSize: '10px', opacity: 0.6 }}>
+                    {alert.timestamp}
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Box style={{ opacity: 0.7, textAlign: 'center' }}>
+                No active budget alerts
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Pending Requests */}
+        <Box style={{ marginBottom: '30px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            PENDING BUDGET REQUESTS:
+          </Box>
+          <Box
+            style={{
+              background: 'rgba(0,0,0,0.5)',
+              padding: '15px',
+              borderRadius: '5px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+            }}
+          >
+            {budget_data?.pending_requests &&
+            budget_data.pending_requests.length > 0 ? (
+              budget_data.pending_requests.map((request, index) => (
+                <Box
+                  key={index}
+                  style={{
+                    padding: '8px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    fontSize: '12px',
+                  }}
+                >
+                  <Box
+                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <Box>
+                      <Box style={{ fontWeight: 'bold' }}>
+                        {request.department} - $
+                        {request.amount?.toLocaleString() || 0}
+                      </Box>
+                      <Box style={{ opacity: 0.8 }}>
+                        {request.justification}
+                      </Box>
+                    </Box>
+                    <Box style={{ fontSize: '10px', opacity: 0.6 }}>
+                      Priority: {request.priority}
+                    </Box>
+                  </Box>
+                  <Box style={{ fontSize: '10px', opacity: 0.6 }}>
+                    Requested by: {request.requested_by} - {request.timestamp}
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Box style={{ opacity: 0.7, textAlign: 'center' }}>
+                No pending budget requests
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    );
+  };
+
   // Personnel Management Interface
   const PersonnelInterface = ({
     personnelActiveTab,
@@ -7978,16 +9183,14 @@ export const PersistenceMasterPanel = (props, context) => {
 
             <Section title="Quick Actions">
               <Flex wrap="wrap" style={{ gap: '10px' }}>
-                <ActionButton
-                  action="personnel_add_record"
+                <EnhancedButton
                   icon="👤"
                   color="good"
-                  successMessage="Employee added successfully"
-                  errorMessage="Failed to add employee"
-                  tooltip="Add new employee"
+                  onClick={() => setPersonnelModalOpen(true)}
+                  tooltip="Open detailed employee registration form"
                 >
                   Add Employee
-                </ActionButton>
+                </EnhancedButton>
                 <ActionButton
                   action="personnel_add_department"
                   icon="🏢"
@@ -9219,6 +10422,26 @@ export const PersistenceMasterPanel = (props, context) => {
                 />
               );
             }
+            if (activeTab === 'budget') {
+              return (
+                <BudgetInterface
+                  budgetModal={budgetModal}
+                  setBudgetModal={setBudgetModal}
+                  budgetRequestModal={budgetRequestModal}
+                  setBudgetRequestModal={setBudgetRequestModal}
+                  budgetTransferModal={budgetTransferModal}
+                  setBudgetTransferModal={setBudgetTransferModal}
+                  budgetReportModal={budgetReportModal}
+                  setBudgetReportModal={setBudgetReportModal}
+                  budgetFormData={budgetFormData}
+                  setBudgetFormData={setBudgetFormData}
+                  budgetRequestData={budgetRequestData}
+                  setBudgetRequestData={setBudgetRequestData}
+                  budgetTransferData={budgetTransferData}
+                  setBudgetTransferData={setBudgetTransferData}
+                />
+              );
+            }
 
             return (
               <Box style={{ color: 'red', fontSize: '16px', padding: '20px' }}>
@@ -9227,12 +10450,11815 @@ export const PersistenceMasterPanel = (props, context) => {
                 <br />
                 Available tabs: terminal, facility, scp, technology, medical,
                 security, research, personnel, players, infrastructure,
-                analytics
+                analytics, budget
               </Box>
             );
           })()}
         </Box>
         {activeTab !== 'desktop' && <SidePanel />}
+
+        {/* Research Modal - Global Access */}
+        {researchModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setResearchModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🔬 NEW RESEARCH PROJECT CREATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setResearchModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Basic Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📋 BASIC INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Project Title *
+                        </Box>
+                        <input
+                          type="text"
+                          value={researchFormData.title}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              title: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            transition: 'border-color 0.3s ease',
+                          }}
+                          placeholder="Enter project title..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Lead Researcher *
+                        </Box>
+                        <input
+                          type="text"
+                          value={researchFormData.lead_researcher}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              lead_researcher: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Enter researcher name..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: 0.8,
+                      }}
+                    >
+                      Project Description *
+                    </Box>
+                    <textarea
+                      value={researchFormData.description}
+                      onChange={(e) =>
+                        setResearchFormData({
+                          ...researchFormData,
+                          description: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        height: '100px',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                      }}
+                      placeholder="Describe the research project, objectives, and expected outcomes..."
+                    />
+                  </Box>
+                </Box>
+
+                {/* Classification Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🏷️ CLASSIFICATION & PRIORITY
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Research Category
+                        </Box>
+                        <select
+                          value={researchFormData.category}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              category: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="general">🔬 General Research</option>
+                          <option value="scp">🔒 SCP Studies</option>
+                          <option value="containment">🛡️ Containment</option>
+                          <option value="medical">🏥 Medical Research</option>
+                          <option value="technology">⚡ Technology</option>
+                          <option value="psychology">🧠 Psychology</option>
+                          <option value="physics">⚛️ Physics</option>
+                          <option value="chemistry">🧪 Chemistry</option>
+                          <option value="biology">🧬 Biology</option>
+                          <option value="mathematics">📐 Mathematics</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Priority Level
+                        </Box>
+                        <select
+                          value={researchFormData.priority}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              priority: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="low">🟢 Low Priority</option>
+                          <option value="medium">🟡 Medium Priority</option>
+                          <option value="high">🟠 High Priority</option>
+                          <option value="critical">🔴 Critical Priority</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Security Clearance
+                        </Box>
+                        <select
+                          value={researchFormData.security_clearance}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              security_clearance: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="level_1">🔓 Level 1 - Basic</option>
+                          <option value="level_2">
+                            🔒 Level 2 - Restricted
+                          </option>
+                          <option value="level_3">
+                            🔐 Level 3 - Confidential
+                          </option>
+                          <option value="level_4">🔐 Level 4 - Secret</option>
+                          <option value="level_5">
+                            🔐 Level 5 - Top Secret
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Timeline & Resources Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    ⏰ TIMELINE & RESOURCES
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Project Timeline
+                        </Box>
+                        <input
+                          type="text"
+                          value={researchFormData.timeline}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              timeline: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 6 months, 1 year, ongoing..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Budget Allocation
+                        </Box>
+                        <input
+                          type="text"
+                          value={researchFormData.budget}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              budget: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., $50,000, 100,000 credits..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: '0.8',
+                      }}
+                    >
+                      Funding Source
+                    </Box>
+                    <input
+                      type="text"
+                      value={researchFormData.funding_source}
+                      onChange={(e) =>
+                        setResearchFormData({
+                          ...researchFormData,
+                          funding_source: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                      }}
+                      placeholder="e.g., Foundation Budget, External Grant, Special Allocation..."
+                    />
+                  </Box>
+                </Box>
+
+                {/* Research Details Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔬 RESEARCH DETAILS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Research Objectives
+                        </Box>
+                        <textarea
+                          value={researchFormData.objectives}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              objectives: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '100px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="List specific research objectives..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Methodology
+                        </Box>
+                        <textarea
+                          value={researchFormData.methodology}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              methodology: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '100px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Describe research methodology..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Expected Outcomes
+                        </Box>
+                        <textarea
+                          value={researchFormData.expected_outcomes}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              expected_outcomes: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Describe expected outcomes..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Potential Risks
+                        </Box>
+                        <textarea
+                          value={researchFormData.risks}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              risks: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Describe potential risks and mitigation..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Safety & Compliance Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🛡️ SAFETY & COMPLIANCE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Containment Requirements
+                        </Box>
+                        <textarea
+                          value={researchFormData.containment_requirements}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              containment_requirements: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Describe containment requirements..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: '0.8',
+                          }}
+                        >
+                          Safety Protocols
+                        </Box>
+                        <textarea
+                          value={researchFormData.safety_protocols}
+                          onChange={(e) =>
+                            setResearchFormData({
+                              ...researchFormData,
+                              safety_protocols: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Describe safety protocols..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={researchFormData.ethical_approval}
+                        onChange={(e) =>
+                          setResearchFormData({
+                            ...researchFormData,
+                            ethical_approval: e.target.checked,
+                          })
+                        }
+                        style={{
+                          width: '18px',
+                          height: '18px',
+                          accentColor: '#66ffff',
+                        }}
+                      />
+                      <Box style={{ fontSize: '14px', opacity: '0.8' }}>
+                        Ethical Approval Required
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setResearchModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !researchFormData.title ||
+                          !researchFormData.description ||
+                          !researchFormData.lead_researcher
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('research_add_project', {
+                          project_data: researchFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Research project created successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setResearchFormData({
+                          title: '',
+                          description: '',
+                          category: 'general',
+                          priority: 'medium',
+                          lead_researcher: '',
+                          budget: '',
+                          timeline: '',
+                          objectives: '',
+                          methodology: '',
+                          expected_outcomes: '',
+                          risks: '',
+                          approvals: [],
+                          status: 'pending',
+                          progress: 0,
+                          start_date: '',
+                          end_date: '',
+                          team_members: [],
+                          equipment_needed: [],
+                          funding_source: '',
+                          security_clearance: 'level_1',
+                          containment_requirements: '',
+                          ethical_approval: false,
+                          safety_protocols: '',
+                        });
+                        setResearchModalOpen(false);
+                      }}
+                      tooltip="Create research project"
+                    >
+                      📋 Create Research Project
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* SCP Modal - Global Access */}
+        {scpModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setScpModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🔒 NEW SCP INSTANCE CREATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setScpModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Basic Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔒 BASIC INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          SCP Designation *
+                        </Box>
+                        <input
+                          type="text"
+                          value={scpFormData.designation}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              designation: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., SCP-173, SCP-096..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Object Name
+                        </Box>
+                        <input
+                          type="text"
+                          value={scpFormData.name}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              name: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., The Sculpture, The Shy Guy..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Object Class *
+                        </Box>
+                        <select
+                          value={scpFormData.object_class}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              object_class: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="safe">🟢 Safe</option>
+                          <option value="euclid">🟡 Euclid</option>
+                          <option value="keter">🔴 Keter</option>
+                          <option value="thaumiel">🔵 Thaumiel</option>
+                          <option value="neutralized">⚪ Neutralized</option>
+                          <option value="pending">🟠 Pending</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Threat Level
+                        </Box>
+                        <select
+                          value={scpFormData.threat_level}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              threat_level: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="green">🟢 Green</option>
+                          <option value="yellow">🟡 Yellow</option>
+                          <option value="orange">🟠 Orange</option>
+                          <option value="red">🔴 Red</option>
+                          <option value="black">⚫ Black</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Current Status
+                        </Box>
+                        <select
+                          value={scpFormData.current_status}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              current_status: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="contained">🔒 Contained</option>
+                          <option value="breach">🚨 Breach</option>
+                          <option value="testing">🧪 Testing</option>
+                          <option value="recovery">🔄 Recovery</option>
+                          <option value="terminated">💀 Terminated</option>
+                          <option value="pending">⏳ Pending</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: 0.8,
+                      }}
+                    >
+                      Description *
+                    </Box>
+                    <textarea
+                      value={scpFormData.description}
+                      onChange={(e) =>
+                        setScpFormData({
+                          ...scpFormData,
+                          description: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        height: '120px',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                      }}
+                      placeholder="Describe the SCP's appearance, behavior, and anomalous properties..."
+                    />
+                  </Box>
+                </Box>
+
+                {/* Containment Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🛡️ CONTAINMENT PROCEDURES
+                  </Box>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: 0.8,
+                      }}
+                    >
+                      Standard Containment Procedures *
+                    </Box>
+                    <textarea
+                      value={scpFormData.containment_procedures}
+                      onChange={(e) =>
+                        setScpFormData({
+                          ...scpFormData,
+                          containment_procedures: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        height: '100px',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                      }}
+                      placeholder="Describe standard containment procedures..."
+                    />
+                  </Box>
+
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: 0.8,
+                      }}
+                    >
+                      Special Containment Procedures
+                    </Box>
+                    <textarea
+                      value={scpFormData.special_containment_procedures}
+                      onChange={(e) =>
+                        setScpFormData({
+                          ...scpFormData,
+                          special_containment_procedures: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        height: '100px',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                      }}
+                      placeholder="Describe special containment procedures..."
+                    />
+                  </Box>
+
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Containment Location
+                        </Box>
+                        <input
+                          type="text"
+                          value={scpFormData.location}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              location: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Site-19, Chamber-173..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Containment Cost
+                        </Box>
+                        <input
+                          type="text"
+                          value={scpFormData.containment_cost}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              containment_cost: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., $50,000/month, 100,000 credits..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Discovery & History Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📅 DISCOVERY & HISTORY
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Discovery Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={scpFormData.discovery_date}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              discovery_date: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 1993-06-23, 2007..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Discovery Location
+                        </Box>
+                        <input
+                          type="text"
+                          value={scpFormData.discovery_location}
+                          onChange={(e) =>
+                            setScpFormData({
+                              ...scpFormData,
+                              discovery_location: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Rome, Italy, Museum of Modern Art..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: 0.8,
+                      }}
+                    >
+                      Recovery Notes
+                    </Box>
+                    <textarea
+                      value={scpFormData.recovery_notes}
+                      onChange={(e) =>
+                        setScpFormData({
+                          ...scpFormData,
+                          recovery_notes: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        height: '80px',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                      }}
+                      placeholder="Describe the recovery operation and initial containment..."
+                    />
+                  </Box>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setScpModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !scpFormData.designation ||
+                          !scpFormData.description ||
+                          !scpFormData.containment_procedures
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('scp_add_instance', {
+                          scp_data: scpFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'SCP instance created successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setScpFormData({
+                          designation: '',
+                          name: '',
+                          object_class: 'safe',
+                          threat_level: 'green',
+                          description: '',
+                          containment_procedures: '',
+                          special_containment_procedures: '',
+                          description_2: '',
+                          addenda: '',
+                          incident_reports: [],
+                          testing_logs: [],
+                          personnel_assignments: [],
+                          location: '',
+                          discovery_date: '',
+                          discovery_location: '',
+                          original_containment: '',
+                          current_status: 'contained',
+                          containment_breaches: 0,
+                          last_incident: '',
+                          research_clearance: 'level_1',
+                          testing_authorized: false,
+                          cross_testing: [],
+                          related_scps: [],
+                          anomalous_properties: '',
+                          recovery_notes: '',
+                          classification_notes: '',
+                          security_clearance: 'level_1',
+                          containment_cost: '',
+                          maintenance_schedule: '',
+                          monitoring_equipment: [],
+                          emergency_protocols: '',
+                          termination_attempts: [],
+                          containment_effectiveness: 100,
+                          risk_assessment: '',
+                          personnel_requirements: '',
+                          facility_requirements: '',
+                          budget_allocation: '',
+                          research_priorities: [],
+                          containment_upgrades: [],
+                          incident_history: [],
+                          testing_protocols: '',
+                          cross_references: [],
+                          classification_review_date: '',
+                          containment_review_date: '',
+                          security_audit_date: '',
+                          last_containment_test: '',
+                          next_containment_test: '',
+                          containment_rating: 'stable',
+                          threat_assessment: 'low',
+                          containment_priority: 'standard',
+                          research_priority: 'standard',
+                          security_priority: 'standard',
+                          maintenance_priority: 'standard',
+                          testing_priority: 'standard',
+                          monitoring_priority: 'standard',
+                          emergency_priority: 'standard',
+                          termination_priority: 'none',
+                          classification_priority: 'standard',
+                          containment_priority_level: 'standard',
+                          research_priority_level: 'standard',
+                          security_priority_level: 'standard',
+                          maintenance_priority_level: 'standard',
+                          testing_priority_level: 'standard',
+                          monitoring_priority_level: 'standard',
+                          emergency_priority_level: 'standard',
+                          termination_priority_level: 'none',
+                          classification_priority_level: 'standard',
+                        });
+                        setScpModalOpen(false);
+                      }}
+                      tooltip="Create SCP instance"
+                    >
+                      🔒 Create SCP Instance
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Medical Modal - Global Access */}
+        {medicalModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setMedicalModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  👤 NEW PATIENT REGISTRATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setMedicalModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Patient Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    👤 PATIENT INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Patient ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.patient_id}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              patient_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., P-2024-001, MED-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Patient Name *
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.patient_name}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              patient_name: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Full name..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Age
+                        </Box>
+                        <input
+                          type="number"
+                          value={medicalFormData.age}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              age: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Age..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Gender
+                        </Box>
+                        <select
+                          value={medicalFormData.gender}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              gender: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="">Select...</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
+                          <option value="prefer_not_to_say">
+                            Prefer not to say
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Blood Type
+                        </Box>
+                        <select
+                          value={medicalFormData.blood_type}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              blood_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="">Select...</option>
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Room Number
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.room_number}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              room_number: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 101, ICU-1..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Medical Details Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🏥 MEDICAL DETAILS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Current Condition *
+                        </Box>
+                        <textarea
+                          value={medicalFormData.current_condition}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              current_condition: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Describe current medical condition..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Symptoms
+                        </Box>
+                        <textarea
+                          value={medicalFormData.symptoms}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              symptoms: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="List symptoms..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Diagnosis
+                        </Box>
+                        <textarea
+                          value={medicalFormData.diagnosis}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              diagnosis: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Medical diagnosis..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Treatment Plan
+                        </Box>
+                        <textarea
+                          value={medicalFormData.treatment_plan}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              treatment_plan: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            height: '80px',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                            resize: 'vertical',
+                          }}
+                          placeholder="Treatment plan..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Vital Signs Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    💓 VITAL SIGNS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Temperature
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.vital_signs.temperature}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              vital_signs: {
+                                ...medicalFormData.vital_signs,
+                                temperature: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="°C"
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Blood Pressure
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.vital_signs.blood_pressure}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              vital_signs: {
+                                ...medicalFormData.vital_signs,
+                                blood_pressure: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="mmHg"
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Heart Rate
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.vital_signs.heart_rate}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              vital_signs: {
+                                ...medicalFormData.vital_signs,
+                                heart_rate: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="bpm"
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Respiratory Rate
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.vital_signs.respiratory_rate}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              vital_signs: {
+                                ...medicalFormData.vital_signs,
+                                respiratory_rate: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="rpm"
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          O2 Saturation
+                        </Box>
+                        <input
+                          type="text"
+                          value={medicalFormData.vital_signs.oxygen_saturation}
+                          onChange={(e) =>
+                            setMedicalFormData({
+                              ...medicalFormData,
+                              vital_signs: {
+                                ...medicalFormData.vital_signs,
+                                oxygen_saturation: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="%"
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setMedicalModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !medicalFormData.patient_id ||
+                          !medicalFormData.patient_name ||
+                          !medicalFormData.current_condition
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('medical_add_patient', {
+                          patient_data: medicalFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Patient registered successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setMedicalFormData({
+                          patient_id: '',
+                          patient_name: '',
+                          age: '',
+                          gender: '',
+                          blood_type: '',
+                          medical_history: '',
+                          current_condition: '',
+                          symptoms: '',
+                          diagnosis: '',
+                          treatment_plan: '',
+                          medications: [],
+                          allergies: [],
+                          vital_signs: {
+                            temperature: '',
+                            blood_pressure: '',
+                            heart_rate: '',
+                            respiratory_rate: '',
+                            oxygen_saturation: '',
+                          },
+                          lab_results: [],
+                          imaging_results: [],
+                          procedures: [],
+                          notes: '',
+                          attending_physician: '',
+                          department: '',
+                          admission_date: '',
+                          discharge_date: '',
+                          room_number: '',
+                          emergency_contact: '',
+                          insurance_info: '',
+                          next_of_kin: '',
+                          special_instructions: '',
+                          quarantine_status: false,
+                          isolation_level: 'none',
+                          infectious_disease: false,
+                          disease_type: '',
+                          containment_required: false,
+                          containment_level: 'none',
+                          security_clearance: 'level_1',
+                          research_subject: false,
+                          research_protocol: '',
+                          experimental_treatment: false,
+                          treatment_consent: false,
+                          family_consent: false,
+                          legal_guardian: '',
+                          power_of_attorney: '',
+                          do_not_resuscitate: false,
+                          living_will: false,
+                          organ_donor: false,
+                          autopsy_authorized: false,
+                          research_authorized: false,
+                          experimental_authorized: false,
+                          testing_authorized: false,
+                          monitoring_authorized: false,
+                          isolation_authorized: false,
+                          quarantine_authorized: false,
+                          containment_authorized: false,
+                          security_authorized: false,
+                          research_priority: 'standard',
+                          treatment_priority: 'standard',
+                          monitoring_priority: 'standard',
+                          security_priority: 'standard',
+                          containment_priority: 'standard',
+                          isolation_priority: 'standard',
+                          quarantine_priority: 'standard',
+                          testing_priority: 'standard',
+                          autopsy_priority: 'none',
+                          research_priority_level: 'standard',
+                          treatment_priority_level: 'standard',
+                          monitoring_priority_level: 'standard',
+                          security_priority_level: 'standard',
+                          containment_priority_level: 'standard',
+                          isolation_priority_level: 'standard',
+                          quarantine_priority_level: 'standard',
+                          testing_priority_level: 'standard',
+                          autopsy_priority_level: 'none',
+                        });
+                        setMedicalModalOpen(false);
+                      }}
+                      tooltip="Register patient"
+                    >
+                      👤 Register Patient
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Security Modal - Global Access */}
+        {securityModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setSecurityModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🚨 SECURITY INCIDENT REPORT
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setSecurityModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Incident Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🚨 INCIDENT INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Incident ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.incident_id}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              incident_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., INC-2024-001, SEC-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Incident Type *
+                        </Box>
+                        <select
+                          value={securityFormData.incident_type}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              incident_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="breach">🔓 Containment Breach</option>
+                          <option value="intrusion">
+                            🚪 Security Intrusion
+                          </option>
+                          <option value="theft">🦹 Theft</option>
+                          <option value="sabotage">💥 Sabotage</option>
+                          <option value="espionage">🕵️ Espionage</option>
+                          <option value="violence">⚔️ Violence</option>
+                          <option value="accident">⚠️ Accident</option>
+                          <option value="system_failure">
+                            💻 System Failure
+                          </option>
+                          <option value="personnel_incident">
+                            👥 Personnel Incident
+                          </option>
+                          <option value="other">❓ Other</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Severity Level *
+                        </Box>
+                        <select
+                          value={securityFormData.severity}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              severity: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="low">🟢 Low</option>
+                          <option value="medium">🟡 Medium</option>
+                          <option value="high">🟠 High</option>
+                          <option value="critical">🔴 Critical</option>
+                          <option value="catastrophic">⚫ Catastrophic</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Threat Level
+                        </Box>
+                        <select
+                          value={securityFormData.threat_level}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              threat_level: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="green">🟢 Green</option>
+                          <option value="yellow">🟡 Yellow</option>
+                          <option value="orange">🟠 Orange</option>
+                          <option value="red">🔴 Red</option>
+                          <option value="black">⚫ Black</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Containment Status
+                        </Box>
+                        <select
+                          value={securityFormData.containment_status}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              containment_status: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="contained">🔒 Contained</option>
+                          <option value="ongoing">🔄 Ongoing</option>
+                          <option value="escalating">📈 Escalating</option>
+                          <option value="resolved">✅ Resolved</option>
+                          <option value="uncontained">🚨 Uncontained</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Location *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.location}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              location: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Site-19, Sector-7, Chamber-173..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Date & Time *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.date_time}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              date_time: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-01-15 14:30:00..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Incident Details Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📋 INCIDENT DETAILS
+                  </Box>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box
+                      style={{
+                        fontSize: '14px',
+                        marginBottom: '8px',
+                        opacity: 0.8,
+                      }}
+                    >
+                      Description *
+                    </Box>
+                    <textarea
+                      value={securityFormData.description}
+                      onChange={(e) =>
+                        setSecurityFormData({
+                          ...securityFormData,
+                          description: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: '100%',
+                        height: '120px',
+                        padding: '12px',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        borderRadius: '6px',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        resize: 'vertical',
+                      }}
+                      placeholder="Provide detailed description of the incident, including what happened, when, where, and how..."
+                    />
+                  </Box>
+                </Box>
+
+                {/* Casualties Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    💀 CASUALTIES & DAMAGE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Fatalities
+                        </Box>
+                        <input
+                          type="number"
+                          value={securityFormData.casualties.fatalities}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              casualties: {
+                                ...securityFormData.casualties,
+                                fatalities: parseInt(e.target.value, 10) || 0,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="0"
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Injuries
+                        </Box>
+                        <input
+                          type="number"
+                          value={securityFormData.casualties.injuries}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              casualties: {
+                                ...securityFormData.casualties,
+                                injuries: parseInt(e.target.value, 10) || 0,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="0"
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Missing
+                        </Box>
+                        <input
+                          type="number"
+                          value={securityFormData.casualties.missing}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              casualties: {
+                                ...securityFormData.casualties,
+                                missing: parseInt(e.target.value, 10) || 0,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="0"
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Response Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🚨 RESPONSE & INVESTIGATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Response Team
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.response_team}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              response_team: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., MTF Alpha-1, Security Team Bravo..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Investigation Lead
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.investigation_lead}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              investigation_lead: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Lead investigator name..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Response Time
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.response_time}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              response_time: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 5 minutes, 30 seconds..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Containment Time
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityFormData.containment_time}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              containment_time: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 15 minutes, 2 hours..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Investigation Status
+                        </Box>
+                        <select
+                          value={securityFormData.investigation_status}
+                          onChange={(e) =>
+                            setSecurityFormData({
+                              ...securityFormData,
+                              investigation_status: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="pending">⏳ Pending</option>
+                          <option value="ongoing">🔄 Ongoing</option>
+                          <option value="completed">✅ Completed</option>
+                          <option value="suspended">⏸️ Suspended</option>
+                          <option value="closed">🔒 Closed</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setSecurityModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !securityFormData.incident_id ||
+                          !securityFormData.incident_type ||
+                          !securityFormData.severity ||
+                          !securityFormData.location ||
+                          !securityFormData.date_time ||
+                          !securityFormData.description
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('security_add_incident', {
+                          incident_data: securityFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Security incident reported successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setSecurityFormData({
+                          incident_id: '',
+                          incident_type: 'breach',
+                          severity: 'low',
+                          location: '',
+                          date_time: '',
+                          description: '',
+                          involved_personnel: [],
+                          involved_scps: [],
+                          casualties: {
+                            fatalities: 0,
+                            injuries: 0,
+                            missing: 0,
+                          },
+                          containment_status: 'contained',
+                          threat_level: 'green',
+                          response_team: '',
+                          response_time: '',
+                          containment_time: '',
+                          investigation_status: 'pending',
+                          investigation_lead: '',
+                          evidence_collected: [],
+                          witnesses: [],
+                          security_breaches: [],
+                          system_failures: [],
+                          human_errors: [],
+                          external_threats: [],
+                          internal_threats: [],
+                          anomalous_events: [],
+                          containment_failures: [],
+                          security_failures: [],
+                          procedural_violations: [],
+                          equipment_failures: [],
+                          communication_failures: [],
+                          coordination_failures: [],
+                          response_delays: [],
+                          investigation_findings: '',
+                          corrective_actions: [],
+                          preventive_measures: [],
+                          security_upgrades: [],
+                          personnel_training: [],
+                          protocol_revisions: [],
+                          equipment_upgrades: [],
+                          system_upgrades: [],
+                          facility_upgrades: [],
+                          containment_upgrades: [],
+                          monitoring_upgrades: [],
+                          response_upgrades: [],
+                          investigation_upgrades: [],
+                          security_audit: false,
+                          security_review: false,
+                          security_assessment: false,
+                          security_evaluation: false,
+                          security_inspection: false,
+                          security_testing: false,
+                          security_monitoring: false,
+                          security_tracking: false,
+                          security_reporting: false,
+                          security_documentation: false,
+                          security_analysis: false,
+                          security_planning: false,
+                          security_coordination: false,
+                          security_communication: false,
+                          security_training: false,
+                          security_awareness: false,
+                          security_preparedness: false,
+                          security_response: false,
+                          security_recovery: false,
+                          security_lessons: false,
+                          security_improvements: false,
+                          security_enhancements: false,
+                          security_optimization: false,
+                          security_modernization: false,
+                          security_innovation: false,
+                          security_development: false,
+                          security_research: false,
+                          security_testing_protocols: false,
+                          security_monitoring_protocols: false,
+                          security_response_protocols: false,
+                          security_investigation_protocols: false,
+                          security_documentation_protocols: false,
+                          security_analysis_protocols: false,
+                          security_planning_protocols: false,
+                          security_coordination_protocols: false,
+                          security_communication_protocols: false,
+                          security_training_protocols: false,
+                          security_awareness_protocols: false,
+                          security_preparedness_protocols: false,
+                          security_recovery_protocols: false,
+                          security_lessons_protocols: false,
+                          security_improvements_protocols: false,
+                          security_enhancements_protocols: false,
+                          security_optimization_protocols: false,
+                          security_modernization_protocols: false,
+                          security_innovation_protocols: false,
+                          security_development_protocols: false,
+                          security_research_protocols: false,
+                        });
+                        setSecurityModalOpen(false);
+                      }}
+                      tooltip="Report security incident"
+                    >
+                      🚨 Report Incident
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Personnel Modal - Global Access */}
+        {personnelModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setPersonnelModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  👤 NEW EMPLOYEE REGISTRATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setPersonnelModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Employee Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    👤 EMPLOYEE INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Employee ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={personnelFormData.employee_id}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              employee_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., EMP-2024-001, PERS-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Full Name *
+                        </Box>
+                        <input
+                          type="text"
+                          value={personnelFormData.name}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              name: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Full name..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Position *
+                        </Box>
+                        <input
+                          type="text"
+                          value={personnelFormData.position}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              position: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Security Officer, Researcher, Administrator..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Department *
+                        </Box>
+                        <input
+                          type="text"
+                          value={personnelFormData.department}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              department: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Security, Research, Medical, Administration..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Security Clearance Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔐 SECURITY CLEARANCE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Security Clearance *
+                        </Box>
+                        <select
+                          value={personnelFormData.security_clearance}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              security_clearance: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="level_1">🔓 Level 1 - Basic</option>
+                          <option value="level_2">
+                            🔒 Level 2 - Restricted
+                          </option>
+                          <option value="level_3">
+                            🔐 Level 3 - Confidential
+                          </option>
+                          <option value="level_4">🔐 Level 4 - Secret</option>
+                          <option value="level_5">
+                            🔐 Level 5 - Top Secret
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Access Level
+                        </Box>
+                        <select
+                          value={personnelFormData.access_level}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              access_level: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="basic">🔓 Basic</option>
+                          <option value="standard">🔒 Standard</option>
+                          <option value="elevated">🔐 Elevated</option>
+                          <option value="administrative">
+                            ⚡ Administrative
+                          </option>
+                          <option value="executive">👑 Executive</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Hire Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={personnelFormData.hire_date}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              hire_date: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-01-15..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Contact Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📞 CONTACT INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Phone Number
+                        </Box>
+                        <input
+                          type="text"
+                          value={personnelFormData.contact_info.phone}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              contact_info: {
+                                ...personnelFormData.contact_info,
+                                phone: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Phone number..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Email Address
+                        </Box>
+                        <input
+                          type="email"
+                          value={personnelFormData.contact_info.email}
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              contact_info: {
+                                ...personnelFormData.contact_info,
+                                email: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Email address..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Emergency Contact
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            personnelFormData.contact_info.emergency_contact
+                          }
+                          onChange={(e) =>
+                            setPersonnelFormData({
+                              ...personnelFormData,
+                              contact_info: {
+                                ...personnelFormData.contact_info,
+                                emergency_contact: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Emergency contact..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setPersonnelModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !personnelFormData.employee_id ||
+                          !personnelFormData.name ||
+                          !personnelFormData.position ||
+                          !personnelFormData.department ||
+                          !personnelFormData.security_clearance
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('personnel_add_record', {
+                          employee_data: personnelFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Employee registered successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setPersonnelFormData({
+                          employee_id: '',
+                          name: '',
+                          position: '',
+                          department: '',
+                          security_clearance: 'level_1',
+                          access_level: 'basic',
+                          hire_date: '',
+                          supervisor: '',
+                          contact_info: {
+                            phone: '',
+                            email: '',
+                            emergency_contact: '',
+                          },
+                          qualifications: [],
+                          certifications: [],
+                          training_completed: [],
+                          performance_rating: 'satisfactory',
+                          status: 'active',
+                          location: '',
+                          schedule: '',
+                          salary: '',
+                          benefits: [],
+                          medical_clearance: false,
+                          psychological_clearance: false,
+                          background_check: false,
+                          drug_test: false,
+                          polygraph_test: false,
+                          security_interview: false,
+                          clearance_review_date: '',
+                          next_review_date: '',
+                          incident_history: [],
+                          commendations: [],
+                          disciplinary_actions: [],
+                          assignments: [],
+                          projects: [],
+                          skills: [],
+                          languages: [],
+                          equipment_authorized: [],
+                          facility_access: [],
+                          system_access: [],
+                          clearance_level: 'level_1',
+                          clearance_type: 'standard',
+                          clearance_status: 'active',
+                          clearance_expiry: '',
+                          clearance_renewal: '',
+                          clearance_conditions: [],
+                          clearance_restrictions: [],
+                          clearance_notes: '',
+                          security_briefing: false,
+                          security_training: false,
+                          security_awareness: false,
+                          security_compliance: false,
+                          security_audit: false,
+                          security_review: false,
+                          security_assessment: false,
+                          security_evaluation: false,
+                          security_inspection: false,
+                          security_testing: false,
+                          security_monitoring: false,
+                          security_tracking: false,
+                          security_reporting: false,
+                          security_documentation: false,
+                          security_analysis: false,
+                          security_planning: false,
+                          security_coordination: false,
+                          security_communication: false,
+                          security_training_completed: false,
+                          security_awareness_completed: false,
+                          security_preparedness: false,
+                          security_response: false,
+                          security_recovery: false,
+                          security_lessons: false,
+                          security_improvements: false,
+                          security_enhancements: false,
+                          security_optimization: false,
+                          security_modernization: false,
+                          security_innovation: false,
+                          security_development: false,
+                          security_research: false,
+                        });
+                        setPersonnelModalOpen(false);
+                      }}
+                      tooltip="Register employee"
+                    >
+                      👤 Register Employee
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Technology Modal - Global Access */}
+        {technologyModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setTechnologyModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  ⚡ NEW TECHNOLOGY REGISTRATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setTechnologyModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Device Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    ⚡ DEVICE INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Device ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.device_id}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              device_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., TECH-2024-001, DEV-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Device Name *
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.device_name}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              device_name: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Mainframe Alpha, Security Terminal..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Device Type *
+                        </Box>
+                        <select
+                          value={technologyFormData.device_type}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              device_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="computer">💻 Computer</option>
+                          <option value="server">🖥️ Server</option>
+                          <option value="terminal">🖱️ Terminal</option>
+                          <option value="network">🌐 Network Device</option>
+                          <option value="security">🔒 Security Device</option>
+                          <option value="monitoring">
+                            📊 Monitoring Device
+                          </option>
+                          <option value="communication">
+                            📡 Communication Device
+                          </option>
+                          <option value="research">
+                            🔬 Research Equipment
+                          </option>
+                          <option value="medical">🏥 Medical Device</option>
+                          <option value="containment">
+                            🛡️ Containment Device
+                          </option>
+                          <option value="other">⚙️ Other</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Manufacturer
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.manufacturer}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              manufacturer: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Foundation Tech, SecureCorp..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Model
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.model}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              model: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., XT-5000, SecureTerm-2024..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Serial Number
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.serial_number}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              serial_number: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Device serial number..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Location
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.location}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              location: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Server Room A, Security Office..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Specifications Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔧 TECHNICAL SPECIFICATIONS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Processor
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.specifications.processor}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              specifications: {
+                                ...technologyFormData.specifications,
+                                processor: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Intel i7, AMD Ryzen..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Memory
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.specifications.memory}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              specifications: {
+                                ...technologyFormData.specifications,
+                                memory: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 16GB RAM..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Storage
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.specifications.storage}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              specifications: {
+                                ...technologyFormData.specifications,
+                                storage: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 1TB SSD..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Network
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.specifications.network}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              specifications: {
+                                ...technologyFormData.specifications,
+                                network: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 1Gbps Ethernet..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={2}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Operating System
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.specifications.os}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              specifications: {
+                                ...technologyFormData.specifications,
+                                os: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Windows 11, Linux..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Status & Maintenance Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 STATUS & MAINTENANCE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Status *
+                        </Box>
+                        <select
+                          value={technologyFormData.status}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              status: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="operational">🟢 Operational</option>
+                          <option value="maintenance">🟡 Maintenance</option>
+                          <option value="offline">🔴 Offline</option>
+                          <option value="testing">🟠 Testing</option>
+                          <option value="decommissioned">
+                            ⚫ Decommissioned
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Purchase Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.purchase_date}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              purchase_date: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-01-15..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Last Maintenance
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.last_maintenance}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              last_maintenance: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-01-15..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Next Maintenance
+                        </Box>
+                        <input
+                          type="text"
+                          value={technologyFormData.next_maintenance}
+                          onChange={(e) =>
+                            setTechnologyFormData({
+                              ...technologyFormData,
+                              next_maintenance: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-07-15..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setTechnologyModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !technologyFormData.device_id ||
+                          !technologyFormData.device_name ||
+                          !technologyFormData.device_type ||
+                          !technologyFormData.status
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('technology_add_tech', {
+                          technology_data: technologyFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Technology device registered successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setTechnologyFormData({
+                          device_id: '',
+                          device_name: '',
+                          device_type: 'computer',
+                          manufacturer: '',
+                          model: '',
+                          serial_number: '',
+                          location: '',
+                          assigned_to: '',
+                          department: '',
+                          status: 'operational',
+                          purchase_date: '',
+                          warranty_expiry: '',
+                          last_maintenance: '',
+                          next_maintenance: '',
+                          specifications: {
+                            processor: '',
+                            memory: '',
+                            storage: '',
+                            network: '',
+                            os: '',
+                          },
+                          software_installed: [],
+                          security_software: [],
+                          access_controls: [],
+                          monitoring_systems: [],
+                          backup_systems: [],
+                          redundancy_systems: [],
+                          failover_systems: [],
+                          disaster_recovery: [],
+                          maintenance_schedule: '',
+                          maintenance_history: [],
+                          repair_history: [],
+                          upgrade_history: [],
+                          replacement_history: [],
+                          cost_information: {
+                            purchase_cost: '',
+                            maintenance_cost: '',
+                            operational_cost: '',
+                            replacement_cost: '',
+                          },
+                          performance_metrics: {
+                            uptime: '',
+                            response_time: '',
+                            throughput: '',
+                            efficiency: '',
+                          },
+                          security_features: [],
+                          vulnerabilities: [],
+                          patches_installed: [],
+                          updates_pending: [],
+                          compliance_status: 'compliant',
+                          audit_status: 'passed',
+                          certification_status: 'certified',
+                          testing_status: 'passed',
+                          monitoring_status: 'active',
+                          tracking_status: 'active',
+                          reporting_status: 'active',
+                          documentation_status: 'complete',
+                          analysis_status: 'complete',
+                          planning_status: 'complete',
+                          coordination_status: 'complete',
+                          communication_status: 'active',
+                          training_status: 'complete',
+                          awareness_status: 'complete',
+                          preparedness_status: 'complete',
+                          response_status: 'ready',
+                          recovery_status: 'ready',
+                          lessons_status: 'complete',
+                          improvements_status: 'complete',
+                          enhancements_status: 'complete',
+                          optimization_status: 'complete',
+                          modernization_status: 'complete',
+                          innovation_status: 'complete',
+                          development_status: 'complete',
+                          research_status: 'complete',
+                        });
+                        setTechnologyModalOpen(false);
+                      }}
+                      tooltip="Register technology device"
+                    >
+                      ⚡ Register Technology
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Facility Modal - Global Access */}
+        {facilityModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setFacilityModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🏢 NEW FACILITY REGISTRATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setFacilityModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Facility Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🏢 FACILITY INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Facility ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.facility_id}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              facility_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., SITE-19, FAC-001, COMPLEX-A..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Facility Name *
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.facility_name}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              facility_name: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Site-19, Research Complex Alpha..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Facility Type *
+                        </Box>
+                        <select
+                          value={facilityFormData.facility_type}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              facility_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="site">🏢 Site</option>
+                          <option value="complex">🏗️ Complex</option>
+                          <option value="facility">🏭 Facility</option>
+                          <option value="base">🏛️ Base</option>
+                          <option value="station">🚉 Station</option>
+                          <option value="outpost">🏕️ Outpost</option>
+                          <option value="laboratory">🧪 Laboratory</option>
+                          <option value="containment">🛡️ Containment</option>
+                          <option value="research">🔬 Research</option>
+                          <option value="medical">🏥 Medical</option>
+                          <option value="administrative">
+                            📋 Administrative
+                          </option>
+                          <option value="storage">📦 Storage</option>
+                          <option value="transportation">
+                            🚚 Transportation
+                          </option>
+                          <option value="other">⚙️ Other</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Status
+                        </Box>
+                        <select
+                          value={facilityFormData.status}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              status: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="operational">🟢 Operational</option>
+                          <option value="construction">
+                            🟡 Under Construction
+                          </option>
+                          <option value="maintenance">🟠 Maintenance</option>
+                          <option value="decommissioned">
+                            🔴 Decommissioned
+                          </option>
+                          <option value="quarantine">🚨 Quarantine</option>
+                          <option value="standby">⚪ Standby</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Security Level
+                        </Box>
+                        <select
+                          value={facilityFormData.security_level}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              security_level: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="level_1">🔓 Level 1 - Basic</option>
+                          <option value="level_2">
+                            🔒 Level 2 - Restricted
+                          </option>
+                          <option value="level_3">
+                            🔐 Level 3 - Confidential
+                          </option>
+                          <option value="level_4">🔐 Level 4 - Secret</option>
+                          <option value="level_5">
+                            🔐 Level 5 - Top Secret
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Location Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📍 LOCATION INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Address
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.location.address}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              location: {
+                                ...facilityFormData.location,
+                                address: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Street address..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          City
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.location.city}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              location: {
+                                ...facilityFormData.location,
+                                city: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="City..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          State/Province
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.location.state}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              location: {
+                                ...facilityFormData.location,
+                                state: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="State/Province..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Country
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.location.country}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              location: {
+                                ...facilityFormData.location,
+                                country: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="Country..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Coordinates
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.location.coordinates}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              location: {
+                                ...facilityFormData.location,
+                                coordinates: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 40.7128° N, 74.0060° W..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Capacity Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 CAPACITY & CAPABILITIES
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Personnel Capacity
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.capacity.personnel}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              capacity: {
+                                ...facilityFormData.capacity,
+                                personnel: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 500, 1000+..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Equipment Capacity
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.capacity.equipment}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              capacity: {
+                                ...facilityFormData.capacity,
+                                equipment: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 200 units, unlimited..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Storage Capacity
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.capacity.storage}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              capacity: {
+                                ...facilityFormData.capacity,
+                                storage: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 10,000 sq ft, 50,000 cubic meters..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Containment Capacity
+                        </Box>
+                        <input
+                          type="text"
+                          value={facilityFormData.capacity.containment}
+                          onChange={(e) =>
+                            setFacilityFormData({
+                              ...facilityFormData,
+                              capacity: {
+                                ...facilityFormData.capacity,
+                                containment: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 50 cells, 100 chambers..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setFacilityModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !facilityFormData.facility_id ||
+                          !facilityFormData.facility_name ||
+                          !facilityFormData.facility_type
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('facility_add_facility', {
+                          facility_data: facilityFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Facility registered successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setFacilityFormData({
+                          facility_id: '',
+                          facility_name: '',
+                          facility_type: 'site',
+                          location: {
+                            address: '',
+                            city: '',
+                            state: '',
+                            country: '',
+                            coordinates: '',
+                          },
+                          capacity: {
+                            personnel: '',
+                            equipment: '',
+                            storage: '',
+                            containment: '',
+                          },
+                          status: 'operational',
+                          security_level: 'level_1',
+                          containment_level: 'level_1',
+                          construction_date: '',
+                          last_renovation: '',
+                          next_renovation: '',
+                          departments: [],
+                          personnel_assigned: [],
+                          equipment_installed: [],
+                          systems_installed: [],
+                          security_systems: [],
+                          containment_systems: [],
+                          monitoring_systems: [],
+                          communication_systems: [],
+                          power_systems: [],
+                          environmental_systems: [],
+                          maintenance_systems: [],
+                          backup_systems: [],
+                          emergency_systems: [],
+                          safety_systems: [],
+                          fire_suppression: [],
+                          ventilation_systems: [],
+                          water_systems: [],
+                          waste_systems: [],
+                          telecommunications: [],
+                          data_systems: [],
+                          laboratory_systems: [],
+                          medical_systems: [],
+                          research_systems: [],
+                          administrative_systems: [],
+                          operational_systems: [],
+                          logistical_systems: [],
+                          transportation_systems: [],
+                          storage_systems: [],
+                          archival_systems: [],
+                          security_clearance: 'level_1',
+                          access_controls: [],
+                          monitoring_equipment: [],
+                          surveillance_systems: [],
+                          alarm_systems: [],
+                          response_systems: [],
+                          emergency_protocols: [],
+                          evacuation_procedures: [],
+                          lockdown_procedures: [],
+                          containment_procedures: [],
+                          security_procedures: [],
+                          safety_procedures: [],
+                          maintenance_procedures: [],
+                          operational_procedures: [],
+                          administrative_procedures: [],
+                          logistical_procedures: [],
+                          transportation_procedures: [],
+                          storage_procedures: [],
+                          archival_procedures: [],
+                          compliance_status: 'compliant',
+                          audit_status: 'passed',
+                          certification_status: 'certified',
+                          testing_status: 'passed',
+                          monitoring_status: 'active',
+                          tracking_status: 'active',
+                          reporting_status: 'active',
+                          documentation_status: 'complete',
+                          analysis_status: 'complete',
+                          planning_status: 'complete',
+                          coordination_status: 'complete',
+                          communication_status: 'active',
+                          training_status: 'complete',
+                          awareness_status: 'complete',
+                          preparedness_status: 'complete',
+                          response_status: 'ready',
+                          recovery_status: 'ready',
+                          lessons_status: 'complete',
+                          improvements_status: 'complete',
+                          enhancements_status: 'complete',
+                          optimization_status: 'complete',
+                          modernization_status: 'complete',
+                          innovation_status: 'complete',
+                          development_status: 'complete',
+                          research_status: 'complete',
+                        });
+                        setFacilityModalOpen(false);
+                      }}
+                      tooltip="Register facility"
+                    >
+                      🏢 Register Facility
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Analytics Report Modal - Global Access */}
+        {analyticsReportModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setAnalyticsReportModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  📄 ANALYTICS REPORT GENERATOR
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setAnalyticsReportModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Report Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📄 REPORT INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Report ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsReportFormData.report_id}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              report_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., RPT-2024-001, ANALYTICS-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Report Title *
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsReportFormData.report_title}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              report_title: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Q4 Performance Analysis..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Report Type *
+                        </Box>
+                        <select
+                          value={analyticsReportFormData.report_type}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              report_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="performance">📊 Performance</option>
+                          <option value="efficiency">⚡ Efficiency</option>
+                          <option value="trend">📈 Trend Analysis</option>
+                          <option value="comparative">🔄 Comparative</option>
+                          <option value="predictive">🔮 Predictive</option>
+                          <option value="statistical">📋 Statistical</option>
+                          <option value="executive">
+                            👑 Executive Summary
+                          </option>
+                          <option value="operational">⚙️ Operational</option>
+                          <option value="security">🔒 Security</option>
+                          <option value="research">🔬 Research</option>
+                          <option value="custom">🎨 Custom</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Format
+                        </Box>
+                        <select
+                          value={analyticsReportFormData.format}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              format: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="pdf">📄 PDF</option>
+                          <option value="excel">📊 Excel</option>
+                          <option value="csv">📋 CSV</option>
+                          <option value="json">🔧 JSON</option>
+                          <option value="html">🌐 HTML</option>
+                          <option value="powerpoint">📽️ PowerPoint</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Priority
+                        </Box>
+                        <select
+                          value={analyticsReportFormData.priority}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              priority: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="low">🟢 Low</option>
+                          <option value="normal">🟡 Normal</option>
+                          <option value="high">🟠 High</option>
+                          <option value="urgent">🔴 Urgent</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Date Range Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📅 DATE RANGE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Start Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsReportFormData.date_range.start_date}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              date_range: {
+                                ...analyticsReportFormData.date_range,
+                                start_date: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-01-01..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          End Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsReportFormData.date_range.end_date}
+                          onChange={(e) =>
+                            setAnalyticsReportFormData({
+                              ...analyticsReportFormData,
+                              date_range: {
+                                ...analyticsReportFormData.date_range,
+                                end_date: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-12-31..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Metrics Selection Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 METRICS TO INCLUDE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsReportFormData.metrics_included
+                                .performance_metrics
+                            }
+                            onChange={(e) =>
+                              setAnalyticsReportFormData({
+                                ...analyticsReportFormData,
+                                metrics_included: {
+                                  ...analyticsReportFormData.metrics_included,
+                                  performance_metrics: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📊 Performance Metrics
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsReportFormData.metrics_included
+                                .efficiency_data
+                            }
+                            onChange={(e) =>
+                              setAnalyticsReportFormData({
+                                ...analyticsReportFormData,
+                                metrics_included: {
+                                  ...analyticsReportFormData.metrics_included,
+                                  efficiency_data: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚡ Efficiency Data
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsReportFormData.metrics_included
+                                .trend_analysis
+                            }
+                            onChange={(e) =>
+                              setAnalyticsReportFormData({
+                                ...analyticsReportFormData,
+                                metrics_included: {
+                                  ...analyticsReportFormData.metrics_included,
+                                  trend_analysis: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📈 Trend Analysis
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsReportFormData.metrics_included
+                                .comparative_data
+                            }
+                            onChange={(e) =>
+                              setAnalyticsReportFormData({
+                                ...analyticsReportFormData,
+                                metrics_included: {
+                                  ...analyticsReportFormData.metrics_included,
+                                  comparative_data: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🔄 Comparative Data
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsReportFormData.metrics_included
+                                .predictive_analytics
+                            }
+                            onChange={(e) =>
+                              setAnalyticsReportFormData({
+                                ...analyticsReportFormData,
+                                metrics_included: {
+                                  ...analyticsReportFormData.metrics_included,
+                                  predictive_analytics: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🔮 Predictive Analytics
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsReportFormData.metrics_included
+                                .statistical_summary
+                            }
+                            onChange={(e) =>
+                              setAnalyticsReportFormData({
+                                ...analyticsReportFormData,
+                                metrics_included: {
+                                  ...analyticsReportFormData.metrics_included,
+                                  statistical_summary: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📋 Statistical Summary
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setAnalyticsReportModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !analyticsReportFormData.report_id ||
+                          !analyticsReportFormData.report_title ||
+                          !analyticsReportFormData.report_type
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('analytics_generate_report', {
+                          report_data: analyticsReportFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Analytics report generation initiated',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setAnalyticsReportFormData({
+                          report_id: '',
+                          report_title: '',
+                          report_type: 'performance',
+                          date_range: {
+                            start_date: '',
+                            end_date: '',
+                          },
+                          metrics_included: {
+                            performance_metrics: true,
+                            efficiency_data: true,
+                            trend_analysis: true,
+                            comparative_data: true,
+                            predictive_analytics: true,
+                            statistical_summary: true,
+                          },
+                          data_sources: [],
+                          filters: {
+                            department: 'all',
+                            facility: 'all',
+                            time_period: 'monthly',
+                            data_quality: 'all',
+                          },
+                          format: 'pdf',
+                          delivery_method: 'download',
+                          recipients: [],
+                          custom_parameters: {
+                            confidence_level: '95',
+                            significance_level: '0.05',
+                            sample_size: 'auto',
+                            outlier_detection: true,
+                            trend_forecasting: true,
+                          },
+                          visualization_options: {
+                            charts: true,
+                            graphs: true,
+                            tables: true,
+                            heatmaps: true,
+                            dashboards: true,
+                          },
+                          analysis_depth: 'comprehensive',
+                          priority: 'normal',
+                          notes: '',
+                        });
+                        setAnalyticsReportModalOpen(false);
+                      }}
+                      tooltip="Generate analytics report"
+                    >
+                      📄 Generate Report
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Analytics KPI Dashboard Modal - Global Access */}
+        {analyticsKpiModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setAnalyticsKpiModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  📈 KPI DASHBOARD CONFIGURATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setAnalyticsKpiModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Dashboard Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📈 DASHBOARD INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Dashboard ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsKpiFormData.dashboard_id}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              dashboard_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., KPI-2024-001, DASHBOARD-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Dashboard Name *
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsKpiFormData.dashboard_name}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              dashboard_name: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., Executive Overview, Operations Dashboard..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Dashboard Type *
+                        </Box>
+                        <select
+                          value={analyticsKpiFormData.dashboard_type}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              dashboard_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="executive">👑 Executive</option>
+                          <option value="operational">⚙️ Operational</option>
+                          <option value="tactical">🎯 Tactical</option>
+                          <option value="strategic">🗺️ Strategic</option>
+                          <option value="departmental">🏢 Departmental</option>
+                          <option value="project">📋 Project</option>
+                          <option value="real_time">⚡ Real-Time</option>
+                          <option value="custom">🎨 Custom</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Refresh Rate
+                        </Box>
+                        <select
+                          value={analyticsKpiFormData.refresh_rate}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              refresh_rate: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="real_time">⚡ Real-Time</option>
+                          <option value="1_minute">⏱️ 1 Minute</option>
+                          <option value="5_minutes">⏱️ 5 Minutes</option>
+                          <option value="15_minutes">⏱️ 15 Minutes</option>
+                          <option value="1_hour">⏰ 1 Hour</option>
+                          <option value="daily">📅 Daily</option>
+                          <option value="manual">🔄 Manual</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Theme
+                        </Box>
+                        <select
+                          value={analyticsKpiFormData.display_options.theme}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              display_options: {
+                                ...analyticsKpiFormData.display_options,
+                                theme: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="dark">🌙 Dark</option>
+                          <option value="light">☀️ Light</option>
+                          <option value="blue">🔵 Blue</option>
+                          <option value="green">🟢 Green</option>
+                          <option value="purple">🟣 Purple</option>
+                          <option value="custom">🎨 Custom</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* KPI Categories Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 KPI CATEGORIES
+                  </Box>
+
+                  {/* Performance KPIs */}
+                  <Box style={{ marginBottom: '20px' }}>
+                    <Box
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginBottom: '10px',
+                        color: '#66ffff',
+                      }}
+                    >
+                      📊 PERFORMANCE METRICS
+                    </Box>
+                    <Grid>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.performance
+                                .overall_efficiency
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  performance: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .performance,
+                                    overall_efficiency: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚡ Overall Efficiency
+                          </span>
+                        </label>
+                      </Grid.Column>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.performance
+                                .response_time
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  performance: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .performance,
+                                    response_time: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⏱️ Response Time
+                          </span>
+                        </label>
+                      </Grid.Column>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.performance
+                                .throughput
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  performance: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .performance,
+                                    throughput: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📈 Throughput
+                          </span>
+                        </label>
+                      </Grid.Column>
+                    </Grid>
+                  </Box>
+
+                  {/* Operational KPIs */}
+                  <Box style={{ marginBottom: '20px' }}>
+                    <Box
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginBottom: '10px',
+                        color: '#66ffff',
+                      }}
+                    >
+                      ⚙️ OPERATIONAL METRICS
+                    </Box>
+                    <Grid>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.operational
+                                .uptime
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  operational: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .operational,
+                                    uptime: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>🟢 Uptime</span>
+                        </label>
+                      </Grid.Column>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.operational
+                                .resource_utilization
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  operational: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .operational,
+                                    resource_utilization: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📊 Resource Utilization
+                          </span>
+                        </label>
+                      </Grid.Column>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.operational
+                                .cost_efficiency
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  operational: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .operational,
+                                    cost_efficiency: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            💰 Cost Efficiency
+                          </span>
+                        </label>
+                      </Grid.Column>
+                    </Grid>
+                  </Box>
+
+                  {/* Security KPIs */}
+                  <Box style={{ marginBottom: '20px' }}>
+                    <Box
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        marginBottom: '10px',
+                        color: '#66ffff',
+                      }}
+                    >
+                      🔒 SECURITY METRICS
+                    </Box>
+                    <Grid>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.security
+                                .incident_rate
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  security: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .security,
+                                    incident_rate: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🚨 Incident Rate
+                          </span>
+                        </label>
+                      </Grid.Column>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.security
+                                .compliance_score
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  security: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .security,
+                                    compliance_score: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ✅ Compliance Score
+                          </span>
+                        </label>
+                      </Grid.Column>
+                      <Grid.Column size={4}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              analyticsKpiFormData.kpi_categories.security
+                                .threat_level
+                            }
+                            onChange={(e) =>
+                              setAnalyticsKpiFormData({
+                                ...analyticsKpiFormData,
+                                kpi_categories: {
+                                  ...analyticsKpiFormData.kpi_categories,
+                                  security: {
+                                    ...analyticsKpiFormData.kpi_categories
+                                      .security,
+                                    threat_level: e.target.checked,
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚠️ Threat Level
+                          </span>
+                        </label>
+                      </Grid.Column>
+                    </Grid>
+                  </Box>
+                </Box>
+
+                {/* Thresholds Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🎯 PERFORMANCE THRESHOLDS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Warning Level (%)
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsKpiFormData.thresholds.warning_level}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              thresholds: {
+                                ...analyticsKpiFormData.thresholds,
+                                warning_level: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 75..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Critical Level (%)
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsKpiFormData.thresholds.critical_level}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              thresholds: {
+                                ...analyticsKpiFormData.thresholds,
+                                critical_level: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 90..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Target Level (%)
+                        </Box>
+                        <input
+                          type="text"
+                          value={analyticsKpiFormData.thresholds.target_level}
+                          onChange={(e) =>
+                            setAnalyticsKpiFormData({
+                              ...analyticsKpiFormData,
+                              thresholds: {
+                                ...analyticsKpiFormData.thresholds,
+                                target_level: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 85..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setAnalyticsKpiModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !analyticsKpiFormData.dashboard_id ||
+                          !analyticsKpiFormData.dashboard_name ||
+                          !analyticsKpiFormData.dashboard_type
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('analytics_kpi_dashboard', {
+                          dashboard_data: analyticsKpiFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'KPI dashboard configuration saved',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setAnalyticsKpiFormData({
+                          dashboard_id: '',
+                          dashboard_name: '',
+                          dashboard_type: 'executive',
+                          kpi_categories: {
+                            performance: {
+                              overall_efficiency: true,
+                              response_time: true,
+                              throughput: true,
+                              accuracy: true,
+                              reliability: true,
+                            },
+                            operational: {
+                              uptime: true,
+                              maintenance_schedule: true,
+                              resource_utilization: true,
+                              cost_efficiency: true,
+                              quality_metrics: true,
+                            },
+                            security: {
+                              incident_rate: true,
+                              response_time: true,
+                              compliance_score: true,
+                              threat_level: true,
+                              vulnerability_status: true,
+                            },
+                            research: {
+                              project_completion: true,
+                              innovation_index: true,
+                              publication_rate: true,
+                              collaboration_score: true,
+                              breakthrough_metrics: true,
+                            },
+                            personnel: {
+                              productivity: true,
+                              training_completion: true,
+                              satisfaction_score: true,
+                              retention_rate: true,
+                              performance_rating: true,
+                            },
+                          },
+                          refresh_rate: 'real_time',
+                          display_options: {
+                            theme: 'dark',
+                            layout: 'grid',
+                            animations: true,
+                            interactive: true,
+                            alerts: true,
+                          },
+                          thresholds: {
+                            warning_level: '75',
+                            critical_level: '90',
+                            target_level: '85',
+                          },
+                          data_sources: [],
+                          custom_widgets: [],
+                          sharing_settings: {
+                            public_access: false,
+                            authorized_users: [],
+                            export_permissions: true,
+                          },
+                        });
+                        setAnalyticsKpiModalOpen(false);
+                      }}
+                      tooltip="Configure KPI dashboard"
+                    >
+                      📈 Configure Dashboard
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Security Personnel Management Modal - Global Access */}
+        {securityPersonnelModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setSecurityPersonnelModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  👥 SECURITY PERSONNEL MANAGEMENT
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setSecurityPersonnelModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Operation Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    👥 OPERATION INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Operation ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityPersonnelFormData.operation_id}
+                          onChange={(e) =>
+                            setSecurityPersonnelFormData({
+                              ...securityPersonnelFormData,
+                              operation_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., SEC-PERS-2024-001, OPS-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Operation Type
+                        </Box>
+                        <select
+                          value={securityPersonnelFormData.operation_type}
+                          onChange={(e) =>
+                            setSecurityPersonnelFormData({
+                              ...securityPersonnelFormData,
+                              operation_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="personnel_management">
+                            👥 Personnel Management
+                          </option>
+                          <option value="assignment_review">
+                            📋 Assignment Review
+                          </option>
+                          <option value="performance_evaluation">
+                            📊 Performance Evaluation
+                          </option>
+                          <option value="training_coordination">
+                            🎓 Training Coordination
+                          </option>
+                          <option value="equipment_management">
+                            🔧 Equipment Management
+                          </option>
+                          <option value="scheduling_management">
+                            📅 Scheduling Management
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Personnel Data Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 PERSONNEL DATA
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Total Personnel
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityPersonnelFormData.personnel_data
+                              .total_personnel
+                          }
+                          onChange={(e) =>
+                            setSecurityPersonnelFormData({
+                              ...securityPersonnelFormData,
+                              personnel_data: {
+                                ...securityPersonnelFormData.personnel_data,
+                                total_personnel: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 150..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Active Personnel
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityPersonnelFormData.personnel_data
+                              .active_personnel
+                          }
+                          onChange={(e) =>
+                            setSecurityPersonnelFormData({
+                              ...securityPersonnelFormData,
+                              personnel_data: {
+                                ...securityPersonnelFormData.personnel_data,
+                                active_personnel: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 120..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          On Duty
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityPersonnelFormData.personnel_data.on_duty
+                          }
+                          onChange={(e) =>
+                            setSecurityPersonnelFormData({
+                              ...securityPersonnelFormData,
+                              personnel_data: {
+                                ...securityPersonnelFormData.personnel_data,
+                                on_duty: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 45..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Off Duty
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityPersonnelFormData.personnel_data.off_duty
+                          }
+                          onChange={(e) =>
+                            setSecurityPersonnelFormData({
+                              ...securityPersonnelFormData,
+                              personnel_data: {
+                                ...securityPersonnelFormData.personnel_data,
+                                off_duty: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 75..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Qualifications Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🎓 QUALIFICATIONS & TRAINING
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityPersonnelFormData.qualifications
+                                .firearms_certified.length > 0
+                            }
+                            onChange={(e) =>
+                              setSecurityPersonnelFormData({
+                                ...securityPersonnelFormData,
+                                qualifications: {
+                                  ...securityPersonnelFormData.qualifications,
+                                  firearms_certified: e.target.checked
+                                    ? ['All Personnel']
+                                    : [],
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🔫 Firearms Certified
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityPersonnelFormData.qualifications
+                                .taser_certified.length > 0
+                            }
+                            onChange={(e) =>
+                              setSecurityPersonnelFormData({
+                                ...securityPersonnelFormData,
+                                qualifications: {
+                                  ...securityPersonnelFormData.qualifications,
+                                  taser_certified: e.target.checked
+                                    ? ['All Personnel']
+                                    : [],
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚡ Taser Certified
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityPersonnelFormData.qualifications
+                                .medical_trained.length > 0
+                            }
+                            onChange={(e) =>
+                              setSecurityPersonnelFormData({
+                                ...securityPersonnelFormData,
+                                qualifications: {
+                                  ...securityPersonnelFormData.qualifications,
+                                  medical_trained: e.target.checked
+                                    ? ['All Personnel']
+                                    : [],
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🏥 Medical Trained
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityPersonnelFormData.qualifications
+                                .tactical_trained.length > 0
+                            }
+                            onChange={(e) =>
+                              setSecurityPersonnelFormData({
+                                ...securityPersonnelFormData,
+                                qualifications: {
+                                  ...securityPersonnelFormData.qualifications,
+                                  tactical_trained: e.target.checked
+                                    ? ['All Personnel']
+                                    : [],
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🎯 Tactical Trained
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityPersonnelFormData.qualifications
+                                .investigation_trained.length > 0
+                            }
+                            onChange={(e) =>
+                              setSecurityPersonnelFormData({
+                                ...securityPersonnelFormData,
+                                qualifications: {
+                                  ...securityPersonnelFormData.qualifications,
+                                  investigation_trained: e.target.checked
+                                    ? ['All Personnel']
+                                    : [],
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🔍 Investigation Trained
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setSecurityPersonnelModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (!securityPersonnelFormData.operation_id) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('security_manage_personnel', {
+                          personnel_data: securityPersonnelFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Security personnel management updated',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setSecurityPersonnelFormData({
+                          operation_id: '',
+                          operation_type: 'personnel_management',
+                          personnel_data: {
+                            total_personnel: '',
+                            active_personnel: '',
+                            on_duty: '',
+                            off_duty: '',
+                            training: '',
+                            leave: '',
+                            suspended: '',
+                          },
+                          assignments: {
+                            patrol_assignments: [],
+                            post_assignments: [],
+                            special_assignments: [],
+                            emergency_assignments: [],
+                          },
+                          qualifications: {
+                            firearms_certified: [],
+                            taser_certified: [],
+                            medical_trained: [],
+                            tactical_trained: [],
+                            investigation_trained: [],
+                          },
+                          performance_metrics: {
+                            response_time: '',
+                            incident_resolution: '',
+                            community_relations: '',
+                            training_completion: '',
+                            disciplinary_actions: '',
+                          },
+                          scheduling: {
+                            shift_patterns: [],
+                            overtime_hours: '',
+                            vacation_requests: [],
+                            sick_leave: [],
+                          },
+                          equipment: {
+                            firearms_assigned: [],
+                            body_armor: [],
+                            communication_devices: [],
+                            vehicles: [],
+                          },
+                          training_schedule: [],
+                          evaluation_dates: [],
+                          clearance_levels: [],
+                          notes: '',
+                        });
+                        setSecurityPersonnelModalOpen(false);
+                      }}
+                      tooltip="Update security personnel management"
+                    >
+                      👥 Update Personnel
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Security Logs Modal - Global Access */}
+        {securityLogsModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setSecurityLogsModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  📋 SECURITY LOGS VIEWER
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setSecurityLogsModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Log Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📋 LOG INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Log ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityLogsFormData.log_id}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              log_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., LOG-2024-001, SEC-LOG-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Log Type
+                        </Box>
+                        <select
+                          value={securityLogsFormData.log_type}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              log_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="security">🔒 Security</option>
+                          <option value="access">🚪 Access</option>
+                          <option value="incident">🚨 Incident</option>
+                          <option value="system">⚙️ System</option>
+                          <option value="audit">📊 Audit</option>
+                          <option value="comprehensive">
+                            📋 Comprehensive
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Date Range Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📅 DATE RANGE
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Start Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityLogsFormData.date_range.start_date}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              date_range: {
+                                ...securityLogsFormData.date_range,
+                                start_date: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-01-01..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          End Date
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityLogsFormData.date_range.end_date}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              date_range: {
+                                ...securityLogsFormData.date_range,
+                                end_date: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 2024-12-31..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Log Categories Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 LOG CATEGORIES
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityLogsFormData.log_categories.access_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityLogsFormData({
+                                ...securityLogsFormData,
+                                log_categories: {
+                                  ...securityLogsFormData.log_categories,
+                                  access_logs: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🚪 Access Logs
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityLogsFormData.log_categories.incident_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityLogsFormData({
+                                ...securityLogsFormData,
+                                log_categories: {
+                                  ...securityLogsFormData.log_categories,
+                                  incident_logs: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🚨 Incident Logs
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityLogsFormData.log_categories.personnel_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityLogsFormData({
+                                ...securityLogsFormData,
+                                log_categories: {
+                                  ...securityLogsFormData.log_categories,
+                                  personnel_logs: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            👥 Personnel Logs
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityLogsFormData.log_categories.system_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityLogsFormData({
+                                ...securityLogsFormData,
+                                log_categories: {
+                                  ...securityLogsFormData.log_categories,
+                                  system_logs: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚙️ System Logs
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityLogsFormData.log_categories.alert_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityLogsFormData({
+                                ...securityLogsFormData,
+                                log_categories: {
+                                  ...securityLogsFormData.log_categories,
+                                  alert_logs: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚠️ Alert Logs
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityLogsFormData.log_categories
+                                .maintenance_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityLogsFormData({
+                                ...securityLogsFormData,
+                                log_categories: {
+                                  ...securityLogsFormData.log_categories,
+                                  maintenance_logs: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🔧 Maintenance Logs
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Export Options Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📤 EXPORT OPTIONS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Export Format
+                        </Box>
+                        <select
+                          value={securityLogsFormData.export_format}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              export_format: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="csv">📋 CSV</option>
+                          <option value="json">🔧 JSON</option>
+                          <option value="xml">📄 XML</option>
+                          <option value="pdf">📄 PDF</option>
+                          <option value="excel">📊 Excel</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Sort By
+                        </Box>
+                        <select
+                          value={securityLogsFormData.sort_by}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              sort_by: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="timestamp">⏰ Timestamp</option>
+                          <option value="severity">🚨 Severity</option>
+                          <option value="user">👤 User</option>
+                          <option value="location">📍 Location</option>
+                          <option value="type">📋 Type</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Max Results
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityLogsFormData.max_results}
+                          onChange={(e) =>
+                            setSecurityLogsFormData({
+                              ...securityLogsFormData,
+                              max_results: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 1000..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setSecurityLogsModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (!securityLogsFormData.log_id) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('security_view_logs', {
+                          logs_data: securityLogsFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Security logs retrieved successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setSecurityLogsFormData({
+                          log_id: '',
+                          log_type: 'security',
+                          date_range: {
+                            start_date: '',
+                            end_date: '',
+                          },
+                          log_categories: {
+                            access_logs: true,
+                            incident_logs: true,
+                            personnel_logs: true,
+                            system_logs: true,
+                            alert_logs: true,
+                            maintenance_logs: true,
+                          },
+                          filters: {
+                            severity: 'all',
+                            personnel: 'all',
+                            location: 'all',
+                            incident_type: 'all',
+                          },
+                          search_terms: [],
+                          export_format: 'csv',
+                          include_details: true,
+                          include_metadata: true,
+                          sort_by: 'timestamp',
+                          sort_order: 'descending',
+                          max_results: '1000',
+                          real_time_monitoring: false,
+                          alert_thresholds: {
+                            critical_incidents: '5',
+                            failed_access: '10',
+                            system_errors: '20',
+                          },
+                        });
+                        setSecurityLogsModalOpen(false);
+                      }}
+                      tooltip="Retrieve security logs"
+                    >
+                      📋 Retrieve Logs
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Security Scan Modal - Global Access */}
+        {securityScanModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setSecurityScanModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🔍 SECURITY SCAN CONFIGURATION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setSecurityScanModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Scan Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔍 SCAN INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Scan ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityScanFormData.scan_id}
+                          onChange={(e) =>
+                            setSecurityScanFormData({
+                              ...securityScanFormData,
+                              scan_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., SCAN-2024-001, SEC-SCAN-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Scan Type
+                        </Box>
+                        <select
+                          value={securityScanFormData.scan_type}
+                          onChange={(e) =>
+                            setSecurityScanFormData({
+                              ...securityScanFormData,
+                              scan_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="comprehensive">
+                            🔍 Comprehensive
+                          </option>
+                          <option value="quick">⚡ Quick</option>
+                          <option value="deep">🕳️ Deep</option>
+                          <option value="targeted">🎯 Targeted</option>
+                          <option value="scheduled">📅 Scheduled</option>
+                          <option value="emergency">🚨 Emergency</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Target Systems Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🎯 TARGET SYSTEMS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityScanFormData.target_systems.access_control
+                            }
+                            onChange={(e) =>
+                              setSecurityScanFormData({
+                                ...securityScanFormData,
+                                target_systems: {
+                                  ...securityScanFormData.target_systems,
+                                  access_control: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🚪 Access Control
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityScanFormData.target_systems.surveillance
+                            }
+                            onChange={(e) =>
+                              setSecurityScanFormData({
+                                ...securityScanFormData,
+                                target_systems: {
+                                  ...securityScanFormData.target_systems,
+                                  surveillance: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📹 Surveillance
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityScanFormData.target_systems.communications
+                            }
+                            onChange={(e) =>
+                              setSecurityScanFormData({
+                                ...securityScanFormData,
+                                target_systems: {
+                                  ...securityScanFormData.target_systems,
+                                  communications: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            📡 Communications
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                  <Grid>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityScanFormData.target_systems.databases
+                            }
+                            onChange={(e) =>
+                              setSecurityScanFormData({
+                                ...securityScanFormData,
+                                target_systems: {
+                                  ...securityScanFormData.target_systems,
+                                  databases: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>🗄️ Databases</span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityScanFormData.target_systems.networks
+                            }
+                            onChange={(e) =>
+                              setSecurityScanFormData({
+                                ...securityScanFormData,
+                                target_systems: {
+                                  ...securityScanFormData.target_systems,
+                                  networks: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>🌐 Networks</span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={4}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityScanFormData.target_systems
+                                .physical_security
+                            }
+                            onChange={(e) =>
+                              setSecurityScanFormData({
+                                ...securityScanFormData,
+                                target_systems: {
+                                  ...securityScanFormData.target_systems,
+                                  physical_security: e.target.checked,
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🏢 Physical Security
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Scan Parameters Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    ⚙️ SCAN PARAMETERS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Scan Depth
+                        </Box>
+                        <select
+                          value={securityScanFormData.scan_parameters.depth}
+                          onChange={(e) =>
+                            setSecurityScanFormData({
+                              ...securityScanFormData,
+                              scan_parameters: {
+                                ...securityScanFormData.scan_parameters,
+                                depth: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="basic">🔍 Basic</option>
+                          <option value="standard">📊 Standard</option>
+                          <option value="thorough">🔬 Thorough</option>
+                          <option value="comprehensive">
+                            📋 Comprehensive
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Scan Speed
+                        </Box>
+                        <select
+                          value={securityScanFormData.scan_parameters.speed}
+                          onChange={(e) =>
+                            setSecurityScanFormData({
+                              ...securityScanFormData,
+                              scan_parameters: {
+                                ...securityScanFormData.scan_parameters,
+                                speed: e.target.value,
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="slow">🐌 Slow</option>
+                          <option value="balanced">⚖️ Balanced</option>
+                          <option value="fast">⚡ Fast</option>
+                          <option value="ultra">🚀 Ultra</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Stealth Mode
+                        </Box>
+                        <select
+                          value={
+                            securityScanFormData.scan_parameters.stealth
+                              ? 'enabled'
+                              : 'disabled'
+                          }
+                          onChange={(e) =>
+                            setSecurityScanFormData({
+                              ...securityScanFormData,
+                              scan_parameters: {
+                                ...securityScanFormData.scan_parameters,
+                                stealth: e.target.value === 'enabled',
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="disabled">❌ Disabled</option>
+                          <option value="enabled">✅ Enabled</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Real-time
+                        </Box>
+                        <select
+                          value={
+                            securityScanFormData.scan_parameters.real_time
+                              ? 'enabled'
+                              : 'disabled'
+                          }
+                          onChange={(e) =>
+                            setSecurityScanFormData({
+                              ...securityScanFormData,
+                              scan_parameters: {
+                                ...securityScanFormData.scan_parameters,
+                                real_time: e.target.value === 'enabled',
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="disabled">❌ Disabled</option>
+                          <option value="enabled">✅ Enabled</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setSecurityScanModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (!securityScanFormData.scan_id) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('security_scan', {
+                          scan_data: securityScanFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Security scan initiated successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setSecurityScanFormData({
+                          scan_id: '',
+                          scan_type: 'comprehensive',
+                          target_systems: {
+                            access_control: true,
+                            surveillance: true,
+                            communications: true,
+                            databases: true,
+                            networks: true,
+                            physical_security: true,
+                          },
+                          scan_parameters: {
+                            depth: 'thorough',
+                            speed: 'balanced',
+                            stealth: false,
+                            real_time: true,
+                          },
+                          vulnerability_assessment: {
+                            critical_vulnerabilities: true,
+                            high_priority: true,
+                            medium_priority: true,
+                            low_priority: false,
+                            informational: false,
+                          },
+                          threat_detection: {
+                            malware_scan: true,
+                            intrusion_detection: true,
+                            anomaly_detection: true,
+                            behavioral_analysis: true,
+                            signature_matching: true,
+                          },
+                          physical_security: {
+                            door_integrity: true,
+                            camera_systems: true,
+                            alarm_systems: true,
+                            environmental_monitoring: true,
+                            perimeter_security: true,
+                          },
+                          reporting: {
+                            generate_report: true,
+                            alert_authorities: true,
+                            log_findings: true,
+                            create_tickets: true,
+                          },
+                          scan_schedule: {
+                            immediate: true,
+                            scheduled: false,
+                            recurring: false,
+                          },
+                        });
+                        setSecurityScanModalOpen(false);
+                      }}
+                      tooltip="Initiate security scan"
+                    >
+                      🔍 Start Scan
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Security Access Control Modal - Global Access */}
+        {securityAccessModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setSecurityAccessModalOpen(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1200px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🚪 SECURITY ACCESS CONTROL
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setSecurityAccessModalOpen(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Access Information Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🚪 ACCESS INFORMATION
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Access ID *
+                        </Box>
+                        <input
+                          type="text"
+                          value={securityAccessFormData.access_id}
+                          onChange={(e) =>
+                            setSecurityAccessFormData({
+                              ...securityAccessFormData,
+                              access_id: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., ACC-2024-001, ACCESS-001..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Access Type
+                        </Box>
+                        <select
+                          value={securityAccessFormData.access_type}
+                          onChange={(e) =>
+                            setSecurityAccessFormData({
+                              ...securityAccessFormData,
+                              access_type: e.target.value,
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="system_management">
+                            ⚙️ System Management
+                          </option>
+                          <option value="user_management">
+                            👥 User Management
+                          </option>
+                          <option value="authentication">
+                            🔐 Authentication
+                          </option>
+                          <option value="monitoring">📊 Monitoring</option>
+                          <option value="emergency_protocols">
+                            🚨 Emergency Protocols
+                          </option>
+                          <option value="comprehensive">
+                            📋 Comprehensive
+                          </option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Access Levels Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔐 ACCESS LEVELS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            marginBottom: '10px',
+                            color: '#66ffff',
+                          }}
+                        >
+                          🔓 Level 1 - Basic Access
+                        </Box>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            opacity: 0.8,
+                            marginBottom: '10px',
+                          }}
+                        >
+                          Permissions: View logs, Basic reports, Self service
+                        </Box>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityAccessFormData.access_levels.level_1
+                                .permissions.view_logs
+                            }
+                            onChange={(e) =>
+                              setSecurityAccessFormData({
+                                ...securityAccessFormData,
+                                access_levels: {
+                                  ...securityAccessFormData.access_levels,
+                                  level_1: {
+                                    ...securityAccessFormData.access_levels
+                                      .level_1,
+                                    permissions: {
+                                      ...securityAccessFormData.access_levels
+                                        .level_1.permissions,
+                                      view_logs: e.target.checked,
+                                    },
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>📋 View Logs</span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            marginBottom: '10px',
+                            color: '#66ffff',
+                          }}
+                        >
+                          🔒 Level 2 - Supervisor Access
+                        </Box>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            opacity: 0.8,
+                            marginBottom: '10px',
+                          }}
+                        >
+                          Permissions: Personnel management, Incident reports,
+                          Basic analytics
+                        </Box>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityAccessFormData.access_levels.level_2
+                                .permissions.personnel_management
+                            }
+                            onChange={(e) =>
+                              setSecurityAccessFormData({
+                                ...securityAccessFormData,
+                                access_levels: {
+                                  ...securityAccessFormData.access_levels,
+                                  level_2: {
+                                    ...securityAccessFormData.access_levels
+                                      .level_2,
+                                    permissions: {
+                                      ...securityAccessFormData.access_levels
+                                        .level_2.permissions,
+                                      personnel_management: e.target.checked,
+                                    },
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            👥 Personnel Management
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            marginBottom: '10px',
+                            color: '#66ffff',
+                          }}
+                        >
+                          🔐 Level 3 - Manager Access
+                        </Box>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            opacity: 0.8,
+                            marginBottom: '10px',
+                          }}
+                        >
+                          Permissions: All reports, Incident management, System
+                          configuration
+                        </Box>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityAccessFormData.access_levels.level_3
+                                .permissions.system_configuration
+                            }
+                            onChange={(e) =>
+                              setSecurityAccessFormData({
+                                ...securityAccessFormData,
+                                access_levels: {
+                                  ...securityAccessFormData.access_levels,
+                                  level_3: {
+                                    ...securityAccessFormData.access_levels
+                                      .level_3,
+                                    permissions: {
+                                      ...securityAccessFormData.access_levels
+                                        .level_3.permissions,
+                                      system_configuration: e.target.checked,
+                                    },
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            ⚙️ System Configuration
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            marginBottom: '10px',
+                            color: '#66ffff',
+                          }}
+                        >
+                          🔐 Level 4 - Administrator Access
+                        </Box>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            opacity: 0.8,
+                            marginBottom: '10px',
+                          }}
+                        >
+                          Permissions: All permissions, Full system control
+                        </Box>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              securityAccessFormData.access_levels.level_4
+                                .permissions.all_permissions
+                            }
+                            onChange={(e) =>
+                              setSecurityAccessFormData({
+                                ...securityAccessFormData,
+                                access_levels: {
+                                  ...securityAccessFormData.access_levels,
+                                  level_4: {
+                                    ...securityAccessFormData.access_levels
+                                      .level_4,
+                                    permissions: {
+                                      ...securityAccessFormData.access_levels
+                                        .level_4.permissions,
+                                      all_permissions: e.target.checked,
+                                    },
+                                  },
+                                },
+                              })
+                            }
+                            style={{ transform: 'scale(1.2)' }}
+                          />
+                          <span style={{ fontSize: '14px' }}>
+                            🔓 All Permissions
+                          </span>
+                        </label>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Authentication Settings Section */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🔐 AUTHENTICATION SETTINGS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Min Password Length
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityAccessFormData.authentication
+                              .password_policy.min_length
+                          }
+                          onChange={(e) =>
+                            setSecurityAccessFormData({
+                              ...securityAccessFormData,
+                              authentication: {
+                                ...securityAccessFormData.authentication,
+                                password_policy: {
+                                  ...securityAccessFormData.authentication
+                                    .password_policy,
+                                  min_length: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 12..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Password Complexity
+                        </Box>
+                        <select
+                          value={
+                            securityAccessFormData.authentication
+                              .password_policy.complexity
+                          }
+                          onChange={(e) =>
+                            setSecurityAccessFormData({
+                              ...securityAccessFormData,
+                              authentication: {
+                                ...securityAccessFormData.authentication,
+                                password_policy: {
+                                  ...securityAccessFormData.authentication
+                                    .password_policy,
+                                  complexity: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                        >
+                          <option value="low">🔓 Low</option>
+                          <option value="medium">🔒 Medium</option>
+                          <option value="high">🔐 High</option>
+                          <option value="maximum">🔐 Maximum</option>
+                        </select>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Expiration (Days)
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityAccessFormData.authentication
+                              .password_policy.expiration_days
+                          }
+                          onChange={(e) =>
+                            setSecurityAccessFormData({
+                              ...securityAccessFormData,
+                              authentication: {
+                                ...securityAccessFormData.authentication,
+                                password_policy: {
+                                  ...securityAccessFormData.authentication
+                                    .password_policy,
+                                  expiration_days: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 90..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box style={{ marginBottom: '15px' }}>
+                        <Box
+                          style={{
+                            fontSize: '14px',
+                            marginBottom: '8px',
+                            opacity: 0.8,
+                          }}
+                        >
+                          Session Timeout (Min)
+                        </Box>
+                        <input
+                          type="text"
+                          value={
+                            securityAccessFormData.authentication
+                              .session_management.timeout_minutes
+                          }
+                          onChange={(e) =>
+                            setSecurityAccessFormData({
+                              ...securityAccessFormData,
+                              authentication: {
+                                ...securityAccessFormData.authentication,
+                                session_management: {
+                                  ...securityAccessFormData.authentication
+                                    .session_management,
+                                  timeout_minutes: e.target.value,
+                                },
+                              },
+                            })
+                          }
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            borderRadius: '6px',
+                            color: '#ffffff',
+                            fontSize: '14px',
+                          }}
+                          placeholder="e.g., 30..."
+                        />
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setSecurityAccessModalOpen(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (!securityAccessFormData.access_id) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('security_access_control', {
+                          access_data: securityAccessFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Security access control updated successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setSecurityAccessFormData({
+                          access_id: '',
+                          access_type: 'system_management',
+                          access_levels: {
+                            level_1: {
+                              name: 'Basic Access',
+                              permissions: {
+                                view_logs: true,
+                                basic_reports: true,
+                                self_service: true,
+                              },
+                              restrictions: [],
+                            },
+                            level_2: {
+                              name: 'Supervisor Access',
+                              permissions: {
+                                view_logs: true,
+                                basic_reports: true,
+                                personnel_management: true,
+                                incident_reports: true,
+                                basic_analytics: true,
+                              },
+                              restrictions: [],
+                            },
+                            level_3: {
+                              name: 'Manager Access',
+                              permissions: {
+                                view_logs: true,
+                                all_reports: true,
+                                personnel_management: true,
+                                incident_management: true,
+                                system_configuration: true,
+                                analytics: true,
+                              },
+                              restrictions: [],
+                            },
+                            level_4: {
+                              name: 'Administrator Access',
+                              permissions: {
+                                all_permissions: true,
+                              },
+                              restrictions: [],
+                            },
+                          },
+                          user_management: {
+                            add_users: true,
+                            remove_users: true,
+                            modify_permissions: true,
+                            bulk_operations: true,
+                          },
+                          authentication: {
+                            password_policy: {
+                              min_length: '12',
+                              complexity: 'high',
+                              expiration_days: '90',
+                              history_count: '5',
+                            },
+                            multi_factor: {
+                              enabled: true,
+                              methods: ['sms', 'email', 'authenticator'],
+                              backup_codes: true,
+                            },
+                            session_management: {
+                              timeout_minutes: '30',
+                              concurrent_sessions: '2',
+                              ip_restrictions: true,
+                            },
+                          },
+                          access_points: {
+                            doors: [],
+                            elevators: [],
+                            restricted_areas: [],
+                            systems: [],
+                            networks: [],
+                          },
+                          monitoring: {
+                            real_time_monitoring: true,
+                            access_logs: true,
+                            failed_attempts: true,
+                            unusual_patterns: true,
+                            alerts: true,
+                          },
+                          emergency_protocols: {
+                            lockdown_procedures: [],
+                            emergency_access: [],
+                            override_protocols: [],
+                            backup_systems: [],
+                          },
+                        });
+                        setSecurityAccessModalOpen(false);
+                      }}
+                      tooltip="Update security access control"
+                    >
+                      🚪 Update Access Control
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Budget Transaction Modal */}
+        {budgetModal && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setBudgetModal(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '800px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  💰 ADD BUDGET TRANSACTION
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setBudgetModal(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                <Grid>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Department *
+                      </Box>
+                      <select
+                        value={budgetFormData.department_id}
+                        onChange={(e) =>
+                          setBudgetFormData({
+                            ...budgetFormData,
+                            department_id: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="security">Security Department</option>
+                        <option value="medical">Medical Department</option>
+                        <option value="research">Research Department</option>
+                        <option value="engineering">
+                          Engineering Department
+                        </option>
+                        <option value="supply">Supply Department</option>
+                        <option value="service">Service Department</option>
+                        <option value="command">Command Department</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Transaction Type *
+                      </Box>
+                      <select
+                        value={budgetFormData.transaction_type}
+                        onChange={(e) =>
+                          setBudgetFormData({
+                            ...budgetFormData,
+                            transaction_type: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="EXPENSE">Expense</option>
+                        <option value="REVENUE">Revenue</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                </Grid>
+
+                <Grid>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Amount (Credits) *
+                      </Box>
+                      <input
+                        type="number"
+                        value={budgetFormData.amount}
+                        onChange={(e) =>
+                          setBudgetFormData({
+                            ...budgetFormData,
+                            amount: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                        placeholder="e.g., 50000"
+                      />
+                    </Box>
+                  </Grid.Column>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Category *
+                      </Box>
+                      <select
+                        value={budgetFormData.category}
+                        onChange={(e) =>
+                          setBudgetFormData({
+                            ...budgetFormData,
+                            category: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="personnel">Personnel</option>
+                        <option value="equipment">Equipment</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="research">Research</option>
+                        <option value="security">Security</option>
+                        <option value="medical">Medical</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="containment">Containment</option>
+                        <option value="transportation">Transportation</option>
+                        <option value="miscellaneous">Miscellaneous</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                </Grid>
+
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box
+                    style={{
+                      fontSize: '14px',
+                      marginBottom: '8px',
+                      opacity: 0.8,
+                    }}
+                  >
+                    Description *
+                  </Box>
+                  <textarea
+                    value={budgetFormData.description}
+                    onChange={(e) =>
+                      setBudgetFormData({
+                        ...budgetFormData,
+                        description: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      minHeight: '80px',
+                      resize: 'vertical',
+                    }}
+                    placeholder="Describe the transaction purpose and details..."
+                  />
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setBudgetModal(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !budgetFormData.department_id ||
+                          !budgetFormData.amount ||
+                          !budgetFormData.description
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('budget_add_transaction', {
+                          transaction_data: budgetFormData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Budget transaction added successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setBudgetFormData({
+                          department_id: 'supply',
+                          amount: '',
+                          category: 'equipment',
+                          description: '',
+                          transaction_type: 'EXPENSE',
+                        });
+                        setBudgetModal(false);
+                      }}
+                      tooltip="Add budget transaction"
+                    >
+                      💰 Add Transaction
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Budget Request Modal */}
+        {budgetRequestModal && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setBudgetRequestModal(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '800px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  📋 REQUEST BUDGET INCREASE
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setBudgetRequestModal(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                <Grid>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Department *
+                      </Box>
+                      <select
+                        value={budgetRequestData.department_id}
+                        onChange={(e) =>
+                          setBudgetRequestData({
+                            ...budgetRequestData,
+                            department_id: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="security">Security Department</option>
+                        <option value="medical">Medical Department</option>
+                        <option value="research">Research Department</option>
+                        <option value="engineering">
+                          Engineering Department
+                        </option>
+                        <option value="supply">Supply Department</option>
+                        <option value="service">Service Department</option>
+                        <option value="command">Command Department</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Requested Amount (Credits) *
+                      </Box>
+                      <input
+                        type="number"
+                        value={budgetRequestData.requested_amount}
+                        onChange={(e) =>
+                          setBudgetRequestData({
+                            ...budgetRequestData,
+                            requested_amount: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                        placeholder="e.g., 100000"
+                      />
+                    </Box>
+                  </Grid.Column>
+                </Grid>
+
+                <Grid>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Category *
+                      </Box>
+                      <select
+                        value={budgetRequestData.requested_category}
+                        onChange={(e) =>
+                          setBudgetRequestData({
+                            ...budgetRequestData,
+                            requested_category: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="personnel">Personnel</option>
+                        <option value="equipment">Equipment</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="research">Research</option>
+                        <option value="security">Security</option>
+                        <option value="medical">Medical</option>
+                        <option value="utilities">Utilities</option>
+                        <option value="containment">Containment</option>
+                        <option value="transportation">Transportation</option>
+                        <option value="miscellaneous">Miscellaneous</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        Priority Level *
+                      </Box>
+                      <select
+                        value={budgetRequestData.priority}
+                        onChange={(e) =>
+                          setBudgetRequestData({
+                            ...budgetRequestData,
+                            priority: parseInt(e.target.value),
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value={1}>1 - Low Priority</option>
+                        <option value={2}>2 - Normal Priority</option>
+                        <option value={3}>3 - High Priority</option>
+                        <option value={4}>4 - Critical Priority</option>
+                        <option value={5}>5 - Emergency Priority</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                </Grid>
+
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box
+                    style={{
+                      fontSize: '14px',
+                      marginBottom: '8px',
+                      opacity: 0.8,
+                    }}
+                  >
+                    Justification *
+                  </Box>
+                  <textarea
+                    value={budgetRequestData.justification}
+                    onChange={(e) =>
+                      setBudgetRequestData({
+                        ...budgetRequestData,
+                        justification: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      minHeight: '80px',
+                      resize: 'vertical',
+                    }}
+                    placeholder="Explain why this budget increase is needed..."
+                  />
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setBudgetRequestModal(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !budgetRequestData.department_id ||
+                          !budgetRequestData.requested_amount ||
+                          !budgetRequestData.justification
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('budget_request_increase', {
+                          request_data: budgetRequestData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Budget increase request submitted successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setBudgetRequestData({
+                          department_id: 'supply',
+                          requested_amount: '',
+                          requested_category: 'equipment',
+                          justification: '',
+                          priority: 1,
+                        });
+                        setBudgetRequestModal(false);
+                      }}
+                      tooltip="Submit budget request"
+                    >
+                      📋 Submit Request
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Budget Transfer Modal */}
+        {budgetTransferModal && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setBudgetTransferModal(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '600px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  🔄 TRANSFER BUDGET
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setBudgetTransferModal(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Form Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                <Grid>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        From Department *
+                      </Box>
+                      <select
+                        value={budgetTransferData.from_department}
+                        onChange={(e) =>
+                          setBudgetTransferData({
+                            ...budgetTransferData,
+                            from_department: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="security">Security Department</option>
+                        <option value="medical">Medical Department</option>
+                        <option value="research">Research Department</option>
+                        <option value="engineering">
+                          Engineering Department
+                        </option>
+                        <option value="supply">Supply Department</option>
+                        <option value="service">Service Department</option>
+                        <option value="command">Command Department</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                  <Grid.Column size={6}>
+                    <Box style={{ marginBottom: '15px' }}>
+                      <Box
+                        style={{
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                          opacity: 0.8,
+                        }}
+                      >
+                        To Department *
+                      </Box>
+                      <select
+                        value={budgetTransferData.to_department}
+                        onChange={(e) =>
+                          setBudgetTransferData({
+                            ...budgetTransferData,
+                            to_department: e.target.value,
+                          })
+                        }
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '6px',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="security">Security Department</option>
+                        <option value="medical">Medical Department</option>
+                        <option value="research">Research Department</option>
+                        <option value="engineering">
+                          Engineering Department
+                        </option>
+                        <option value="supply">Supply Department</option>
+                        <option value="service">Service Department</option>
+                        <option value="command">Command Department</option>
+                      </select>
+                    </Box>
+                  </Grid.Column>
+                </Grid>
+
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box
+                    style={{
+                      fontSize: '14px',
+                      marginBottom: '8px',
+                      opacity: 0.8,
+                    }}
+                  >
+                    Transfer Amount (Credits) *
+                  </Box>
+                  <input
+                    type="number"
+                    value={budgetTransferData.amount}
+                    onChange={(e) =>
+                      setBudgetTransferData({
+                        ...budgetTransferData,
+                        amount: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                    }}
+                    placeholder="e.g., 50000"
+                  />
+                </Box>
+
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box
+                    style={{
+                      fontSize: '14px',
+                      marginBottom: '8px',
+                      opacity: 0.8,
+                    }}
+                  >
+                    Transfer Reason *
+                  </Box>
+                  <textarea
+                    value={budgetTransferData.reason}
+                    onChange={(e) =>
+                      setBudgetTransferData({
+                        ...budgetTransferData,
+                        reason: e.target.value,
+                      })
+                    }
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      minHeight: '80px',
+                      resize: 'vertical',
+                    }}
+                    placeholder="Explain the reason for this budget transfer..."
+                  />
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    * Required fields must be completed
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setBudgetTransferModal(false)}
+                      color="default"
+                      tooltip="Cancel and close form"
+                    >
+                      ✕ Cancel
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="good"
+                      onClick={() => {
+                        // Validate required fields
+                        if (
+                          !budgetTransferData.from_department ||
+                          !budgetTransferData.to_department ||
+                          !budgetTransferData.amount ||
+                          !budgetTransferData.reason
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'Please complete all required fields',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Validate departments are different
+                        if (
+                          budgetTransferData.from_department ===
+                          budgetTransferData.to_department
+                        ) {
+                          addNotification(
+                            'Validation Error',
+                            'From and To departments must be different',
+                            'error',
+                          );
+                          return;
+                        }
+
+                        // Submit to backend
+                        act('budget_transfer', {
+                          transfer_data: budgetTransferData,
+                        });
+
+                        // Show success notification
+                        addNotification(
+                          'Success',
+                          'Budget transfer completed successfully',
+                          'success',
+                        );
+
+                        // Reset form and close modal
+                        setBudgetTransferData({
+                          from_department: 'supply',
+                          to_department: 'security',
+                          amount: '',
+                          reason: '',
+                        });
+                        setBudgetTransferModal(false);
+                      }}
+                      tooltip="Execute budget transfer"
+                    >
+                      🔄 Execute Transfer
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Budget Report Modal */}
+        {budgetReportModal && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.85)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)',
+            }}
+            onClick={() => setBudgetReportModal(false)}
+          >
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '15px',
+                padding: '30px',
+                width: '90vw',
+                maxWidth: '1000px',
+                maxHeight: '90vh',
+                overflow: 'auto',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '25px',
+                  borderBottom: '2px solid rgba(255,255,255,0.2)',
+                  paddingBottom: '15px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  📊 BUDGET ANALYSIS REPORT
+                </Box>
+                <Box
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '24px',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s ease',
+                    padding: '5px',
+                    borderRadius: '5px',
+                  }}
+                  onClick={() => setBudgetReportModal(false)}
+                  onMouseEnter={(e) => (e.target.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.target.style.opacity = '0.7')}
+                >
+                  ✕
+                </Box>
+              </Box>
+
+              {/* Report Content */}
+              <Box
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '25px',
+                }}
+              >
+                {/* Executive Summary */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📈 EXECUTIVE SUMMARY
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={3}>
+                      <Box
+                        style={{
+                          background: 'rgba(0,255,0,0.1)',
+                          padding: '15px',
+                          borderRadius: '5px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#66ff66',
+                          }}
+                        >
+                          Total Budget
+                        </Box>
+                        <Box style={{ fontSize: '24px' }}>
+                          ${(budget_data?.total_budget || 0).toLocaleString()}
+                        </Box>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box
+                        style={{
+                          background: 'rgba(255,165,0,0.1)',
+                          padding: '15px',
+                          borderRadius: '5px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#ffaa66',
+                          }}
+                        >
+                          Available
+                        </Box>
+                        <Box style={{ fontSize: '24px' }}>
+                          $
+                          {(budget_data?.current_balance || 0).toLocaleString()}
+                        </Box>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box
+                        style={{
+                          background: 'rgba(255,0,0,0.1)',
+                          padding: '15px',
+                          borderRadius: '5px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#ff6666',
+                          }}
+                        >
+                          Spent
+                        </Box>
+                        <Box style={{ fontSize: '24px' }}>
+                          $
+                          {(
+                            (budget_data?.total_budget || 0) -
+                            (budget_data?.current_balance || 0)
+                          ).toLocaleString()}
+                        </Box>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={3}>
+                      <Box
+                        style={{
+                          background: 'rgba(0,255,255,0.1)',
+                          padding: '15px',
+                          borderRadius: '5px',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#66ffff',
+                          }}
+                        >
+                          Utilization
+                        </Box>
+                        <Box style={{ fontSize: '24px' }}>
+                          {budget_data?.total_budget
+                            ? Math.round(
+                                ((budget_data.total_budget -
+                                  budget_data.current_balance) /
+                                  budget_data.total_budget) *
+                                  100,
+                              )
+                            : 0}
+                          %
+                        </Box>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Department Performance */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    🏢 DEPARTMENT PERFORMANCE
+                  </Box>
+                  <Box
+                    style={{
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {budget_data?.departments &&
+                      Object.entries(budget_data.departments).map(
+                        ([deptId, dept]) => (
+                          <Box
+                            key={deptId}
+                            style={{
+                              padding: '15px',
+                              borderBottom: '1px solid rgba(255,255,255,0.1)',
+                              marginBottom: '10px',
+                            }}
+                          >
+                            <Box
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '10px',
+                              }}
+                            >
+                              <Box
+                                style={{ fontSize: '16px', fontWeight: 'bold' }}
+                              >
+                                {dept.name}
+                              </Box>
+                              <Box
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold',
+                                  color:
+                                    dept.status === 'NORMAL'
+                                      ? '#66ff66'
+                                      : dept.status === 'WARNING'
+                                        ? '#ffff00'
+                                        : dept.status === 'CRITICAL'
+                                          ? '#ff6600'
+                                          : '#ff0000',
+                                  background:
+                                    dept.status === 'NORMAL'
+                                      ? 'rgba(0,255,0,0.2)'
+                                      : dept.status === 'WARNING'
+                                        ? 'rgba(255,255,0,0.2)'
+                                        : dept.status === 'CRITICAL'
+                                          ? 'rgba(255,102,0,0.2)'
+                                          : 'rgba(255,0,0,0.2)',
+                                }}
+                              >
+                                {dept.status}
+                              </Box>
+                            </Box>
+                            <Grid>
+                              <Grid.Column size={3}>
+                                <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                                  Allocated
+                                </Box>
+                                <Box
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                  }}
+                                >
+                                  ${dept.allocated?.toLocaleString() || 0}
+                                </Box>
+                              </Grid.Column>
+                              <Grid.Column size={3}>
+                                <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                                  Spent
+                                </Box>
+                                <Box
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#ff6666',
+                                  }}
+                                >
+                                  ${dept.spent?.toLocaleString() || 0}
+                                </Box>
+                              </Grid.Column>
+                              <Grid.Column size={3}>
+                                <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                                  Remaining
+                                </Box>
+                                <Box
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#66ff66',
+                                  }}
+                                >
+                                  ${dept.remaining?.toLocaleString() || 0}
+                                </Box>
+                              </Grid.Column>
+                              <Grid.Column size={3}>
+                                <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                                  Efficiency
+                                </Box>
+                                <Box
+                                  style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#66ffff',
+                                  }}
+                                >
+                                  {dept.efficiency || 0}%
+                                </Box>
+                              </Grid.Column>
+                            </Grid>
+                          </Box>
+                        ),
+                      )}
+                  </Box>
+                </Box>
+
+                {/* Financial Trends */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📊 FINANCIAL TRENDS
+                  </Box>
+                  <Grid>
+                    <Grid.Column size={6}>
+                      <Box
+                        style={{
+                          background: 'rgba(255,0,0,0.1)',
+                          padding: '15px',
+                          borderRadius: '5px',
+                          marginBottom: '10px',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#ff6666',
+                          }}
+                        >
+                          Monthly Expenses
+                        </Box>
+                        <Box style={{ fontSize: '20px' }}>
+                          $
+                          {(
+                            budget_data?.monthly_expenses || 0
+                          ).toLocaleString()}
+                        </Box>
+                        <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                          Average daily: $
+                          {Math.round(
+                            (budget_data?.monthly_expenses || 0) / 30,
+                          ).toLocaleString()}
+                        </Box>
+                      </Box>
+                    </Grid.Column>
+                    <Grid.Column size={6}>
+                      <Box
+                        style={{
+                          background: 'rgba(0,255,255,0.1)',
+                          padding: '15px',
+                          borderRadius: '5px',
+                          marginBottom: '10px',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#66ffff',
+                          }}
+                        >
+                          Monthly Revenue
+                        </Box>
+                        <Box style={{ fontSize: '20px' }}>
+                          $
+                          {(budget_data?.monthly_revenue || 0).toLocaleString()}
+                        </Box>
+                        <Box style={{ fontSize: '12px', opacity: 0.8 }}>
+                          Net: $
+                          {(
+                            (budget_data?.monthly_revenue || 0) -
+                            (budget_data?.monthly_expenses || 0)
+                          ).toLocaleString()}
+                        </Box>
+                      </Box>
+                    </Grid.Column>
+                  </Grid>
+                </Box>
+
+                {/* Budget Trends */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    📈 BUDGET TRENDS
+                  </Box>
+                  <Box style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                    {(() => {
+                      const trends = budget_data?.budget_trends || {};
+                      const trendsList = [];
+
+                      if (trends.spending_rate !== undefined) {
+                        trendsList.push(
+                          `💰 Daily Spending Rate: ${Math.round(trends.spending_rate).toLocaleString()} credits/day`,
+                        );
+                        trendsList.push(
+                          `📊 Projected Monthly: ${Math.round(trends.projected_monthly).toLocaleString()} credits/month`,
+                        );
+                        trendsList.push(
+                          `⏰ Budget Life Expectancy: ${Math.round(trends.budget_life_expectancy)} days`,
+                        );
+                      }
+
+                      if (trends.department_trends) {
+                        Object.entries(trends.department_trends).forEach(
+                          ([deptId, deptTrends]) => {
+                            trendsList.push(
+                              `🏢 ${deptId.toUpperCase()}: ${Math.round(deptTrends.spending_rate).toLocaleString()} credits/day`,
+                            );
+                          },
+                        );
+                      }
+
+                      if (trendsList.length === 0) {
+                        trendsList.push(
+                          '📊 Insufficient historical data for trend analysis',
+                        );
+                      }
+
+                      return trendsList.map((trend, index) => (
+                        <Box
+                          key={index}
+                          style={{
+                            marginBottom: '8px',
+                            padding: '6px',
+                            background: 'rgba(255,255,255,0.05)',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {trend}
+                        </Box>
+                      ));
+                    })()}
+                  </Box>
+                </Box>
+
+                {/* Recommendations */}
+                <Box
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '20px',
+                  }}
+                >
+                  <Box
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: 'bold',
+                      marginBottom: '15px',
+                      color: '#66ffff',
+                    }}
+                  >
+                    💡 RECOMMENDATIONS
+                  </Box>
+                  <Box style={{ fontSize: '14px', lineHeight: '1.6' }}>
+                    {(() => {
+                      const recommendations = [];
+                      const utilization = budget_data?.total_budget
+                        ? ((budget_data.total_budget -
+                            budget_data.current_balance) /
+                            budget_data.total_budget) *
+                          100
+                        : 0;
+
+                      if (utilization > 90) {
+                        recommendations.push(
+                          '🚨 CRITICAL: Budget utilization is over 90%. Consider requesting additional funding.',
+                        );
+                      } else if (utilization > 75) {
+                        recommendations.push(
+                          '⚠️ WARNING: Budget utilization is over 75%. Monitor spending closely.',
+                        );
+                      }
+
+                      if (
+                        (budget_data?.monthly_expenses || 0) >
+                        (budget_data?.monthly_revenue || 0)
+                      ) {
+                        recommendations.push(
+                          '📉 REVENUE: Monthly expenses exceed revenue. Focus on cost reduction or revenue generation.',
+                        );
+                      }
+
+                      const criticalDepts = budget_data?.departments
+                        ? Object.values(budget_data.departments).filter(
+                            (dept) =>
+                              dept.status === 'CRITICAL' ||
+                              dept.status === 'OVERSPENT',
+                          )
+                        : [];
+                      if (criticalDepts.length > 0) {
+                        recommendations.push(
+                          `🔴 DEPARTMENTS: ${criticalDepts.length} department(s) have critical budget status. Immediate attention required.`,
+                        );
+                      }
+
+                      if (recommendations.length === 0) {
+                        recommendations.push(
+                          '✅ BUDGET HEALTH: All departments are operating within normal budget parameters.',
+                        );
+                      }
+
+                      return recommendations.map((rec, index) => (
+                        <Box
+                          key={index}
+                          style={{
+                            marginBottom: '10px',
+                            padding: '8px',
+                            background: 'rgba(255,255,255,0.05)',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {rec}
+                        </Box>
+                      ));
+                    })()}
+                  </Box>
+                </Box>
+
+                {/* Action Buttons */}
+                <Box
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '20px',
+                    borderTop: '2px solid rgba(255,255,255,0.2)',
+                    paddingTop: '20px',
+                  }}
+                >
+                  <Box style={{ fontSize: '14px', opacity: '0.7' }}>
+                    Report generated on {new Date().toLocaleString()}
+                  </Box>
+                  <Box style={{ display: 'flex', gap: '15px' }}>
+                    <EnhancedButton
+                      onClick={() => setBudgetReportModal(false)}
+                      color="default"
+                      tooltip="Close report"
+                    >
+                      ✕ Close
+                    </EnhancedButton>
+                    <EnhancedButton
+                      color="purple"
+                      onClick={() => {
+                        addNotification(
+                          'Report Export',
+                          'Budget report exported to system logs',
+                          'info',
+                        );
+                      }}
+                      tooltip="Export report to system"
+                    >
+                      📄 Export Report
+                    </EnhancedButton>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
 
         <style>
           {`

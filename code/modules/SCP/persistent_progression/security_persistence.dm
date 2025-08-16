@@ -499,6 +499,358 @@ SUBSYSTEM_DEF(security_persistence)
 	security_protocols[protocol_id] = protocol
 	return protocol
 
+// Comprehensive Security Scanning System
+/datum/security_persistence_manager/proc/perform_comprehensive_security_scan(var/scan_type = "comprehensive", var/scan_targets = list())
+	var/list/scan_results = list()
+	var/list/threats_found = list()
+	var/list/vulnerabilities = list()
+	var/list/recommendations = list()
+	var/scan_severity = 0
+
+	world.log << "Security: Starting comprehensive security scan - Type: [scan_type]"
+
+	// Always perform all scans for now (simplified)
+	var/list/physical_results = scan_physical_security_systems()
+	scan_results["physical_security"] = physical_results
+	threats_found += physical_results["threats"]
+	vulnerabilities += physical_results["vulnerabilities"]
+	scan_severity += physical_results["severity"]
+
+	var/list/access_results = scan_access_control_systems()
+	scan_results["access_control"] = access_results
+	threats_found += access_results["threats"]
+	vulnerabilities += access_results["vulnerabilities"]
+	scan_severity += access_results["severity"]
+
+	var/list/surveillance_results = scan_surveillance_systems()
+	scan_results["surveillance"] = surveillance_results
+	threats_found += surveillance_results["threats"]
+	vulnerabilities += surveillance_results["vulnerabilities"]
+	scan_severity += surveillance_results["severity"]
+
+	var/list/comm_results = scan_communication_systems()
+	scan_results["communications"] = comm_results
+	threats_found += comm_results["threats"]
+	vulnerabilities += comm_results["vulnerabilities"]
+	scan_severity += comm_results["severity"]
+
+	var/list/db_results = scan_database_systems()
+	scan_results["databases"] = db_results
+	threats_found += db_results["threats"]
+	vulnerabilities += db_results["vulnerabilities"]
+	scan_severity += db_results["severity"]
+
+	var/list/network_results = scan_network_systems()
+	scan_results["networks"] = network_results
+	threats_found += network_results["threats"]
+	vulnerabilities += network_results["vulnerabilities"]
+	scan_severity += network_results["severity"]
+
+	var/list/personnel_results = scan_personnel_security()
+	scan_results["personnel"] = personnel_results
+	threats_found += personnel_results["threats"]
+	vulnerabilities += personnel_results["vulnerabilities"]
+	scan_severity += personnel_results["severity"]
+
+	var/list/containment_results = scan_containment_systems()
+	scan_results["containment"] = containment_results
+	threats_found += containment_results["threats"]
+	vulnerabilities += containment_results["vulnerabilities"]
+	scan_severity += containment_results["severity"]
+
+	// Generate recommendations based on findings
+	recommendations = generate_security_recommendations(threats_found, vulnerabilities, scan_severity)
+
+	// Create comprehensive scan report
+	var/list/final_results = list(
+		"scan_type" = scan_type,
+		"timestamp" = world.time,
+		"total_threats" = threats_found.len,
+		"total_vulnerabilities" = vulnerabilities.len,
+		"overall_severity" = scan_severity,
+		"threats_found" = threats_found,
+		"vulnerabilities" = vulnerabilities,
+		"recommendations" = recommendations,
+		"detailed_results" = scan_results
+	)
+
+	world.log << "Security: Scan completed - [threats_found.len] threats, [vulnerabilities.len] vulnerabilities, severity: [scan_severity]"
+
+	return final_results
+
+// Physical Security Systems Scan
+/datum/security_persistence_manager/proc/scan_physical_security_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check for breached airlocks
+	for(var/obj/machinery/door/airlock/airlock in world)
+		if(airlock.z == 1)
+			if(airlock.obj_flags & EMAGGED)
+				threat_count++
+				results["threats"] += "Emagged airlock at [airlock.loc]"
+				results["severity"] += 3
+
+	// Check for unauthorized access points
+	for(var/obj/machinery/door/firedoor/firedoor in world)
+		if(firedoor.z == 1 && firedoor.obj_flags & EMAGGED)
+			threat_count++
+			results["threats"] += "Compromised fire door at [firedoor.loc]"
+			results["severity"] += 2
+
+	// Check for security breaches in maintenance
+	var/maintenance_breaches = 0
+	for(var/turf/open/floor/plating/floor in world)
+		if(floor.z == 1 && istype(floor.loc, /area/station/maintenance))
+			maintenance_breaches++
+
+	if(maintenance_breaches > 10)
+		results["vulnerabilities"] += "[maintenance_breaches] maintenance access points"
+		results["severity"] += 1
+
+	world.log << "Security: Physical security scan found [threat_count] threats"
+	return results
+
+// Access Control Systems Scan
+/datum/security_persistence_manager/proc/scan_access_control_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check security records console
+	for(var/obj/machinery/computer/secure_data/sec_console in world)
+		if(sec_console.z == 1)
+			if(sec_console.obj_flags & EMAGGED)
+				threat_count++
+				results["threats"] += "Compromised security records at [sec_console.loc]"
+				results["severity"] += 5
+
+	// Check for unauthorized access attempts
+	if(unauthorized_access_attempts > 10)
+		results["vulnerabilities"] += "High number of unauthorized access attempts: [unauthorized_access_attempts]"
+		results["severity"] += 2
+
+	// Check personnel access levels
+	var/over_privileged = 0
+	for(var/ckey in security_records)
+		var/datum/security_record/record = security_records[ckey]
+		if(record.security_clearance > 3)
+			over_privileged++
+
+	if(over_privileged > 5)
+		results["vulnerabilities"] += "[over_privileged] personnel with excessive clearance levels"
+		results["severity"] += 1
+
+	world.log << "Security: Access control scan found [threat_count] threats"
+	return results
+
+// Surveillance Systems Scan
+/datum/security_persistence_manager/proc/scan_surveillance_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+	var/total_cameras = 0
+	var/compromised_cameras = 0
+
+	// Check camera systems
+	for(var/obj/machinery/camera/camera in world)
+		if(camera.z == 1)
+			total_cameras++
+			if(camera.obj_flags & EMAGGED)
+				compromised_cameras++
+				threat_count++
+				results["threats"] += "Compromised camera at [camera.loc]"
+				results["severity"] += 2
+			else if(!camera.status)
+				results["vulnerabilities"] += "Offline camera at [camera.loc]"
+				results["severity"] += 1
+
+	// Check camera monitoring console
+	for(var/obj/machinery/computer/security/security_console in world)
+		if(security_console.z == 1)
+			if(security_console.obj_flags & EMAGGED)
+				threat_count++
+				results["threats"] += "Compromised security console at [security_console.loc]"
+				results["severity"] += 4
+
+	// Calculate surveillance coverage
+	if(total_cameras > 0)
+		var/coverage_ratio = (total_cameras - compromised_cameras) / total_cameras
+		if(coverage_ratio < 0.8)
+			results["vulnerabilities"] += "Low surveillance coverage: [round(coverage_ratio * 100)]%"
+			results["severity"] += 2
+
+	world.log << "Security: Surveillance scan found [threat_count] threats, [compromised_cameras]/[total_cameras] cameras compromised"
+	return results
+
+// Communication Systems Scan
+/datum/security_persistence_manager/proc/scan_communication_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check communications console
+	for(var/obj/machinery/computer/communications/comm in world)
+		if(comm.z == 1)
+			if(comm.obj_flags & EMAGGED)
+				threat_count++
+				results["threats"] += "Compromised communications console at [comm.loc]"
+				results["severity"] += 5
+
+	// Check radio systems
+	for(var/obj/item/radio/radio in world)
+		if(radio.z == 1 && radio.obj_flags & EMAGGED)
+			threat_count++
+			results["threats"] += "Compromised radio at [radio.loc]"
+			results["severity"] += 1
+
+	world.log << "Security: Communication systems scan found [threat_count] threats"
+	return results
+
+// Database Systems Scan
+/datum/security_persistence_manager/proc/scan_database_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check medical records console
+	for(var/obj/machinery/computer/med_data/med_console in world)
+		if(med_console.z == 1 && med_console.obj_flags & EMAGGED)
+			threat_count++
+			results["threats"] += "Compromised medical records at [med_console.loc]"
+			results["severity"] += 3
+
+	// Check crew monitoring console
+	for(var/obj/machinery/computer/crew/crew_console in world)
+		if(crew_console.z == 1 && crew_console.obj_flags & EMAGGED)
+			threat_count++
+			results["threats"] += "Compromised crew monitoring at [crew_console.loc]"
+			results["severity"] += 3
+
+
+
+	world.log << "Security: Database systems scan found [threat_count] threats"
+	return results
+
+// Network Systems Scan
+/datum/security_persistence_manager/proc/scan_network_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check telecommunications
+	for(var/obj/machinery/telecomms/telecomms in world)
+		if(telecomms.z == 1 && telecomms.obj_flags & EMAGGED)
+			threat_count++
+			results["threats"] += "Compromised telecomms at [telecomms.loc]"
+			results["severity"] += 3
+
+	world.log << "Security: Network systems scan found [threat_count] threats"
+	return results
+
+// Personnel Security Scan
+/datum/security_persistence_manager/proc/scan_personnel_security()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check for personnel with low security ratings
+	var/low_rating_personnel = 0
+	for(var/ckey in security_records)
+		var/datum/security_record/record = security_records[ckey]
+		if(record.security_rating < 50)
+			low_rating_personnel++
+			results["vulnerabilities"] += "Low security rating for [record.real_name]: [record.security_rating]"
+			results["severity"] += 1
+
+	// Check for personnel with many incidents
+	for(var/ckey in security_records)
+		var/datum/security_record/record = security_records[ckey]
+		if(record.security_incidents.len > 3)
+			results["vulnerabilities"] += "Multiple incidents for [record.real_name]: [record.security_incidents.len]"
+			results["severity"] += 2
+
+	// Check for suspended personnel
+	for(var/ckey in security_records)
+		var/datum/security_record/record = security_records[ckey]
+		if(record.security_status == "SUSPENDED")
+			results["threats"] += "Suspended personnel: [record.real_name]"
+			results["severity"] += 2
+
+	// Check for terminated personnel still in system
+	for(var/ckey in security_records)
+		var/datum/security_record/record = security_records[ckey]
+		if(record.security_status == "TERMINATED")
+			results["threats"] += "Terminated personnel still in system: [record.real_name]"
+			results["severity"] += 3
+
+	world.log << "Security: Personnel security scan found [threat_count] threats, [low_rating_personnel] low-rated personnel"
+	return results
+
+// Containment Systems Scan
+/datum/security_persistence_manager/proc/scan_containment_systems()
+	var/list/results = list("threats" = list(), "vulnerabilities" = list(), "severity" = 0)
+	var/threat_count = 0
+
+	// Check for containment breaches
+	if(containment_breaches > 0)
+		results["threats"] += "[containment_breaches] active containment breaches"
+		results["severity"] += containment_breaches * 5
+
+	// Check for active threats
+	if(active_threats > 0)
+		results["threats"] += "[active_threats] active security threats"
+		results["severity"] += active_threats * 3
+
+	// Check for unresolved incidents
+	var/unresolved_incidents = 0
+	for(var/incident_id in security_incidents)
+		var/datum/security_incident/incident = security_incidents[incident_id]
+		if(!incident.resolved)
+			unresolved_incidents++
+
+	if(unresolved_incidents > 5)
+		results["vulnerabilities"] += "[unresolved_incidents] unresolved security incidents"
+		results["severity"] += 2
+
+	// Check for high-severity incidents
+	var/high_severity_incidents = 0
+	for(var/incident_id in security_incidents)
+		var/datum/security_incident/incident = security_incidents[incident_id]
+		if(incident.severity >= 4)
+			high_severity_incidents++
+
+	if(high_severity_incidents > 0)
+		results["threats"] += "[high_severity_incidents] high-severity incidents"
+		results["severity"] += high_severity_incidents * 2
+
+	world.log << "Security: Containment systems scan found [threat_count] threats, [containment_breaches] breaches"
+	return results
+
+// Generate Security Recommendations
+/datum/security_persistence_manager/proc/generate_security_recommendations(var/list/threats, var/list/vulnerabilities, var/severity)
+	var/list/recommendations = list()
+
+	if(severity >= 10)
+		recommendations += "CRITICAL: Immediate security lockdown recommended"
+		recommendations += "CRITICAL: Deploy emergency response teams"
+
+	if(severity >= 7)
+		recommendations += "HIGH: Increase security patrols"
+		recommendations += "HIGH: Review all access permissions"
+
+	if(severity >= 5)
+		recommendations += "MEDIUM: Conduct personnel security review"
+		recommendations += "MEDIUM: Update security protocols"
+
+	if(threats.len > 5)
+		recommendations += "Multiple threats detected - prioritize containment"
+
+	if(vulnerabilities.len > 3)
+		recommendations += "Multiple vulnerabilities found - implement security patches"
+
+	if(containment_breaches > 0)
+		recommendations += "Containment breaches detected - activate emergency protocols"
+
+	if(unauthorized_access_attempts > 10)
+		recommendations += "High unauthorized access attempts - review access control systems"
+
+	return recommendations
+
 // Add clearance request (updated)
 /datum/security_persistence_manager/proc/add_clearance_request(var/personnel_ckey, var/requested_level, var/reason)
 	var/request_id = "CLEARANCE_[time2text(world.time, "YYYYMMDD_HHMMSS")]"

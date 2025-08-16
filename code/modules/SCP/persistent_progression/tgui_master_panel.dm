@@ -126,6 +126,83 @@
 			))
 	data["medical_data"] = medical_data
 
+	// Budget Data with comprehensive financial information
+	var/list/budget_data = list()
+	if(SSbudget_system && SSbudget_system.manager)
+		var/datum/budget_manager/budget_manager = SSbudget_system.manager
+		budget_data = list(
+			"total_budget" = budget_manager.total_budget,
+			"current_balance" = budget_manager.current_balance,
+			"monthly_expenses" = budget_manager.monthly_expenses,
+			"monthly_revenue" = budget_manager.monthly_revenue,
+			"budget_cycle" = budget_manager.budget_cycle,
+		)
+
+		// Add department budget information
+		budget_data["departments"] = list()
+		for(var/dept_id in budget_manager.department_budgets)
+			var/datum/budget_data/dept = budget_manager.department_budgets[dept_id]
+			budget_data["departments"][dept_id] = list(
+				"name" = dept.department_name,
+				"allocated" = dept.allocated_budget,
+				"spent" = dept.spent_budget,
+				"remaining" = dept.remaining_budget,
+				"efficiency" = dept.budget_efficiency,
+				"status" = dept.budget_status
+			)
+
+		// Add recent transactions
+		budget_data["recent_transactions"] = list()
+		var/transaction_count = 0
+		for(var/txn_id in budget_manager.transaction_history)
+			if(transaction_count >= 10) // Limit to 10 most recent
+				break
+			var/datum/transaction_data/txn = budget_manager.transaction_history[txn_id]
+			budget_data["recent_transactions"] += list(list(
+				"id" = txn.transaction_id,
+				"department" = txn.department_id,
+				"type" = txn.transaction_type,
+				"amount" = txn.amount,
+				"category" = txn.category,
+				"description" = txn.description,
+				"timestamp" = time2text(txn.timestamp, "YYYY-MM-DD HH:MM")
+			))
+			transaction_count++
+
+		// Add pending budget requests
+		budget_data["pending_requests"] = list()
+		for(var/req_id in budget_manager.budget_requests)
+			var/datum/budget_request_data/req = budget_manager.budget_requests[req_id]
+			if(req.status == "PENDING")
+				budget_data["pending_requests"] += list(list(
+					"id" = req.request_id,
+					"department" = req.department_id,
+					"amount" = req.requested_amount,
+					"category" = req.requested_category,
+					"justification" = req.justification,
+					"priority" = req.priority,
+					"requested_by" = req.requested_by,
+					"timestamp" = time2text(req.timestamp, "YYYY-MM-DD HH:MM")
+				))
+
+		// Add budget alerts
+		budget_data["budget_alerts"] = list()
+		for(var/alert_id in budget_manager.budget_alerts)
+			var/list/alerts = budget_manager.budget_alerts[alert_id]
+			for(var/list/alert in alerts)
+				budget_data["budget_alerts"] += list(list(
+					"type" = alert["type"],
+					"department" = alert["department"],
+					"message" = alert["message"],
+					"severity" = alert["severity"],
+					"timestamp" = time2text(alert["timestamp"], "YYYY-MM-DD HH:MM")
+				))
+
+		// Add budget trends
+		var/list/trends = budget_manager.get_budget_trends()
+		budget_data["budget_trends"] = trends
+	data["budget_data"] = budget_data
+
 	// Security Data with detailed records
 	var/list/security_data = list()
 	if(SSsecurity_persistence && SSsecurity_persistence.manager)
@@ -136,7 +213,7 @@
 			"active_threats" = security_manager.active_threats,
 			"containment_breaches" = security_manager.containment_breaches,
 			"unauthorized_access" = security_manager.unauthorized_access_attempts,
-			"security_budget" = security_manager.security_budget,
+			"security_budget" = SSbudget_system?.manager?.department_budgets["security"]?.allocated_budget || 2000000,
 		)
 
 		// Add security personnel records
@@ -1164,6 +1241,234 @@
 			var/achievement_id = params["achievement"]
 			to_chat(admin_client, span_notice("Viewing achievement: [achievement_id]"))
 
+		// Security Actions
+		if("security_manage_personnel")
+			world.log << "PersistenceMasterPanel: Processing security_manage_personnel for [admin_client.ckey]"
+			var/personnel_data = params["personnel_data"]
+			if(personnel_data && SSsecurity_persistence && SSsecurity_persistence.manager)
+				// Update personnel data in the security persistence system
+				var/personnel_info = personnel_data["personnel_data"]
+				if(personnel_info)
+					// Add or update security personnel records
+					for(var/ckey in personnel_info["active_personnel_list"] || list())
+						var/real_name = personnel_info["active_personnel_list"][ckey] || "Unknown"
+						var/clearance_level = text2num(personnel_info["clearance_levels"]?[ckey] || "1")
+						SSsecurity_persistence.manager.add_security_personnel(ckey, real_name, clearance_level)
+
+					// Update security staff count
+					SSsecurity_persistence.manager.security_staff_count = text2num(personnel_info["total_personnel"] || "0")
+
+					// Update security statistics
+					SSsecurity_persistence.manager.update_security_statistics()
+
+				to_chat(admin_client, span_notice("Security personnel management updated successfully. [SSsecurity_persistence.manager.security_staff_count] personnel records updated."))
+				world.log << "PersistenceMasterPanel: Security personnel management updated by [admin_client.ckey] with data: [json_encode(personnel_data)]"
+			else
+				to_chat(admin_client, span_warning("No personnel data provided or security persistence system unavailable."))
+
+		if("security_view_logs")
+			world.log << "PersistenceMasterPanel: Processing security_view_logs for [admin_client.ckey]"
+			var/logs_data = params["logs_data"]
+			if(logs_data && SSsecurity_persistence && SSsecurity_persistence.manager)
+				// Add security log entry
+				var/log_type = logs_data["log_type"] || "system"
+				var/log_description = "Security log query: [logs_data["date_range"]?["start_date"] || "unknown"] to [logs_data["date_range"]?["end_date"] || "unknown"]"
+				var/severity = text2num(logs_data["max_results"] || "1000") > 500 ? 2 : 1
+
+				SSsecurity_persistence.manager.add_security_incident(log_type, log_description, severity, "Security Console", list(admin_client.ckey))
+
+				to_chat(admin_client, span_notice("Security logs retrieved successfully. Found [SSsecurity_persistence.manager.access_logs.len] access logs and [SSsecurity_persistence.manager.security_incidents.len] incidents."))
+				world.log << "PersistenceMasterPanel: Security logs retrieved by [admin_client.ckey] with parameters: [json_encode(logs_data)]"
+			else
+				to_chat(admin_client, span_warning("No logs data provided or security persistence system unavailable."))
+
+		if("security_scan")
+			world.log << "PersistenceMasterPanel: Processing security_scan for [admin_client.ckey]"
+			var/scan_data = params["scan_data"]
+			if(scan_data && SSsecurity_persistence && SSsecurity_persistence.manager)
+				// Perform comprehensive security scan
+				var/scan_type = scan_data["scan_type"] || "comprehensive"
+				var/target_systems = scan_data["target_systems"] || list()
+
+				// Convert target systems from frontend format to backend format
+				var/list/scan_targets = list()
+				if(target_systems["access_control"])
+					scan_targets += "access_control"
+				if(target_systems["surveillance"])
+					scan_targets += "surveillance"
+				if(target_systems["communications"])
+					scan_targets += "communications"
+				if(target_systems["databases"])
+					scan_targets += "databases"
+				if(target_systems["networks"])
+					scan_targets += "networks"
+				if(target_systems["physical_security"])
+					scan_targets += "physical_security"
+
+				// Perform the actual security scan
+				var/list/scan_results = SSsecurity_persistence.manager.perform_comprehensive_security_scan(scan_type, scan_targets)
+
+				// Create security incident for the scan
+				var/scan_description = "Security scan completed: [scan_type] scan found [scan_results["total_threats"]] threats and [scan_results["total_vulnerabilities"]] vulnerabilities"
+				var/severity = scan_results["overall_severity"] > 10 ? 5 : (scan_results["overall_severity"] > 5 ? 4 : 3)
+
+				SSsecurity_persistence.manager.add_security_incident("SECURITY_SCAN", scan_description, severity, "Security Console", list(admin_client.ckey))
+
+				// Add access log for the scan
+				SSsecurity_persistence.manager.add_access_log(admin_client.ckey, "Security Console - Scan", TRUE, 4, "Security scan completed")
+
+				// Update security statistics
+				SSsecurity_persistence.manager.update_security_statistics()
+
+				// Send detailed scan results to the user
+				var/scan_message = "<h3>Security Scan Results</h3>"
+				scan_message += "<b>Scan Type:</b> [scan_type]<br>"
+				scan_message += "<b>Total Threats Found:</b> [scan_results["total_threats"]]<br>"
+				scan_message += "<b>Total Vulnerabilities:</b> [scan_results["total_vulnerabilities"]]<br>"
+				scan_message += "<b>Overall Severity:</b> [scan_results["overall_severity"]]<br><br>"
+
+				if(scan_results["threats_found"].len > 0)
+					scan_message += "<b>Threats Detected:</b><br>"
+					for(var/threat in scan_results["threats_found"])
+						scan_message += "• [threat]<br>"
+					scan_message += "<br>"
+
+				if(scan_results["vulnerabilities"].len > 0)
+					scan_message += "<b>Vulnerabilities Found:</b><br>"
+					for(var/vulnerability in scan_results["vulnerabilities"])
+						scan_message += "• [vulnerability]<br>"
+					scan_message += "<br>"
+
+				if(scan_results["recommendations"].len > 0)
+					scan_message += "<b>Recommendations:</b><br>"
+					for(var/recommendation in scan_results["recommendations"])
+						scan_message += "• [recommendation]<br>"
+
+				to_chat(admin_client, span_notice("[scan_message]"))
+				world.log << "PersistenceMasterPanel: Security scan completed by [admin_client.ckey] - [scan_results["total_threats"]] threats, [scan_results["total_vulnerabilities"]] vulnerabilities"
+			else
+				to_chat(admin_client, span_warning("No scan data provided or security persistence system unavailable."))
+
+		if("security_access_control")
+			world.log << "PersistenceMasterPanel: Processing security_access_control for [admin_client.ckey]"
+			var/access_data = params["access_data"]
+			if(access_data && SSsecurity_persistence && SSsecurity_persistence.manager)
+				// Update access control settings
+				var/access_levels = access_data["access_levels"]
+				if(access_levels)
+					for(var/level_key in access_levels)
+						var/level_data = access_levels[level_key]
+						var/protocol_name = "Access Control - [level_data["name"] || level_key]"
+						var/protocol_description = "Access level [level_data["name"] || level_key] permissions updated"
+						var/clearance_required = text2num(level_data["clearance_required"] || "1")
+
+						SSsecurity_persistence.manager.add_security_protocol(protocol_name, protocol_description, clearance_required)
+
+				// Add access log
+				SSsecurity_persistence.manager.add_access_log(admin_client.ckey, "Security Console - Access Control", TRUE, 4, "Access control settings updated")
+
+				// Update security statistics
+				SSsecurity_persistence.manager.update_security_statistics()
+
+				to_chat(admin_client, span_notice("Security access control updated successfully. [access_levels?.len || 0] access levels configured."))
+				world.log << "PersistenceMasterPanel: Security access control updated by [admin_client.ckey] with data: [json_encode(access_data)]"
+			else
+				to_chat(admin_client, span_warning("No access data provided or security persistence system unavailable."))
+
+		// Budget Actions
+		if("budget_request_increase")
+			world.log << "PersistenceMasterPanel: Processing budget_request_increase for [admin_client.ckey]"
+			var/request_data = params["request_data"]
+			if(request_data && SSbudget_system && SSbudget_system.manager)
+				var/department_id = request_data["department_id"]
+				var/requested_amount = text2num(request_data["requested_amount"] || "0")
+				var/category = request_data["requested_category"] || "miscellaneous"
+				var/justification = request_data["justification"] || "No justification provided"
+				var/priority = text2num(request_data["priority"] || "1")
+
+				var/datum/budget_request_data/request = SSbudget_system.manager.request_budget_increase(department_id, requested_amount, category, justification, admin_client.ckey)
+				if(request)
+					request.priority = priority
+					to_chat(admin_client, span_notice("Budget increase request submitted successfully. Request ID: [request.request_id]"))
+					world.log << "PersistenceMasterPanel: Budget request [request.request_id] submitted by [admin_client.ckey] for [requested_amount] credits"
+				else
+					to_chat(admin_client, span_warning("Failed to submit budget request."))
+			else
+				to_chat(admin_client, span_warning("No request data provided or budget system unavailable."))
+
+		if("budget_approve_request")
+			world.log << "PersistenceMasterPanel: Processing budget_approve_request for [admin_client.ckey]"
+			var/approval_data = params["approval_data"]
+			if(approval_data && SSbudget_system && SSbudget_system.manager)
+				var/request_id = approval_data["request_id"]
+				var/approval_notes = approval_data["approval_notes"] || "Approved by [admin_client.ckey]"
+
+				if(SSbudget_system.manager.approve_budget_request(request_id, admin_client.ckey, approval_notes))
+					to_chat(admin_client, span_notice("Budget request [request_id] approved successfully."))
+					world.log << "PersistenceMasterPanel: Budget request [request_id] approved by [admin_client.ckey]"
+				else
+					to_chat(admin_client, span_warning("Failed to approve budget request [request_id]."))
+			else
+				to_chat(admin_client, span_warning("No approval data provided or budget system unavailable."))
+
+		if("budget_deny_request")
+			world.log << "PersistenceMasterPanel: Processing budget_deny_request for [admin_client.ckey]"
+			var/denial_data = params["denial_data"]
+			if(denial_data && SSbudget_system && SSbudget_system.manager)
+				var/request_id = denial_data["request_id"]
+				var/denial_notes = denial_data["denial_notes"] || "Denied by [admin_client.ckey]"
+
+				if(SSbudget_system.manager.deny_budget_request(request_id, admin_client.ckey, denial_notes))
+					to_chat(admin_client, span_notice("Budget request [request_id] denied successfully."))
+					world.log << "PersistenceMasterPanel: Budget request [request_id] denied by [admin_client.ckey]"
+				else
+					to_chat(admin_client, span_warning("Failed to deny budget request [request_id]."))
+			else
+				to_chat(admin_client, span_warning("No denial data provided or budget system unavailable."))
+
+		if("budget_add_transaction")
+			world.log << "PersistenceMasterPanel: Processing budget_add_transaction for [admin_client.ckey]"
+			var/transaction_data = params["transaction_data"]
+			if(transaction_data && SSbudget_system && SSbudget_system.manager)
+				var/department_id = transaction_data["department_id"]
+				var/transaction_type = transaction_data["transaction_type"] || "EXPENSE"
+				var/amount = text2num(transaction_data["amount"] || "0")
+				var/category = transaction_data["category"] || "miscellaneous"
+				var/description = transaction_data["description"] || "Transaction added via admin panel"
+
+				var/datum/transaction_data/transaction = SSbudget_system.manager.add_transaction(department_id, transaction_type, amount, category, description, admin_client.ckey)
+				if(transaction)
+					to_chat(admin_client, span_notice("Transaction added successfully. Transaction ID: [transaction.transaction_id]"))
+					world.log << "PersistenceMasterPanel: Transaction [transaction.transaction_id] added by [admin_client.ckey] for [amount] credits"
+				else
+					to_chat(admin_client, span_warning("Failed to add transaction."))
+			else
+				to_chat(admin_client, span_warning("No transaction data provided or budget system unavailable."))
+
+		if("budget_transfer")
+			world.log << "PersistenceMasterPanel: Processing budget_transfer for [admin_client.ckey]"
+			var/transfer_data = params["transfer_data"]
+			if(transfer_data && SSbudget_system && SSbudget_system.manager)
+				var/from_department = transfer_data["from_department"]
+				var/to_department = transfer_data["to_department"]
+				var/amount = text2num(transfer_data["amount"] || "0")
+				var/reason = transfer_data["reason"] || "Budget transfer via admin panel"
+
+				// Check if source department has sufficient budget
+				var/datum/budget_data/from_dept = SSbudget_system.manager.department_budgets[from_department]
+				if(!from_dept || from_dept.remaining_budget < amount)
+					to_chat(admin_client, span_warning("Insufficient budget in [from_department] department for transfer."))
+					return
+
+				// Execute the transfer
+				if(SSbudget_system.manager.transfer_budget(from_department, to_department, amount, reason, admin_client.ckey))
+					to_chat(admin_client, span_notice("Budget transfer completed successfully. [amount] credits transferred from [from_department] to [to_department]."))
+					world.log << "PersistenceMasterPanel: Budget transfer of [amount] credits from [from_department] to [to_department] by [admin_client.ckey]"
+				else
+					to_chat(admin_client, span_warning("Failed to complete budget transfer."))
+			else
+				to_chat(admin_client, span_warning("No transfer data provided or budget system unavailable."))
+
 		if("test_systems")
 			world.log << "PersistenceMasterPanel: Testing all persistence systems for [admin_client.ckey]"
 			var/test_message = "<h2>Persistence Systems Test Results</h2>"
@@ -1199,6 +1504,17 @@
 			else
 				test_message += "<b>Personnel System:</b> ❌ NOT AVAILABLE<br>"
 				world.log << "PersistenceMasterPanel: Personnel system not available"
+
+			// Test budget system
+			if(SSbudget_system && SSbudget_system.manager)
+				test_message += "<b>Budget System:</b> ✅ OPERATIONAL<br>"
+				test_message += "<b>Total Budget:</b> [SSbudget_system.manager.total_budget] credits<br>"
+				test_message += "<b>Current Balance:</b> [SSbudget_system.manager.current_balance] credits<br>"
+				test_message += "<b>Departments:</b> [SSbudget_system.manager.department_budgets.len] departments<br>"
+				world.log << "PersistenceMasterPanel: Budget system operational"
+			else
+				test_message += "<b>Budget System:</b> ❌ NOT AVAILABLE<br>"
+				world.log << "PersistenceMasterPanel: Budget system not available"
 
 			to_chat(admin_client, span_notice("[test_message]"))
 
