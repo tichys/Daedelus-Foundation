@@ -192,7 +192,8 @@
 
 	// Keep only last 100 entries
 	if(experience[ckey].len > 100)
-		experience[ckey] = experience[ckey].Copy(experience[ckey].len - 99, experience[ckey].len)
+		var/list/exp_list = experience[ckey]
+		experience[ckey] = exp_list.Copy(exp_list.len - 99, exp_list.len)
 
 	var/success = write_json_file(file_path, experience)
 
@@ -221,7 +222,8 @@
 	// Sort by timestamp (newest first)
 	recent = sort_list(recent, /proc/cmp_experience_timestamp)
 
-	return recent.Copy(1, min(limit + 1, recent.len + 1))
+	var/list/recent_copy = recent.Copy()
+	return recent_copy.Copy(1, min(limit + 1, recent_copy.len + 1))
 
 // Achievement operations
 /datum/persistent_progression_database/proc/unlock_achievement(ckey, achievement_id, progress = 0)
@@ -455,7 +457,8 @@
 
 	// Keep only last 100 entries per metric
 	if(analytics[ckey][metric_name].len > 100)
-		analytics[ckey][metric_name] = analytics[ckey][metric_name].Copy(analytics[ckey][metric_name].len - 99, analytics[ckey][metric_name].len)
+		var/list/metric_list = analytics[ckey][metric_name]
+		analytics[ckey][metric_name] = metric_list.Copy(metric_list.len - 99, metric_list.len)
 
 	return write_json_file(file_path, analytics)
 
@@ -473,7 +476,8 @@
 	// Sort by timestamp (newest first)
 	metric_data = sort_list(metric_data, /proc/cmp_analytics_timestamp)
 
-	return metric_data.Copy(1, min(limit + 1, metric_data.len + 1))
+	var/list/metric_copy = metric_data.Copy()
+	return metric_copy.Copy(1, min(limit + 1, metric_copy.len + 1))
 
 // Global statistics
 /datum/persistent_progression_database/proc/get_global_stats()

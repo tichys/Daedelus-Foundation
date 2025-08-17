@@ -38,7 +38,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/list/notes = list()
 	var/status = "SCHEDULED" // SCHEDULED, IN_PROGRESS, COMPLETED, FAILED
 
-	New(var/record_id, var/equipment_id, var/maintenance_type, var/maintenance_description, var/technician_ckey)
+/datum/maintenance_record/New(var/record_id, var/equipment_id, var/maintenance_type, var/maintenance_description, var/technician_ckey)
 		src.record_id = record_id
 		src.equipment_id = equipment_id
 		src.maintenance_type = maintenance_type
@@ -60,7 +60,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/list/known_issues = list()
 	var/list/performance_metrics = list()
 
-	New(var/equipment_id, var/equipment_name, var/infrastructure_equipment_type, var/location)
+/datum/equipment_status/New(var/equipment_id, var/equipment_name, var/infrastructure_equipment_type, var/location)
 		src.equipment_id = equipment_id
 		src.equipment_name = equipment_name
 		src.infrastructure_equipment_type = infrastructure_equipment_type
@@ -83,7 +83,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/last_inspection
 	var/next_inspection
 
-	New(var/system_id, var/system_name, var/system_type, var/location)
+/datum/power_system/New(var/system_id, var/system_name, var/system_type, var/location)
 		src.system_id = system_id
 		src.system_name = system_name
 		src.system_type = system_type
@@ -103,7 +103,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/risk_level = "LOW" // LOW, MEDIUM, HIGH, CRITICAL
 	var/evacuation_required = FALSE
 
-	New(var/area_id, var/area_name, var/area_type)
+/datum/structural_integrity/New(var/area_id, var/area_name, var/area_type)
 		src.area_id = area_id
 		src.area_name = area_name
 		src.area_type = area_type
@@ -123,7 +123,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/list/required_parts = list()
 	var/list/work_notes = list()
 
-	New(var/order_id, var/equipment_id, var/issue_description)
+/datum/repair_order/New(var/order_id, var/equipment_id, var/issue_description)
 		src.order_id = order_id
 		src.equipment_id = equipment_id
 		src.issue_description = issue_description
@@ -143,7 +143,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/list/maintenance_procedures = list()
 	var/list/required_tools = list()
 
-	New(var/pm_id, var/equipment_id, var/maintenance_type, var/maintenance_description)
+/datum/preventive_maintenance/New(var/pm_id, var/equipment_id, var/maintenance_type, var/maintenance_description)
 		src.pm_id = pm_id
 		src.equipment_id = equipment_id
 		src.maintenance_type = maintenance_type

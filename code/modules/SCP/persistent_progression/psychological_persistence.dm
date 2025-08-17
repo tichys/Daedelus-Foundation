@@ -39,7 +39,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	var/assessment_frequency = 7 // Days between assessments
 	var/risk_level = "LOW" // LOW, MEDIUM, HIGH, CRITICAL
 
-	New(var/ckey, var/real_name)
+/datum/mental_health_record/New(var/ckey, var/real_name)
 		src.ckey = ckey
 		src.real_name = real_name
 		src.last_assessment = world.time
@@ -59,7 +59,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	var/therapist_rating = 0 // 0-100 scale
 	var/status = "SCHEDULED" // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
 
-	New(var/session_id, var/patient_ckey, var/therapist_ckey, var/session_type)
+/datum/therapy_session/New(var/session_id, var/patient_ckey, var/therapist_ckey, var/session_type)
 		src.session_id = session_id
 		src.patient_ckey = patient_ckey
 		src.therapist_ckey = therapist_ckey
@@ -81,7 +81,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	var/exposure_date
 	var/recovery_date
 
-	New(var/exposure_id, var/patient_ckey, var/scp_id, var/exposure_type)
+/datum/scp_exposure_effect/New(var/exposure_id, var/patient_ckey, var/scp_id, var/exposure_type)
 		src.exposure_id = exposure_id
 		src.patient_ckey = patient_ckey
 		src.scp_id = scp_id
@@ -101,7 +101,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	var/event_date
 	var/resolution_date
 
-	New(var/stress_id, var/patient_ckey, var/stress_type, var/stress_description)
+/datum/stress_event/New(var/stress_id, var/patient_ckey, var/stress_type, var/stress_description)
 		src.stress_id = stress_id
 		src.patient_ckey = patient_ckey
 		src.stress_type = stress_type
@@ -122,7 +122,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	var/follow_up_date
 	var/assessment_notes = ""
 
-	New(var/assessment_id, var/patient_ckey, var/assessor_ckey, var/assessment_type)
+/datum/psychological_assessment/New(var/assessment_id, var/patient_ckey, var/assessor_ckey, var/assessment_type)
 		src.assessment_id = assessment_id
 		src.patient_ckey = patient_ckey
 		src.assessor_ckey = assessor_ckey
@@ -143,7 +143,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	var/status = "ACTIVE" // ACTIVE, RESOLVED, ESCALATED
 	var/requires_intervention = FALSE
 
-	New(var/incident_id, var/patient_ckey, var/incident_type, var/incident_description)
+/datum/mental_health_incident/New(var/incident_id, var/patient_ckey, var/incident_type, var/incident_description)
 		src.incident_id = incident_id
 		src.patient_ckey = patient_ckey
 		src.incident_type = incident_type
