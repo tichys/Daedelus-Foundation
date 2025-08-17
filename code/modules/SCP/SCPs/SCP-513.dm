@@ -26,7 +26,7 @@
 		"SCP-513",
 		SCP_EUCLID,
 		"513",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 15

@@ -53,7 +53,7 @@
 		"SCP-1048",
 		SCP_EUCLID,
 		"1048",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 8

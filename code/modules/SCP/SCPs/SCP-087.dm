@@ -49,7 +49,7 @@
 		"SCP-087",
 		SCP_EUCLID,
 		"087",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 20

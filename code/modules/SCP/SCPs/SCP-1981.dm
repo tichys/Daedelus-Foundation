@@ -47,7 +47,7 @@
 		"SCP-1981",
 		SCP_EUCLID,
 		"1981",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 20

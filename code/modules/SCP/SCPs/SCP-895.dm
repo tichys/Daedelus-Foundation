@@ -26,7 +26,7 @@
 		"SCP-895",
 		SCP_EUCLID,
 		"895",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 15

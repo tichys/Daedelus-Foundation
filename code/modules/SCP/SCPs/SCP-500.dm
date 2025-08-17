@@ -36,7 +36,7 @@
 		"SCP-500",
 		SCP_SAFE,
 		"500",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 5

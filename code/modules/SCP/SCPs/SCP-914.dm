@@ -73,7 +73,7 @@
 		"SCP-914",
 		SCP_EUCLID,
 		"914",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 10

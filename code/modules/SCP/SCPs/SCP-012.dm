@@ -44,7 +44,7 @@
 		"SCP-012",
 		SCP_EUCLID,
 		"012",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 15

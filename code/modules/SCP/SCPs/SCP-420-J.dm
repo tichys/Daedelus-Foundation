@@ -43,7 +43,7 @@
 		"SCP-420-J",
 		SCP_SAFE,
 		"420-J",
-		SCP_DISABLED
+
 	)
 
 	SCP.min_playercount = 15

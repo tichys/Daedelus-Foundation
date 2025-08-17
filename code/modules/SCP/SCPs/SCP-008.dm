@@ -22,7 +22,7 @@
 		"SCP-008",
 		SCP_KETER,
 		"008",
-		SCP_DISABLED
+		
 	)
 
 	SCP.min_playercount = 20
