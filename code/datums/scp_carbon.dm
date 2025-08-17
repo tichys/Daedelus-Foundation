@@ -51,12 +51,12 @@
 
 /mob/living/carbon/scp/Destroy()
 	// Clean up SCP data
-	scp_abilities.Cut()
-	active_effects.Cut()
-	passive_effects.Cut()
-	interaction_history.Cut()
-	affected_targets.Cut()
-	containment_requirements.Cut()
+	scp_abilities = list()
+	active_effects = list()
+	passive_effects = list()
+	interaction_history = list()
+	affected_targets = list()
+	containment_requirements = list()
 	persistence_data = list()
 
 	// Remove from persistence system

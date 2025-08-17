@@ -47,11 +47,11 @@
 		SSscp_persistence.manager.scp_instances["SCP-500"] = new /datum/scp_instance("SCP-500", src)
 
 /obj/item/reagent_containers/pill/scp500/Destroy()
-	cured_diseases.Cut()
-	cured_targets.Cut()
-	healing_history.Cut()
-	affected_targets.Cut()
-	known_cures.Cut()
+	cured_diseases = list()
+	cured_targets = list()
+	healing_history = list()
+	affected_targets = list()
+	known_cures = list()
 	return ..()
 
 // Core mechanics

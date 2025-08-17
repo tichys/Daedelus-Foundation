@@ -88,8 +88,7 @@
 	if(origin)
 		var/turf/starting = get_turf(origin)
 		check_turf(starting, found_turfs, NONE)
-	for(var/i = 1; i <= length(found_turfs), i++)
-		var/turf/focus = found_turfs[i]
+	for(var/turf/focus in found_turfs)
 		var/list/focus_packet = found_turfs[focus]
 		var/dirs_checked = focus_packet[MERGE_TURF_PACKET_DIR]
 		for(var/dir in GLOB.cardinals)

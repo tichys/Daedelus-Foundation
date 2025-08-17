@@ -55,8 +55,8 @@
 	add_passive_effect("partner_bonding")
 
 /mob/living/carbon/scp/scp131/Destroy()
-	telepathic_messages.Cut()
-	observed_targets.Cut()
+	telepathic_messages = list()
+	observed_targets = list()
 	return ..()
 
 // Override core mechanics

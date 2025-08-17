@@ -99,8 +99,8 @@
 	add_passive_effect("regeneration_mastery")
 
 /mob/living/carbon/scp/scp682/Destroy()
-	adaptations.Cut()
-	damage_history.Cut()
+	adaptations = list()
+	damage_history = list()
 	return ..()
 
 // Override core mechanics

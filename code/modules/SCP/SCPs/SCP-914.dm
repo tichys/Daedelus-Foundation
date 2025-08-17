@@ -84,11 +84,11 @@
 		SSscp_persistence.manager.scp_instances["SCP-914"] = new /datum/scp_instance("SCP-914", src)
 
 /obj/machinery/scp914/Destroy()
-	input_objects.Cut()
-	output_objects.Cut()
-	refinement_history.Cut()
-	refined_materials.Cut()
-	failed_refinements.Cut()
+	input_objects = list()
+	output_objects = list()
+	refinement_history = list()
+	refined_materials = list()
+	failed_refinements = list()
 	return ..()
 
 // Core mechanics

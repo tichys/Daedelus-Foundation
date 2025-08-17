@@ -92,13 +92,13 @@
 	add_passive_effect("advanced_hunting")
 
 /mob/living/carbon/scp/scp939/Destroy()
-	pack_members.Cut()
-	hunting_targets.Cut()
-	mimicked_voices.Cut()
-	territory_areas.Cut()
-	psychological_profiles.Cut()
-	hunting_strategies.Cut()
-	voice_evolution_data.Cut()
+	pack_members = list()
+	hunting_targets = list()
+	mimicked_voices = list()
+	territory_areas = list()
+	psychological_profiles = list()
+	hunting_strategies = list()
+	voice_evolution_data = list()
 	return ..()
 
 // Override core mechanics

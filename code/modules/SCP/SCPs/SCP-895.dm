@@ -37,8 +37,8 @@
 		SSscp_persistence.manager.scp_instances["SCP-895"] = new /datum/scp_instance("SCP-895", src)
 
 /obj/machinery/camera/scp895/Destroy()
-	affected_targets.Cut()
-	sickness_levels.Cut()
+	affected_targets = list()
+	sickness_levels = list()
 	return ..()
 
 // Core mechanics

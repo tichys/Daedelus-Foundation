@@ -33,8 +33,8 @@
 		SSscp_persistence.manager.scp_instances["SCP-008"] = new /datum/scp_instance("SCP-008", src)
 
 /obj/item/reagent_containers/glass/bottle/scp008/Destroy()
-	infected_targets.Cut()
-	zombified_targets.Cut()
+	infected_targets = list()
+	zombified_targets = list()
 	return ..()
 
 // Core mechanics
@@ -218,7 +218,7 @@
 		SSscp_persistence.manager.scp_instances["SCP-008-Zombie-[src]"] = new /datum/scp_instance("SCP-008-Zombie-[src]", src)
 
 /mob/living/simple_animal/hostile/scp008_zombie/Destroy()
-	infected_targets.Cut()
+	infected_targets = list()
 	return ..()
 
 // Core mechanics

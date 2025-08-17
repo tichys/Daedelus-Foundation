@@ -51,7 +51,7 @@
 	add_passive_effect("pocket_dimension_mastery")
 
 /mob/living/carbon/scp/scp106/Destroy()
-	pocket_dimensions.Cut()
+	pocket_dimensions = list()
 	return ..()
 
 // Override core mechanics

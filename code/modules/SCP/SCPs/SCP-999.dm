@@ -98,8 +98,8 @@
 	add_passive_effect("emotional_resonance")
 
 /mob/living/carbon/scp/scp999/Destroy()
-	healed_targets.Cut()
-	mood_improved_targets.Cut()
+	healed_targets = list()
+	mood_improved_targets = list()
 	return ..()
 
 // Override core mechanics

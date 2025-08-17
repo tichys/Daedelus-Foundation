@@ -37,8 +37,8 @@
 		SSscp_persistence.manager.scp_instances["SCP-513"] = new /datum/scp_instance("SCP-513", src)
 
 /obj/item/scp513/Destroy()
-	affected_targets.Cut()
-	fear_levels.Cut()
+	affected_targets = list()
+	fear_levels = list()
 	return ..()
 
 // Ring the cowbell

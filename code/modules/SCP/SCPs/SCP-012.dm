@@ -55,8 +55,8 @@
 		SSscp_persistence.manager.scp_instances["SCP-012"] = new /datum/scp_instance("SCP-012", src)
 
 /obj/item/paper/scp012/Destroy()
-	affected_composers.Cut()
-	composition_notes.Cut()
+	affected_composers = list()
+	composition_notes = list()
 	return ..()
 
 // Core mechanics

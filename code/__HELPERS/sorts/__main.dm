@@ -101,7 +101,7 @@ GLOBAL_DATUM_INIT(sortInstance, /datum/sort_instance, new())
 	if(start <= lo)
 		start = lo + 1
 
-	for(,start < hi, ++start)
+	for(; start < hi; ++start)
 		var/pivot = fetchElement(L,start)
 
 		//set left and right to the index where pivot belongs

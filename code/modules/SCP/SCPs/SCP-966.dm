@@ -95,8 +95,8 @@
 	add_passive_effect("invisibility_evolution")
 
 /mob/living/carbon/scp/scp966/Destroy()
-	sleep_affected_targets.Cut()
-	stalked_targets.Cut()
+	sleep_affected_targets = list()
+	stalked_targets = list()
 	return ..()
 
 /mob/living/carbon/scp/scp966/process_scp_effects()

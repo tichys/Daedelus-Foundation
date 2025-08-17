@@ -73,12 +73,12 @@
 	)
 
 /mob/living/simple_animal/hostile/scp1048/Destroy()
-	construction_materials.Cut()
-	completed_structures.Cut()
-	construction_history.Cut()
-	available_materials.Cut()
-	blueprint_knowledge.Cut()
-	construction_targets.Cut()
+	construction_materials = list()
+	completed_structures = list()
+	construction_history = list()
+	available_materials = list()
+	blueprint_knowledge = list()
+	construction_targets = list()
 	return ..()
 
 // Core mechanics

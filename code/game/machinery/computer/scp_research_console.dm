@@ -52,10 +52,10 @@
 /obj/machinery/computer/scp_research_console/proc/generate_ui(mob/user)
 	var/datum/researcher_data/researcher = get_researcher_data(user.ckey)
 	var/list/html = list()
-	
+
 	html += "<html><head><title>SCP Research Console</title></head><body>"
 	html += "<h1>SCP Research Console</h1>"
-	
+
 	if(!researcher)
 		html += "<p>No research data found. Start researching SCPs to see your progress.</p>"
 	else
@@ -69,26 +69,26 @@
 		html += "<tr><td><b>Completed Projects:</b></td><td>[researcher.completed_projects]</td></tr>"
 		html += "<tr><td><b>Failed Projects:</b></td><td>[researcher.failed_projects]</td></tr>"
 		html += "</table>"
-		
+
 		if(researcher.achievements.len > 0)
 			html += "<h2>Achievements</h2>"
 			html += "<ul>"
 			for(var/achievement in researcher.achievements)
 				html += "<li>[achievement]</li>"
 			html += "</ul>"
-		
+
 		if(researcher.completed_research.len > 0)
 			html += "<h2>Completed Research</h2>"
 			html += "<ul>"
 			for(var/research in researcher.completed_research)
 				html += "<li>[research]</li>"
 			html += "</ul>"
-		
+
 		html += "<h2>Active Research Projects</h2>"
 		var/found_projects = FALSE
 		html += "<table border='1' style='width:100%; border-collapse: collapse;'>"
 		html += "<tr><th>SCP</th><th>Type</th><th>Level</th><th>Progress</th><th>Time</th></tr>"
-		
+
 		for(var/project_id in SSscp_research.manager.research_projects)
 			var/datum/research_data/project = SSscp_research.manager.research_projects[project_id]
 			if(project.researcher_ckey == user.ckey && project.status == "ACTIVE")
@@ -102,21 +102,21 @@
 				html += "<td>[project.research_points]/[project.research_cost] ([progress_percent]%)</td>"
 				html += "<td>[time_minutes] minutes</td>"
 				html += "</tr>"
-		
+
 		if(!found_projects)
 			html += "<tr><td colspan='5'>No active research projects</td></tr>"
-		
+
 		html += "</table>"
-	
+
 	html += "<br><a href='?src=[REF(src)];refresh=1'>Refresh</a>"
 	html += "</body></html>"
-	
+
 	return jointext(html, "")
 
 /obj/machinery/computer/scp_research_console/Topic(href, href_list)
 	if(..())
 		return
-	
+
 	if(href_list["refresh"])
 		interact(usr)
 		return

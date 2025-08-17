@@ -93,8 +93,8 @@
 	add_passive_effect("flame_evolution")
 
 /mob/living/carbon/scp/scp457/Destroy()
-	created_fires.Cut()
-	consumed_targets.Cut()
+	created_fires = list()
+	consumed_targets = list()
 	return ..()
 
 /mob/living/carbon/scp/scp457/process_scp_effects()

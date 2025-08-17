@@ -61,11 +61,11 @@
 	)
 
 /obj/item/clothing/mask/scp035/Destroy()
-	previous_hosts.Cut()
-	personality_traits.Cut()
-	possession_history.Cut()
-	affected_targets.Cut()
-	learned_abilities.Cut()
+	previous_hosts = list()
+	personality_traits = list()
+	possession_history = list()
+	affected_targets = list()
+	learned_abilities = list()
 	return ..()
 
 // Core mechanics
