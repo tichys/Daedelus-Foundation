@@ -65,7 +65,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 /datum/scp_persistence_manager/proc/get_scp_id(var/obj/O)
 	// Extract SCP ID from object name or properties
-	if(FALSE) // Simplified SCP ID check
+	if(istype(O, /obj/item/paper)) // Check if it's a document with SCP info
 		return "SCP-000"
 	else if(findtext(O.name, "SCP-"))
 		var/list/parts = splittext(O.name, " ")

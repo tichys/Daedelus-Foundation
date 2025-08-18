@@ -38,7 +38,7 @@ SUBSYSTEM_DEF(incident_persistence)
 	var/incident_classification = "UNCLASSIFIED"
 	var/response_priority = 1 // 1-5 scale
 
-	New(var/incident_id, var/incident_type, var/incident_description, var/location)
+/datum/incident_record/New(var/incident_id, var/incident_type, var/incident_description, var/location)
 		src.incident_id = incident_id
 		src.incident_type = incident_type
 		src.incident_description = incident_description
@@ -59,7 +59,7 @@ SUBSYSTEM_DEF(incident_persistence)
 	var/list/affected_scps = list()
 	var/breach_radius = 0
 
-	New(var/breach_id, var/breach_type, var/breach_description, var/breach_location)
+/datum/breach_event/New(var/breach_id, var/breach_type, var/breach_description, var/breach_location)
 		src.breach_id = breach_id
 		src.breach_type = breach_type
 		src.breach_description = breach_description
@@ -80,7 +80,7 @@ SUBSYSTEM_DEF(incident_persistence)
 	var/team_leader
 	var/status = "DEPLOYED" // DEPLOYED, ON_SITE, COMPLETED, FAILED
 
-	New(var/response_id, var/incident_id, var/response_team, var/response_type, var/team_leader)
+/datum/response_log/New(var/response_id, var/incident_id, var/response_team, var/response_type, var/team_leader)
 		src.response_id = response_id
 		src.incident_id = incident_id
 		src.response_team = response_team
@@ -102,7 +102,7 @@ SUBSYSTEM_DEF(incident_persistence)
 	var/injury_time
 	var/treatment_time
 
-	New(var/casualty_id, var/incident_id, var/victim_name, var/victim_ckey, var/injury_type)
+/datum/casualty_report/New(var/casualty_id, var/incident_id, var/victim_name, var/victim_ckey, var/injury_type)
 		src.casualty_id = casualty_id
 		src.incident_id = incident_id
 		src.victim_name = victim_name
@@ -123,7 +123,7 @@ SUBSYSTEM_DEF(incident_persistence)
 	var/damage_description
 	var/affected_systems = list()
 
-	New(var/damage_id, var/incident_id, var/damage_type, var/damage_location)
+/datum/damage_assessment/New(var/damage_id, var/incident_id, var/damage_type, var/damage_location)
 		src.damage_id = damage_id
 		src.incident_id = incident_id
 		src.damage_type = damage_type
@@ -142,7 +142,7 @@ SUBSYSTEM_DEF(incident_persistence)
 	var/list/containment_procedures = list()
 	var/containment_cost = 0
 
-	New(var/containment_id, var/incident_id, var/containment_method, var/containment_location)
+/datum/containment_event/New(var/containment_id, var/incident_id, var/containment_method, var/containment_location)
 		src.containment_id = containment_id
 		src.incident_id = incident_id
 		src.containment_method = containment_method

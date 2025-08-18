@@ -44,7 +44,7 @@ SUBSYSTEM_DEF(research_persistence)
 	var/list/publications = list()
 	var/research_notes = ""
 
-	New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
+/datum/research_persistence_project/New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
 		src.project_id = project_id
 		src.project_name = project_name
 		src.project_description = project_description
@@ -66,7 +66,7 @@ SUBSYSTEM_DEF(research_persistence)
 	var/patent_status = "NONE" // NONE, PENDING, GRANTED, REJECTED
 	var/commercial_value = 0
 
-	New(var/discovery_id, var/discovery_name, var/discovery_description, var/discovery_type, var/research_field, var/discoverer_ckey)
+/datum/research_scientific_discovery/New(var/discovery_id, var/discovery_name, var/discovery_description, var/discovery_type, var/research_field, var/discoverer_ckey)
 		src.discovery_id = discovery_id
 		src.discovery_name = discovery_name
 		src.discovery_description = discovery_description
@@ -87,7 +87,7 @@ SUBSYSTEM_DEF(research_persistence)
 	var/peer_review_status = "PENDING" // PENDING, APPROVED, REJECTED, PUBLISHED
 	var/doi_number = ""
 
-	New(var/publication_id, var/publication_title, var/publication_abstract, var/authors, var/journal_name)
+/datum/publication/New(var/publication_id, var/publication_title, var/publication_abstract, var/authors, var/journal_name)
 		src.publication_id = publication_id
 		src.publication_title = publication_title
 		src.publication_abstract = publication_abstract
@@ -108,7 +108,7 @@ SUBSYSTEM_DEF(research_persistence)
 	var/list/equipment = list()
 	var/security_level = 1
 
-	New(var/facility_id, var/facility_name, var/facility_type, var/location)
+/datum/research_persistence_facility/New(var/facility_id, var/facility_name, var/facility_type, var/location)
 		src.facility_id = facility_id
 		src.facility_name = facility_name
 		src.facility_type = facility_type
@@ -127,7 +127,7 @@ SUBSYSTEM_DEF(research_persistence)
 	var/requirements = list()
 	var/progress_reports = list()
 
-	New(var/grant_id, var/grant_name, var/granting_organization, var/amount, var/research_field, var/recipient_ckey)
+/datum/research_grant/New(var/grant_id, var/grant_name, var/granting_organization, var/amount, var/research_field, var/recipient_ckey)
 		src.grant_id = grant_id
 		src.grant_name = grant_name
 		src.granting_organization = granting_organization

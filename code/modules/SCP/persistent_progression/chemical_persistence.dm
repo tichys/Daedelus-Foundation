@@ -37,7 +37,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/containment_status = "SAFE"
 	var/last_updated
 
-	New(var/chemical_id, var/chemical_name, var/chemical_formula, var/chemical_type)
+/datum/chemical_record/New(var/chemical_id, var/chemical_name, var/chemical_formula, var/chemical_type)
 		src.chemical_id = chemical_id
 		src.chemical_name = chemical_name
 		src.chemical_formula = chemical_formula
@@ -61,7 +61,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/list/discoveries = list()
 	var/list/publications = list()
 
-	New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
+/datum/chemical_research_project/New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
 		src.project_id = project_id
 		src.project_name = project_name
 		src.project_description = project_description
@@ -81,7 +81,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/status = "ACTIVE" // ACTIVE, BREACHED, DECOMMISSIONED
 	var/list/containment_logs = list()
 
-	New(var/containment_id, var/substance_name, var/containment_location, var/containment_method)
+/datum/containment_record/New(var/containment_id, var/substance_name, var/containment_location, var/containment_method)
 		src.containment_id = containment_id
 		src.substance_name = substance_name
 		src.containment_location = containment_location
@@ -102,7 +102,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/list/affected_personnel = list()
 	var/cleanup_cost = 0
 
-	New(var/accident_id, var/accident_type, var/accident_description, var/location)
+/datum/accident_log/New(var/accident_id, var/accident_type, var/accident_description, var/location)
 		src.accident_id = accident_id
 		src.accident_type = accident_type
 		src.accident_description = accident_description
@@ -121,7 +121,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/research_applications = list()
 	var/safety_rating = 1 // 1-5 scale
 
-	New(var/compound_id, var/compound_name, var/compound_formula, var/compound_type, var/discoverer_ckey)
+/datum/discovered_compound/New(var/compound_id, var/compound_name, var/compound_formula, var/compound_type, var/discoverer_ckey)
 		src.compound_id = compound_id
 		src.compound_name = compound_name
 		src.compound_formula = compound_formula
@@ -140,7 +140,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/disposal_method = "UNKNOWN"
 	var/containment_cost = 0
 
-	New(var/substance_id, var/substance_name, var/substance_formula, var/danger_level)
+/datum/dangerous_substance/New(var/substance_id, var/substance_name, var/substance_formula, var/danger_level)
 		src.substance_id = substance_id
 		src.substance_name = substance_name
 		src.substance_formula = substance_formula

@@ -36,7 +36,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/health_rating = 100
 	var/last_updated
 
-	New(var/ckey, var/real_name)
+/datum/medical_record/New(var/ckey, var/real_name)
 		src.ckey = ckey
 		src.real_name = real_name
 		src.last_updated = world.time
@@ -51,7 +51,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/success = TRUE
 	var/notes = ""
 
-	New(var/treatment_id, var/patient_ckey, var/treatment_type, var/doctor_ckey)
+/datum/treatment_log/New(var/treatment_id, var/patient_ckey, var/treatment_type, var/doctor_ckey)
 		src.treatment_id = treatment_id
 		src.patient_ckey = patient_ckey
 		src.treatment_type = treatment_type
@@ -71,7 +71,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/list/affected_patients = list()
 	var/containment_protocols = list()
 
-	New(var/outbreak_id, var/disease_name, var/disease_type)
+/datum/outbreak_record/New(var/outbreak_id, var/disease_name, var/disease_type)
 		src.outbreak_id = outbreak_id
 		src.disease_name = disease_name
 		src.disease_type = disease_type
@@ -93,7 +93,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/list/discoveries = list()
 	var/list/publications = list()
 
-	New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
+/datum/medical_research_project/New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
 		src.project_id = project_id
 		src.project_name = project_name
 		src.project_description = project_description
@@ -116,7 +116,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/total_cases = 0
 	var/total_deaths = 0
 
-	New(var/disease_id, var/disease_name, var/disease_type)
+/datum/disease_data/New(var/disease_id, var/disease_name, var/disease_type)
 		src.disease_id = disease_id
 		src.disease_name = disease_name
 		src.disease_type = disease_type

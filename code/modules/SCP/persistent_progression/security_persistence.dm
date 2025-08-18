@@ -37,7 +37,7 @@ SUBSYSTEM_DEF(security_persistence)
 	var/security_status = "ACTIVE" // ACTIVE, SUSPENDED, TERMINATED, CLEARED
 	var/last_updated
 
-	New(var/ckey, var/real_name)
+/datum/security_record/New(var/ckey, var/real_name)
 		src.ckey = ckey
 		src.real_name = real_name
 		src.last_updated = world.time
@@ -55,7 +55,7 @@ SUBSYSTEM_DEF(security_persistence)
 	var/resolution_notes = ""
 	var/security_rating_impact = 0
 
-	New(var/incident_id, var/incident_type, var/incident_description, var/severity)
+/datum/security_incident/New(var/incident_id, var/incident_type, var/incident_description, var/severity)
 		src.incident_id = incident_id
 		src.incident_type = incident_type
 		src.incident_description = incident_description
@@ -72,7 +72,7 @@ SUBSYSTEM_DEF(security_persistence)
 	var/timestamp
 	var/approval_notes = ""
 
-	New(var/request_id, var/applicant_ckey, var/requested_clearance, var/reason)
+/datum/clearance_request/New(var/request_id, var/applicant_ckey, var/requested_clearance, var/reason)
 		src.request_id = request_id
 		src.applicant_ckey = applicant_ckey
 		src.requested_clearance = requested_clearance
@@ -90,7 +90,7 @@ SUBSYSTEM_DEF(security_persistence)
 	var/effectiveness_rating = 100
 	var/last_updated
 
-	New(var/protocol_id, var/protocol_name, var/protocol_description)
+/datum/security_protocol/New(var/protocol_id, var/protocol_name, var/protocol_description)
 		src.protocol_id = protocol_id
 		src.protocol_name = protocol_name
 		src.protocol_description = protocol_description
@@ -105,7 +105,7 @@ SUBSYSTEM_DEF(security_persistence)
 	var/clearance_level
 	var/reason
 
-	New(var/log_id, var/ckey, var/access_point, var/access_granted, var/clearance_level)
+/datum/access_log/New(var/log_id, var/ckey, var/access_point, var/access_granted, var/clearance_level)
 		src.log_id = log_id
 		src.ckey = ckey
 		src.access_point = access_point

@@ -416,7 +416,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 		for(var/obj/machinery/M in A)
 			equipment_count++
-			if(TRUE) // Simplified operational check
+			if(M) // Simplified operational check
 				operational_equipment++
 
 		if(equipment_count > 0)
@@ -446,7 +446,7 @@ SUBSYSTEM_DEF(facility_persistence)
 		for(var/obj/machinery/M in A)
 			if(istype(M, /obj/machinery))
 				equipment_count++
-				if(TRUE) // Simplified operational check
+				if(M) // Simplified operational check
 					operational_equipment++
 
 		if(equipment_count > 0)
