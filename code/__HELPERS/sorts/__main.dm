@@ -105,7 +105,7 @@ GLOBAL_DATUM_INIT(sortInstance, /datum/sort_instance, new())
 	if(!L || L.len == 0 || hi > L.len || lo < 1 || start < 1)
 		return
 
-	for(; start < hi; ++start)
+	for(start; start < hi; ++start)
 		// Bounds check before accessing
 		if(start > L.len)
 			break
@@ -117,7 +117,7 @@ GLOBAL_DATUM_INIT(sortInstance, /datum/sort_instance, new())
 		var/right = start
 		//ASSERT(left <= right)
 
-		//[lo, left) elements less than or equal to pivot less than [right, start) elements
+		//[lo, left) elements less than or equal to pivot, less than [right, start) elements
 		//in other words, find where the pivot element should go using bisection search
 		while(left < right)
 			var/mid = (left + right) >> 1 //round((left+right)/2)

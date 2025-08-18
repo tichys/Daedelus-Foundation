@@ -58,6 +58,9 @@ SUBSYSTEM_DEF(scp_persistence)
 	// Calculate global metrics
 	calculate_global_metrics()
 
+	// Detect cross-SCP interactions
+	process_cross_scp_interactions()
+
 	// Save data periodically
 	if(world.time % 6000 == 0) // Every 10 minutes
 		save_scp_data()
@@ -82,6 +85,32 @@ SUBSYSTEM_DEF(scp_persistence)
 					var/datum/scp_instance/new_instance = new /datum/scp_instance(scp_id, O)
 					scp_instances[scp_id] = new_instance
 					new_instance.update_status(O)
+
+// Cross-SCP interactions: proximity-based simple detection and logging
+/datum/scp_persistence_manager/proc/process_cross_scp_interactions()
+	if(scp_instances.len < 2)
+		return
+	var/list/id_to_atom = list()
+	// Build id->atom map by scanning world once
+	for(var/obj/O in world)
+		if(findtext(O.name, "SCP-"))
+			var/id = get_scp_id(O)
+			if(id)
+				id_to_atom[id] = O
+	// Compare pairs
+	for(var/id_a in scp_instances)
+		var/obj/A = id_to_atom[id_a]
+		if(!A) continue
+		for(var/id_b in scp_instances)
+			if(id_b == id_a) continue
+			var/obj/B = id_to_atom[id_b]
+			if(!B) continue
+			if(get_dist(A, B) <= 3)
+				// Log an interaction
+				var/datum/scp_instance/inst_a = scp_instances[id_a]
+				var/datum/scp_instance/inst_b = scp_instances[id_b]
+				if(inst_a) inst_a.add_interaction_record(null, "proximity:[id_b]")
+				if(inst_b) inst_b.add_interaction_record(null, "proximity:[id_a]")
 
 /datum/scp_persistence_manager/proc/get_scp_id(var/obj/O)
 	// Extract SCP ID from object name or properties

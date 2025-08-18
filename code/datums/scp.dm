@@ -68,6 +68,9 @@
 		qdel(parent)
 		return
 
+	// Auto-register with persistence system
+	register_with_persistence()
+
 	RegisterSignal(parent, COMSIG_PARENT_EXAMINE, PROC_REF(OnExamine))
 
 /datum/scp/Destroy()
@@ -96,6 +99,45 @@
 	var/datum/job/job = SSjob.GetJob(H.job)
 	if(job)
 		examine_list += span_obviousnotice("You know this is SCP-[designation]!")
+		// Award small observation research for examining
+		if(SSscp_research && SSscp_research.manager)
+			award_research_points("[designation]", "observation", 5, H.ckey)
 
+///Returns the canonical SCP id string like "SCP-173"
+/datum/scp/proc/get_scp_id()
+	return "SCP-[designation]"
+
+///Registers this SCP's parent atom with the persistence manager
+/datum/scp/proc/register_with_persistence()
+	if(!parent)
+		return
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/id = get_scp_id()
+		SSscp_persistence.manager.scp_instances[id] = new /datum/scp_instance(id, parent)
+
+///Helper to record an interaction in persistence
+/datum/scp/proc/log_interaction(mob/user, interaction_type)
+	if(!(SSscp_persistence && SSscp_persistence.manager))
+		return
+	var/id = get_scp_id()
+	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[id]
+	if(instance)
+		instance.add_interaction_record(user, interaction_type)
+
+///Helper to record a breach event
+/datum/scp/proc/log_breach()
+	if(!(SSscp_persistence && SSscp_persistence.manager))
+		return
+	var/id = get_scp_id()
+	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[id]
+	if(instance)
+		instance.add_breach_record()
+
+///Simple hook for SCPs to award research points
+/datum/scp/proc/award_research(mob/user, research_type, points)
+	if(user && user.ckey)
+		award_research_points("[designation]", research_type, points, user.ckey)
+
+///Check the minimum player requirement
 /datum/scp/proc/has_minimum_players()
 	return length(GLOB.clients) >= min_playercount
