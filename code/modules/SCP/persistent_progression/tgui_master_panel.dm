@@ -205,13 +205,20 @@
 	var/list/security_data = list()
 	if(SSsecurity_persistence && SSsecurity_persistence.manager)
 		var/datum/security_persistence_manager/security_manager = SSsecurity_persistence.manager
+		var/security_budget = 2000000
+		if(SSbudget_system && SSbudget_system.manager)
+			var/datum/budget_manager/bm = SSbudget_system.manager
+			if(bm.department_budgets && bm.department_budgets["security"])
+				var/datum/budget_data/dept = bm.department_budgets["security"]
+				if(dept)
+					security_budget = dept.allocated_budget
 		security_data = list(
 			"total_personnel" = security_manager.security_records.len,
 			"total_incidents" = security_manager.total_security_incidents,
 			"active_threats" = security_manager.active_threats,
 			"containment_breaches" = security_manager.containment_breaches,
 			"unauthorized_access" = security_manager.unauthorized_access_attempts,
-			"security_budget" = SSbudget_system?.manager?.department_budgets["security"]?.allocated_budget || 2000000,
+			"security_budget" = security_budget,
 		)
 
 		// Add security personnel records
@@ -256,11 +263,13 @@
 	var/list/research_data = list()
 	if(SSresearch_persistence && SSresearch_persistence.manager)
 		var/datum/research_persistence_manager/research_manager = SSresearch_persistence.manager
+		var/list/research_projects_list = research_manager.research_projects
+		var/list/scientific_discoveries_list = research_manager.scientific_discoveries
 		research_data = list(
 			"total_projects" = research_manager.total_research_projects,
 			"completed_projects" = research_manager.completed_projects,
-			"active_projects" = research_manager.research_projects.len,
-			"scientific_discoveries" = research_manager.scientific_discoveries.len,
+			"active_projects" = research_projects_list.len,
+			"scientific_discoveries" = scientific_discoveries_list.len,
 			"publications" = research_manager.publication_count,
 			"research_budget" = research_manager.research_budget,
 			"research_efficiency" = research_manager.research_efficiency,
@@ -268,8 +277,8 @@
 
 		// Add research projects
 		research_data["research_projects"] = list()
-		for(var/project_id in research_manager.research_projects)
-			var/datum/research_persistence_project/project = research_manager.research_projects[project_id]
+		for(var/project_id in research_projects_list)
+			var/datum/research_persistence_project/project = research_projects_list[project_id]
 			research_data["research_projects"] += list(list(
 				"project_name" = project.project_name,
 				"field" = project.research_field,
@@ -281,8 +290,8 @@
 
 		// Add scientific discoveries
 		research_data["scientific_discoveries"] = list()
-		for(var/discovery_id in research_manager.scientific_discoveries)
-			var/datum/research_scientific_discovery/discovery = research_manager.scientific_discoveries[discovery_id]
+		for(var/discovery_id in scientific_discoveries_list)
+			var/datum/research_scientific_discovery/discovery = scientific_discoveries_list[discovery_id]
 			research_data["scientific_discoveries"] += list(list(
 				"discovery_name" = discovery.discovery_name,
 				"field" = discovery.research_field,
@@ -397,14 +406,16 @@
 	// Research progress from actual research data
 	if(SSresearch_persistence?.manager)
 		var/datum/research_persistence_manager/research_manager = SSresearch_persistence.manager
-		var/active_projects = research_manager.research_projects.len
+		var/list/research_projects_list = research_manager.research_projects
+		var/list/scientific_discoveries_list = research_manager.scientific_discoveries
+		var/active_projects = research_projects_list.len
 		var/total_projects = research_manager.total_research_projects
 		var/completed_projects = research_manager.completed_projects
 
 		data["analytics"]["research_progress"] = list(
 			"active_projects" = active_projects,
 			"completion_rate" = total_projects > 0 ? "[round((completed_projects / total_projects) * 100)]%" : "0%",
-			"breakthroughs" = research_manager.scientific_discoveries.len,
+			"breakthroughs" = scientific_discoveries_list.len,
 			"funding" = "$[round(research_manager.research_budget / 1000000)].[round((research_manager.research_budget % 1000000) / 100000)]M"
 		)
 	else
@@ -1325,21 +1336,24 @@
 				scan_message += "<b>Total Vulnerabilities:</b> [scan_results["total_vulnerabilities"]]<br>"
 				scan_message += "<b>Overall Severity:</b> [scan_results["overall_severity"]]<br><br>"
 
-				if(scan_results["threats_found"].len > 0)
+				var/list/threats_found = scan_results["threats_found"]
+				if(threats_found.len > 0)
 					scan_message += "<b>Threats Detected:</b><br>"
-					for(var/threat in scan_results["threats_found"])
+					for(var/threat in threats_found)
 						scan_message += "• [threat]<br>"
 					scan_message += "<br>"
 
-				if(scan_results["vulnerabilities"].len > 0)
+				var/list/vulnerabilities = scan_results["vulnerabilities"]
+				if(vulnerabilities.len > 0)
 					scan_message += "<b>Vulnerabilities Found:</b><br>"
-					for(var/vulnerability in scan_results["vulnerabilities"])
+					for(var/vulnerability in vulnerabilities)
 						scan_message += "• [vulnerability]<br>"
 					scan_message += "<br>"
 
-				if(scan_results["recommendations"].len > 0)
+				var/list/recommendations = scan_results["recommendations"]
+				if(recommendations.len > 0)
 					scan_message += "<b>Recommendations:</b><br>"
-					for(var/recommendation in scan_results["recommendations"])
+					for(var/recommendation in recommendations)
 						scan_message += "• [recommendation]<br>"
 
 				to_chat(admin_client, span_notice("[scan_message]"))
@@ -1353,6 +1367,7 @@
 			if(access_data && SSsecurity_persistence && SSsecurity_persistence.manager)
 				// Update access control settings
 				var/access_levels = access_data["access_levels"]
+				var/access_count = 0
 				if(access_levels)
 					for(var/level_key in access_levels)
 						var/level_data = access_levels[level_key]
@@ -1361,6 +1376,7 @@
 						var/clearance_required = text2num(level_data["clearance_required"] || "1")
 
 						SSsecurity_persistence.manager.add_security_protocol(protocol_name, protocol_description, clearance_required)
+						access_count++
 
 				// Add access log
 				SSsecurity_persistence.manager.add_access_log(admin_client.ckey, "Security Console - Access Control", TRUE, 4, "Access control settings updated")
@@ -1368,7 +1384,7 @@
 				// Update security statistics
 				SSsecurity_persistence.manager.update_security_statistics()
 
-				to_chat(admin_client, span_notice("Security access control updated successfully. [access_levels?.len || 0] access levels configured."))
+				to_chat(admin_client, span_notice("Security access control updated successfully. [access_count] access levels configured."))
 				world.log << "PersistenceMasterPanel: Security access control updated by [admin_client.ckey] with data: [json_encode(access_data)]"
 			else
 				to_chat(admin_client, span_warning("No access data provided or security persistence system unavailable."))
