@@ -45,7 +45,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	var/emergency_contact = ""
 	var/last_updated
 
-	New(var/ckey, var/real_name, var/department, var/position)
+/datum/personnel_record/New(var/ckey, var/real_name, var/department, var/position)
 		src.ckey = ckey
 		src.real_name = real_name
 		src.department = department
@@ -66,7 +66,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	var/supervisor_ckey
 	var/notes = ""
 
-	New(var/assignment_id, var/employee_ckey, var/assignment_type, var/assignment_description, var/supervisor_ckey)
+/datum/assignment/New(var/assignment_id, var/employee_ckey, var/assignment_type, var/assignment_description, var/supervisor_ckey)
 		src.assignment_id = assignment_id
 		src.employee_ckey = employee_ckey
 		src.assignment_type = assignment_type
@@ -86,7 +86,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	var/overall_assessment = ""
 	var/next_review_date
 
-	New(var/review_id, var/employee_ckey, var/reviewer_ckey)
+/datum/performance_review/New(var/review_id, var/employee_ckey, var/reviewer_ckey)
 		src.review_id = review_id
 		src.employee_ckey = employee_ckey
 		src.reviewer_ckey = reviewer_ckey
@@ -105,7 +105,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	var/trainer_ckey
 	var/notes = ""
 
-	New(var/training_id, var/employee_ckey, var/training_type, var/training_name, var/trainer_ckey)
+/datum/training_record/New(var/training_id, var/employee_ckey, var/training_type, var/training_name, var/trainer_ckey)
 		src.training_id = training_id
 		src.employee_ckey = employee_ckey
 		src.training_type = training_type
@@ -124,7 +124,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	var/salary_increase = 0
 	var/clearance_increase = 0
 
-	New(var/promotion_id, var/employee_ckey, var/old_position, var/new_position, var/approver_ckey)
+/datum/promotion/New(var/promotion_id, var/employee_ckey, var/old_position, var/new_position, var/approver_ckey)
 		src.promotion_id = promotion_id
 		src.employee_ckey = employee_ckey
 		src.old_position = old_position

@@ -37,12 +37,12 @@ SUBSYSTEM_DEF(analytics_persistence)
 	var/list/historical_data = list()
 	var/list/contributing_factors = list()
 
-	New(var/metric_id, var/metric_name, var/metric_type, var/unit_of_measure)
-		src.metric_id = metric_id
-		src.metric_name = metric_name
-		src.metric_type = metric_type
-		src.unit_of_measure = unit_of_measure
-		src.measurement_date = world.time
+/datum/performance_metric/New(var/metric_id, var/metric_name, var/metric_type, var/unit_of_measure)
+	src.metric_id = metric_id
+	src.metric_name = metric_name
+	src.metric_type = metric_type
+	src.unit_of_measure = unit_of_measure
+	src.measurement_date = world.time
 
 /datum/efficiency_data
 	var/efficiency_id
@@ -57,11 +57,11 @@ SUBSYSTEM_DEF(analytics_persistence)
 	var/list/optimization_opportunities = list()
 	var/status = "NORMAL" // NORMAL, OPTIMIZED, DEGRADED, CRITICAL
 
-	New(var/efficiency_id, var/system_name, var/efficiency_type)
-		src.efficiency_id = efficiency_id
-		src.system_name = system_name
-		src.efficiency_type = efficiency_type
-		src.measurement_date = world.time
+/datum/efficiency_data/New(var/efficiency_id, var/system_name, var/efficiency_type)
+	src.efficiency_id = efficiency_id
+	src.system_name = system_name
+	src.efficiency_type = efficiency_type
+	src.measurement_date = world.time
 
 /datum/statistical_analysis
 	var/analysis_id
@@ -76,11 +76,11 @@ SUBSYSTEM_DEF(analytics_persistence)
 	var/analysis_notes = ""
 	var/analysis_quality = "HIGH" // HIGH, MEDIUM, LOW
 
-	New(var/analysis_id, var/analysis_type, var/analysis_name)
-		src.analysis_id = analysis_id
-		src.analysis_type = analysis_type
-		src.analysis_name = analysis_name
-		src.analysis_date = world.time
+/datum/statistical_analysis/New(var/analysis_id, var/analysis_type, var/analysis_name)
+	src.analysis_id = analysis_id
+	src.analysis_type = analysis_type
+	src.analysis_name = analysis_name
+	src.analysis_date = world.time
 
 /datum/trend_data
 	var/trend_id
@@ -96,11 +96,11 @@ SUBSYSTEM_DEF(analytics_persistence)
 	var/trend_significance = "LOW" // LOW, MEDIUM, HIGH
 	var/forecast_accuracy = 0.0
 
-	New(var/trend_id, var/trend_name, var/trend_type)
-		src.trend_id = trend_id
-		src.trend_name = trend_name
-		src.trend_type = trend_type
-		src.start_date = world.time
+/datum/trend_data/New(var/trend_id, var/trend_name, var/trend_type)
+	src.trend_id = trend_id
+	src.trend_name = trend_name
+	src.trend_type = trend_type
+	src.start_date = world.time
 
 /datum/kpi_record
 	var/kpi_id
@@ -116,12 +116,12 @@ SUBSYSTEM_DEF(analytics_persistence)
 	var/list/action_items = list()
 	var/owner_ckey
 
-	New(var/kpi_id, var/kpi_name, var/kpi_category, var/owner_ckey)
-		src.kpi_id = kpi_id
-		src.kpi_name = kpi_name
-		src.kpi_category = kpi_category
-		src.owner_ckey = owner_ckey
-		src.measurement_date = world.time
+/datum/kpi_record/New(var/kpi_id, var/kpi_name, var/kpi_category, var/owner_ckey)
+	src.kpi_id = kpi_id
+	src.kpi_name = kpi_name
+	src.kpi_category = kpi_category
+	src.owner_ckey = owner_ckey
+	src.measurement_date = world.time
 
 /datum/benchmark_data
 	var/benchmark_id
@@ -136,11 +136,12 @@ SUBSYSTEM_DEF(analytics_persistence)
 	var/list/improvement_areas = list()
 	var/competitive_position = "AVERAGE" // LEADING, ABOVE_AVERAGE, AVERAGE, BELOW_AVERAGE, LAGGING
 
-	New(var/benchmark_id, var/benchmark_name, var/benchmark_category)
-		src.benchmark_id = benchmark_id
-		src.benchmark_name = benchmark_name
-		src.benchmark_category = benchmark_category
-		src.benchmark_date = world.time
+
+/datum/benchmark_data/New(var/benchmark_id, var/benchmark_name, var/benchmark_category)
+	src.benchmark_id = benchmark_id
+	src.benchmark_name = benchmark_name
+	src.benchmark_category = benchmark_category
+	src.benchmark_date = world.time
 
 // Subsystem initialization
 /datum/controller/subsystem/analytics_persistence/Initialize()

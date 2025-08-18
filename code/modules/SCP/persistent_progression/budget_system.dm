@@ -52,7 +52,7 @@ SUBSYSTEM_DEF(budget_system)
 	var/budget_status = "NORMAL" // NORMAL, WARNING, CRITICAL, OVERSPENT
 	var/last_updated
 
-	New(var/department_id, var/department_name, var/allocated_budget)
+/datum/budget_data/New(var/department_id, var/department_name, var/allocated_budget)
 		src.department_id = department_id
 		src.department_name = department_name
 		src.allocated_budget = allocated_budget
@@ -71,7 +71,7 @@ SUBSYSTEM_DEF(budget_system)
 	var/status = "PENDING" // PENDING, APPROVED, DENIED, CANCELLED
 	var/related_system // Which game system this affects
 
-	New(var/transaction_id, var/department_id, var/transaction_type, var/amount, var/category, var/description)
+/datum/transaction_data/New(var/transaction_id, var/department_id, var/transaction_type, var/amount, var/category, var/description)
 		src.transaction_id = transaction_id
 		src.department_id = department_id
 		src.transaction_type = transaction_type
@@ -93,7 +93,7 @@ SUBSYSTEM_DEF(budget_system)
 	var/approved_by
 	var/approval_notes = ""
 
-	New(var/request_id, var/department_id, var/requested_amount, var/requested_category, var/justification)
+/datum/budget_request_data/New(var/request_id, var/department_id, var/requested_amount, var/requested_category, var/justification)
 		src.request_id = request_id
 		src.department_id = department_id
 		src.requested_amount = requested_amount
@@ -751,7 +751,6 @@ GLOBAL_DATUM_INIT(budget_manager, /datum/budget_manager, new)
 		if(order.paying_account)
 			// Find which department this account belongs to
 			for(var/dept_id in SSbudget_system.manager.department_budgets)
-				var/datum/budget_data/dept = SSbudget_system.manager.department_budgets[dept_id]
 				// This is a simplified check - in a real implementation you'd have account-to-department mapping
 				if(order.paying_account.account_balance >= amount)
 					department_id = dept_id

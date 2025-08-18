@@ -181,7 +181,7 @@
 			class_data["exp_multiplier"] = class.experience_multiplier
 			class_data["max_rank"] = class.max_rank
 			class_data["current"] = (class_id == player_data.current_class_id)
-			class_data["available"] = (player_data.current_faction_id in SSpersistent_progression.factions && class_id in SSpersistent_progression.get_faction(player_data.current_faction_id).faction_classes)
+			class_data["available"] = (player_data.current_faction_id in SSpersistent_progression.factions && (class_id in SSpersistent_progression.get_faction(player_data.current_faction_id).faction_classes))
 
 			// Compatible factions for this class
 			var/list/compatible_factions = list()
@@ -354,92 +354,90 @@
 	factions_ui.ui_interact(user)
 
 // Classes overview UI
-/datum/persistent_progression_classes_ui
-	ui_interact(mob/user, datum/tgui/ui)
-		ui = SStgui.try_update_ui(user, src, ui)
-		if(!ui)
-			ui = new(user, src, "PersistentProgressionClasses", "Available Classes", 800, 600)
-			ui.open()
+/datum/persistent_progression_classes_ui/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "PersistentProgressionClasses", "Available Classes", 800, 600)
+		ui.open()
 
-	ui_state(mob/user)
-		return GLOB.always_state
+/datum/persistent_progression_classes_ui/ui_state(mob/user)
+	return GLOB.always_state
 
-	ui_data(mob/user)
-		var/list/data = list()
-		var/list/classes = list()
+/datum/persistent_progression_classes_ui/ui_data(mob/user)
+	var/list/data = list()
+	var/list/classes = list()
 
-		for(var/class_id in SSpersistent_progression.classes)
-			var/datum/persistent_class/class = SSpersistent_progression.get_class(class_id)
-			if(class)
-				var/list/class_data = list()
-				class_data["id"] = class_id
-				class_data["name"] = class.class_name
-				class_data["description"] = class.class_description
-				class_data["exp_multiplier"] = class.experience_multiplier
-				class_data["max_rank"] = class.max_rank
+	for(var/class_id in SSpersistent_progression.classes)
+		var/datum/persistent_class/class = SSpersistent_progression.get_class(class_id)
+		if(class)
+			var/list/class_data = list()
+			class_data["id"] = class_id
+			class_data["name"] = class.class_name
+			class_data["description"] = class.class_description
+			class_data["exp_multiplier"] = class.experience_multiplier
+			class_data["max_rank"] = class.max_rank
 
-				// Compatible factions
-				var/list/compatible_factions = list()
-				for(var/faction_id in SSpersistent_progression.factions)
-					var/datum/persistent_faction/faction = SSpersistent_progression.get_faction(faction_id)
-					if(faction && (class_id in faction.faction_classes))
-						compatible_factions += faction.faction_name
-				class_data["compatible_factions"] = compatible_factions
+			// Compatible factions
+			var/list/compatible_factions = list()
+			for(var/faction_id in SSpersistent_progression.factions)
+				var/datum/persistent_faction/faction = SSpersistent_progression.get_faction(faction_id)
+				if(faction && (class_id in faction.faction_classes))
+					compatible_factions += faction.faction_name
+			class_data["compatible_factions"] = compatible_factions
 
-				// Ranks
-				var/list/ranks = list()
-				for(var/rank_level = 0; rank_level <= class.max_rank; rank_level++)
-					var/list/rank_data = list()
-					rank_data["name"] = class.get_rank_name(rank_level)
-					rank_data["requirement"] = class.get_rank_requirement(rank_level)
-					rank_data["color"] = class.get_rank_color(rank_level)
-					ranks += list(rank_data)
-				class_data["ranks"] = ranks
+			// Ranks
+			var/list/ranks = list()
+			for(var/rank_level = 0; rank_level <= class.max_rank; rank_level++)
+				var/list/rank_data = list()
+				rank_data["name"] = class.get_rank_name(rank_level)
+				rank_data["requirement"] = class.get_rank_requirement(rank_level)
+				rank_data["color"] = class.get_rank_color(rank_level)
+				ranks += list(rank_data)
+			class_data["ranks"] = ranks
 
-				classes += list(class_data)
+			classes += list(class_data)
 
-		data["classes"] = classes
-		return data
+	data["classes"] = classes
+	return data
 
 // Factions overview UI
-/datum/persistent_progression_factions_ui
-	ui_interact(mob/user, datum/tgui/ui)
-		ui = SStgui.try_update_ui(user, src, ui)
-		if(!ui)
-			ui = new(user, src, "PersistentProgressionFactions", "Available Factions", 800, 600)
-			ui.open()
+/datum/persistent_progression_factions_ui/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "PersistentProgressionFactions", "Available Factions", 800, 600)
+		ui.open()
 
-	ui_state(mob/user)
-		return GLOB.always_state
+/datum/persistent_progression_factions_ui/ui_state(mob/user)
+	return GLOB.always_state
 
-	ui_data(mob/user)
-		var/list/data = list()
-		var/list/factions = list()
+/datum/persistent_progression_factions_ui/ui_data(mob/user)
+	var/list/data = list()
+	var/list/factions = list()
 
-		for(var/faction_id in SSpersistent_progression.factions)
-			var/datum/persistent_faction/faction = SSpersistent_progression.get_faction(faction_id)
-			if(faction)
-				var/list/faction_data = list()
-				faction_data["id"] = faction_id
-				faction_data["name"] = faction.faction_name
-				faction_data["description"] = faction.faction_description
-				faction_data["exp_multiplier"] = faction.experience_multiplier
+	for(var/faction_id in SSpersistent_progression.factions)
+		var/datum/persistent_faction/faction = SSpersistent_progression.get_faction(faction_id)
+		if(faction)
+			var/list/faction_data = list()
+			faction_data["id"] = faction_id
+			faction_data["name"] = faction.faction_name
+			faction_data["description"] = faction.faction_description
+			faction_data["exp_multiplier"] = faction.experience_multiplier
 
-				// Available classes
-				var/list/available_classes = list()
-				for(var/class_id in faction.faction_classes)
-					var/datum/persistent_class/class = SSpersistent_progression.get_class(class_id)
-					if(class)
-						var/list/class_data = list()
-						class_data["name"] = class.class_name
-						class_data["description"] = class.class_description
-						available_classes += list(class_data)
-				faction_data["available_classes"] = available_classes
+			// Available classes
+			var/list/available_classes = list()
+			for(var/class_id in faction.faction_classes)
+				var/datum/persistent_class/class = SSpersistent_progression.get_class(class_id)
+				if(class)
+					var/list/class_data = list()
+					class_data["name"] = class.class_name
+					class_data["description"] = class.class_description
+					available_classes += list(class_data)
+			faction_data["available_classes"] = available_classes
 
-				factions += list(faction_data)
+			factions += list(faction_data)
 
-		data["factions"] = factions
-		return data
+	data["factions"] = factions
+	return data
 
 // Admin UI for managing player progression
 /datum/persistent_progression_admin_ui

@@ -152,7 +152,7 @@ SUBSYSTEM_DEF(persistent_progression)
 /datum/controller/subsystem/persistent_progression/proc/get_class(class_id)
 	return classes[class_id]
 
-/datum/controller/subsystem/persistent_progression/proc/get_faction(faction_id)
+/datum/controller/subsystem/persistent_progression/proc/get_faction(faction_id) as /datum/persistent_faction
 	return factions[faction_id]
 
 /datum/controller/subsystem/persistent_progression/proc/get_experience_source(source_id)

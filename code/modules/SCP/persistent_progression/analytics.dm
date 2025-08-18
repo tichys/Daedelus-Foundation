@@ -94,7 +94,8 @@
 /datum/analytics_tracker/proc/get_average_experience_per_round()
 	var/total_rounds = 0
 	if(performance_data["rounds_played"])
-		total_rounds = performance_data["rounds_played"].len
+		var/list/rounds_list = performance_data["rounds_played"]
+		total_rounds = rounds_list.len
 
 	if(total_rounds == 0)
 		return 0
@@ -106,10 +107,12 @@
 	var/total = 0
 
 	if(performance_data["rounds_survived"])
-		survived = performance_data["rounds_survived"].len
+		var/list/survived_list = performance_data["rounds_survived"]
+		survived = survived_list.len
 
 	if(performance_data["rounds_played"])
-		total = performance_data["rounds_played"].len
+		var/list/played_list = performance_data["rounds_played"]
+		total = played_list.len
 
 	if(total == 0)
 		return 0
@@ -122,7 +125,11 @@
 	summary["total_experience"] = get_total_experience()
 	summary["average_experience_per_round"] = get_average_experience_per_round()
 	summary["survival_rate"] = get_survival_rate()
-	summary["total_rounds"] = performance_data["rounds_played"] ? performance_data["rounds_played"].len : 0
+	var/rounds_count = 0
+	if(performance_data["rounds_played"])
+		var/list/rounds_list = performance_data["rounds_played"]
+		rounds_count = rounds_list.len
+	summary["total_rounds"] = rounds_count
 	summary["trends"] = trend_data
 	summary["insights"] = insights
 
@@ -149,14 +156,19 @@
 
 /datum/player_analytics_manager/proc/get_global_statistics()
 	var/list/global_stats = list()
-	var/total_players = player_analytics.len
+	var/list/analytics_list = player_analytics
+	var/total_players = analytics_list.len
 	var/total_experience = 0
 	var/total_rounds = 0
 
 	for(var/ckey in player_analytics)
 		var/datum/analytics_tracker/tracker = player_analytics[ckey]
 		total_experience += tracker.get_total_experience()
-		total_rounds += tracker.performance_data["rounds_played"] ? tracker.performance_data["rounds_played"].len : 0
+		var/rounds_count = 0
+		if(tracker.performance_data["rounds_played"])
+			var/list/rounds_list = tracker.performance_data["rounds_played"]
+			rounds_count = rounds_list.len
+		total_rounds += rounds_count
 
 	global_stats["total_players"] = total_players
 	global_stats["total_experience"] = total_experience
