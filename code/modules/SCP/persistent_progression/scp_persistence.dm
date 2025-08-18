@@ -39,6 +39,11 @@ SUBSYSTEM_DEF(scp_persistence)
 	var/rotation_interval = 18000 // 30 minutes
 	var/last_rotation_time = 0
 
+	// Player Performance System
+	var/list/player_performance_data = list() // ckey -> datum/player_performance
+	var/performance_tracking_enabled = TRUE
+	var/auto_access_management = TRUE
+
 /datum/scp_persistence_manager/proc/process_scp()
 	// Update SCP instances
 	update_scp_instances()
@@ -65,8 +70,19 @@ SUBSYSTEM_DEF(scp_persistence)
 	if(world.time % 6000 == 0) // Every 10 minutes
 		save_scp_data()
 
+	// Periodically snapshot skills to player performance if pilots exist
+	for(var/client/C in GLOB.clients)
+		if(C.mob && istype(C.mob, /mob/living/carbon/scp))
+			var/mob/living/carbon/scp/S = C.mob
+			var/datum/player_performance/perf = get_player_performance(C.ckey)
+			perf.register_scp_skill_snapshot(S.SCP_datum ? S.SCP_datum.name : (S.name || "SCP"), S.skill_levels)
+
 	// Process SCP management
 	process_scp_management()
+
+	// Process player performance tracking
+	if(performance_tracking_enabled)
+		process_player_performance()
 
 /datum/scp_persistence_manager/proc/update_scp_instances()
 	// Find and update all SCP objects in the world
@@ -81,10 +97,20 @@ SUBSYSTEM_DEF(scp_persistence)
 				if(scp_id in scp_instances)
 					var/datum/scp_instance/instance = scp_instances[scp_id]
 					instance.update_status(O)
+					// If this is a live SCP mob, try to apply persisted skills one-time
+					if(istype(O, /mob/living/carbon/scp))
+						var/mob/living/carbon/scp/S = O
+						if(!S.skills_restored)
+							instance.apply_to_scp(S)
+							S.skills_restored = TRUE
 				else
 					var/datum/scp_instance/new_instance = new /datum/scp_instance(scp_id, O)
 					scp_instances[scp_id] = new_instance
 					new_instance.update_status(O)
+					if(istype(O, /mob/living/carbon/scp))
+						var/mob/living/carbon/scp/S2 = O
+						new_instance.apply_to_scp(S2)
+						S2.skills_restored = TRUE
 
 // Cross-SCP interactions: proximity-based simple detection and logging
 /datum/scp_persistence_manager/proc/process_cross_scp_interactions()
@@ -257,6 +283,13 @@ SUBSYSTEM_DEF(scp_persistence)
 	var/research_value = 100
 	var/threat_level = 1
 
+	// Skill persistence
+	var/list/persisted_skill_levels = list()
+	var/list/persisted_skill_experience = list()
+	var/list/persisted_skill_cooldowns = list()
+	var/last_skill_use = 0
+	var/level_up_cooldown = 0
+
 /datum/scp_instance/New(var/id, var/obj/O)
 	scp_id = id
 	if(O)
@@ -281,6 +314,29 @@ SUBSYSTEM_DEF(scp_persistence)
 
 		// Update containment effectiveness
 		containment_effectiveness = containment_health / 100
+
+		// Update skill persistence from live SCP mob, if applicable
+		if(istype(O, /mob/living/carbon/scp))
+			var/mob/living/carbon/scp/S = O
+			persisted_skill_levels = islist(S.skill_levels) ? S.skill_levels.Copy() : list()
+			persisted_skill_experience = islist(S.skill_experience) ? S.skill_experience.Copy() : list()
+			persisted_skill_cooldowns = islist(S.skill_cooldowns) ? S.skill_cooldowns.Copy() : list()
+			last_skill_use = S.last_skill_use
+			level_up_cooldown = S.level_up_cooldown
+
+
+// Apply persisted state back onto a live SCP mob
+/datum/scp_instance/proc/apply_to_scp(var/mob/living/carbon/scp/S)
+	if(!S)
+		return
+	if(islist(persisted_skill_levels) && persisted_skill_levels.len)
+		S.skill_levels = persisted_skill_levels.Copy()
+	if(islist(persisted_skill_experience) && persisted_skill_experience.len)
+		S.skill_experience = persisted_skill_experience.Copy()
+	if(islist(persisted_skill_cooldowns) && persisted_skill_cooldowns.len)
+		S.skill_cooldowns = persisted_skill_cooldowns.Copy()
+	S.last_skill_use = last_skill_use
+	S.level_up_cooldown = level_up_cooldown
 
 /datum/scp_instance/proc/add_breach_record()
 	var/list/breach_record = list(
@@ -1030,3 +1086,145 @@ SUBSYSTEM_DEF(scp_persistence)
 				for(var/key in config)
 					config_message += "<b>[key]:</b> [config[key]]<br>"
 				to_chat(usr, "<span class='notice'>[config_message]</span>")
+
+// Player Performance Management Methods
+/datum/scp_persistence_manager/proc/process_player_performance()
+	// Update performance data for all online players
+	for(var/client/C in GLOB.clients)
+		if(C.mob && ishuman(C.mob))
+			var/mob/living/carbon/human/H = C.mob
+			update_player_performance(H.ckey)
+
+/datum/scp_persistence_manager/proc/update_player_performance(var/player)
+	if(!player)
+		return
+
+	var/ckey = player
+
+	// Get or create player performance datum
+	if(!(ckey in player_performance_data))
+		player_performance_data[ckey] = new /datum/player_performance(ckey)
+
+	var/datum/player_performance/performance = player_performance_data[ckey]
+
+	// Update basic stats
+	performance.total_playtime += 5 // 5 seconds per fire cycle
+	performance.last_updated = 0
+
+/datum/scp_persistence_manager/proc/get_player_performance(var/ckey)
+	if(!(ckey in player_performance_data))
+		player_performance_data[ckey] = new /datum/player_performance(ckey)
+
+	return player_performance_data[ckey]
+
+/datum/scp_persistence_manager/proc/get_player_access_level(var/ckey)
+	var/datum/player_performance/performance = get_player_performance(ckey)
+	return performance.access_level
+
+/datum/scp_persistence_manager/proc/get_player_available_scps(var/ckey)
+	var/datum/player_performance/performance = get_player_performance(ckey)
+	return performance.get_available_scps()
+
+/datum/scp_persistence_manager/proc/set_player_access_level(var/ckey, var/access_level)
+	var/datum/player_performance/performance = get_player_performance(ckey)
+	performance.access_level = max(0, min(5, access_level))
+	performance.save_performance_data()
+
+/datum/scp_persistence_manager/proc/add_player_achievement(var/ckey, var/achievement_id, var/achievement_name, var/description)
+	var/datum/player_performance/performance = get_player_performance(ckey)
+	performance.add_achievement(achievement_id, achievement_name, description)
+
+/datum/scp_persistence_manager/proc/add_player_violation(var/ckey, var/violation_type, var/description, var/severity = "minor")
+	var/datum/player_performance/performance = get_player_performance(ckey)
+	performance.add_violation(violation_type, description, severity)
+
+// Admin commands for player performance management
+/mob/proc/manage_player_performance()
+	set name = "Manage Player Performance"
+	set category = "SCP"
+
+	if(!SSscp_persistence || !SSscp_persistence.manager)
+		to_chat(src, "<span class='warning'>SCP Persistence system not available.</span>")
+		return
+
+	var/datum/scp_persistence_manager/manager = SSscp_persistence.manager
+
+	var/ckey = input(src, "Enter player ckey:", "Manage Player Performance") as text|null
+	if(!ckey)
+		return
+
+	ckey = ckey(ckey)
+	var/datum/player_performance/performance = manager.get_player_performance(ckey)
+
+	var/action = input(src, "Choose action for [ckey]:", "Player Performance Management") as null|anything in list(
+		"View Performance",
+		"Set Access Level",
+		"Add Achievement",
+		"Add Violation",
+		"Reset Performance"
+	)
+
+	switch(action)
+		if("View Performance")
+			var/message = "<h2>Performance Report for [ckey]</h2>"
+			message += "<b>Overall Rating:</b> [performance.overall_rating]<br>"
+			message += "<b>Access Level:</b> [performance.access_level]<br>"
+			message += "<b>Rounds Played:</b> [performance.rounds_played]<br>"
+			message += "<b>Rounds as SCP:</b> [performance.rounds_as_scp]<br>"
+			message += "<b>Rounds as Staff:</b> [performance.rounds_as_staff]<br>"
+			message += "<b>Total Playtime:</b> [round(performance.total_playtime / 600)] minutes<br><br>"
+
+			message += "<h3>Job Performance</h3>"
+			for(var/job_title in performance.job_performance)
+				var/list/job_data = performance.job_performance[job_title]
+				message += "<b>[job_title]:</b> [job_data["average_score"]] (Rounds: [job_data["rounds_played"]])<br>"
+
+			message += "<h3>SCP Performance</h3>"
+			for(var/scp_id in performance.scp_performance)
+				var/list/scp_data = performance.scp_performance[scp_id]
+				message += "<b>[scp_id]:</b> [scp_data["average_score"]] (Rounds: [scp_data["rounds_played"]])<br>"
+
+			message += "<h3>Achievements ([performance.achievements.len])</h3>"
+			for(var/achievement in performance.achievements)
+				var/list/ach_data = achievement
+				message += "- [ach_data["name"]]: [ach_data["description"]]<br>"
+
+			message += "<h3>Violations ([performance.violations.len])</h3>"
+			for(var/violation in performance.violations)
+				var/list/viol_data = violation
+				message += "- [viol_data["type"]] ([viol_data["severity"]]): [viol_data["description"]]<br>"
+
+			to_chat(src, "<span class='notice'>[message]</span>")
+
+		if("Set Access Level")
+			var/new_level = input(src, "Enter new access level (0-5):", "Set Access Level") as num|null
+			if(!isnull(new_level))
+				manager.set_player_access_level(ckey, new_level)
+				to_chat(src, "<span class='notice'>Access level for [ckey] set to [new_level].</span>")
+
+		if("Add Achievement")
+			var/achievement_id = input(src, "Enter achievement ID:", "Add Achievement") as text|null
+			var/achievement_name = input(src, "Enter achievement name:", "Add Achievement") as text|null
+			var/description = input(src, "Enter achievement description:", "Add Achievement") as text|null
+
+			if(achievement_id && achievement_name && description)
+				manager.add_player_achievement(ckey, achievement_id, achievement_name, description)
+				to_chat(src, "<span class='notice'>Achievement added for [ckey].</span>")
+
+		if("Add Violation")
+			var/violation_type = input(src, "Enter violation type:", "Add Violation") as text|null
+			var/description = input(src, "Enter violation description:", "Add Violation") as text|null
+			var/severity = input(src, "Choose severity:", "Add Violation") as null|anything in list("minor", "major")
+
+			if(violation_type && description && severity)
+				manager.add_player_violation(ckey, violation_type, description, severity)
+				to_chat(src, "<span class='notice'>Violation added for [ckey].</span>")
+
+		if("Reset Performance")
+			var/confirm = alert(src, "Are you sure you want to reset performance data for [ckey]?", "Reset Performance", "Yes", "No")
+			if(confirm == "Yes")
+				manager.player_performance_data -= ckey
+				var/filename = "data/player_performance/[ckey].json"
+				if(fexists(filename))
+					fdel(filename)
+				to_chat(src, "<span class='notice'>Performance data reset for [ckey].</span>")

@@ -18,6 +18,48 @@
 /datum/scp_management_interface/proc/initialize_scp_templates()
 	// Define SCP templates with default configurations
 	scp_templates = list(
+		"SCP-035" = list(
+			"name" = "SCP-035",
+			"class" = "Keter",
+			"description" = "Possessive mask with corrosive secretion.",
+			"containment_level" = "Keter",
+			"spawn_conditions" = list(
+				"min_players" = 20,
+				"min_time" = 30,
+				"max_instances" = 1,
+				"spawn_probability" = 0.2,
+				"allowed_jobs" = list("Scientist", "Security Officer", "Medical Doctor"),
+				"restricted_jobs" = list("D-Class"),
+				"spawn_locations" = list("Containment Zone", "Research Wing"),
+				"time_restrictions" = list("start_hour" = 0, "end_hour" = 24, "allowed_days" = list(1,2,3,4,5,6,7))
+			),
+			"player_access" = list("allowed_roles" = list("Scientist", "Security Officer"), "restricted_roles" = list("D-Class"), "min_rank" = 2, "requires_clearance" = TRUE, "clearance_level" = 3, "training_required" = list("SCP-035 Handling"), "max_players" = 1),
+			"containment_settings" = list("auto_containment" = TRUE, "containment_radius" = 4, "breach_response_time" = 20, "containment_effectiveness" = 0.8, "backup_protocols" = list("Emergency Lockdown")),
+			"research_settings" = list("research_allowed" = TRUE, "research_clearance" = 4, "research_restrictions" = list("No direct contact"), "research_goals" = list("Study secretion", "Study possession")),
+			"interaction_settings" = list("interaction_allowed" = FALSE, "interaction_clearance" = 5, "interaction_restrictions" = list("No wearing the mask"), "interaction_logging" = TRUE)
+		),
+		"SCP-049" = list(
+			"name" = "SCP-049",
+			"class" = "Euclid",
+			"description" = "The Plague Doctor.",
+			"containment_level" = "Euclid",
+			"spawn_conditions" = list("min_players" = 20, "min_time" = 35, "max_instances" = 1, "spawn_probability" = 0.25, "allowed_jobs" = list("Scientist", "Medical Doctor"), "restricted_jobs" = list("D-Class"), "spawn_locations" = list("Containment Zone"), "time_restrictions" = list("start_hour"=0, "end_hour"=24, "allowed_days"=list(1,2,3,4,5,6,7))),
+			"player_access" = list("allowed_roles" = list("Scientist", "Medical Doctor"), "restricted_roles" = list("D-Class"), "min_rank" = 2, "requires_clearance" = TRUE, "clearance_level" = 3, "training_required" = list("Biohazard Containment"), "max_players" = 1),
+			"containment_settings" = list("auto_containment" = TRUE, "containment_radius" = 6, "breach_response_time" = 15, "containment_effectiveness" = 0.85, "backup_protocols" = list("Emergency Lockdown")),
+			"research_settings" = list("research_allowed" = TRUE, "research_clearance" = 4, "research_restrictions" = list("No surgery"), "research_goals" = list("Study cure claims")),
+			"interaction_settings" = list("interaction_allowed" = FALSE, "interaction_clearance" = 5, "interaction_restrictions" = list("No patient contact"), "interaction_logging" = TRUE)
+		),
+		"SCP-2427-3" = list(
+			"name" = "SCP-2427-3",
+			"class" = "Euclid",
+			"description" = "Sapient component of SCP-2427.",
+			"containment_level" = "Euclid",
+			"spawn_conditions" = list("min_players" = 18, "min_time" = 25, "max_instances" = 1, "spawn_probability" = 0.2, "allowed_jobs" = list("Scientist", "Security Officer"), "restricted_jobs" = list("D-Class"), "spawn_locations" = list("Research Wing"), "time_restrictions" = list("start_hour"=0, "end_hour"=24, "allowed_days"=list(1,2,3,4,5,6,7))),
+			"player_access" = list("allowed_roles" = list("Scientist", "Security Officer"), "restricted_roles" = list("D-Class"), "min_rank" = 2, "requires_clearance" = TRUE, "clearance_level" = 3, "training_required" = list("SCP-2427 Handling"), "max_players" = 1),
+			"containment_settings" = list("auto_containment" = TRUE, "containment_radius" = 5, "breach_response_time" = 20, "containment_effectiveness" = 0.8, "backup_protocols" = list("Emergency Lockdown")),
+			"research_settings" = list("research_allowed" = TRUE, "research_clearance" = 4, "research_restrictions" = list(), "research_goals" = list("Behavior study")),
+			"interaction_settings" = list("interaction_allowed" = TRUE, "interaction_clearance" = 4, "interaction_restrictions" = list(), "interaction_logging" = TRUE)
+		),
 		"SCP-008" = list(
 			"name" = "SCP-008",
 			"class" = "Keter",
@@ -443,6 +485,21 @@
 			var/mob/living/carbon/scp/scp096/scp = new /mob/living/carbon/scp/scp096()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
+		if("SCP-035")
+			var/mob/living/carbon/human/H = new /mob/living/carbon/human()
+			H.real_name = "SCP-035 Host"
+			H.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
+			return H
+		if("SCP-049")
+			var/mob/living/carbon/human/H2 = new /mob/living/carbon/human()
+			H2.real_name = "SCP-049"
+			H2.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
+			return H2
+		if("SCP-2427-3")
+			var/mob/living/carbon/human/H3 = new /mob/living/carbon/human()
+			H3.real_name = "SCP-2427-3"
+			H3.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
+			return H3
 		else
 			return null
 

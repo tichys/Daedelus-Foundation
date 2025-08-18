@@ -7,6 +7,8 @@
 	icon = 'icons/scp/scp-106.dmi'
 	icon_state = "scp106"
 	real_name = "SCP-106"
+	use_custom_sprite = TRUE
+	use_custom_sprite = TRUE
 
 	// SCP-106 specific variables
 	var/phase_cooldown = 0
@@ -49,6 +51,27 @@
 	// Add passive effects
 	add_passive_effect("wall_phasing")
 	add_passive_effect("pocket_dimension_mastery")
+
+	// Add SCP-106 specific containment protocols
+	add_containment_protocol("Dimensional Anchoring", "SCP-106 must be anchored to prevent dimensional travel")
+	add_containment_protocol("Wall Reinforcement", "Containment walls reinforced to prevent phasing")
+	add_containment_protocol("Pocket Dimension Monitoring", "Monitoring systems for pocket dimension creation")
+
+	// Add SCP-106 specific security measures
+	add_security_measure("Dimensional Sensors", "Sensors to detect dimensional anomalies")
+	add_security_measure("Phase Detection", "Systems to detect wall phasing attempts")
+	add_security_measure("Victim Tracking", "Tracking systems for personnel dragged to pocket dimensions")
+
+	// Add SCP-106 specific containment abilities
+	add_containment_ability("dimensional_manipulation", "dimensional_manipulation_ability")
+	add_containment_ability("wall_corrosion", "wall_corrosion_ability")
+
+	// Add SCP-106 specific containment effects
+	add_containment_effect("dimensional_instability")
+	add_containment_effect("wall_weakening")
+
+	// Set up default containment protocols and security measures
+	setup_default_containment()
 
 /mob/living/carbon/scp/scp106/Destroy()
 	pocket_dimensions = list()
@@ -150,6 +173,44 @@
 	add_interaction_record(null, "create_pocket_dimension")
 
 	return pocket
+
+// Override specific containment check for SCP-106
+/mob/living/carbon/scp/scp106/check_specific_containment()
+	// Check if we're near walls that we could phase through
+	for(var/turf/T in range(1, src))
+		if(T.density)
+			// We're near a wall - chance to reduce containment integrity
+			if(prob(5))
+				reduce_containment_integrity(2)
+				to_chat(src, "<span class='notice'>You sense a weak point in the containment.</span>")
+
+// SCP-106 specific containment abilities
+/mob/living/carbon/scp/scp106/proc/dimensional_manipulation_ability()
+	to_chat(src, "<span class='notice'>You manipulate the dimensional anchoring.</span>")
+	// Temporarily disable dimensional anchoring
+	remove_containment_protocol("Dimensional Anchoring")
+	spawn(45 SECONDS)
+		add_containment_protocol("Dimensional Anchoring", "SCP-106 must be anchored to prevent dimensional travel")
+
+/mob/living/carbon/scp/scp106/proc/wall_corrosion_ability()
+	to_chat(src, "<span class='notice'>You begin corroding the containment walls.</span>")
+	reduce_containment_integrity(20)
+	remove_containment_protocol("Wall Reinforcement")
+	spawn(90 SECONDS)
+		add_containment_protocol("Wall Reinforcement", "Containment walls reinforced to prevent phasing")
+
+// Process SCP-106 specific containment effects
+/mob/living/carbon/scp/scp106/process_containment_effect(effect)
+	switch(effect)
+		if("dimensional_instability")
+			// SCP-106 creates dimensional instability
+			if(prob(1))
+				to_chat(src, "<span class='notice'>You create dimensional instability.</span>")
+				reduce_containment_integrity(3)
+		if("wall_weakening")
+			// SCP-106 slowly weakens walls
+			if(prob(2))
+				reduce_containment_integrity(1)
 
 // Attack behavior
 /mob/living/carbon/scp/scp106/UnarmedAttack(atom/A)
@@ -275,9 +336,24 @@
 /mob/living/carbon/scp/scp106/verb/drag_victim()
 	set name = "Drag Victim"
 	set category = "SCP"
-	set desc = "Drag a victim to a pocket dimension."
+	set desc = "Drag a victim to your pocket dimension."
 
 	drag_victim_ability()
+
+// SCP-106 specific containment verbs
+/mob/living/carbon/scp/scp106/verb/dimensional_manipulation()
+	set name = "Manipulate Dimensions"
+	set category = "SCP"
+	set desc = "Manipulate the dimensional anchoring."
+
+	dimensional_manipulation_ability()
+
+/mob/living/carbon/scp/scp106/verb/wall_corrosion()
+	set name = "Corrode Walls"
+	set category = "SCP"
+	set desc = "Begin corroding the containment walls."
+
+	wall_corrosion_ability()
 
 // Override persistence data view
 /mob/living/carbon/scp/scp106/view_persistence_data()

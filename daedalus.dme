@@ -1210,6 +1210,8 @@
 #include "code\modules\SCP\persistent_progression\facility_persistence.dm"
 #include "code\modules\SCP\persistent_progression\scp_persistence.dm"
 #include "code\modules\SCP\persistent_progression\scp_management_interface.dm"
+#include "code\modules\SCP\antagonists\scp_antagonists.dm"
+#include "code\modules\SCP\persistent_progression\player_performance.dm"
 #include "code\modules\SCP\persistent_progression\scp_research_system.dm"
 #include "code\modules\SCP\persistent_progression\technology_persistence.dm"
 #include "code\modules\SCP\persistent_progression\medical_persistence.dm"

@@ -6,6 +6,7 @@
 	desc = "A massive, vaguely reptilian creature with powerful regenerative abilities and extreme hostility towards all life."
 	icon = 'icons/scp/nonhumanoidscps(32x32).dmi'
 	icon_state = "scp682"
+	use_custom_sprite = TRUE
 	real_name = "SCP-682"
 
 	// Maximum Enhanced SCP-682 variables
@@ -32,8 +33,7 @@
 	var/max_rage_mastery = 100
 	var/regeneration_mastery = 0
 	var/max_regeneration_mastery = 100
-	var/containment_resistance = 0
-	var/max_containment_resistance = 100
+	// Note: containment_resistance and max_containment_resistance are inherited from base SCP type
 	var/evolution_cooldown = 0
 	var/evolution_cooldown_time = 30 SECONDS
 	var/rage_burst_cooldown = 0
@@ -97,6 +97,23 @@
 	add_passive_effect("adaptation_mastery")
 	add_passive_effect("rage_mastery")
 	add_passive_effect("regeneration_mastery")
+
+	// Initialize SCP-682 specific skills with cooldowns and requirements
+	initialize_skill("rage_attack", 15 SECONDS, list("base_cooldown" = 15 SECONDS))
+	initialize_skill("escape_containment", 60 SECONDS, list("base_cooldown" = 60 SECONDS, "requires_level_20" = TRUE))
+	initialize_skill("view_adaptations", 30 SECONDS, list("base_cooldown" = 30 SECONDS, "requires_level_10" = TRUE))
+	initialize_skill("evolve", 120 SECONDS, list("base_cooldown" = 120 SECONDS, "requires_level_30" = TRUE))
+	initialize_skill("rage_burst", 45 SECONDS, list("base_cooldown" = 45 SECONDS, "requires_level_25" = TRUE))
+	initialize_skill("adaptation_mastery", 90 SECONDS, list("base_cooldown" = 90 SECONDS, "requires_level_35" = TRUE))
+	initialize_skill("containment_resistance", 75 SECONDS, list("base_cooldown" = 75 SECONDS, "requires_level_40" = TRUE))
+	initialize_skill("destruction_potential", 150 SECONDS, list("base_cooldown" = 150 SECONDS, "requires_level_50" = TRUE, "requires_breach" = TRUE))
+	initialize_skill("regeneration_mastery", 60 SECONDS, list("base_cooldown" = 60 SECONDS, "requires_level_30" = TRUE))
+	initialize_skill("rage_mastery", 80 SECONDS, list("base_cooldown" = 80 SECONDS, "requires_level_45" = TRUE))
+	initialize_skill("ultimate_destruction", 300 SECONDS, list("base_cooldown" = 300 SECONDS, "requires_level_70" = TRUE, "requires_breach" = TRUE))
+	initialize_skill("adaptation_synthesis", 180 SECONDS, list("base_cooldown" = 180 SECONDS, "requires_level_60" = TRUE, "requires_breach" = TRUE))
+
+	// Set up default containment protocols and security measures
+	setup_default_containment()
 
 /mob/living/carbon/scp/scp682/Destroy()
 	adaptations = list()
@@ -303,6 +320,9 @@
 
 // Maximum enhanced abilities
 /mob/living/carbon/scp/scp682/proc/rage_attack_ability()
+	if(!use_skill("rage_attack", 1, 0.8))
+		return
+
 	if(rage_level < 20)
 		to_chat(src, "<span class='warning'>You need more rage to perform a rage attack.</span>")
 		return
@@ -327,6 +347,9 @@
 	to_chat(src, "<span class='notice'>You perform a rage attack on [target]. Rage Level: [rage_level]/[max_rage]</span>")
 
 /mob/living/carbon/scp/scp682/proc/escape_containment_ability()
+	if(!use_skill("escape_containment", 3, 1.5))
+		return
+
 	containment_breach_level = min(max_containment_breach, containment_breach_level + 20)
 	containment_breaches++
 
@@ -334,6 +357,9 @@
 	to_chat(src, "<span class='notice'>You attempt to breach containment. Breach Level: [containment_breach_level]/[max_containment_breach]</span>")
 
 /mob/living/carbon/scp/scp682/proc/view_adaptations_ability()
+	if(!use_skill("view_adaptations", 1, 0.5))
+		return
+
 	var/message = "<h2>SCP-682 Adaptations</h2>"
 	message += "<b>Adaptation Level:</b> [adaptation_level]/[max_adaptation]<br>"
 	message += "<b>Evolution Stage:</b> [evolution_stage]/[max_evolution_stage]<br>"
@@ -351,6 +377,9 @@
 	to_chat(src, "<span class='notice'>[message]</span>")
 
 /mob/living/carbon/scp/scp682/proc/evolve_ability()
+	if(!use_skill("evolve", 5, 1.8))
+		return
+
 	if(evolution_stage >= max_evolution_stage)
 		to_chat(src, "<span class='warning'>You have reached maximum evolution.</span>")
 		return
@@ -362,11 +391,9 @@
 	evolve_stage()
 
 /mob/living/carbon/scp/scp682/proc/rage_burst_ability()
-	if(world.time < rage_burst_cooldown)
-		to_chat(src, "<span class='warning'>You need to wait before using rage burst again.</span>")
+	if(!use_skill("rage_burst", 4, 1.3))
 		return
 
-	rage_burst_cooldown = world.time + rage_burst_cooldown_time
 	rage_bursts++
 
 	// Affect all nearby targets
@@ -379,6 +406,9 @@
 	to_chat(src, "<span class='notice'>You unleash a rage burst on all nearby targets.</span>")
 
 /mob/living/carbon/scp/scp682/proc/adaptation_mastery_ability()
+	if(!use_skill("adaptation_mastery", 3, 1.2))
+		return
+
 	if(adaptation_mastery >= max_adaptation_mastery)
 		to_chat(src, "<span class='warning'>You have reached maximum adaptation mastery.</span>")
 		return
@@ -389,6 +419,9 @@
 	to_chat(src, "<span class='notice'>You enhance your adaptation mastery. Mastery: [adaptation_mastery]/[max_adaptation_mastery]</span>")
 
 /mob/living/carbon/scp/scp682/proc/containment_resistance_ability()
+	if(!use_skill("containment_resistance", 2, 1.0))
+		return
+
 	if(containment_resistance >= max_containment_resistance)
 		to_chat(src, "<span class='warning'>You have reached maximum containment resistance.</span>")
 		return
@@ -399,65 +432,65 @@
 	to_chat(src, "<span class='notice'>You enhance your containment resistance. Resistance: [containment_resistance]/[max_containment_resistance]</span>")
 
 /mob/living/carbon/scp/scp682/proc/destruction_potential_ability()
+	if(!use_skill("destruction_potential", 6, 2.0))
+		return
+
 	if(destruction_potential >= max_destruction_potential)
 		to_chat(src, "<span class='warning'>You have reached maximum destruction potential.</span>")
 		return
 
-	destruction_potential = min(max_destruction_potential, destruction_potential + 10)
+	destruction_potential = min(max_destruction_potential, destruction_potential + 15)
 	destruction_events++
 
 	to_chat(src, "<span class='notice'>You enhance your destruction potential. Potential: [destruction_potential]/[max_destruction_potential]</span>")
 
 /mob/living/carbon/scp/scp682/proc/regeneration_mastery_ability()
+	if(!use_skill("regeneration_mastery", 2, 1.1))
+		return
+
 	if(regeneration_mastery >= max_regeneration_mastery)
 		to_chat(src, "<span class='warning'>You have reached maximum regeneration mastery.</span>")
 		return
 
 	regeneration_mastery = min(max_regeneration_mastery, regeneration_mastery + 10)
+	// regeneration_masteries++ // Variable not defined, removed
 
 	to_chat(src, "<span class='notice'>You enhance your regeneration mastery. Mastery: [regeneration_mastery]/[max_regeneration_mastery]</span>")
 
 /mob/living/carbon/scp/scp682/proc/rage_mastery_ability()
+	if(!use_skill("rage_mastery", 3, 1.4))
+		return
+
 	if(rage_mastery >= max_rage_mastery)
 		to_chat(src, "<span class='warning'>You have reached maximum rage mastery.</span>")
 		return
 
 	rage_mastery = min(max_rage_mastery, rage_mastery + 10)
+	// rage_masteries++ // Variable not defined, removed
 
 	to_chat(src, "<span class='notice'>You enhance your rage mastery. Mastery: [rage_mastery]/[max_rage_mastery]</span>")
 
 /mob/living/carbon/scp/scp682/proc/ultimate_destruction_ability()
-	if(destruction_potential < max_destruction_potential)
-		to_chat(src, "<span class='warning'>You need maximum destruction potential to use ultimate destruction.</span>")
+	if(!use_skill("ultimate_destruction", 8, 2.5))
 		return
 
-	// Ultimate destruction affects the entire area
-	for(var/mob/living/L in range(15, src))
+	to_chat(src, "<span class='notice'>You unleash ultimate destruction!</span>")
+	// Affect all nearby targets with massive damage
+	for(var/mob/living/L in view(20, src))
 		if(L != src && !L.SCP)
 			L.adjustBruteLoss(200)
-			to_chat(L, "<span class='danger'>You experience SCP-682's ultimate destruction!</span>")
-
-	visible_message("<span class='danger'>[src] unleashes ultimate destruction!</span>")
-	to_chat(src, "<span class='notice'>You unleash ultimate destruction on the entire area.</span>")
+			L.adjustFireLoss(100)
+			to_chat(L, "<span class='danger'>You are devastated by SCP-682's ultimate destruction!</span>")
 
 /mob/living/carbon/scp/scp682/proc/adaptation_synthesis_ability()
-	if(adaptation_level < max_adaptation)
-		to_chat(src, "<span class='warning'>You need more adaptations to synthesize.</span>")
+	if(!use_skill("adaptation_synthesis", 7, 2.2))
 		return
 
-	// Create a powerful new adaptation
-	var/list/synthesis_adaptations = list(
-		"reality_manipulation",
-		"time_distortion",
-		"dimensional_breach",
-		"existence_erasure",
-		"concept_manipulation"
-	)
-
-	var/new_adaptation = pick(synthesis_adaptations)
-	adaptations += new_adaptation
-
-	to_chat(src, "<span class='notice'>You synthesize [new_adaptation] through adaptation mastery!</span>")
+	to_chat(src, "<span class='notice'>You synthesize new adaptations!</span>")
+	// Create new adaptations
+	adaptation_level = min(max_adaptation, adaptation_level + 10)
+	evolution_stage = min(max_evolution_stage, evolution_stage + 1)
+	to_chat(src, "<span class='notice'>Adaptation Level: [adaptation_level]/[max_adaptation], Evolution Stage: [evolution_stage]/[max_evolution_stage]</span>")
 
 // Enhanced status display
 /mob/living/carbon/scp/scp682/get_status_tab_items()
@@ -614,3 +647,95 @@
 			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
 
 	to_chat(src, "<span class='notice'>[message]</span>")
+
+// SCP-682 specific skill requirement checks
+/mob/living/carbon/scp/scp682/check_skill_requirement(requirement, current_level)
+	switch(requirement)
+		if("requires_breach")
+			return containment_status == "breached"
+		if("requires_level_10")
+			return current_level >= 10
+		if("requires_level_20")
+			return current_level >= 20
+		if("requires_level_25")
+			return current_level >= 25
+		if("requires_level_30")
+			return current_level >= 30
+		if("requires_level_35")
+			return current_level >= 35
+		if("requires_level_40")
+			return current_level >= 40
+		if("requires_level_45")
+			return current_level >= 45
+		if("requires_level_50")
+			return current_level >= 50
+		if("requires_level_60")
+			return current_level >= 60
+		if("requires_level_70")
+			return current_level >= 70
+		else
+			return ..()
+
+// Apply skill level effects for SCP-682
+/mob/living/carbon/scp/scp682/apply_skill_level_effects(skill_name, new_level)
+	switch(skill_name)
+		if("rage_attack")
+			if(new_level >= 20)
+				to_chat(src, "<span class='notice'>Your rage attacks affect a larger area.</span>")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your rage attacks can now hit multiple targets.</span>")
+		if("escape_containment")
+			if(new_level >= 25)
+				to_chat(src, "<span class='notice'>Your containment escapes are more effective.</span>")
+			if(new_level >= 50)
+				to_chat(src, "<span class='notice'>Your containment escapes can now damage containment systems.</span>")
+		if("view_adaptations")
+			if(new_level >= 15)
+				to_chat(src, "<span class='notice'>You can now see more detailed adaptation information.</span>")
+			if(new_level >= 30)
+				to_chat(src, "<span class='notice'>You can now predict future adaptations.</span>")
+		if("evolve")
+			if(new_level >= 35)
+				to_chat(src, "<span class='notice'>Your evolution is more potent.</span>")
+			if(new_level >= 70)
+				to_chat(src, "<span class='notice'>Your evolution can now create new forms.</span>")
+		if("rage_burst")
+			if(new_level >= 30)
+				to_chat(src, "<span class='notice'>Your rage burst affects a larger area.</span>")
+			if(new_level >= 60)
+				to_chat(src, "<span class='notice'>Your rage burst can now cause environmental damage.</span>")
+		if("adaptation_mastery")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your adaptation mastery is more efficient.</span>")
+			if(new_level >= 75)
+				to_chat(src, "<span class='notice'>Your adaptation mastery can now create permanent adaptations.</span>")
+		if("containment_resistance")
+			if(new_level >= 45)
+				to_chat(src, "<span class='notice'>Your containment resistance is more effective.</span>")
+			if(new_level >= 80)
+				to_chat(src, "<span class='notice'>Your containment resistance can now weaken containment systems.</span>")
+		if("destruction_potential")
+			if(new_level >= 55)
+				to_chat(src, "<span class='notice'>Your destruction potential affects a larger area.</span>")
+			if(new_level >= 85)
+				to_chat(src, "<span class='notice'>Your destruction potential can now cause structural damage.</span>")
+		if("regeneration_mastery")
+			if(new_level >= 35)
+				to_chat(src, "<span class='notice'>Your regeneration is faster.</span>")
+			if(new_level >= 70)
+				to_chat(src, "<span class='notice'>Your regeneration can now heal others.</span>")
+		if("rage_mastery")
+			if(new_level >= 50)
+				to_chat(src, "<span class='notice'>Your rage mastery is more controlled.</span>")
+			if(new_level >= 85)
+				to_chat(src, "<span class='notice'>Your rage mastery can now influence others.</span>")
+		if("ultimate_destruction")
+			if(new_level >= 75)
+				to_chat(src, "<span class='notice'>Your ultimate destruction affects a larger area.</span>")
+			if(new_level >= 90)
+				to_chat(src, "<span class='notice'>Your ultimate destruction can now cause permanent damage.</span>")
+		if("adaptation_synthesis")
+			if(new_level >= 65)
+				to_chat(src, "<span class='notice'>Your adaptation synthesis creates more potent adaptations.</span>")
+			if(new_level >= 85)
+				to_chat(src, "<span class='notice'>Your adaptation synthesis can now create beneficial mutations.</span>")

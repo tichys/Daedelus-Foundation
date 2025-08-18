@@ -7,6 +7,7 @@
 	icon = 'icons/scp/scp-096.dmi'
 	icon_state = "scp096"
 	real_name = "SCP-096"
+	use_custom_sprite = TRUE
 
 	// SCP-096 specific variables
 	var/state = "idle" // idle, screaming, chasing, slaughter
@@ -49,6 +50,34 @@
 	// Add passive effects
 	add_passive_effect("face_obsession")
 	add_passive_effect("rage_escalation")
+
+	// Initialize SCP-096 specific skills with cooldowns and requirements
+	initialize_skill("face_revelation", 60 SECONDS, list("base_cooldown" = 60 SECONDS, "requires_breach" = TRUE))
+	initialize_skill("rage_manipulation", 45 SECONDS, list("base_cooldown" = 45 SECONDS))
+	initialize_skill("scream_attack", 30 SECONDS, list("base_cooldown" = 30 SECONDS))
+	initialize_skill("rage_escalation", 90 SECONDS, list("base_cooldown" = 90 SECONDS, "requires_level_20" = TRUE))
+	initialize_skill("mass_hysteria", 180 SECONDS, list("base_cooldown" = 180 SECONDS, "requires_level_60" = TRUE, "requires_breach" = TRUE))
+
+	// Add SCP-096 specific containment protocols
+	add_containment_protocol("Face Concealment", "SCP-096's face must never be viewed by personnel")
+	add_containment_protocol("Blindfold Protocol", "Personnel must wear blindfolds when entering containment area")
+	add_containment_protocol("Rage Management", "Procedures for calming SCP-096 after rage activation")
+
+	// Add SCP-096 specific security measures
+	add_security_measure("Facial Recognition Blocking", "AI systems programmed to blur SCP-096's face")
+	add_security_measure("Emergency Containment", "Rapid containment procedures for rage events")
+	add_security_measure("Psychological Monitoring", "Monitoring of personnel mental state around SCP-096")
+
+	// Add SCP-096 specific containment abilities
+	add_containment_ability("face_revelation", "face_revelation_ability")
+	add_containment_ability("rage_manipulation", "rage_manipulation_ability")
+
+	// Add SCP-096 specific containment effects
+	add_containment_effect("face_obsession_escalation")
+	add_containment_effect("rage_amplification")
+
+	// Set up default containment protocols and security measures
+	setup_default_containment()
 
 /mob/living/carbon/scp/scp096/Destroy()
 	current_target = null
@@ -156,6 +185,129 @@
 	return_to_containment()
 	visible_message("<span class='notice'>[src] calms down and returns to covering its face.</span>")
 
+// Override specific containment check for SCP-096
+/mob/living/carbon/scp/scp096/check_specific_containment()
+	// Check if anyone can see our face
+	for(var/mob/living/carbon/human/H in view(7, src))
+		if(H.SCP)
+			continue
+		if(can_see(H, src))
+			// Someone can see our face - this is a containment failure
+			reduce_containment_integrity(10)
+			if(prob(20))
+				trigger_rage(H)
+			break
+
+// SCP-096 specific containment abilities
+/mob/living/carbon/scp/scp096/proc/face_revelation_ability()
+	if(!use_skill("face_revelation", 3, 1.5))
+		return
+
+	to_chat(src, "<span class='notice'>You reveal your face to nearby personnel.</span>")
+	// Force face revelation to nearby personnel
+	for(var/mob/living/carbon/human/H in view(5, src))
+		if(H != src && !H.SCP)
+			trigger_rage(H)
+			break
+
+/mob/living/carbon/scp/scp096/proc/rage_manipulation_ability()
+	if(!use_skill("rage_manipulation", 2, 1.0))
+		return
+
+	to_chat(src, "<span class='notice'>You manipulate your rage state.</span>")
+	if(state == "idle")
+		state = "screaming"
+		rage_duration = world.time + 10 SECONDS
+		icon_state = "scp096-screaming"
+		breach_containment()
+	else
+		state = "idle"
+		icon_state = "scp096"
+		return_to_containment()
+
+// Enhanced skill-based abilities
+/mob/living/carbon/scp/scp096/proc/scream_attack_ability()
+	if(!use_skill("scream_attack", 1, 0.8))
+		return
+
+	if(state == "idle" && world.time >= scream_cooldown)
+		var/list/targets = list()
+		for(var/mob/living/carbon/human/H in view(7, src))
+			if(H != src)
+				targets += H
+
+		if(targets.len)
+			var/mob/living/carbon/human/chosen_target = pick(targets)
+			trigger_rage(chosen_target)
+		else
+			to_chat(src, "<span class='warning'>No targets in range to scream at.</span>")
+	else
+		to_chat(src, "<span class='warning'>You cannot scream right now.</span>")
+
+/mob/living/carbon/scp/scp096/proc/rage_escalation_ability()
+	if(!use_skill("rage_escalation", 4, 1.8))
+		return
+
+	to_chat(src, "<span class='notice'>You escalate your rage to new heights!</span>")
+	// Enhanced rage effects
+	enhance_containment_resistance(10)
+	reduce_containment_integrity(10)
+	spawn(30 SECONDS)
+		enhance_containment_resistance(-10)
+
+/mob/living/carbon/scp/scp096/proc/mass_hysteria_ability()
+	if(!use_skill("mass_hysteria", 6, 2.5))
+		return
+
+	to_chat(src, "<span class='notice'>You cause mass hysteria!</span>")
+	// Affect all nearby humans with panic
+	for(var/mob/living/carbon/human/H in view(15, src))
+		if(H != src && !H.SCP)
+			H.adjustBruteLoss(30)
+			H.stamina.adjust(-50)
+			to_chat(H, "<span class='danger'>You are overcome with hysteria!</span>")
+
+// SCP-096 specific skill requirement checks
+/mob/living/carbon/scp/scp096/check_skill_requirement(requirement, current_level)
+	switch(requirement)
+		if("requires_breach")
+			return containment_status == "breached"
+		if("requires_level_20")
+			return current_level >= 20
+		if("requires_level_60")
+			return current_level >= 60
+		else
+			return ..()
+
+// Apply skill level effects for SCP-096
+/mob/living/carbon/scp/scp096/apply_skill_level_effects(skill_name, new_level)
+	switch(skill_name)
+		if("face_revelation")
+			if(new_level >= 20)
+				to_chat(src, "<span class='notice'>Your face revelation affects a larger area.</span>")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your face revelation can now affect multiple targets.</span>")
+		if("rage_manipulation")
+			if(new_level >= 15)
+				to_chat(src, "<span class='notice'>Your rage manipulation is more effective.</span>")
+			if(new_level >= 30)
+				to_chat(src, "<span class='notice'>Your rage manipulation can now control others.</span>")
+		if("scream_attack")
+			if(new_level >= 10)
+				to_chat(src, "<span class='notice'>Your scream attack is more powerful.</span>")
+			if(new_level >= 25)
+				to_chat(src, "<span class='notice'>Your scream attack can now stun targets.</span>")
+		if("rage_escalation")
+			if(new_level >= 25)
+				to_chat(src, "<span class='notice'>Your rage escalation affects a larger area.</span>")
+			if(new_level >= 50)
+				to_chat(src, "<span class='notice'>Your rage escalation can now cause environmental damage.</span>")
+		if("mass_hysteria")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your mass hysteria affects a larger area.</span>")
+			if(new_level >= 80)
+				to_chat(src, "<span class='notice'>Your mass hysteria can now cause permanent psychological damage.</span>")
+
 // Attack behavior
 /mob/living/carbon/scp/scp096/UnarmedAttack(atom/A)
 	if(ishuman(A))
@@ -228,16 +380,46 @@
 /mob/living/carbon/scp/scp096/verb/scream()
 	set name = "Scream"
 	set category = "SCP"
-	set desc = "Let out a blood-curdling scream."
+	set desc = "Let out a blood-curling scream."
 
-	scream_ability()
+	scream_attack_ability()
 
 /mob/living/carbon/scp/scp096/verb/rage_mode()
 	set name = "Rage Mode"
 	set category = "SCP"
 	set desc = "Enter a controlled rage mode."
 
-	rage_mode_ability()
+	rage_manipulation_ability()
+
+// SCP-096 specific containment verbs
+/mob/living/carbon/scp/scp096/verb/face_revelation()
+	set name = "Reveal Face"
+	set category = "SCP"
+	set desc = "Reveal your face to nearby personnel."
+
+	face_revelation_ability()
+
+/mob/living/carbon/scp/scp096/verb/rage_manipulation()
+	set name = "Manipulate Rage"
+	set category = "SCP"
+	set desc = "Manipulate your rage state."
+
+	rage_manipulation_ability()
+
+// New skill-based verbs
+/mob/living/carbon/scp/scp096/verb/rage_escalation()
+	set name = "Rage Escalation"
+	set category = "SCP"
+	set desc = "Escalate your rage to new heights (requires level 20)."
+
+	rage_escalation_ability()
+
+/mob/living/carbon/scp/scp096/verb/mass_hysteria()
+	set name = "Mass Hysteria"
+	set category = "SCP"
+	set desc = "Cause mass hysteria (requires level 60 and breach)."
+
+	mass_hysteria_ability()
 
 // Override persistence data view
 /mob/living/carbon/scp/scp096/view_persistence_data()

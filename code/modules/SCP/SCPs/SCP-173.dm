@@ -7,6 +7,7 @@
 	icon = 'icons/scp/scp-173.dmi'
 	icon_state = "scp173"
 	real_name = "SCP-173"
+	use_custom_sprite = TRUE
 
 	// SCP-173 specific variables
 	var/move_cooldown = 0
@@ -45,6 +46,34 @@
 	// Add passive effects
 	add_passive_effect("motion_detection")
 	add_passive_effect("concrete_durability")
+
+	// Initialize SCP-173 specific skills with cooldowns and requirements
+	initialize_skill("motion_manipulation", 45 SECONDS, list("base_cooldown" = 45 SECONDS, "requires_breach" = TRUE))
+	initialize_skill("concrete_weakening", 90 SECONDS, list("base_cooldown" = 90 SECONDS, "requires_level_10" = TRUE))
+	initialize_skill("neck_snapping", 15 SECONDS, list("base_cooldown" = 15 SECONDS))
+	initialize_skill("stealth_movement", 30 SECONDS, list("base_cooldown" = 30 SECONDS, "requires_level_25" = TRUE))
+	initialize_skill("mass_terror", 120 SECONDS, list("base_cooldown" = 120 SECONDS, "requires_level_50" = TRUE, "requires_breach" = TRUE))
+
+	// Add SCP-173 specific containment protocols
+	add_containment_protocol("Motion Detection", "SCP-173 must be observed at all times to prevent movement")
+	add_containment_protocol("Blink Protocol", "Personnel must coordinate blinking to maintain constant observation")
+	add_containment_protocol("Concrete Reinforcement", "Containment area reinforced with concrete to prevent structural damage")
+
+	// Add SCP-173 specific security measures
+	add_security_measure("Observation Teams", "Multiple personnel assigned to maintain constant visual contact")
+	add_security_measure("Emergency Lighting", "Backup lighting systems to prevent darkness")
+	add_security_measure("Motion Sensors", "Advanced motion detection systems")
+
+	// Add SCP-173 specific containment abilities
+	add_containment_ability("motion_manipulation", "motion_manipulation_ability")
+	add_containment_ability("concrete_weakening", "concrete_weakening_ability")
+
+	// Add SCP-173 specific containment effects
+	add_containment_effect("motion_detection_bypass")
+	add_containment_effect("concrete_corrosion")
+
+	// Set up default containment protocols and security measures
+	setup_default_containment()
 
 /mob/living/carbon/scp/scp173/Destroy()
 	containment_area = null
@@ -92,6 +121,127 @@
 
 	// Breach containment if we're outside containment area
 	breach_containment()
+
+// Override specific containment check for SCP-173
+/mob/living/carbon/scp/scp173/check_specific_containment()
+	// Check if anyone is observing us
+	var/being_observed = FALSE
+	for(var/mob/living/carbon/human/H in view(7, src))
+		if(H.SCP)
+			continue
+		if(can_see(H, src))
+			being_observed = TRUE
+			break
+
+	// If not being observed, reduce containment integrity
+	if(!being_observed)
+		reduce_containment_integrity(1)
+		// Chance to breach if integrity is very low
+		if(containment_integrity < 20 && prob(5))
+			attempt_containment_breach()
+
+// SCP-173 specific containment abilities
+/mob/living/carbon/scp/scp173/proc/motion_manipulation_ability()
+	if(!use_skill("motion_manipulation", 2, 1.0))
+		return
+
+	to_chat(src, "<span class='notice'>You manipulate the motion detection systems.</span>")
+	// Temporarily disable motion sensors
+	remove_security_measure("Motion Sensors")
+	spawn(30 SECONDS)
+		add_security_measure("Motion Sensors", "Advanced motion detection systems")
+
+/mob/living/carbon/scp/scp173/proc/concrete_weakening_ability()
+	if(!use_skill("concrete_weakening", 3, 1.5))
+		return
+
+	to_chat(src, "<span class='notice'>You begin weakening the concrete reinforcements.</span>")
+	reduce_containment_integrity(15)
+	remove_containment_protocol("Concrete Reinforcement")
+	spawn(60 SECONDS)
+		add_containment_protocol("Concrete Reinforcement", "Containment area reinforced with concrete to prevent structural damage")
+
+// Enhanced skill-based abilities
+/mob/living/carbon/scp/scp173/proc/neck_snapping_ability()
+	if(!use_skill("neck_snapping", 1, 0.8))
+		return
+
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in view(1, src))
+		if(H != src)
+			targets += H
+
+	if(!targets.len)
+		to_chat(src, "<span class='warning'>No targets in range.</span>")
+		return
+
+	var/mob/living/carbon/human/target = input(src, "Choose a target to snap the neck of:", "Snap Neck") as null|anything in targets
+	if(target)
+		UnarmedAttack(target)
+
+/mob/living/carbon/scp/scp173/proc/stealth_movement_ability()
+	if(!use_skill("stealth_movement", 2, 1.2))
+		return
+
+	to_chat(src, "<span class='notice'>You move with enhanced stealth.</span>")
+	// Enhanced movement for a short time
+	enhance_containment_resistance(5)
+	spawn(20 SECONDS)
+		enhance_containment_resistance(-5)
+
+/mob/living/carbon/scp/scp173/proc/mass_terror_ability()
+	if(!use_skill("mass_terror", 5, 2.0))
+		return
+
+	to_chat(src, "<span class='notice'>You unleash mass terror!</span>")
+	// Affect all nearby humans
+	for(var/mob/living/carbon/human/H in view(10, src))
+		if(H != src && !H.SCP)
+			H.adjustBruteLoss(20)
+			to_chat(H, "<span class='danger'>You feel overwhelming terror!</span>")
+
+// SCP-173 specific skill requirement checks
+/mob/living/carbon/scp/scp173/check_skill_requirement(requirement, current_level)
+	switch(requirement)
+		if("requires_breach")
+			return containment_status == "breached"
+		if("requires_level_10")
+			return current_level >= 10
+		if("requires_level_25")
+			return current_level >= 25
+		if("requires_level_50")
+			return current_level >= 50
+		else
+			return ..()
+
+// Apply skill level effects for SCP-173
+/mob/living/carbon/scp/scp173/apply_skill_level_effects(skill_name, new_level)
+	switch(skill_name)
+		if("motion_manipulation")
+			if(new_level >= 25)
+				to_chat(src, "<span class='notice'>Your motion manipulation now affects a larger area.</span>")
+			if(new_level >= 50)
+				to_chat(src, "<span class='notice'>Your motion manipulation can now disable multiple systems.</span>")
+		if("concrete_weakening")
+			if(new_level >= 20)
+				to_chat(src, "<span class='notice'>Your concrete weakening is now more effective.</span>")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your concrete weakening affects a larger area.</span>")
+		if("neck_snapping")
+			if(new_level >= 15)
+				to_chat(src, "<span class='notice'>Your neck snapping is now more precise.</span>")
+			if(new_level >= 30)
+				to_chat(src, "<span class='notice'>Your neck snapping can now affect multiple targets.</span>")
+		if("stealth_movement")
+			if(new_level >= 20)
+				to_chat(src, "<span class='notice'>Your stealth movement is now more effective.</span>")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your stealth movement can now bypass some detection.</span>")
+		if("mass_terror")
+			if(new_level >= 30)
+				to_chat(src, "<span class='notice'>Your mass terror affects a larger area.</span>")
+			if(new_level >= 60)
+				to_chat(src, "<span class='notice'>Your mass terror can now cause panic effects.</span>")
 
 // Attack behavior
 /mob/living/carbon/scp/scp173/UnarmedAttack(atom/A)
@@ -154,7 +304,37 @@
 	set category = "SCP"
 	set desc = "Snap the neck of a nearby target."
 
-	snap_neck_ability()
+	neck_snapping_ability()
+
+// SCP-173 specific containment verbs
+/mob/living/carbon/scp/scp173/verb/motion_manipulation()
+	set name = "Manipulate Motion Sensors"
+	set category = "SCP"
+	set desc = "Temporarily disable motion detection systems."
+
+	motion_manipulation_ability()
+
+/mob/living/carbon/scp/scp173/verb/concrete_weakening()
+	set name = "Weaken Concrete"
+	set category = "SCP"
+	set desc = "Begin weakening concrete reinforcements."
+
+	concrete_weakening_ability()
+
+// New skill-based verbs
+/mob/living/carbon/scp/scp173/verb/stealth_movement()
+	set name = "Stealth Movement"
+	set category = "SCP"
+	set desc = "Move with enhanced stealth (requires level 25)."
+
+	stealth_movement_ability()
+
+/mob/living/carbon/scp/scp173/verb/mass_terror()
+	set name = "Mass Terror"
+	set category = "SCP"
+	set desc = "Unleash mass terror on nearby targets (requires level 50 and breach)."
+
+	mass_terror_ability()
 
 // Override persistence data view
 /mob/living/carbon/scp/scp173/view_persistence_data()

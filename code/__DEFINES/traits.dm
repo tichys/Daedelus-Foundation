@@ -1007,6 +1007,9 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// trait that prevents AI controllers from making new plans, but not executing plans
 #define TRAIT_AI_DISABLE_PLANNING "TRAIT_AI_DISABLE_PLANNING"
 
+// SCP trait source
+#define SCP_TRAIT "scp"
+
 // Flock trait sources
 /// Under control
 #define FLOCK_CONTROLLED_BY_OVERMIND_SOURCE "FLOCK_CONTROLLED_BY_OVERMIND_SOURCE"

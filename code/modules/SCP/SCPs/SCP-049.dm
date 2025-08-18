@@ -7,6 +7,7 @@
 	icon = 'icons/scp/scp-049.dmi'
 	icon_state = "scp049"
 	real_name = "SCP-049"
+	use_custom_sprite = TRUE
 
 	// Maximum Enhanced SCP-049 variables
 	var/pestilence_mastery = 0
@@ -79,6 +80,22 @@
 	add_passive_effect("plague_evolution")
 	add_passive_effect("infection_potency")
 	add_passive_effect("research_breakthroughs")
+
+	// Initialize SCP-049 specific skills with cooldowns and requirements
+	initialize_skill("infect_target", 20 SECONDS, list("base_cooldown" = 20 SECONDS))
+	initialize_skill("cure_target", 45 SECONDS, list("base_cooldown" = 45 SECONDS, "requires_level_15" = TRUE))
+	initialize_skill("research_pestilence", 60 SECONDS, list("base_cooldown" = 60 SECONDS, "requires_level_10" = TRUE))
+	initialize_skill("pestilence_mastery", 90 SECONDS, list("base_cooldown" = 90 SECONDS, "requires_level_25" = TRUE))
+	initialize_skill("medical_expertise", 30 SECONDS, list("base_cooldown" = 30 SECONDS, "requires_level_20" = TRUE))
+	initialize_skill("cure_research", 120 SECONDS, list("base_cooldown" = 120 SECONDS, "requires_level_30" = TRUE))
+	initialize_skill("evolve_plague", 180 SECONDS, list("base_cooldown" = 180 SECONDS, "requires_level_40" = TRUE, "requires_breach" = TRUE))
+	initialize_skill("infection_potency", 75 SECONDS, list("base_cooldown" = 75 SECONDS, "requires_level_35" = TRUE))
+	initialize_skill("research_breakthrough", 150 SECONDS, list("base_cooldown" = 150 SECONDS, "requires_level_50" = TRUE))
+	initialize_skill("ultimate_pestilence", 300 SECONDS, list("base_cooldown" = 300 SECONDS, "requires_level_70" = TRUE, "requires_breach" = TRUE))
+	initialize_skill("plague_synthesis", 240 SECONDS, list("base_cooldown" = 240 SECONDS, "requires_level_60" = TRUE, "requires_breach" = TRUE))
+
+	// Set up default containment protocols and security measures
+	setup_default_containment()
 
 /mob/living/carbon/scp/scp049/Destroy()
 	return ..()
@@ -173,9 +190,11 @@
 
 	to_chat(src, "<span class='notice'>[evolution_message] Plague Evolution: [plague_evolution]/[max_plague_evolution]</span>")
 
-// Maximum enhanced abilities
 /mob/living/carbon/scp/scp049/proc/infect_target_ability()
-	to_chat(src, "<span class='notice'>You attempt to cure the pestilence in a nearby target.</span>")
+	if(!use_skill("infect_target", 1, 0.8))
+		return
+	
+	to_chat(src, "<span class='notice'>You attempt to infect a target with the pestilence.</span>")
 
 	// Find a target to infect
 	var/mob/living/carbon/human/target = null
@@ -188,14 +207,14 @@
 		to_chat(target, "<span class='danger'>SCP-049 attempts to cure your pestilence!</span>")
 		target.adjustBruteLoss(25)
 		infections_performed++
-
-
-
 		to_chat(src, "<span class='notice'>You have cured the pestilence in [target].</span>")
 	else
 		to_chat(src, "<span class='warning'>No suitable targets for curing found.</span>")
 
 /mob/living/carbon/scp/scp049/proc/cure_target_ability()
+	if(!use_skill("cure_target", 2, 1.2))
+		return
+	
 	to_chat(src, "<span class='notice'>You attempt to cure a target of the pestilence.</span>")
 
 	// Find a target to cure
@@ -208,52 +227,50 @@
 	if(target)
 		to_chat(target, "<span class='notice'>SCP-049 attempts to cure you...</span>")
 		cures_attempted++
-
-
-
 		to_chat(src, "<span class='notice'>You attempt to cure [target].</span>")
 	else
 		to_chat(src, "<span class='warning'>No targets for curing found.</span>")
 
 /mob/living/carbon/scp/scp049/proc/research_pestilence_ability()
+	if(!use_skill("research_pestilence", 3, 1.0))
+		return
+	
 	cure_research = min(max_cure_research, cure_research + 10)
 	research_notes++
-
 	to_chat(src, "<span class='notice'>You conduct pestilence research. Research: [cure_research]/[max_cure_research]</span>")
 
 /mob/living/carbon/scp/scp049/proc/pestilence_mastery_ability()
+	if(!use_skill("pestilence_mastery", 4, 1.5))
+		return
+	
 	if(pestilence_mastery >= max_pestilence_mastery)
 		to_chat(src, "<span class='warning'>You have reached maximum pestilence mastery.</span>")
 		return
 
 	pestilence_mastery = min(max_pestilence_mastery, pestilence_mastery + 10)
 	pestilence_masteries++
-
 	to_chat(src, "<span class='notice'>Your pestilence mastery is enhanced. Mastery: [pestilence_mastery]/[max_pestilence_mastery]</span>")
 
 /mob/living/carbon/scp/scp049/proc/medical_expertise_ability()
-	if(world.time < medical_cooldown)
-		to_chat(src, "<span class='warning'>You need time to enhance your medical expertise again.</span>")
+	if(!use_skill("medical_expertise", 2, 1.0))
 		return
-
-	medical_cooldown = world.time + medical_cooldown_time
+	
 	medical_expertise = min(max_medical_expertise, medical_expertise + 10)
 	medical_masteries++
-
 	to_chat(src, "<span class='notice'>Your medical expertise is enhanced. Expertise: [medical_expertise]/[max_medical_expertise]</span>")
 
 /mob/living/carbon/scp/scp049/proc/cure_research_ability()
-	if(world.time < research_cooldown)
-		to_chat(src, "<span class='warning'>You need time to conduct more research.</span>")
+	if(!use_skill("cure_research", 5, 1.8))
 		return
-
-	research_cooldown = world.time + research_cooldown_time
+	
 	cure_research = min(max_cure_research, cure_research + 15)
 	research_masteries++
-
 	to_chat(src, "<span class='notice'>Your cure research advances. Research: [cure_research]/[max_cure_research]</span>")
 
 /mob/living/carbon/scp/scp049/proc/evolve_plague_ability()
+	if(!use_skill("evolve_plague", 6, 2.0))
+		return
+	
 	if(plague_evolution >= max_plague_evolution)
 		to_chat(src, "<span class='warning'>You have reached maximum plague evolution.</span>")
 		return
@@ -265,44 +282,49 @@
 	evolve_plague_stage()
 
 /mob/living/carbon/scp/scp049/proc/infection_potency_ability()
+	if(!use_skill("infection_potency", 3, 1.3))
+		return
+	
 	if(infection_potency >= max_infection_potency)
 		to_chat(src, "<span class='warning'>You have reached maximum infection potency.</span>")
 		return
 
 	infection_potency = min(max_infection_potency, infection_potency + 1)
-
 	to_chat(src, "<span class='notice'>Your infection potency increases. Potency: [infection_potency]/[max_infection_potency]</span>")
 
 /mob/living/carbon/scp/scp049/proc/research_breakthrough_ability()
+	if(!use_skill("research_breakthrough", 4, 1.6))
+		return
+	
 	research_breakthroughs = min(max_research_breakthroughs, research_breakthroughs + 5)
 	breakthrough_events++
-
 	to_chat(src, "<span class='notice'>You achieve a research breakthrough! Breakthroughs: [research_breakthroughs]/[max_research_breakthroughs]</span>")
 
 /mob/living/carbon/scp/scp049/proc/ultimate_pestilence_ability()
+	if(!use_skill("ultimate_pestilence", 8, 2.5))
+		return
+	
 	if(plague_evolution < max_plague_evolution)
 		to_chat(src, "<span class='warning'>You need maximum plague evolution for ultimate pestilence.</span>")
 		return
 
-	// Ultimate pestilence affects all nearby targets
-	for(var/mob/living/carbon/human/H in range(10, src))
+	to_chat(src, "<span class='notice'>You unleash the ultimate pestilence!</span>")
+	// Affect all nearby humans with ultimate pestilence
+	for(var/mob/living/carbon/human/H in range(15, src))
 		if(H != src && !H.SCP)
-			to_chat(H, "<span class='danger'>SCP-049 performs ultimate pestilence cure!</span>")
-			H.adjustBruteLoss(75)
-
-	to_chat(src, "<span class='notice'>You perform ultimate pestilence cure on all nearby targets.</span>")
+			H.adjustBruteLoss(50)
+			H.adjustToxLoss(30)
+			to_chat(H, "<span class='danger'>You are overwhelmed by the ultimate pestilence!</span>")
 
 /mob/living/carbon/scp/scp049/proc/plague_synthesis_ability()
-	if(pestilence_mastery < max_pestilence_mastery)
-		to_chat(src, "<span class='warning'>You need more pestilence mastery to synthesize.</span>")
+	if(!use_skill("plague_synthesis", 7, 2.2))
 		return
-
-	// Create a powerful pestilence effect
-	for(var/mob/living/carbon/human/H in range(8, src))
-		if(H != src && !H.SCP)
-			to_chat(H, "<span class='danger'>You feel the overwhelming presence of the pestilence...</span>")
-
-	to_chat(src, "<span class='notice'>You synthesize pestilence and affect all nearby targets.</span>")
+	
+	to_chat(src, "<span class='notice'>You synthesize a new strain of the pestilence!</span>")
+	// Create a new plague effect
+	plague_evolution = min(max_plague_evolution, plague_evolution + 1)
+	infection_potency = min(max_infection_potency, infection_potency + 2)
+	to_chat(src, "<span class='notice'>Plague evolution: [plague_evolution]/[max_plague_evolution], Potency: [infection_potency]/[max_infection_potency]</span>")
 
 // Enhanced status display
 /mob/living/carbon/scp/scp049/get_status_tab_items()
@@ -446,3 +468,90 @@
 			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
 
 	to_chat(src, "<span class='notice'>[message]</span>")
+
+// SCP-049 specific skill requirement checks
+/mob/living/carbon/scp/scp049/check_skill_requirement(requirement, current_level)
+	switch(requirement)
+		if("requires_breach")
+			return containment_status == "breached"
+		if("requires_level_10")
+			return current_level >= 10
+		if("requires_level_15")
+			return current_level >= 15
+		if("requires_level_20")
+			return current_level >= 20
+		if("requires_level_25")
+			return current_level >= 25
+		if("requires_level_30")
+			return current_level >= 30
+		if("requires_level_35")
+			return current_level >= 35
+		if("requires_level_40")
+			return current_level >= 40
+		if("requires_level_50")
+			return current_level >= 50
+		if("requires_level_60")
+			return current_level >= 60
+		if("requires_level_70")
+			return current_level >= 70
+		else
+			return ..()
+
+// Apply skill level effects for SCP-049
+/mob/living/carbon/scp/scp049/apply_skill_level_effects(skill_name, new_level)
+	switch(skill_name)
+		if("infect_target")
+			if(new_level >= 20)
+				to_chat(src, "<span class='notice'>Your infection affects a larger area.</span>")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your infection can now affect multiple targets.</span>")
+		if("cure_target")
+			if(new_level >= 25)
+				to_chat(src, "<span class='notice'>Your curing is more effective.</span>")
+			if(new_level >= 50)
+				to_chat(src, "<span class='notice'>Your curing can now heal allies.</span>")
+		if("research_pestilence")
+			if(new_level >= 20)
+				to_chat(src, "<span class='notice'>Your research is more efficient.</span>")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your research can now unlock new abilities.</span>")
+		if("pestilence_mastery")
+			if(new_level >= 30)
+				to_chat(src, "<span class='notice'>Your pestilence mastery affects a larger area.</span>")
+			if(new_level >= 60)
+				to_chat(src, "<span class='notice'>Your pestilence mastery can now control the disease.</span>")
+		if("medical_expertise")
+			if(new_level >= 25)
+				to_chat(src, "<span class='notice'>Your medical expertise is more precise.</span>")
+			if(new_level >= 50)
+				to_chat(src, "<span class='notice'>Your medical expertise can now diagnose diseases.</span>")
+		if("cure_research")
+			if(new_level >= 35)
+				to_chat(src, "<span class='notice'>Your cure research is more advanced.</span>")
+			if(new_level >= 70)
+				to_chat(src, "<span class='notice'>Your cure research can now create vaccines.</span>")
+		if("evolve_plague")
+			if(new_level >= 45)
+				to_chat(src, "<span class='notice'>Your plague evolution is more potent.</span>")
+			if(new_level >= 80)
+				to_chat(src, "<span class='notice'>Your plague evolution can now create new strains.</span>")
+		if("infection_potency")
+			if(new_level >= 40)
+				to_chat(src, "<span class='notice'>Your infection potency affects more targets.</span>")
+			if(new_level >= 75)
+				to_chat(src, "<span class='notice'>Your infection potency can now spread rapidly.</span>")
+		if("research_breakthrough")
+			if(new_level >= 55)
+				to_chat(src, "<span class='notice'>Your research breakthroughs are more significant.</span>")
+			if(new_level >= 85)
+				to_chat(src, "<span class='notice'>Your research breakthroughs can now revolutionize medicine.</span>")
+		if("ultimate_pestilence")
+			if(new_level >= 75)
+				to_chat(src, "<span class='notice'>Your ultimate pestilence affects a larger area.</span>")
+			if(new_level >= 90)
+				to_chat(src, "<span class='notice'>Your ultimate pestilence can now cause global outbreaks.</span>")
+		if("plague_synthesis")
+			if(new_level >= 65)
+				to_chat(src, "<span class='notice'>Your plague synthesis creates more potent strains.</span>")
+			if(new_level >= 85)
+				to_chat(src, "<span class='notice'>Your plague synthesis can now create beneficial viruses.</span>")

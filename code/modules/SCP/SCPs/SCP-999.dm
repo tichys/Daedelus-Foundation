@@ -7,6 +7,7 @@
 	icon = 'icons/scp/scp-999.dmi'
 	icon_state = "scp999"
 	real_name = "SCP-999"
+	use_custom_sprite = TRUE
 
 	// Maximum Enhanced SCP-999 variables
 	var/healing_power = 25
@@ -169,7 +170,7 @@
 
 // Process emotional manipulation
 /mob/living/carbon/scp/scp999/proc/process_emotional_manipulation()
-	if(emotional_manipulation > 0 && prob(1)):
+	if(emotional_manipulation > 0 && prob(1))
 		// Create emotional effects
 		for(var/mob/living/carbon/human/H in range(comfort_radius + comfort_radius_expansion, src))
 			if(H != src && !H.SCP)
@@ -178,7 +179,7 @@
 // Process comfort mastery
 /mob/living/carbon/scp/scp999/proc/process_comfort_mastery()
 	if(comfort_provided > 0 && comfort_mastery < max_comfort_mastery)
-		if(prob(1)):
+		if(prob(1))
 			comfort_mastery = min(max_comfort_mastery, comfort_mastery + 1)
 
 // Process happiness evolution
@@ -207,7 +208,7 @@
 
 // Process emotional resonance
 /mob/living/carbon/scp/scp999/proc/process_emotional_resonance()
-	if(emotional_resonance > 0 && prob(1)):
+	if(emotional_resonance > 0 && prob(1))
 		// Create emotional resonance effects
 		for(var/mob/living/carbon/human/H in range(comfort_radius + comfort_radius_expansion, src))
 			if(H != src && !H.SCP)
