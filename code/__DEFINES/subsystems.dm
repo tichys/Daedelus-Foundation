@@ -241,6 +241,8 @@
 #define FIRE_PRIORITY_CODEX 5
 #define FIRE_PRIORITY_TITLE 5
 
+// D-Class Management Subsystem
+#define FIRE_PRIORITY_DCLASS 15
 
 
 // SS runlevels

@@ -185,6 +185,91 @@
 		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
 		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
 
+// SCP-3199 Antagonist (Sapient Biological Entity)
+/datum/antagonist/scp/scp3199
+	name = "SCP-3199"
+	scp_id = "SCP-3199"
+	scp_class = "Keter"
+	description = "You are SCP-3199, a sapient biological entity with unique reproductive capabilities. Hunt for prey and protect your hatchlings."
+
+/datum/antagonist/scp/scp3199/apply_scp_effects()
+	if(owner.current)
+		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+		ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+		ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+		// Add reproductive abilities
+		RegisterSignal(owner.current, COMSIG_MOB_ATTACK_HAND, PROC_REF(on_attack))
+		// Grant SCP-3199 specific abilities
+		grant_scp3199_abilities()
+
+/datum/antagonist/scp/scp3199/remove_scp_effects()
+	if(owner.current)
+		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+		REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+		REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+		UnregisterSignal(owner.current, COMSIG_MOB_ATTACK_HAND)
+		remove_scp3199_abilities()
+
+/datum/antagonist/scp/scp3199/proc/on_attack(mob/living/source, mob/living/target)
+	// Liquefy internal organs and bone structure
+	if(ishuman(target))
+		var/mob/living/carbon/human/H = target
+		H.adjustBruteLoss(25)
+		H.adjustToxLoss(15)
+		to_chat(target, span_danger("Your internal structure feels like it's liquefying!"))
+		to_chat(owner.current, span_notice("You liquefy [target]'s internal structure."))
+
+/datum/antagonist/scp/scp3199/proc/grant_scp3199_abilities()
+	// Grant SCP-3199 specific abilities
+	var/datum/action/innate/scp3199_produce_egg/produce_egg = new()
+	produce_egg.Grant(owner.current)
+
+	var/datum/action/innate/scp3199_protect_hatchlings/protect_hatchlings = new()
+	protect_hatchlings.Grant(owner.current)
+
+/datum/antagonist/scp/scp3199/proc/remove_scp3199_abilities()
+	// Remove SCP-3199 abilities
+	var/datum/action/innate/scp3199_produce_egg/produce_egg = locate() in owner.current.actions
+	if(produce_egg)
+		produce_egg.Remove(owner.current)
+
+	var/datum/action/innate/scp3199_protect_hatchlings/protect_hatchlings = locate() in owner.current.actions
+	if(protect_hatchlings)
+		protect_hatchlings.Remove(owner.current)
+
+// SCP-3199 Abilities
+/datum/action/innate/scp3199_produce_egg
+	name = "Produce Egg"
+	desc = "Produce an egg for reproduction."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "spell_default"
+
+/datum/action/innate/scp3199_produce_egg/Trigger()
+	var/mob/living/user = usr
+	if(user)
+		var/turf/T = get_turf(user)
+		var/obj/item/scp3199_egg/egg = new /obj/item/scp3199_egg(T)
+		egg.parent_entity = user
+		to_chat(user, span_notice("You produce an egg."))
+		playsound(user, 'sound/effects/explosion1.ogg', 100, TRUE, 10)
+
+/datum/action/innate/scp3199_protect_hatchlings
+	name = "Protect Hatchlings"
+	desc = "Become more aggressive to protect nearby hatchlings."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "spell_default"
+
+/datum/action/innate/scp3199_protect_hatchlings/Trigger()
+	var/mob/living/user = usr
+	if(user)
+		// Increase aggression temporarily
+		to_chat(user, span_notice("You become more aggressive to protect hatchlings."))
+		// This would need to be implemented with the actual SCP-3199 mob
+
 // Hostile Groups of Interest
 
 // Sarkic Cult

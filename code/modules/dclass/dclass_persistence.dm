@@ -1,0 +1,444 @@
+// D-Class Enhanced Persistence System
+// Tracks detailed player statistics, achievements, and integrates with SCP persistence
+
+/datum/dclass_persistence_data
+	var/ckey
+	var/name
+	var/round_count = 0
+	var/total_playtime = 0
+	var/total_escape_attempts = 0
+	var/total_successful_escapes = 0
+	var/total_contraband_found = 0
+	var/total_work_completed = 0
+	var/total_alliances_formed = 0
+	var/total_players_betrayed = 0
+	var/highest_level_achieved = 1
+	var/longest_survival_time = 0
+	var/most_valuable_contraband = ""
+	var/favorite_escape_route = ""
+	var/achievements = list()
+	var/statistics = list()
+	var/last_round_data = list()
+	var/persistence_version = 1
+
+// Achievement System
+/datum/dclass_achievement
+	var/id
+	var/name
+	var/description
+	var/icon_state = "achievement"
+	var/unlocked = FALSE
+	var/unlock_time = 0
+	var/requirements = list()
+
+// Define achievements
+/datum/dclass_achievement/first_escape
+	id = "first_escape"
+	name = "First Taste of Freedom"
+	description = "Successfully escape for the first time"
+	requirements = list("successful_escapes" = 1)
+
+/datum/dclass_achievement/contraband_collector
+	id = "contraband_collector"
+	name = "Contraband Collector"
+	description = "Find 50 pieces of contraband"
+	requirements = list("total_contraband_found" = 50)
+
+/datum/dclass_achievement/escape_artist
+	id = "escape_artist"
+	name = "Escape Artist"
+	description = "Successfully escape 10 times"
+	requirements = list("successful_escapes" = 10)
+
+/datum/dclass_achievement/social_butterfly
+	id = "social_butterfly"
+	name = "Social Butterfly"
+	description = "Form 20 alliances with other D-Class"
+	requirements = list("total_alliances_formed" = 20)
+
+/datum/dclass_achievement/betrayer
+	id = "betrayer"
+	name = "The Betrayer"
+	description = "Betray 10 other D-Class players"
+	requirements = list("total_players_betrayed" = 10)
+
+/datum/dclass_achievement/survivor
+	id = "survivor"
+	name = "Survivor"
+	description = "Survive for 30 minutes in a single round"
+	requirements = list("longest_survival_time" = 1800)
+
+/datum/dclass_achievement/master_escape
+	id = "master_escape"
+	name = "Master Escape Artist"
+	description = "Reach level 5 and escape successfully"
+	requirements = list("highest_level_achieved" = 5, "successful_escapes" = 1)
+
+/datum/dclass_achievement/scp_exploiter
+	id = "scp_exploiter"
+	name = "SCP Exploiter"
+	description = "Successfully escape during an SCP breach event"
+	requirements = list("escape_during_scp_event" = 1)
+
+/datum/dclass_achievement/stealth_master
+	id = "stealth_master"
+	name = "Stealth Master"
+	description = "Complete a round without being detected by guards"
+	requirements = list("stealth_round" = 1)
+
+/datum/dclass_achievement/contraband_king
+	id = "contraband_king"
+	name = "Contraband King"
+	description = "Find 100 pieces of contraband"
+	requirements = list("total_contraband_found" = 100)
+
+// Enhanced Persistence Manager
+/datum/dclass_persistence_manager
+	var/list/persistent_data = list() // ckey -> datum/dclass_persistence_data
+	var/list/achievements = list()
+	var/persistence_file = "data/dclass_persistence.json"
+	var/backup_file = "data/dclass_persistence_backup.json"
+	var/auto_save_interval = 600 // 10 minutes
+	var/last_save_time = 0
+
+/datum/dclass_persistence_manager/New()
+	. = ..()
+	initialize_achievements()
+	load_persistence_data()
+
+/datum/dclass_persistence_manager/proc/initialize_achievements()
+	achievements["first_escape"] = new /datum/dclass_achievement/first_escape()
+	achievements["contraband_collector"] = new /datum/dclass_achievement/contraband_collector()
+	achievements["escape_artist"] = new /datum/dclass_achievement/escape_artist()
+	achievements["social_butterfly"] = new /datum/dclass_achievement/social_butterfly()
+	achievements["betrayer"] = new /datum/dclass_achievement/betrayer()
+	achievements["survivor"] = new /datum/dclass_achievement/survivor()
+	achievements["master_escape"] = new /datum/dclass_achievement/master_escape()
+	achievements["scp_exploiter"] = new /datum/dclass_achievement/scp_exploiter()
+	achievements["stealth_master"] = new /datum/dclass_achievement/stealth_master()
+	achievements["contraband_king"] = new /datum/dclass_achievement/contraband_king()
+
+/datum/dclass_persistence_manager/proc/get_persistence_data(ckey)
+	if(!(ckey in persistent_data))
+		persistent_data[ckey] = new /datum/dclass_persistence_data()
+		persistent_data[ckey].ckey = ckey
+	return persistent_data[ckey]
+
+/datum/dclass_persistence_manager/proc/update_player_statistics(datum/dclass_player/player, stat_name, value)
+	if(!player || !player.ckey)
+		return
+
+	var/datum/dclass_persistence_data/data = get_persistence_data(player.ckey)
+
+	// Update basic statistics
+	switch(stat_name)
+		if("escape_attempts")
+			data.total_escape_attempts += value
+		if("successful_escapes")
+			data.total_successful_escapes += value
+		if("contraband_found")
+			data.total_contraband_found += value
+		if("work_completed")
+			data.total_work_completed += value
+		if("alliances_formed")
+			data.total_alliances_formed += value
+		if("players_betrayed")
+			data.total_players_betrayed += value
+		if("level_achieved")
+			if(value > data.highest_level_achieved)
+				data.highest_level_achieved = value
+		if("survival_time")
+			if(value > data.longest_survival_time)
+				data.longest_survival_time = value
+		if("valuable_contraband")
+			data.most_valuable_contraband = value
+		if("escape_route")
+			data.favorite_escape_route = value
+
+	// Update detailed statistics
+	if(!(stat_name in data.statistics))
+		data.statistics[stat_name] = 0
+	data.statistics[stat_name] += value
+
+	// Check for achievement unlocks
+	check_achievements(data)
+
+/datum/dclass_persistence_manager/proc/check_achievements(datum/dclass_persistence_data/data)
+	for(var/achievement_id in achievements)
+		var/datum/dclass_achievement/achievement = achievements[achievement_id]
+		if(achievement.unlocked)
+			continue
+
+		var/can_unlock = TRUE
+		for(var/requirement in achievement.requirements)
+			var/required_value = achievement.requirements[requirement]
+			var/current_value = 0
+
+			// Get current value based on requirement type
+			switch(requirement)
+				if("successful_escapes")
+					current_value = data.total_successful_escapes
+				if("total_contraband_found")
+					current_value = data.total_contraband_found
+				if("total_alliances_formed")
+					current_value = data.total_alliances_formed
+				if("total_players_betrayed")
+					current_value = data.total_players_betrayed
+				if("highest_level_achieved")
+					current_value = data.highest_level_achieved
+				if("longest_survival_time")
+					current_value = data.longest_survival_time
+				else
+					// Check detailed statistics
+					current_value = data.statistics[requirement] || 0
+
+			if(current_value < required_value)
+				can_unlock = FALSE
+				break
+
+		if(can_unlock)
+			unlock_achievement(data, achievement)
+
+/datum/dclass_persistence_manager/proc/unlock_achievement(datum/dclass_persistence_data/data, datum/dclass_achievement/achievement)
+	achievement.unlocked = TRUE
+	achievement.unlock_time = world.time
+	data.achievements[achievement.id] = list(
+		"name" = achievement.name,
+		"description" = achievement.description,
+		"unlock_time" = achievement.unlock_time
+	)
+
+	// Notify player if they're online
+	for(var/client/C in GLOB.clients)
+		if(C.ckey == data.ckey)
+			to_chat(C, "<span class='notice'><b>Achievement Unlocked: [achievement.name]</b><br>[achievement.description]</span>")
+			break
+
+/datum/dclass_persistence_manager/proc/save_round_data(datum/dclass_player/player)
+	if(!player || !player.ckey)
+		return
+
+	var/datum/dclass_persistence_data/data = get_persistence_data(player.ckey)
+
+	// Save current round statistics
+	data.last_round_data = list(
+		"round_start_time" = player.round_start_time,
+		"escape_attempts" = player.escape_attempts,
+		"successful_escapes" = player.successful_escapes,
+		"contraband_found" = player.contraband.len,
+		"work_assignments" = player.current_work_assignment,
+		"alliances_formed" = player.allies.len,
+		"players_betrayed" = player.reported_players.len,
+		"final_level" = player.level,
+		"final_experience" = player.experience,
+		"survival_time" = world.time - player.round_start_time,
+		"stealth_round" = player.stealth_round_completed,
+		"escape_during_scp_event" = player.escaped_during_scp_event
+	)
+
+	// Update persistent statistics
+	update_player_statistics(player, "escape_attempts", player.escape_attempts)
+	update_player_statistics(player, "successful_escapes", player.successful_escapes)
+	update_player_statistics(player, "contraband_found", player.contraband.len)
+	update_player_statistics(player, "work_completed", 1)
+	update_player_statistics(player, "alliances_formed", player.allies.len)
+	update_player_statistics(player, "players_betrayed", player.reported_players.len)
+	update_player_statistics(player, "level_achieved", player.level)
+	update_player_statistics(player, "survival_time", world.time - player.round_start_time)
+
+	data.round_count++
+
+/datum/dclass_persistence_manager/proc/save_persistence_data()
+	var/list/save_data = list()
+
+	for(var/ckey in persistent_data)
+		var/datum/dclass_persistence_data/data = persistent_data[ckey]
+		save_data[ckey] = list(
+			"name" = data.name,
+			"round_count" = data.round_count,
+			"total_playtime" = data.total_playtime,
+			"total_escape_attempts" = data.total_escape_attempts,
+			"total_successful_escapes" = data.total_successful_escapes,
+			"total_contraband_found" = data.total_contraband_found,
+			"total_work_completed" = data.total_work_completed,
+			"total_alliances_formed" = data.total_alliances_formed,
+			"total_players_betrayed" = data.total_players_betrayed,
+			"highest_level_achieved" = data.highest_level_achieved,
+			"longest_survival_time" = data.longest_survival_time,
+			"most_valuable_contraband" = data.most_valuable_contraband,
+			"favorite_escape_route" = data.favorite_escape_route,
+			"achievements" = data.achievements,
+			"statistics" = data.statistics,
+			"last_round_data" = data.last_round_data,
+			"persistence_version" = data.persistence_version
+		)
+
+	// Create backup first
+	if(fexists(persistence_file))
+		fcopy(persistence_file, backup_file)
+
+	// Save new data
+	fdel(persistence_file)
+	text2file(json_encode(save_data), persistence_file)
+	last_save_time = world.time
+
+/datum/dclass_persistence_manager/proc/load_persistence_data()
+	if(!fexists(persistence_file))
+		return
+
+	var/json_data = file2text(persistence_file)
+	var/list/loaded_data = json_decode(json_data)
+	if(!loaded_data)
+		return
+
+	for(var/ckey in loaded_data)
+		var/list/player_data = loaded_data[ckey]
+		var/datum/dclass_persistence_data/data = new /datum/dclass_persistence_data()
+
+		data.ckey = ckey
+		data.name = player_data["name"] || "Unknown"
+		data.round_count = player_data["round_count"] || 0
+		data.total_playtime = player_data["total_playtime"] || 0
+		data.total_escape_attempts = player_data["total_escape_attempts"] || 0
+		data.total_successful_escapes = player_data["total_successful_escapes"] || 0
+		data.total_contraband_found = player_data["total_contraband_found"] || 0
+		data.total_work_completed = player_data["total_work_completed"] || 0
+		data.total_alliances_formed = player_data["total_alliances_formed"] || 0
+		data.total_players_betrayed = player_data["total_players_betrayed"] || 0
+		data.highest_level_achieved = player_data["highest_level_achieved"] || 1
+		data.longest_survival_time = player_data["longest_survival_time"] || 0
+		data.most_valuable_contraband = player_data["most_valuable_contraband"] || ""
+		data.favorite_escape_route = player_data["favorite_escape_route"] || ""
+		data.achievements = player_data["achievements"] || list()
+		data.statistics = player_data["statistics"] || list()
+		data.last_round_data = player_data["last_round_data"] || list()
+		data.persistence_version = player_data["persistence_version"] || 1
+
+		persistent_data[ckey] = data
+
+		// Restore achievement states
+		for(var/achievement_id in data.achievements)
+			if(achievement_id in achievements)
+				var/datum/dclass_achievement/achievement = achievements[achievement_id]
+				achievement.unlocked = TRUE
+				achievement.unlock_time = data.achievements[achievement_id]["unlock_time"] || 0
+
+/datum/dclass_persistence_manager/proc/get_player_leaderboard()
+	var/list/leaderboard = list()
+
+	for(var/ckey in persistent_data)
+		var/datum/dclass_persistence_data/data = persistent_data[ckey]
+		leaderboard += list(list(
+			"ckey" = ckey,
+			"name" = data.name,
+			"successful_escapes" = data.total_successful_escapes,
+			"highest_level" = data.highest_level_achieved,
+			"contraband_found" = data.total_contraband_found,
+			"achievements" = length(data.achievements)
+		))
+
+	// Sort by successful escapes (descending) - manual sorting
+	for(var/i = 1; i <= leaderboard.len; i++)
+		for(var/j = i + 1; j <= leaderboard.len; j++)
+			if(leaderboard[i]["successful_escapes"] < leaderboard[j]["successful_escapes"])
+				var/list/temp = leaderboard[i]
+				leaderboard[i] = leaderboard[j]
+				leaderboard[j] = temp
+	return leaderboard
+
+// Integration with SCP Persistence
+/datum/dclass_persistence_manager/proc/integrate_with_scp_persistence(datum/dclass_player/player)
+	if(!player || !player.ckey || !SSscp_persistence || !SSscp_persistence.manager)
+		return
+
+	// Get SCP persistence data for this player
+	var/datum/player_performance/scp_performance = SSscp_persistence.manager.get_player_performance(player.ckey)
+	if(!scp_performance)
+		return
+
+	var/datum/dclass_persistence_data/data = get_persistence_data(player.ckey)
+
+	// Integrate SCP performance data
+	data.statistics["scp_rounds_played"] = scp_performance.rounds_played || 0
+	data.statistics["scp_achievements"] = length(scp_performance.achievements)
+	data.statistics["scp_violations"] = length(scp_performance.violations)
+	data.statistics["scp_access_level"] = scp_performance.access_level
+
+	// Check for SCP-related achievements
+	if(scp_performance.access_level >= 3)
+		update_player_statistics(player, "scp_access_level", scp_performance.access_level)
+
+// Enhanced player data with persistence integration
+/datum/dclass_player
+	var/round_start_time = 0
+	var/stealth_round_completed = FALSE
+	var/escaped_during_scp_event = FALSE
+	var/current_round_stats = list()
+
+/datum/dclass_player/New(var/player_ckey)
+	ckey = player_ckey
+	data_file_path = "data/dclass/[ckey].json"
+	round_start_time = world.time
+	initialize_skills()
+	load_data()
+
+	// Initialize round statistics
+	current_round_stats = list(
+		"start_time" = round_start_time,
+		"escape_attempts" = 0,
+		"contraband_found" = 0,
+		"alliances_formed" = 0,
+		"players_betrayed" = 0,
+		"work_assignments" = 0,
+		"guard_detections" = 0,
+		"stealth_time" = 0
+	)
+
+/datum/dclass_player/proc/process_player_with_persistence()
+	// Regular processing
+	process_player()
+
+	// Update round statistics
+	if(mob)
+		current_round_stats["current_time"] = world.time
+		current_round_stats["survival_time"] = world.time - round_start_time
+
+	// Check for stealth round completion
+	if(is_hiding && !stealth_round_completed)
+		current_round_stats["stealth_time"] += 6 // 6 seconds per process cycle
+		if(current_round_stats["stealth_time"] >= 1800) // 30 minutes
+			stealth_round_completed = TRUE
+
+	// Auto-save persistence data
+	if(SSdclass && SSdclass.manager && SSdclass.manager.persistence_manager)
+		if(world.time > SSdclass.manager.persistence_manager.last_save_time + SSdclass.manager.persistence_manager.auto_save_interval)
+			SSdclass.manager.persistence_manager.save_persistence_data()
+
+/datum/dclass_player/proc/save_data_with_persistence()
+	// Save regular data
+	save_data()
+
+	// Save to enhanced persistence system
+	if(SSdclass && SSdclass.manager && SSdclass.manager.persistence_manager)
+		SSdclass.manager.persistence_manager.save_round_data(src)
+		SSdclass.manager.persistence_manager.integrate_with_scp_persistence(src)
+
+// Add persistence manager to main manager
+/datum/dclass_manager
+	var/datum/dclass_persistence_manager/persistence_manager
+
+/datum/dclass_manager/New()
+	. = ..()
+	round_start_time = world.time
+	initialize_routines()
+	initialize_guard_patrols()
+	initialize_work_assignments()
+	initialize_contraband_locations()
+	initialize_escape_routes()
+	initialize_events()
+	initialize_persistence()
+
+/datum/dclass_manager/proc/initialize_persistence()
+	persistence_manager = new /datum/dclass_persistence_manager()
+
+// Note: process_dclass() is defined in dclass_system.dm and includes persistence features

@@ -208,7 +208,6 @@
 #include "code\__DEFINES\say.dm"
 #include "code\__DEFINES\scent.dm"
 #include "code\__DEFINES\scp.dm"
-#include "code\__DEFINES\scp914.dm"
 #include "code\__DEFINES\screentips.dm"
 #include "code\__DEFINES\shuttles.dm"
 #include "code\__DEFINES\sight.dm"
@@ -1224,6 +1223,17 @@
 #include "code\modules\SCP\persistent_progression\infrastructure_persistence.dm"
 #include "code\modules\SCP\persistent_progression\analytics_persistence.dm"
 #include "code\modules\SCP\persistent_progression\budget_system.dm"
+
+#include "code\modules\SCP\SCPs\SCP-3199.dm"
+// D-Class Escapists 2 Style System
+#include "code\modules\dclass\dclass_system.dm"
+#include "code\modules\dclass\dclass_player.dm"
+#include "code\modules\dclass\dclass_verbs.dm"
+#include "code\modules\dclass\dclass_enhanced_verbs.dm"
+#include "code\objects\items\dclass\contraband.dm"
+#include "code\modules\dclass\dclass_events.dm"
+#include "code\modules\dclass\dclass_persistence.dm"
+
 #include "code\datums\proximity_monitor\field.dm"
 #include "code\datums\proximity_monitor\proximity_monitor.dm"
 #include "code\datums\proximity_monitor\fields\gravity.dm"
@@ -4407,6 +4417,7 @@
 #include "code\modules\SCP\SCPs\SCP-5000.dm"
 #include "code\modules\SCP\SCPs\SCP-5295.dm"
 #include "code\modules\SCP\SCPs\SCP-427.dm"
+#include "code\modules\SCP\SCPs\SCP-3199.dm"
 #include "code\modules\research\xenobiology\crossbreeding\recurring.dm"
 #include "code\modules\research\xenobiology\crossbreeding\regenerative.dm"
 #include "code\modules\research\xenobiology\crossbreeding\reproductive.dm"

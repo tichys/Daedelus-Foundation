@@ -203,6 +203,54 @@
 				"interaction_restrictions" = list("No visual contact", "No physical proximity"),
 				"interaction_logging" = TRUE
 			)
+		),
+		"SCP-3199" = list(
+			"name" = "SCP-3199",
+			"class" = "Keter",
+			"description" = "Sapient biological entity with unique reproductive capabilities and hunting behavior",
+			"containment_level" = "Keter",
+			"spawn_conditions" = list(
+				"min_players" = 30,
+				"min_time" = 60,
+				"max_instances" = 4,
+				"spawn_probability" = 0.15,
+				"allowed_jobs" = list("Scientist", "Security Officer", "Medical Doctor"),
+				"restricted_jobs" = list("D-Class"),
+				"spawn_locations" = list("Containment Zone", "Research Wing", "Medical Bay"),
+				"time_restrictions" = list(
+					"start_hour" = 0,
+					"end_hour" = 24,
+					"allowed_days" = list(1, 2, 3, 4, 5, 6, 7)
+				)
+			),
+			"player_access" = list(
+				"allowed_roles" = list("Scientist", "Security Officer", "Medical Doctor"),
+				"restricted_roles" = list("D-Class"),
+				"min_rank" = 4,
+				"requires_clearance" = TRUE,
+				"clearance_level" = 5,
+				"training_required" = list("SCP-3199 Containment Protocol", "Emergency Response", "Biological Hazard Training"),
+				"max_players" = 1
+			),
+			"containment_settings" = list(
+				"auto_containment" = TRUE,
+				"containment_radius" = 20,
+				"breach_response_time" = 5,
+				"containment_effectiveness" = 0.9,
+				"backup_protocols" = list("Emergency Lockdown", "Evacuation Protocol", "Termination Protocol", "Site Lockdown")
+			),
+			"research_settings" = list(
+				"research_allowed" = TRUE,
+				"research_clearance" = 5,
+				"research_restrictions" = list("No direct contact", "Remote observation only", "Full PPE required"),
+				"research_goals" = list("Reproductive cycle study", "Behavioral analysis", "Containment optimization")
+			),
+			"interaction_settings" = list(
+				"interaction_allowed" = FALSE,
+				"interaction_clearance" = 5,
+				"interaction_restrictions" = list("No physical contact", "No proximity", "Remote observation only"),
+				"interaction_logging" = TRUE
+			)
 		)
 	)
 
@@ -500,6 +548,10 @@
 			H3.real_name = "SCP-2427-3"
 			H3.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return H3
+		if("SCP-3199")
+			var/mob/living/simple_animal/hostile/scp3199/scp = new /mob/living/simple_animal/hostile/scp3199()
+			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
+			return scp
 		else
 			return null
 
