@@ -4418,6 +4418,12 @@
 #include "code\modules\SCP\SCPs\SCP-5295.dm"
 #include "code\modules\SCP\SCPs\SCP-427.dm"
 #include "code\modules\SCP\SCPs\SCP-3199.dm"
+
+// SCP Clothing and Armor
+#include "code\game\objects\items\weapons\SCP\clothing.dm"
+#include "code\game\objects\items\weapons\SCP\armor.dm"
+#include "code\game\objects\items\weapons\SCP\helmet.dm"
+
 #include "code\modules\research\xenobiology\crossbreeding\recurring.dm"
 #include "code\modules\research\xenobiology\crossbreeding\regenerative.dm"
 #include "code\modules\research\xenobiology\crossbreeding\reproductive.dm"
