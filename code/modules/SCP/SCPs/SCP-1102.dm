@@ -20,26 +20,26 @@
 /obj/item/storage/briefcase/scp1102ru/attack_self(mob/user)
 	if(!user || !istype(user, /mob/living))
 		return
-	
+
 	if(portal_cooldown > world.time)
 		to_chat(user, "<span class='warning'>The portal is still recharging...</span>")
 		return
-	
+
 	if(!enter_point)
 		enter_point = new /obj/structure/ladder/scp1102ladder(get_turf(src))
-	
+
 	to_chat(user, "<span class='warning'>You feel a strange sensation as you open the case...</span>")
 	to_chat(user, "<span class='notice'>You find yourself climbing down a ladder that shouldn't be there.</span>")
-	
+
 	// Create portal effect
 	playsound(src, 'sound/effects/explosion1.ogg', 50)
 	playsound(enter_point, 'sound/effects/explosion1.ogg', 50)
-	
+
 	// Move user to ladder
 	var/mob/living/L = user
 	L.forceMove(get_turf(enter_point))
 	to_chat(user, "<span class='warning'>The case disappears behind you as you descend.</span>")
-	
+
 	// Set cooldown
 	portal_cooldown = world.time + portal_cooldown_time
 
@@ -55,7 +55,7 @@
 	SCP = new /datum/scp(src, "ladder", SCP_SAFE, "1102-RU-1")
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-1102-RU-1"] = new /datum/scp_instance("SCP-1102-RU-1", src)
-	
+
 	// Find and link to the case
 	linked_case = locate(/obj/item/storage/briefcase/scp1102ru) in world
 
@@ -63,18 +63,18 @@
 	if(!linked_case)
 		to_chat(user, "<span class='warning'>The ladder seems to lead nowhere...</span>")
 		return
-	
+
 	// Return to the case
 	if(linked_case.portal_cooldown > world.time)
 		to_chat(user, "<span class='warning'>The portal is still recharging...</span>")
 		return
-	
+
 	to_chat(user, "<span class='notice'>You climb back up the ladder...</span>")
 	playsound(src, 'sound/effects/explosion1.ogg', 50)
 	playsound(linked_case, 'sound/effects/explosion1.ogg', 50)
-	
+
 	user.forceMove(get_turf(linked_case))
 	to_chat(user, "<span class='notice'>You emerge from the strange case.</span>")
-	
+
 	// Set cooldown
 	linked_case.portal_cooldown = world.time + linked_case.portal_cooldown_time

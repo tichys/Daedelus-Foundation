@@ -762,6 +762,102 @@ SUBSYSTEM_DEF(scp_persistence)
 		instance.containment_health = 100
 		world.log << "SCP Management: Auto-containment successful for [scp_id]"
 
+// Force SCP rotation (admin command)
+/datum/scp_persistence_manager/proc/force_scp_rotation()
+	rotate_scps()
+	world.log << "SCP Management: Force rotation executed by admin"
+
+// Get SCP template data for TGUI
+/datum/scp_persistence_manager/proc/get_scp_templates()
+	var/list/templates = list()
+
+	// This would be populated from the SCP management interface
+	// For now, return basic template structure
+	templates["SCP-008"] = list(
+		"name" = "SCP-008",
+		"class" = "Keter",
+		"description" = "Zombie plague virus",
+		"containment_level" = "Keter"
+	)
+
+	templates["SCP-173"] = list(
+		"name" = "SCP-173",
+		"class" = "Euclid",
+		"description" = "Sculpture that moves when not observed",
+		"containment_level" = "Euclid"
+	)
+
+	templates["SCP-096"] = list(
+		"name" = "SCP-096",
+		"class" = "Euclid",
+		"description" = "Shy Guy - becomes aggressive when its face is seen",
+		"containment_level" = "Euclid"
+	)
+
+	return templates
+
+// Get player data for TGUI
+/datum/scp_persistence_manager/proc/get_player_data()
+	var/list/player_data = list()
+
+	for(var/client/C in GLOB.clients)
+		if(C.mob && ishuman(C.mob))
+			var/mob/living/carbon/human/H = C.mob
+			var/list/player_info = list(
+				"key" = C.key,
+				"name" = H.real_name,
+				"job" = H.job,
+				"rank" = H.mind ? 1 : 1, // Placeholder for rank system
+				"clearance" = H.mind ? 1 : 1, // Placeholder for clearance system
+				"online" = TRUE
+			)
+			player_data += list(player_info)
+
+	return player_data
+
+// Get spawn schedules for TGUI
+/datum/scp_persistence_manager/proc/get_spawn_schedules()
+	// This would be populated from the SCP management interface
+	return list()
+
+// Get containment protocols for TGUI
+/datum/scp_persistence_manager/proc/get_containment_protocols()
+	var/list/protocols = list()
+
+	protocols["standard"] = list(
+		"name" = "Standard Containment",
+		"description" = "Basic containment procedures",
+		"effectiveness" = 0.7,
+		"response_time" = 30,
+		"requirements" = list("Security clearance 2+", "Basic training")
+	)
+
+	protocols["enhanced"] = list(
+		"name" = "Enhanced Containment",
+		"description" = "Advanced containment with monitoring",
+		"effectiveness" = 0.85,
+		"response_time" = 20,
+		"requirements" = list("Security clearance 3+", "Advanced training")
+	)
+
+	protocols["maximum"] = list(
+		"name" = "Maximum Containment",
+		"description" = "Highest level containment procedures",
+		"effectiveness" = 0.95,
+		"response_time" = 10,
+		"requirements" = list("Security clearance 4+", "Specialized training")
+	)
+
+	protocols["emergency"] = list(
+		"name" = "Emergency Protocol",
+		"description" = "Emergency containment procedures",
+		"effectiveness" = 0.6,
+		"response_time" = 5,
+		"requirements" = list("Any clearance", "Emergency training")
+	)
+
+	return protocols
+
 // SCP Management Verbs
 /mob/proc/manage_scp_system()
 	set name = "Manage SCP System"
