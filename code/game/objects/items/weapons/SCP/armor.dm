@@ -1,5 +1,6 @@
-// SCP Foundation Armor - Simplified for Daedalus Dock compatibility
+// SCP Foundation Armor - Complete for Daedalus Dock compatibility
 
+// Standard Armor Vests
 /obj/item/clothing/suit/armor/vest/scp/lightarmor
 	name = "light armored vest"
 	desc = "A light synthetic armor vest."
@@ -73,6 +74,7 @@
 	cold_protection = 15
 	armor = list(melee = 40, bullet = 35, laser = 25, energy = 30, bomb = 10, bio = 5, rad = 5)
 
+// Chaos Insurgency Armor
 /obj/item/clothing/suit/armor/vest/scp/medarmor/chaos
 	name = "Chaos Insurgency armored vest"
 	desc = "A heavy tan russian type ballistic vest, mainly protecting against bullets, and not much else. It's usually used by russian military forces, but is used by the Chaos Insurgency."
@@ -80,3 +82,49 @@
 	body_parts_covered = 3
 	cold_protection = 3
 	armor = list(melee = 20, bullet = 40, laser = 10, energy = 5, bomb = 5, bio = 0, rad = 0)
+
+/obj/item/clothing/suit/armor/vest/scp/medarmor/chaos/pilot
+	name = "Chaos Insurgency pilot vest"
+	desc = "A light, agile-purposed vest with barely any plating, meant for pilots who need the maneuverability, but also need protection. It's usually used by russian military forces, but is used by the Chaos Insurgency."
+	icon_state = "ci_pilot_vest"
+	body_parts_covered = 3
+	cold_protection = 3
+	armor = list(melee = 15, bullet = 15, laser = 5, energy = 0, bomb = 0, bio = 0, rad = 5)
+
+// MTF Specialized Armor
+/obj/item/clothing/suit/armor/vest/scp/medarmor/eta
+	name = "Eta-10 armored vest"
+	desc = "A synthetic armor vest designed for MTF unit Eta-10."
+	icon_state = "eta-armor"
+	body_parts_covered = 63
+	cold_protection = 63
+	armor = list(melee = 45, bullet = 45, laser = 40, energy = 35, bomb = 10, bio = 5, rad = 5)
+
+/obj/item/clothing/suit/armor/vest/scp/medarmor/beta
+	name = "Beta-7 armored suit"
+	desc = "A synthetic armor vest designed for MTF unit Beta-7. Provides heavy protection against biologic and radioactive threats."
+	icon_state = "beta-armor"
+	body_parts_covered = 63
+	cold_protection = 63
+	permeability_coefficient = 0.5
+	armor = list(melee = 55, bullet = 50, laser = 35, energy = 15, bomb = 10, bio = 50, rad = 50)
+
+// Hazmat Suits
+/obj/item/clothing/head/hcz_hazmat
+	name = "combat hazmat helmet"
+	icon_state = "hcz-hazard-helmet"
+	desc = "A helmet that protects the head and face from biological contaminants, heavy acids, high temperatures, and bullets."
+	permeability_coefficient = 0
+	armor = list(melee = 30, bullet = 35, laser = 35, energy = 30, bomb = 30, bio = 50, rad = 50)
+	body_parts_covered = 1
+	siemens_coefficient = 0.5
+
+/obj/item/clothing/suit/hcz_hazmat
+	name = "combat hazmat suit"
+	desc = "An armored suit that protects against biological contamination, heavy acids, and high temperatures."
+	icon_state = "hcz-hazard"
+	w_class = 4
+	permeability_coefficient = 0
+	body_parts_covered = 63
+	armor = list(melee = 30, bullet = 35, laser = 35, energy = 30, bomb = 30, bio = 50, rad = 50)
+	siemens_coefficient = 0.5

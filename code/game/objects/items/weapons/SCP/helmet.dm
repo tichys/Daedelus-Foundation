@@ -1,5 +1,6 @@
-// SCP Foundation Helmets - Simplified for Daedalus Dock compatibility
+// SCP Foundation Helmets - Complete for Daedalus Dock compatibility
 
+// Standard Foundation Security Helmets
 /obj/item/clothing/head/helmet/scp/security
 	name = "\improper foundation security helmet"
 	desc = "A heavy non-descript helmet with built-in padding, and armor. It has a poly-carbonate yellow riot visor on it."
@@ -56,6 +57,7 @@
 	body_parts_covered = 1
 	armor = list(melee = 25, bullet = 5, laser = 8, energy = 5, bomb = 5, bio = 5, rad = 5)
 
+// HCZ Security Helmets
 /obj/item/clothing/head/helmet/scp/hczsecurityofficer
 	name = "\improper Tactical Security Officer Helmet"
 	desc = "The markings on this helmet indicate that it belongs to a SD zone commander."
@@ -70,9 +72,79 @@
 	body_parts_covered = 1
 	armor = list(melee = 45, bullet = 40, laser = 40, energy = 15, bomb = 10, bio = 5, rad = 5)
 
+// Anti-stab Helmet
 /obj/item/clothing/head/helmet/scp/securitystab
 	name = "\improper Armored Anti-stab Helmet"
 	desc = "An anti-stab SCP Foundation helmet normally issued to detention facility guards."
 	icon_state = "guard-helm"
 	body_parts_covered = 1
 	armor = list(melee = 50, bullet = 30, laser = 40, energy = 15, bomb = 10, bio = 5, rad = 5)
+
+// Chaos Insurgency Helmets
+/obj/item/clothing/head/helmet/scp/chaos
+	name = "Chaos Insurgency helmet"
+	desc = "A russian type of ballistics helmet usually seen worn by modern russian military forces, this one is colored tan and is used by the Chaos Insurgency."
+	icon_state = "ci_helmet"
+	body_parts_covered = 1
+	armor = list(melee = 30, bullet = 40, laser = 35, energy = 15, bomb = 10, bio = 5, rad = 5)
+
+/obj/item/clothing/head/helmet/scp/security/chaos
+	name = "Chaos Insurgency K6-3 Altyn helmet"
+	desc = "A heavy russian type of helmet usually seen worn by modern russian military forces, this one has a face shield and is used by heavy soldiers, this one is colored tan and is used by the Chaos Insurgency."
+	icon_state = "ci_heavy_helmet"
+	body_parts_covered = 1
+	armor = list(melee = 40, bullet = 45, laser = 40, energy = 30, bomb = 10, bio = 5, rad = 5)
+
+/obj/item/clothing/head/helmet/scp/chaos/officer
+	name = "Chaos Insurgency field cap"
+	desc = "A durable, unquestionably bulletproof russian type of field cap used by mainly officers of the russian military forces, this one is colored tan and is used by the Chaos Insurgency."
+	icon_state = "ci_officer"
+	body_parts_covered = 1
+	armor = list(melee = 40, bullet = 35, laser = 15, energy = 5, bomb = 5, bio = 0, rad = 0)
+
+/obj/item/clothing/head/helmet/scp/chaos/pilot
+	name = "Chaos Insurgency pilot helmet"
+	desc = "A pilot helmet worn by air pilots usually wanting the utmost defense while flying a plane. Also keeps the bugs out of your eyes if your windshield ever breaks. usually seen worn by modern russian military forces, this one is colored tan and is used by the Chaos Insurgency."
+	icon_state = "ci_pilot_helmet"
+	body_parts_covered = 1
+	armor = list(melee = 15, bullet = 5, laser = 5, energy = 0, bomb = 0, bio = 0, rad = 5)
+
+// Donor Helmets
+/obj/item/clothing/head/helmet/scp/donor
+	name = "\improper tactical helmet"
+	desc = "Tactical Helmet."
+	icon_state = "donor_sec"
+	body_parts_covered = 1
+	armor = list(melee = 40, bullet = 45, laser = 40, energy = 15, bomb = 10, bio = 5, rad = 5)
+
+/obj/item/clothing/head/helmet/scp/donor2
+	name = "\improper security heavy helmet"
+	desc = "Security Helmet."
+	icon_state = "donate_sec"
+	body_parts_covered = 1
+	armor = list(melee = 40, bullet = 45, laser = 40, energy = 15, bomb = 10, bio = 5, rad = 5)
+
+/obj/item/clothing/head/helmet/scp/donor3
+	name = "\improper security heavy helmet"
+	desc = "Heavy Helmet."
+	icon_state = "don_sec"
+	body_parts_covered = 1
+	armor = list(melee = 40, bullet = 35, laser = 40, energy = 15, bomb = 10, bio = 5, rad = 5)
+
+// MTF Specialized Helmets
+/obj/item/clothing/head/helmet/scp/eta
+	name = "Eta-10 Visored Helmet"
+	desc = "A anti-memetic helmet with a special visor to deal with visual memetic SCP's."
+	icon_state = "eta-helmet-open"
+	body_parts_covered = 1
+	cold_protection = 1
+	armor = list(melee = 45, bullet = 35, laser = 40, energy = 35, bomb = 10, bio = 5, rad = 5)
+
+/obj/item/clothing/head/helmet/scp/beta
+	name = "Beta-7 Armored Anti-Biological Hood"
+	desc = "A hood combined kevlar and other materials to shield it against biological attacks, heavy acids, radiation and physical harm."
+	icon_state = "beta-helmet"
+	body_parts_covered = 1
+	cold_protection = 1
+	permeability_coefficient = 0.5
+	armor = list(melee = 55, bullet = 45, laser = 35, energy = 15, bomb = 30, bio = 50, rad = 50)

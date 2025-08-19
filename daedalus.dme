@@ -4421,6 +4421,7 @@
 
 // SCP Clothing and Armor
 #include "code\game\objects\items\weapons\SCP\clothing.dm"
+#include "code\game\objects\items\weapons\SCP\accessories.dm"
 #include "code\game\objects\items\weapons\SCP\armor.dm"
 #include "code\game\objects\items\weapons\SCP\helmet.dm"
 
