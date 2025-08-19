@@ -43,6 +43,45 @@ SUBSYSTEM_DEF(persistence)
 	save_custom_outfits()
 	SaveDisplacedSCP216Items()
 
+	// Save D-Class persistence data
+	SaveDClassPersistence()
+
+	// Save Personnel persistence data
+	SavePersonnelPersistence()
+
+	// Save Security persistence data
+	SaveSecurityPersistence()
+
+	// Save Medical persistence data
+	SaveMedicalPersistence()
+
+	// Save Research persistence data
+	SaveResearchPersistence()
+
+/datum/controller/subsystem/persistence/proc/SaveDClassPersistence()
+	if(SSdclass && SSdclass.manager && SSdclass.manager.persistence_manager)
+		SSdclass.manager.persistence_manager.save_persistence_data()
+
+/datum/controller/subsystem/persistence/proc/SavePersonnelPersistence()
+	if(SSpersonnel_persistence && SSpersonnel_persistence.manager)
+		SSpersonnel_persistence.manager.save_personnel_data()
+
+/datum/controller/subsystem/persistence/proc/SaveSecurityPersistence()
+	if(SSsecurity_persistence && SSsecurity_persistence.manager)
+		SSsecurity_persistence.manager.save_security_data()
+
+/datum/controller/subsystem/persistence/proc/SaveMedicalPersistence()
+	if(SSmedical_persistence && SSmedical_persistence.manager)
+		SSmedical_persistence.manager.save_medical_data()
+
+/datum/controller/subsystem/persistence/proc/SaveResearchPersistence()
+	if(SSresearch_persistence && SSresearch_persistence.manager)
+		SSresearch_persistence.manager.save_research_data()
+
+/datum/controller/subsystem/persistence/Shutdown()
+	collect_data()
+	return ..()
+
 /datum/controller/subsystem/persistence/proc/LoadPoly()
 	for(var/mob/living/simple_animal/parrot/poly/P in GLOB.alive_mob_list)
 		twitterize(P.speech_buffer, "polytalk")

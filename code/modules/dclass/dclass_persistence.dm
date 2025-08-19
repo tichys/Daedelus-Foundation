@@ -248,7 +248,134 @@
 
 	data.round_count++
 
+	// Save to database
+	save_player_to_database(data)
+
+/datum/dclass_persistence_manager/proc/save_player_to_database(datum/dclass_persistence_data/data)
+	if(!SSdbcore.Connect())
+		return
+
+	// Save basic player data
+	var/datum/db_query/query_save_player = SSdbcore.NewQuery({"
+		INSERT INTO [format_table_name("dclass_players")] 
+		(ckey, name, round_count, total_playtime, total_escape_attempts, total_successful_escapes, 
+		total_contraband_found, total_work_completed, total_alliances_formed, total_players_betrayed,
+		highest_level_achieved, longest_survival_time, most_valuable_contraband, favorite_escape_route,
+		achievements, statistics, last_round_data, persistence_version, last_updated)
+		VALUES (:ckey, :name, :round_count, :total_playtime, :total_escape_attempts, :total_successful_escapes,
+		:total_contraband_found, :total_work_completed, :total_alliances_formed, :total_players_betrayed,
+		:highest_level_achieved, :longest_survival_time, :most_valuable_contraband, :favorite_escape_route,
+		:achievements, :statistics, :last_round_data, :persistence_version, NOW())
+		ON DUPLICATE KEY UPDATE
+		name = VALUES(name), round_count = VALUES(round_count), total_playtime = VALUES(total_playtime),
+		total_escape_attempts = VALUES(total_escape_attempts), total_successful_escapes = VALUES(total_successful_escapes),
+		total_contraband_found = VALUES(total_contraband_found), total_work_completed = VALUES(total_work_completed),
+		total_alliances_formed = VALUES(total_alliances_formed), total_players_betrayed = VALUES(total_players_betrayed),
+		highest_level_achieved = VALUES(highest_level_achieved), longest_survival_time = VALUES(longest_survival_time),
+		most_valuable_contraband = VALUES(most_valuable_contraband), favorite_escape_route = VALUES(favorite_escape_route),
+		achievements = VALUES(achievements), statistics = VALUES(statistics), last_round_data = VALUES(last_round_data),
+		persistence_version = VALUES(persistence_version), last_updated = NOW()
+	"}, list(
+		"ckey" = data.ckey,
+		"name" = data.name,
+		"round_count" = data.round_count,
+		"total_playtime" = data.total_playtime,
+		"total_escape_attempts" = data.total_escape_attempts,
+		"total_successful_escapes" = data.total_successful_escapes,
+		"total_contraband_found" = data.total_contraband_found,
+		"total_work_completed" = data.total_work_completed,
+		"total_alliances_formed" = data.total_alliances_formed,
+		"total_players_betrayed" = data.total_players_betrayed,
+		"highest_level_achieved" = data.highest_level_achieved,
+		"longest_survival_time" = data.longest_survival_time,
+		"most_valuable_contraband" = data.most_valuable_contraband,
+		"favorite_escape_route" = data.favorite_escape_route,
+		"achievements" = json_encode(data.achievements),
+		"statistics" = json_encode(data.statistics),
+		"last_round_data" = json_encode(data.last_round_data),
+		"persistence_version" = data.persistence_version
+	))
+
+	if(!query_save_player.warn_execute())
+		qdel(query_save_player)
+		return
+
+	qdel(query_save_player)
+
+	// Save individual achievements to database
+	save_achievements_to_database(data)
+
+/datum/dclass_persistence_manager/proc/save_achievements_to_database(datum/dclass_persistence_data/data)
+	if(!SSdbcore.Connect())
+		return
+
+	var/list/achievement_rows = list()
+	for(var/achievement_id in data.achievements)
+		var/list/achievement_data = data.achievements[achievement_id]
+		achievement_rows += list(list(
+			"ckey" = data.ckey,
+			"achievement_id" = achievement_id,
+			"achievement_name" = achievement_data["name"],
+			"achievement_description" = achievement_data["description"],
+			"unlock_time" = achievement_data["unlock_time"],
+			"unlocked_at" = SQLtime(achievement_data["unlock_time"])
+		))
+
+	if(achievement_rows.len > 0)
+		SSdbcore.MassInsert(format_table_name("dclass_achievements"), achievement_rows, duplicate_key = TRUE)
+
+/datum/dclass_persistence_manager/proc/load_player_from_database(ckey)
+	if(!SSdbcore.Connect())
+		return null
+
+	var/datum/db_query/query_load_player = SSdbcore.NewQuery(
+		"SELECT * FROM [format_table_name("dclass_players")] WHERE ckey = :ckey",
+		list("ckey" = ckey)
+	)
+
+	if(!query_load_player.warn_execute())
+		qdel(query_load_player)
+		return null
+
+	var/datum/dclass_persistence_data/data = null
+	if(query_load_player.NextRow())
+		data = new /datum/dclass_persistence_data()
+		data.ckey = ckey
+		data.name = query_load_player.item[2] || "Unknown"
+		data.round_count = text2num(query_load_player.item[3]) || 0
+		data.total_playtime = text2num(query_load_player.item[4]) || 0
+		data.total_escape_attempts = text2num(query_load_player.item[5]) || 0
+		data.total_successful_escapes = text2num(query_load_player.item[6]) || 0
+		data.total_contraband_found = text2num(query_load_player.item[7]) || 0
+		data.total_work_completed = text2num(query_load_player.item[8]) || 0
+		data.total_alliances_formed = text2num(query_load_player.item[9]) || 0
+		data.total_players_betrayed = text2num(query_load_player.item[10]) || 0
+		data.highest_level_achieved = text2num(query_load_player.item[11]) || 1
+		data.longest_survival_time = text2num(query_load_player.item[12]) || 0
+		data.most_valuable_contraband = query_load_player.item[13] || ""
+		data.favorite_escape_route = query_load_player.item[14] || ""
+		
+		// Parse JSON fields
+		try
+			data.achievements = json_decode(query_load_player.item[15]) || list()
+			data.statistics = json_decode(query_load_player.item[16]) || list()
+			data.last_round_data = json_decode(query_load_player.item[17]) || list()
+		catch(var/exception/e)
+			data.achievements = list()
+			data.statistics = list()
+			data.last_round_data = list()
+		
+		data.persistence_version = text2num(query_load_player.item[18]) || 1
+
+	qdel(query_load_player)
+	return data
+
 /datum/dclass_persistence_manager/proc/save_persistence_data()
+	// Save to both file and database
+	save_persistence_to_file()
+	save_persistence_to_database()
+
+/datum/dclass_persistence_manager/proc/save_persistence_to_file()
 	var/list/save_data = list()
 
 	for(var/ckey in persistent_data)
@@ -282,7 +409,54 @@
 	text2file(json_encode(save_data), persistence_file)
 	last_save_time = world.time
 
+/datum/dclass_persistence_manager/proc/save_persistence_to_database()
+	if(!SSdbcore.Connect())
+		return
+
+	// Save all players to database
+	for(var/ckey in persistent_data)
+		var/datum/dclass_persistence_data/data = persistent_data[ckey]
+		save_player_to_database(data)
+
 /datum/dclass_persistence_manager/proc/load_persistence_data()
+	// Try to load from database first, fall back to file
+	load_persistence_from_database()
+	
+	// If database loading failed or was incomplete, load from file
+	if(persistent_data.len == 0)
+		load_persistence_from_file()
+
+/datum/dclass_persistence_manager/proc/load_persistence_from_database()
+	if(!SSdbcore.Connect())
+		return
+
+	// Load all players from database
+	var/datum/db_query/query_load_all = SSdbcore.NewQuery(
+		"SELECT ckey FROM [format_table_name("dclass_players")]"
+	)
+
+	if(!query_load_all.warn_execute())
+		qdel(query_load_all)
+		return
+
+	while(query_load_all.NextRow())
+		var/ckey = query_load_all.item[1]
+		var/datum/dclass_persistence_data/data = load_player_from_database(ckey)
+		if(data)
+			persistent_data[ckey] = data
+
+	qdel(query_load_all)
+
+	// Restore achievement states
+	for(var/ckey in persistent_data)
+		var/datum/dclass_persistence_data/data = persistent_data[ckey]
+		for(var/achievement_id in data.achievements)
+			if(achievement_id in achievements)
+				var/datum/dclass_achievement/achievement = achievements[achievement_id]
+				achievement.unlocked = TRUE
+				achievement.unlock_time = data.achievements[achievement_id]["unlock_time"] || 0
+
+/datum/dclass_persistence_manager/proc/load_persistence_from_file()
 	if(!fexists(persistence_file))
 		return
 

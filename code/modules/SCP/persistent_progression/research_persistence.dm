@@ -459,6 +459,170 @@ SUBSYSTEM_DEF(research_persistence)
 	var/savefile/S = new /savefile("data/research_persistence.json")
 	S["data"] << json_data
 
+	// Save to database
+	save_research_data_to_database()
+
+/datum/research_persistence_manager/proc/save_research_data_to_database()
+	if(!SSdbcore.Connect())
+		world.log << "Research Persistence: Database connection failed, skipping database save"
+		return
+
+	// Save research projects to database
+	for(var/project_id in research_projects)
+		var/datum/research_persistence_project/project = research_projects[project_id]
+		var/datum/db_query/query_save_project = SSdbcore.NewQuery({"
+			INSERT INTO [format_table_name("research_projects")]
+			(project_id, project_name, project_description, research_field, lead_researcher, researchers, progress, budget_allocated, budget_used, start_date, estimated_completion, actual_completion, status, priority, discoveries, publications, research_notes)
+			VALUES (:project_id, :project_name, :project_description, :research_field, :lead_researcher, :researchers, :progress, :budget_allocated, :budget_used, :start_date, :estimated_completion, :actual_completion, :status, :priority, :discoveries, :publications, :research_notes)
+			ON DUPLICATE KEY UPDATE
+			project_name = VALUES(project_name), project_description = VALUES(project_description), research_field = VALUES(research_field),
+			lead_researcher = VALUES(lead_researcher), researchers = VALUES(researchers), progress = VALUES(progress),
+			budget_allocated = VALUES(budget_allocated), budget_used = VALUES(budget_used), start_date = VALUES(start_date),
+			estimated_completion = VALUES(estimated_completion), actual_completion = VALUES(actual_completion), status = VALUES(status),
+			priority = VALUES(priority), discoveries = VALUES(discoveries), publications = VALUES(publications), research_notes = VALUES(research_notes)
+		"}, list(
+			"project_id" = project_id,
+			"project_name" = project.project_name,
+			"project_description" = project.project_description,
+			"research_field" = project.research_field,
+			"lead_researcher" = project.lead_researcher,
+			"researchers" = json_encode(project.researchers),
+			"progress" = project.progress,
+			"budget_allocated" = project.budget_allocated,
+			"budget_used" = project.budget_used,
+			"start_date" = project.start_date,
+			"estimated_completion" = project.estimated_completion,
+			"actual_completion" = project.actual_completion,
+			"status" = project.status,
+			"priority" = project.priority,
+			"discoveries" = json_encode(project.discoveries),
+			"publications" = json_encode(project.publications),
+			"research_notes" = json_encode(project.research_notes)
+		))
+
+		if(!query_save_project.warn_execute())
+			world.log << "Research Persistence: Failed to save research project [project_id]"
+		qdel(query_save_project)
+
+	// Save scientific discoveries to database
+	for(var/discovery_id in scientific_discoveries)
+		var/datum/research_scientific_discovery/discovery = scientific_discoveries[discovery_id]
+		var/datum/db_query/query_save_discovery = SSdbcore.NewQuery({"
+			INSERT INTO [format_table_name("research_scientific_discoveries")]
+			(discovery_id, discovery_name, discovery_description, discovery_type, research_field, discoverer_ckey, discovery_date, significance_level, related_projects, applications, patent_status, commercial_value)
+			VALUES (:discovery_id, :discovery_name, :discovery_description, :discovery_type, :research_field, :discoverer_ckey, :discovery_date, :significance_level, :related_projects, :applications, :patent_status, :commercial_value)
+			ON DUPLICATE KEY UPDATE
+			discovery_name = VALUES(discovery_name), discovery_description = VALUES(discovery_description), discovery_type = VALUES(discovery_type),
+			research_field = VALUES(research_field), discoverer_ckey = VALUES(discoverer_ckey), discovery_date = VALUES(discovery_date),
+			significance_level = VALUES(significance_level), related_projects = VALUES(related_projects), applications = VALUES(applications),
+			patent_status = VALUES(patent_status), commercial_value = VALUES(commercial_value)
+		"}, list(
+			"discovery_id" = discovery_id,
+			"discovery_name" = discovery.discovery_name,
+			"discovery_description" = discovery.discovery_description,
+			"discovery_type" = discovery.discovery_type,
+			"research_field" = discovery.research_field,
+			"discoverer_ckey" = discovery.discoverer_ckey,
+			"discovery_date" = discovery.discovery_date,
+			"significance_level" = discovery.significance_level,
+			"related_projects" = json_encode(discovery.related_projects),
+			"applications" = json_encode(discovery.applications),
+			"patent_status" = discovery.patent_status,
+			"commercial_value" = discovery.commercial_value
+		))
+
+		if(!query_save_discovery.warn_execute())
+			world.log << "Research Persistence: Failed to save scientific discovery [discovery_id]"
+		qdel(query_save_discovery)
+
+	// Save publications to database
+	for(var/publication_id in publications)
+		var/datum/publication/publication = publications[publication_id]
+		var/datum/db_query/query_save_publication = SSdbcore.NewQuery({"
+			INSERT INTO [format_table_name("research_publications")]
+			(publication_id, publication_title, publication_abstract, authors, journal_name, publication_date, impact_factor, citation_count, peer_review_status, doi_number)
+			VALUES (:publication_id, :publication_title, :publication_abstract, :authors, :journal_name, :publication_date, :impact_factor, :citation_count, :peer_review_status, :doi_number)
+			ON DUPLICATE KEY UPDATE
+			publication_title = VALUES(publication_title), publication_abstract = VALUES(publication_abstract), authors = VALUES(authors),
+			journal_name = VALUES(journal_name), publication_date = VALUES(publication_date), impact_factor = VALUES(impact_factor),
+			citation_count = VALUES(citation_count), peer_review_status = VALUES(peer_review_status), doi_number = VALUES(doi_number)
+		"}, list(
+			"publication_id" = publication_id,
+			"publication_title" = publication.publication_title,
+			"publication_abstract" = publication.publication_abstract,
+			"authors" = json_encode(publication.authors),
+			"journal_name" = publication.journal_name,
+			"publication_date" = publication.publication_date,
+			"impact_factor" = publication.impact_factor,
+			"citation_count" = publication.citation_count,
+			"peer_review_status" = publication.peer_review_status,
+			"doi_number" = publication.doi_number
+		))
+
+		if(!query_save_publication.warn_execute())
+			world.log << "Research Persistence: Failed to save publication [publication_id]"
+		qdel(query_save_publication)
+
+	// Save research facilities to database
+	for(var/facility_id in research_facilities)
+		var/datum/research_persistence_facility/facility = research_facilities[facility_id]
+		var/datum/db_query/query_save_facility = SSdbcore.NewQuery({"
+			INSERT INTO [format_table_name("research_facilities")]
+			(facility_id, facility_name, facility_type, location, capacity, current_occupancy, equipment_quality, maintenance_level, active_projects, equipment, security_level)
+			VALUES (:facility_id, :facility_name, :facility_type, :location, :capacity, :current_occupancy, :equipment_quality, :maintenance_level, :active_projects, :equipment, :security_level)
+			ON DUPLICATE KEY UPDATE
+			facility_name = VALUES(facility_name), facility_type = VALUES(facility_type), location = VALUES(location),
+			capacity = VALUES(capacity), current_occupancy = VALUES(current_occupancy), equipment_quality = VALUES(equipment_quality),
+			maintenance_level = VALUES(maintenance_level), active_projects = VALUES(active_projects), equipment = VALUES(equipment), security_level = VALUES(security_level)
+		"}, list(
+			"facility_id" = facility_id,
+			"facility_name" = facility.facility_name,
+			"facility_type" = facility.facility_type,
+			"location" = facility.location,
+			"capacity" = facility.capacity,
+			"current_occupancy" = facility.current_occupancy,
+			"equipment_quality" = facility.equipment_quality,
+			"maintenance_level" = facility.maintenance_level,
+			"active_projects" = json_encode(facility.active_projects),
+			"equipment" = json_encode(facility.equipment),
+			"security_level" = facility.security_level
+		))
+
+		if(!query_save_facility.warn_execute())
+			world.log << "Research Persistence: Failed to save research facility [facility_id]"
+		qdel(query_save_facility)
+
+	// Save research grants to database
+	for(var/grant_id in research_grants)
+		var/datum/research_grant/grant = research_grants[grant_id]
+		var/datum/db_query/query_save_grant = SSdbcore.NewQuery({"
+			INSERT INTO [format_table_name("research_grants")]
+			(grant_id, grant_name, granting_organization, amount, research_field, recipient_ckey, grant_date, expiration_date, status, requirements, progress_reports)
+			VALUES (:grant_id, :grant_name, :granting_organization, :amount, :research_field, :recipient_ckey, :grant_date, :expiration_date, :status, :requirements, :progress_reports)
+			ON DUPLICATE KEY UPDATE
+			grant_name = VALUES(grant_name), granting_organization = VALUES(granting_organization), amount = VALUES(amount),
+			research_field = VALUES(research_field), recipient_ckey = VALUES(recipient_ckey), grant_date = VALUES(grant_date),
+			expiration_date = VALUES(expiration_date), status = VALUES(status), requirements = VALUES(requirements), progress_reports = VALUES(progress_reports)
+		"}, list(
+			"grant_id" = grant_id,
+			"grant_name" = grant.grant_name,
+			"granting_organization" = grant.granting_organization,
+			"amount" = grant.amount,
+			"research_field" = grant.research_field,
+			"recipient_ckey" = grant.recipient_ckey,
+			"grant_date" = grant.grant_date,
+			"expiration_date" = grant.expiration_date,
+			"status" = grant.status,
+			"requirements" = json_encode(grant.requirements),
+			"progress_reports" = json_encode(grant.progress_reports)
+		))
+
+		if(!query_save_grant.warn_execute())
+			world.log << "Research Persistence: Failed to save research grant [grant_id]"
+		qdel(query_save_grant)
+
+	world.log << "Research Persistence: Saved [research_projects.len] research projects, [scientific_discoveries.len] discoveries, [publications.len] publications, [research_facilities.len] facilities, and [research_grants.len] grants to database"
+
 /datum/research_persistence_manager/proc/load_research_data()
 	var/savefile/S = new /savefile("data/research_persistence.json")
 	if(!S["data"])

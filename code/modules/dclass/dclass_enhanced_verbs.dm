@@ -317,13 +317,20 @@
 		player.increase_suspicion(25)
 		to_chat(player.mob, "<span class='danger'>You fail to steal materials from [S.name] and attract attention!</span>")
 
+// List of all enhanced D-Class verbs for easy management
+var/list/enhanced_dclass_verbs = list(
+	/mob/living/carbon/human/verb/dclass_events_status,
+	/mob/living/carbon/human/verb/dclass_scp_interaction,
+	/mob/living/carbon/human/verb/dclass_achievements,
+	/mob/living/carbon/human/verb/dclass_leaderboard,
+	/mob/living/carbon/human/verb/dclass_enhanced_escape
+)
+
 // Register enhanced verbs
 /mob/living/carbon/human/proc/register_enhanced_dclass_verbs()
 	if(job == "D-Class" && ckey)
-		verbs += /mob/living/carbon/human/verb/dclass_events_status
-		verbs += /mob/living/carbon/human/verb/dclass_scp_interaction
-		verbs += /mob/living/carbon/human/verb/dclass_achievements
-		verbs += /mob/living/carbon/human/verb/dclass_leaderboard
-		verbs += /mob/living/carbon/human/verb/dclass_enhanced_escape
+		verbs += enhanced_dclass_verbs
 
-// Note: register_dclass_verbs() is defined in dclass_verbs.dm and should call register_enhanced_dclass_verbs()
+// Remove enhanced verbs
+/mob/living/carbon/human/proc/remove_enhanced_dclass_verbs()
+	verbs -= enhanced_dclass_verbs

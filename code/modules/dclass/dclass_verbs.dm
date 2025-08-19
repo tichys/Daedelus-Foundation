@@ -399,17 +399,23 @@
 
 	to_chat(src, "<span class='notice'>[info]</span>")
 
-// Register D-Class verbs when player spawns
+// List of all D-Class verbs for easy management
+var/list/dclass_verbs = list(
+	/mob/living/carbon/human/verb/dclass_status,
+	/mob/living/carbon/human/verb/dclass_escape_plan,
+	/mob/living/carbon/human/verb/dclass_work_info,
+	/mob/living/carbon/human/verb/dclass_contraband_manage,
+	/mob/living/carbon/human/verb/dclass_social,
+	/mob/living/carbon/human/verb/dclass_observe,
+	/mob/living/carbon/human/verb/dclass_stealth,
+	/mob/living/carbon/human/verb/dclass_help
+)
+
+// Register D-Class verbs when player gets D-Class job
 /mob/living/carbon/human/proc/register_dclass_verbs()
 	if(job == "D-Class" && ckey)
-		verbs += /mob/living/carbon/human/verb/dclass_status
-		verbs += /mob/living/carbon/human/verb/dclass_escape_plan
-		verbs += /mob/living/carbon/human/verb/dclass_work_info
-		verbs += /mob/living/carbon/human/verb/dclass_contraband_manage
-		verbs += /mob/living/carbon/human/verb/dclass_social
-		verbs += /mob/living/carbon/human/verb/dclass_observe
-		verbs += /mob/living/carbon/human/verb/dclass_stealth
-		verbs += /mob/living/carbon/human/verb/dclass_help
+		// Add all D-Class verbs
+		verbs += dclass_verbs
 
 		// Register enhanced verbs
 		register_enhanced_dclass_verbs()
@@ -418,14 +424,36 @@
 		if(SSdclass && SSdclass.manager)
 			SSdclass.manager.register_dclass_player(src)
 
-// Hook into player spawn
+// Remove D-Class verbs when player loses D-Class job
+/mob/living/carbon/human/proc/remove_dclass_verbs()
+	// Remove all D-Class verbs
+	verbs -= dclass_verbs
+
+	// Remove enhanced verbs
+	remove_enhanced_dclass_verbs()
+
+	// Unregister from D-Class manager
+	if(ckey && SSdclass && SSdclass.manager)
+		SSdclass.manager.unregister_dclass_player(ckey)
+
+// Hook into job assignment signal
+/mob/living/carbon/human/proc/on_job_received(datum/source, datum/job/job)
+	SIGNAL_HANDLER
+
+	// Remove D-Class verbs if we had them before
+	remove_dclass_verbs()
+
+	// Add D-Class verbs if we're now D-Class
+	if(job.title == "D-Class")
+		register_dclass_verbs()
+
+// Hook into player spawn and job assignment
 /mob/living/carbon/human/Initialize()
 	. = ..()
-	spawn(10) // Small delay to ensure job is set
-		register_dclass_verbs()
+	// Register for job assignment signal
+	RegisterSignal(src, COMSIG_JOB_RECEIVED, PROC_REF(on_job_received))
 
 // Hook into player death/disconnect
 /mob/living/carbon/human/Destroy()
-	if(ckey && SSdclass && SSdclass.manager)
-		SSdclass.manager.unregister_dclass_player(ckey)
+	remove_dclass_verbs()
 	return ..()
