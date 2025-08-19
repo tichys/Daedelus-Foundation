@@ -33,6 +33,43 @@
 			"equipment_operational" = facility_manager.equipment_status.len,
 			"security_systems_count" = facility_manager.security_systems.len,
 		)
+
+		// Add detailed equipment status data for Equipment Management interface
+		facility_data["equipment_status"] = list()
+		for(var/equipment_type in facility_manager.equipment_status)
+			var/datum/equipment_status/status = facility_manager.equipment_status[equipment_type]
+			facility_data["equipment_status"][equipment_type] = list(
+				"equipment_type" = status.equipment_type,
+				"health" = status.health,
+				"operational" = status.operational,
+				"efficiency" = status.efficiency,
+				"maintenance_required" = status.maintenance_required,
+				"power_consumption" = status.power_consumption,
+				"heat_generation" = status.heat_generation
+			)
+
+		// Add security systems data for System Management interface
+		facility_data["security_systems"] = list()
+		for(var/system_type in facility_manager.security_systems)
+			var/datum/security_component/system = facility_manager.security_systems[system_type]
+			facility_data["security_systems"][system_type] = list(
+				"system_type" = system_type,
+				"operational" = system.operational,
+				"health" = system.health,
+				"security_level" = system.security_level,
+				"alert_status" = system.alert_status
+			)
+
+		// Add maintenance tasks data for Maintenance Schedule interface
+		facility_data["maintenance_tasks"] = list()
+		// For now, use placeholder data until maintenance system is fully implemented
+		facility_data["maintenance_tasks"]["TASK-001"] = list(
+			"task_name" = "Power Grid Maintenance",
+			"priority" = "high",
+			"assigned_to" = "Engineering Team",
+			"due_date" = "TBD",
+			"status" = "pending"
+		)
 	data["facility_data"] = facility_data
 
 	// SCP Data
@@ -46,6 +83,31 @@
 			"containment_effectiveness" = scp_manager.containment_effectiveness,
 			"scp_instances_count" = scp_manager.scp_instances.len,
 		)
+
+		// Add detailed SCP instance data
+		scp_data["scp_instances"] = list()
+		for(var/scp_id in scp_manager.scp_instances)
+			var/datum/scp_instance/instance = scp_manager.scp_instances[scp_id]
+			if(instance)
+				scp_data["scp_instances"] += list(list(
+					"id" = scp_id,
+					"classification" = "unknown",
+					"containment_status" = instance.containment_status,
+					"location" = "Unknown Location",
+					"containment_health" = instance.containment_health,
+					"interaction_count" = instance.interaction_history.len,
+					"last_interaction" = instance.interaction_history.len > 0 ? time2text(instance.interaction_history[instance.interaction_history.len]["timestamp"], "YYYY-MM-DD HH:MM") : "Never",
+					"enabled" = scp_manager.is_scp_enabled(scp_id)
+				))
+
+		// Add SCP breaches data - placeholder until breach system is implemented
+		scp_data["breaches"] = list()
+
+		// Add SCP research projects data - placeholder until research system is implemented
+		scp_data["research_projects"] = list()
+
+		// Add SCP containment protocols data - placeholder until protocol system is implemented
+		scp_data["containment_protocols"] = list()
 	data["scp_data"] = scp_data
 
 	// Technology Data
@@ -421,26 +483,44 @@
 	else
 		data["analytics"]["research_progress"] = list("active_projects" = 0, "completion_rate" = "0%", "breakthroughs" = 0, "funding" = "$0.0M")
 
-	// Real-time notifications
+	// Real-time notifications based on actual system data
 	data["notifications"] = list()
+
+	// Security notifications based on actual threats
 	if(SSsecurity_persistence?.manager?.active_threats > 0)
-		data["notifications"] += list(list(
-			"type" = "CRITICAL",
-			"message" = "SCP-[pick("173", "096", "049", "682")] containment breach detected",
-			"time" = "[rand(1, 30)] minutes ago"
-		))
+		var/datum/security_persistence_manager/security_manager = SSsecurity_persistence.manager
+		for(var/incident_id in security_manager.security_incidents)
+			var/datum/security_incident/incident = security_manager.security_incidents[incident_id]
+			if(!incident.resolved)
+				data["notifications"] += list(list(
+					"type" = "CRITICAL",
+					"message" = "[incident.incident_type] at [incident.location]",
+					"time" = time2text(incident.timestamp, "HH:MM")
+				))
+
+	// Medical notifications based on actual outbreaks
 	if(SSmedical_persistence?.manager?.active_outbreaks > 0)
-		data["notifications"] += list(list(
-			"type" = "WARNING",
-			"message" = "Medical supplies running low",
-			"time" = "[rand(10, 60)] minutes ago"
-		))
+		var/datum/medical_persistence_manager/medical_manager = SSmedical_persistence.manager
+		for(var/outbreak_id in medical_manager.outbreak_records)
+			var/datum/outbreak_record/outbreak = medical_manager.outbreak_records[outbreak_id]
+			if(outbreak.status == "ACTIVE")
+				data["notifications"] += list(list(
+					"type" = "WARNING",
+					"message" = "[outbreak.disease_name] outbreak detected",
+					"time" = time2text(outbreak.start_time, "HH:MM")
+				))
+
+	// Research notifications based on actual completed projects
 	if(SSresearch_persistence?.manager?.research_projects?.len > 0)
-		data["notifications"] += list(list(
-			"type" = "INFO",
-			"message" = "Research project completed",
-			"time" = "[rand(1, 24)] hours ago"
-		))
+		var/datum/research_persistence_manager/research_manager = SSresearch_persistence.manager
+		for(var/project_id in research_manager.research_projects)
+			var/datum/research_persistence_project/project = research_manager.research_projects[project_id]
+			if(project.status == "COMPLETED" && project.progress >= 100)
+				data["notifications"] += list(list(
+					"type" = "INFO",
+					"message" = "Research project '[project.project_name]' completed",
+					"time" = time2text(world.time, "HH:MM")
+				))
 
 	// Real-time personnel details
 	data["personnel_details"] = list()
@@ -463,27 +543,70 @@
 				"status" = record.status
 			))
 
-		// Department data
+		// Department data based on actual assignments
+		var/list/department_staff_counts = list()
+		var/list/department_budgets = list()
+
+		// Count staff per department
+		for(var/ckey in pm.personnel_records)
+			var/datum/personnel_record/record = pm.personnel_records[ckey]
+			if(record.department)
+				department_staff_counts[record.department] = (department_staff_counts[record.department] || 0) + 1
+
+		// Get department budgets from budget system
+		if(SSbudget_system?.manager)
+			var/datum/budget_manager/budget_manager = SSbudget_system.manager
+			for(var/dept_id in budget_manager.department_budgets)
+				var/datum/budget_data/dept = budget_manager.department_budgets[dept_id]
+				department_budgets[dept_id] = dept.allocated_budget
+
 		for(var/assignment_id in pm.assignments)
 			var/datum/assignment/assignment = pm.assignments[assignment_id]
 			if(findtext(assignment_id, "DEPT_"))
 				var/dept_name = copytext(assignment_id, 6) // Remove "DEPT_" prefix
+				var/staff_count = department_staff_counts[dept_name] || 0
+				var/budget_amount = department_budgets[dept_name] || 1000000
+				var/efficiency = 85 // Default efficiency, could be calculated from performance ratings
+
+				// Calculate efficiency based on department performance
+				var/total_performance = 0
+				var/performance_count = 0
+				for(var/ckey in pm.personnel_records)
+					var/datum/personnel_record/record = pm.personnel_records[ckey]
+					if(record.department == dept_name)
+						total_performance += record.performance_rating
+						performance_count++
+
+				if(performance_count > 0)
+					efficiency = round(total_performance / performance_count)
+
 				data["personnel_details"]["departments"] += list(list(
 					"name" = dept_name,
 					"head" = assignment.employee_ckey,
-					"staff_count" = rand(5, 30),
-					"budget" = "$[rand(1, 5)].[rand(0, 9)]M",
-					"efficiency" = rand(70, 95)
+					"staff_count" = staff_count,
+					"budget" = "$[round(budget_amount / 1000000, 1)]M",
+					"efficiency" = efficiency
 				))
 
-		// Training data
+		// Training data based on actual training records
 		for(var/training_id in pm.training_records)
 			var/datum/training_record/training = pm.training_records[training_id]
+			var/duration_weeks = 2 // Default duration, could be calculated from training type
+			var/completion_rate = training.score || 75
+
+			// Calculate duration based on training type if available
+			if(training.training_type == "ADVANCED")
+				duration_weeks = 4
+			else if(training.training_type == "BASIC")
+				duration_weeks = 1
+			else if(training.training_type == "SPECIALIZED")
+				duration_weeks = 3
+
 			data["personnel_details"]["training"] += list(list(
 				"program" = training.training_name,
 				"instructor" = training.trainer_ckey,
-				"duration" = "[rand(1, 4)] weeks",
-				"completion" = rand(20, 100),
+				"duration" = "[duration_weeks] weeks",
+				"completion" = completion_rate,
 				"status" = training.status
 			))
 

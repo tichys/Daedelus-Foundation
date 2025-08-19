@@ -211,9 +211,30 @@ SUBSYSTEM_DEF(security_persistence)
 	for(var/protocol_id in security_protocols)
 		var/datum/security_protocol/protocol = security_protocols[protocol_id]
 		if(protocol.status == "ACTIVE")
-			// Simulate protocol effectiveness changes
-			if(prob(10)) // 10% chance to change effectiveness
-				protocol.effectiveness_rating = max(0, min(100, protocol.effectiveness_rating + rand(-5, 5)))
+			// Calculate real protocol effectiveness based on actual game data
+			protocol.effectiveness_rating = calculate_real_protocol_effectiveness(protocol)
+
+// Calculate real protocol effectiveness based on actual game data
+/datum/security_persistence_manager/proc/calculate_real_protocol_effectiveness(protocol)
+	var/base_effectiveness = 75 // Default effectiveness
+	
+	// Effectiveness based on containment breaches
+	if(containment_breaches > 0)
+		base_effectiveness -= containment_breaches * 10
+	
+	// Effectiveness based on unauthorized access attempts
+	if(unauthorized_access_attempts > 0)
+		base_effectiveness -= unauthorized_access_attempts * 5
+	
+	// Effectiveness based on security staff count
+	if(security_staff_count > 0)
+		base_effectiveness += min(20, security_staff_count * 2)
+	
+	// Effectiveness based on security incidents
+	if(total_security_incidents > 0)
+		base_effectiveness -= min(30, total_security_incidents * 3)
+	
+	return max(0, min(100, base_effectiveness))
 
 /datum/security_persistence_manager/proc/save_security_data()
 	var/list/data = list()

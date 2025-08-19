@@ -92,6 +92,15 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/status = "ACTIVE" // ACTIVE, COMPLETED, CANCELLED, ON_HOLD
 	var/list/discoveries = list()
 	var/list/publications = list()
+	// Additional properties for real data tracking
+	var/experiments_conducted = 0
+	var/data_samples_collected = 0
+	var/lab_hours_invested = 0
+	var/equipment_usage_hours = 0
+	var/collaboration_count = 0
+	var/publication_drafts = 0
+	var/peer_reviews_received = 0
+	var/research_milestones_completed = 0
 
 /datum/medical_research_project/New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
 		src.project_id = project_id
@@ -205,14 +214,51 @@ SUBSYSTEM_DEF(medical_persistence)
 	for(var/project_id in research_projects)
 		var/datum/medical_research_project/project = research_projects[project_id]
 		if(project.status == "ACTIVE")
-			// Simulate research progress
-			if(prob(5)) // 5% chance to make progress
-				project.progress = min(100, project.progress + rand(1, 5))
+			// Calculate real research progress based on actual game data
+			project.progress = calculate_real_medical_research_progress(project)
 
 			// Check for completion
 			if(project.progress >= 100)
 				project.status = "COMPLETED"
 				medical_research_progress += 10
+
+// Calculate real medical research progress based on actual game data
+/datum/medical_persistence_manager/proc/calculate_real_medical_research_progress(var/datum/medical_research_project/project)
+	var/base_progress = project.progress
+
+	// Progress based on number of researchers
+	if(project.researchers.len > 0)
+		base_progress += project.researchers.len * 2
+
+	// Progress based on budget utilization
+	if(project.budget_allocated > 0)
+		var/budget_utilization = (project.budget_used / project.budget_allocated) * 100
+		base_progress += budget_utilization * 0.5
+
+	// Progress based on experiments conducted
+	base_progress += project.experiments_conducted * 3
+
+	// Progress based on data samples collected
+	base_progress += project.data_samples_collected * 1.5
+
+	// Progress based on lab hours invested
+	base_progress += project.lab_hours_invested * 0.1
+
+	// Progress based on equipment usage
+	base_progress += project.equipment_usage_hours * 0.2
+
+	// Progress based on collaborations
+	base_progress += project.collaboration_count * 2
+
+	// Progress based on research milestones
+	base_progress += project.research_milestones_completed * 5
+
+	// Progress based on time elapsed
+	var/time_elapsed = world.time - project.start_date
+	var/time_factor = min(20, time_elapsed / 6000) // Max 20% from time, 6000 ticks = 10 minutes
+	base_progress += time_factor
+
+	return min(100, base_progress)
 
 /datum/medical_persistence_manager/proc/save_medical_data()
 	var/list/data = list()

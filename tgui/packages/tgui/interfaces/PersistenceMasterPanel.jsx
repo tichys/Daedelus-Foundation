@@ -2876,26 +2876,57 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Efficiency</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>EQ-001</Table.Cell>
-                  <Table.Cell>Power Generator</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      OPERATIONAL
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <ProgressBar value={95} maxValue={100} color="good" />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      onClick={() => setSelectedEquipment('EQ-001')}
-                    >
-                      View
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+                {data.facility_data?.equipment_status ? (
+                  Object.entries(data.facility_data.equipment_status).map(
+                    ([equipmentId, equipment]) => (
+                      <Table.Row key={equipmentId}>
+                        <Table.Cell>{equipmentId}</Table.Cell>
+                        <Table.Cell>
+                          {equipment.equipment_type || 'Unknown'}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Box
+                            style={{
+                              color: equipment.operational
+                                ? '#66ff66'
+                                : '#ff6666',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {equipment.operational ? 'OPERATIONAL' : 'OFFLINE'}
+                          </Box>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <ProgressBar
+                            value={equipment.efficiency * 100}
+                            maxValue={100}
+                            color={
+                              equipment.efficiency > 0.8
+                                ? 'good'
+                                : equipment.efficiency > 0.5
+                                  ? 'average'
+                                  : 'bad'
+                            }
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="small"
+                            onClick={() => setSelectedEquipment(equipmentId)}
+                          >
+                            View
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ),
+                  )
+                ) : (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No equipment data available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -2912,28 +2943,53 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Priority</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>Containment Field Generator</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      ONLINE
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>CRITICAL</Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      color="red"
-                      onClick={() =>
-                        act('facility_shutdown_system', {
-                          system: 'containment',
-                        })
-                      }
-                    >
-                      Shutdown
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+                {data.facility_data?.security_systems ? (
+                  Object.entries(data.facility_data.security_systems).map(
+                    ([systemId, system]) => (
+                      <Table.Row key={systemId}>
+                        <Table.Cell>
+                          {system.system_type || systemId}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Box
+                            style={{
+                              color: system.operational ? '#66ff66' : '#ff6666',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {system.operational ? 'ONLINE' : 'OFFLINE'}
+                          </Box>
+                        </Table.Cell>
+                        <Table.Cell>
+                          {system.health > 80
+                            ? 'LOW'
+                            : system.health > 50
+                              ? 'MEDIUM'
+                              : 'CRITICAL'}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="small"
+                            color="red"
+                            onClick={() =>
+                              act('facility_shutdown_system', {
+                                system: systemId,
+                              })
+                            }
+                          >
+                            Shutdown
+                          </Button>
+                        </Table.Cell>
+                      </Table.Row>
+                    ),
+                  )
+                ) : (
+                  <Table.Row>
+                    <Table.Cell colSpan={4} textAlign="center">
+                      No system data available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -2951,17 +3007,51 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Due Date</Table.Cell>
                   <Table.Cell>Status</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>Power Grid Maintenance</Table.Cell>
-                  <Table.Cell>HIGH</Table.Cell>
-                  <Table.Cell>Engineering Team</Table.Cell>
-                  <Table.Cell>2024-01-20</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#ffaa00', fontWeight: 'bold' }}>
-                      IN PROGRESS
-                    </Box>
-                  </Table.Cell>
-                </Table.Row>
+                {data.facility_data?.maintenance_tasks ? (
+                  Object.entries(data.facility_data.maintenance_tasks).map(
+                    ([taskId, task]) => (
+                      <Table.Row key={taskId}>
+                        <Table.Cell>{task.task_name || taskId}</Table.Cell>
+                        <Table.Cell>
+                          {task.priority === 'high'
+                            ? 'HIGH'
+                            : task.priority === 'medium'
+                              ? 'MEDIUM'
+                              : 'LOW'}
+                        </Table.Cell>
+                        <Table.Cell>
+                          {task.assigned_to || 'Unassigned'}
+                        </Table.Cell>
+                        <Table.Cell>{task.due_date || 'TBD'}</Table.Cell>
+                        <Table.Cell>
+                          <Box
+                            style={{
+                              color:
+                                task.status === 'completed'
+                                  ? '#66ff66'
+                                  : task.status === 'in_progress'
+                                    ? '#ffaa00'
+                                    : '#ff6666',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {task.status === 'completed'
+                              ? 'COMPLETED'
+                              : task.status === 'in_progress'
+                                ? 'IN PROGRESS'
+                                : 'PENDING'}
+                          </Box>
+                        </Table.Cell>
+                      </Table.Row>
+                    ),
+                  )
+                ) : (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No maintenance tasks available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -3341,72 +3431,69 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Location</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>SCP-173</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#ffaa00', fontWeight: 'bold' }}>
-                      EUCLID
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      CONTAINED
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>Containment Cell A-1</Table.Cell>
-                  <Table.Cell>
-                    <Flex style={{ gap: '5px' }}>
-                      <Button
-                        size="small"
-                        onClick={() => setSelectedSCP('SCP-173')}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        size="small"
-                        color="blue"
-                        onClick={() =>
-                          act('scp_edit_instance', { scp: 'SCP-173' })
-                        }
-                      >
-                        Edit
-                      </Button>
-                    </Flex>
-                  </Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>SCP-096</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#ff6666', fontWeight: 'bold' }}>
-                      KETER
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      CONTAINED
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>Containment Cell B-3</Table.Cell>
-                  <Table.Cell>
-                    <Flex style={{ gap: '5px' }}>
-                      <Button
-                        size="small"
-                        onClick={() => setSelectedSCP('SCP-096')}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        size="small"
-                        color="blue"
-                        onClick={() =>
-                          act('scp_edit_instance', { scp: 'SCP-096' })
-                        }
-                      >
-                        Edit
-                      </Button>
-                    </Flex>
-                  </Table.Cell>
-                </Table.Row>
+                {data.scp_data?.scp_instances ? (
+                  data.scp_data.scp_instances.map((scp) => (
+                    <Table.Row key={scp.id}>
+                      <Table.Cell>{scp.id}</Table.Cell>
+                      <Table.Cell>
+                        <Box
+                          style={{
+                            color:
+                              scp.classification === 'keter'
+                                ? '#ff6666'
+                                : scp.classification === 'euclid'
+                                  ? '#ffaa00'
+                                  : '#66ff66',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {scp.classification?.toUpperCase() || 'UNKNOWN'}
+                        </Box>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Box
+                          style={{
+                            color:
+                              scp.containment_status === 'contained'
+                                ? '#66ff66'
+                                : '#ff6666',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {scp.containment_status?.toUpperCase() || 'UNKNOWN'}
+                        </Box>
+                      </Table.Cell>
+                      <Table.Cell>
+                        {scp.location || 'Unknown Location'}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Flex style={{ gap: '5px' }}>
+                          <Button
+                            size="small"
+                            onClick={() => setSelectedSCP(scp.id)}
+                          >
+                            View
+                          </Button>
+                          <Button
+                            size="small"
+                            color="blue"
+                            onClick={() =>
+                              act('scp_edit_instance', { scp: scp.id })
+                            }
+                          >
+                            Edit
+                          </Button>
+                        </Flex>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
+                ) : (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No SCP instances available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -3424,30 +3511,50 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Status</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                {scp_data?.active_breaches > 0 ? (
-                  <Table.Row>
-                    <Table.Cell>BR-001</Table.Cell>
-                    <Table.Cell>SCP-173</Table.Cell>
-                    <Table.Cell>
-                      <Box style={{ color: '#ff6666', fontWeight: 'bold' }}>
-                        CRITICAL
-                      </Box>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Box style={{ color: '#ffaa00', fontWeight: 'bold' }}>
-                        ACTIVE
-                      </Box>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Button
-                        size="small"
-                        color="red"
-                        onClick={() => setSelectedBreach('BR-001')}
-                      >
-                        Respond
-                      </Button>
-                    </Table.Cell>
-                  </Table.Row>
+                {data.scp_data?.breaches ? (
+                  data.scp_data.breaches.map((breach) => (
+                    <Table.Row key={breach.id}>
+                      <Table.Cell>{breach.id}</Table.Cell>
+                      <Table.Cell>{breach.scp_involved}</Table.Cell>
+                      <Table.Cell>
+                        <Box
+                          style={{
+                            color:
+                              breach.severity === 'critical'
+                                ? '#ff6666'
+                                : breach.severity === 'high'
+                                  ? '#ffaa00'
+                                  : '#66ff66',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {breach.severity?.toUpperCase() || 'UNKNOWN'}
+                        </Box>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Box
+                          style={{
+                            color:
+                              breach.status === 'active'
+                                ? '#ffaa00'
+                                : '#66ff66',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {breach.status?.toUpperCase() || 'UNKNOWN'}
+                        </Box>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          size="small"
+                          color="red"
+                          onClick={() => setSelectedBreach(breach.id)}
+                        >
+                          Respond
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
                 ) : (
                   <Table.Row>
                     <Table.Cell
@@ -3476,19 +3583,49 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Progress</Table.Cell>
                   <Table.Cell>Status</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>RES-001</Table.Cell>
-                  <Table.Cell>SCP-173</Table.Cell>
-                  <Table.Cell>Behavioral Analysis</Table.Cell>
-                  <Table.Cell>
-                    <ProgressBar value={75} maxValue={100} color="good" />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      ONGOING
-                    </Box>
-                  </Table.Cell>
-                </Table.Row>
+                {data.scp_data?.research_projects ? (
+                  data.scp_data.research_projects.map((project) => (
+                    <Table.Row key={project.id}>
+                      <Table.Cell>{project.id}</Table.Cell>
+                      <Table.Cell>{project.scp_subject}</Table.Cell>
+                      <Table.Cell>{project.research_type}</Table.Cell>
+                      <Table.Cell>
+                        <ProgressBar
+                          value={project.progress || 0}
+                          maxValue={100}
+                          color={
+                            project.progress > 80
+                              ? 'good'
+                              : project.progress > 50
+                                ? 'average'
+                                : 'bad'
+                          }
+                        />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Box
+                          style={{
+                            color:
+                              project.status === 'ongoing'
+                                ? '#66ff66'
+                                : project.status === 'completed'
+                                  ? '#66ff66'
+                                  : '#ffaa00',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {project.status?.toUpperCase() || 'UNKNOWN'}
+                        </Box>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
+                ) : (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No research projects available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -3506,27 +3643,45 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Status</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>PROT-173</Table.Cell>
-                  <Table.Cell>SCP-173</Table.Cell>
-                  <Table.Cell>Standard Containment</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      ACTIVE
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      color="blue"
-                      onClick={() =>
-                        act('scp_view_protocol', { protocol: 'PROT-173' })
-                      }
-                    >
-                      View
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+                {data.scp_data?.containment_protocols ? (
+                  data.scp_data.containment_protocols.map((protocol) => (
+                    <Table.Row key={protocol.id}>
+                      <Table.Cell>{protocol.id}</Table.Cell>
+                      <Table.Cell>{protocol.scp_target}</Table.Cell>
+                      <Table.Cell>{protocol.protocol_type}</Table.Cell>
+                      <Table.Cell>
+                        <Box
+                          style={{
+                            color:
+                              protocol.status === 'active'
+                                ? '#66ff66'
+                                : '#ffaa00',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {protocol.status?.toUpperCase() || 'UNKNOWN'}
+                        </Box>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          size="small"
+                          color="blue"
+                          onClick={() =>
+                            act('scp_view_protocol', { protocol: protocol.id })
+                          }
+                        >
+                          View
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))
+                ) : (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No containment protocols available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>

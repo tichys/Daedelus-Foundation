@@ -42,7 +42,18 @@ SUBSYSTEM_DEF(research_persistence)
 	var/priority = 1
 	var/list/discoveries = list()
 	var/list/publications = list()
-	var/research_notes = ""
+	var/list/research_notes = list()
+	// Additional properties for real data tracking
+	var/experiments_completed = 0
+	var/data_analysis_sessions = 0
+	var/peer_consultations = 0
+	var/hypothesis_tests_run = 0
+	var/prototype_iterations = 0
+	var/field_tests_conducted = 0
+	var/documentation_pages = 0
+	var/conference_presentations = 0
+	var/patent_applications = 0
+	var/research_equipment_used = 0
 
 /datum/research_persistence_project/New(var/project_id, var/project_name, var/project_description, var/research_field, var/lead_researcher)
 		src.project_id = project_id
@@ -107,6 +118,15 @@ SUBSYSTEM_DEF(research_persistence)
 	var/list/active_projects = list()
 	var/list/equipment = list()
 	var/security_level = 1
+	// Additional properties for real data tracking
+	var/last_maintenance = 0
+	var/usage_hours = 0
+	var/safety_incidents = 0
+	var/equipment_failures = 0
+	var/research_output_rating = 1.0
+	var/energy_consumption = 0
+	var/operational_cost = 0
+	var/staff_assigned = 0
 
 /datum/research_persistence_facility/New(var/facility_id, var/facility_name, var/facility_type, var/location)
 		src.facility_id = facility_id
@@ -214,10 +234,8 @@ SUBSYSTEM_DEF(research_persistence)
 	for(var/project_id in research_projects)
 		var/datum/research_persistence_project/project = research_projects[project_id]
 		if(project.status == "ACTIVE")
-			// Simulate research progress
-			var/progress_chance = 5 + (project.priority * 2) // Higher priority = faster progress
-			if(prob(progress_chance))
-				project.progress = min(100, project.progress + rand(1, 5))
+			// Calculate real research progress based on actual game data
+			project.progress = calculate_real_research_progress(project)
 
 			// Check for completion
 			if(project.progress >= 100)
@@ -225,23 +243,103 @@ SUBSYSTEM_DEF(research_persistence)
 				project.actual_completion = world.time
 				completed_projects++
 
-				// Generate discovery chance
-				if(prob(30)) // 30% chance of discovery upon completion
+				// Generate discovery based on actual research data
+				if(project.research_notes.len > 5) // Real discovery based on research notes
 					var/discovery_name = "Discovery from [project.project_name]"
 					var/discovery_description = "A significant discovery made during the completion of [project.project_name]"
 					add_scientific_discovery(discovery_name, discovery_description, "EXPERIMENTAL", project.research_field, project.lead_researcher)
+
+// Calculate real research progress based on actual game data
+/datum/research_persistence_manager/proc/calculate_real_research_progress(var/datum/research_persistence_project/project)
+	var/base_progress = project.progress
+
+	// Progress based on number of researchers
+	if(project.researchers.len > 0)
+		base_progress += project.researchers.len * 3
+
+	// Progress based on budget utilization
+	if(project.budget_allocated > 0)
+		var/budget_utilization = (project.budget_used / project.budget_allocated) * 100
+		base_progress += budget_utilization * 0.3
+
+	// Progress based on research notes (actual research activity)
+	base_progress += project.research_notes.len * 1.5
+
+	// Progress based on experiments completed
+	base_progress += project.experiments_completed * 4
+
+	// Progress based on data analysis sessions
+	base_progress += project.data_analysis_sessions * 2
+
+	// Progress based on peer consultations
+	base_progress += project.peer_consultations * 1.5
+
+	// Progress based on hypothesis tests
+	base_progress += project.hypothesis_tests_run * 2.5
+
+	// Progress based on prototype iterations
+	base_progress += project.prototype_iterations * 3
+
+	// Progress based on field tests
+	base_progress += project.field_tests_conducted * 4
+
+	// Progress based on documentation
+	base_progress += project.documentation_pages * 0.5
+
+	// Progress based on presentations and patents
+	base_progress += project.conference_presentations * 2
+	base_progress += project.patent_applications * 5
+
+	// Progress based on equipment usage
+	base_progress += project.research_equipment_used * 0.1
+
+	// Progress based on time elapsed
+	var/time_elapsed = world.time - project.start_date
+	var/time_factor = min(15, time_elapsed / 12000) // Max 15% from time, 12000 ticks = 20 minutes
+	base_progress += time_factor
+
+	// Progress based on priority
+	base_progress += project.priority * 2
+
+	return min(100, base_progress)
 
 /datum/research_persistence_manager/proc/update_facilities()
 	for(var/facility_id in research_facilities)
 		var/datum/research_persistence_facility/facility = research_facilities[facility_id]
 
-		// Simulate facility wear and tear
-		if(prob(10)) // 10% chance to reduce maintenance
-			facility.maintenance_level = max(0, facility.maintenance_level - rand(1, 3))
+		// Calculate real facility wear and tear based on actual usage
+		facility.maintenance_level = calculate_real_maintenance_level(facility)
 
 		// Update equipment quality based on maintenance
 		if(facility.maintenance_level < 50)
 			facility.equipment_quality = max(0.5, facility.equipment_quality - 0.01)
+
+// Calculate real maintenance level based on actual facility usage
+/datum/research_persistence_manager/proc/calculate_real_maintenance_level(var/datum/research_persistence_facility/facility)
+	var/base_maintenance = facility.maintenance_level
+
+	// Maintenance decreases based on time since last maintenance
+	var/time_since_maintenance = world.time - facility.last_maintenance
+	var/maintenance_decay = time_since_maintenance / 60000 // Decay over 100 minutes
+
+	// Maintenance decreases based on facility usage hours
+	var/usage_decay = facility.usage_hours * 0.1
+
+	// Maintenance decreases based on safety incidents
+	var/incident_decay = facility.safety_incidents * 5
+
+	// Maintenance decreases based on equipment failures
+	var/failure_decay = facility.equipment_failures * 3
+
+	// Maintenance decreases based on energy consumption (wear and tear)
+	var/energy_decay = facility.energy_consumption * 0.05
+
+	// Maintenance decreases based on number of active projects
+	var/project_decay = facility.active_projects.len * 2
+
+	base_maintenance -= maintenance_decay + usage_decay + incident_decay + failure_decay + energy_decay + project_decay
+
+	return max(0, base_maintenance)
 
 /datum/research_persistence_manager/proc/process_grants()
 	for(var/grant_id in research_grants)

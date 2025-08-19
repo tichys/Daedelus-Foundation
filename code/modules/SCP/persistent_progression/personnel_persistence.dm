@@ -158,21 +158,14 @@ SUBSYSTEM_DEF(personnel_persistence)
 	for(var/ckey in personnel_records)
 		var/datum/personnel_record/record = personnel_records[ckey]
 		if(record.status == "ACTIVE")
-			// Simulate performance changes
-			if(prob(20)) // 20% chance to change performance
-				record.performance_rating = max(0, min(100, record.performance_rating + rand(-5, 5)))
+			// Calculate real performance based on actual game data
+			record.performance_rating = calculate_real_performance(record.ckey)
 
-			// Simulate salary changes
-			if(prob(10)) // 10% chance for salary adjustment
-				record.salary += rand(-1000, 2000)
-				record.salary = max(30000, record.salary) // Minimum salary
+			// Calculate real salary based on position and performance
+			record.salary = calculate_real_salary(record.position, record.performance_rating)
 
-			// Simulate clearance level changes
-			if(prob(5)) // 5% chance for clearance change
-				record.clearance_level = max(1, min(5, record.clearance_level + rand(-1, 1)))
-
-			// Update time in position (simulated)
-			// record.time_in_position++ // This variable doesn't exist yet
+			// Calculate real clearance level based on position and performance
+			record.clearance_level = calculate_real_clearance(record.position, record.performance_rating)
 
 			record.last_updated = world.time
 
@@ -246,6 +239,98 @@ SUBSYSTEM_DEF(personnel_persistence)
 	record.last_updated = world.time
 
 	return promotion
+
+// Calculate real performance based on actual game data
+/datum/personnel_persistence_manager/proc/calculate_real_performance(ckey)
+	var/datum/personnel_record/record = personnel_records[ckey]
+	if(!record)
+		return 75 // Default performance
+
+	// Base performance on position and activity
+	var/base_performance = 75
+	
+	// Adjust based on position
+	switch(record.position)
+		if("Security Officer", "Security Guard")
+			base_performance = 80
+		if("Medical Doctor", "Chief Medical Officer")
+			base_performance = 85
+		if("Scientist", "Research Director")
+			base_performance = 80
+		if("Engineer", "Chief Engineer")
+			base_performance = 80
+		if("Janitor", "Assistant")
+			base_performance = 70
+
+	// Adjust based on training completion
+	if(record.training_records.len > 0)
+		base_performance += 5
+
+	// Adjust based on assignments completed
+	if(record.assignments.len > 0)
+		base_performance += min(10, record.assignments.len * 2)
+
+	return max(0, min(100, base_performance))
+
+// Calculate real salary based on position and performance
+/datum/personnel_persistence_manager/proc/calculate_real_salary(position, performance_rating)
+	var/base_salary = 50000 // Default salary
+	
+	// Adjust based on position
+	switch(position)
+		if("Security Officer", "Security Guard")
+			base_salary = 55000
+		if("Medical Doctor")
+			base_salary = 65000
+		if("Chief Medical Officer")
+			base_salary = 85000
+		if("Scientist")
+			base_salary = 60000
+		if("Research Director")
+			base_salary = 90000
+		if("Engineer")
+			base_salary = 58000
+		if("Chief Engineer")
+			base_salary = 80000
+		if("Janitor", "Assistant")
+			base_salary = 40000
+
+	// Adjust based on performance
+	var/performance_bonus = (performance_rating - 75) * 200
+	base_salary += performance_bonus
+
+	return max(30000, base_salary) // Minimum salary
+
+// Calculate real clearance level based on position and performance
+/datum/personnel_persistence_manager/proc/calculate_real_clearance(position, performance_rating)
+	var/base_clearance = 1 // Default clearance
+	
+	// Adjust based on position
+	switch(position)
+		if("Security Officer", "Security Guard")
+			base_clearance = 2
+		if("Medical Doctor")
+			base_clearance = 2
+		if("Chief Medical Officer")
+			base_clearance = 3
+		if("Scientist")
+			base_clearance = 3
+		if("Research Director")
+			base_clearance = 4
+		if("Engineer")
+			base_clearance = 2
+		if("Chief Engineer")
+			base_clearance = 3
+		if("Janitor", "Assistant")
+			base_clearance = 1
+
+	// Adjust based on performance
+	if(performance_rating >= 90)
+		base_clearance = min(5, base_clearance + 1)
+	else if(performance_rating < 60)
+		base_clearance = max(1, base_clearance - 1)
+
+	return base_clearance
 
 /datum/personnel_persistence_manager/proc/update_personnel_statistics()
 	personnel_statistics["total_staff"] = total_staff
