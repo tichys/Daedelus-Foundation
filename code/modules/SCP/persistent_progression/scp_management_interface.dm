@@ -251,6 +251,54 @@
 				"interaction_restrictions" = list("No physical contact", "No proximity", "Remote observation only"),
 				"interaction_logging" = TRUE
 			)
+		),
+		"Split Personality Necklace" = list(
+			"name" = "Split Personality Necklace",
+			"class" = "Euclid",
+			"description" = "A mysterious necklace that causes split personality disorder when worn.",
+			"containment_level" = "Euclid",
+			"spawn_conditions" = list(
+				"min_players" = 10,
+				"min_time" = 15,
+				"max_instances" = 3,
+				"spawn_probability" = 0.4,
+				"allowed_jobs" = list("Scientist", "Security Officer", "Medical Doctor"),
+				"restricted_jobs" = list(),
+				"spawn_locations" = list("Research Wing", "Containment Zone"),
+				"time_restrictions" = list(
+					"start_hour" = 0,
+					"end_hour" = 24,
+					"allowed_days" = list(1, 2, 3, 4, 5, 6, 7)
+				)
+			),
+			"player_access" = list(
+				"allowed_roles" = list("Scientist", "Security Officer", "Medical Doctor"),
+				"restricted_roles" = list(),
+				"min_rank" = 1,
+				"requires_clearance" = TRUE,
+				"clearance_level" = 2,
+				"training_required" = list("Psychological SCP Handling"),
+				"max_players" = 3
+			),
+			"containment_settings" = list(
+				"auto_containment" = FALSE,
+				"containment_radius" = 0,
+				"breach_response_time" = 0,
+				"containment_effectiveness" = 1.0,
+				"backup_protocols" = list()
+			),
+			"research_settings" = list(
+				"research_allowed" = TRUE,
+				"research_clearance" = 3,
+				"research_restrictions" = list("Volunteer testing only"),
+				"research_goals" = list("Study psychological effects", "Study personality switching")
+			),
+			"interaction_settings" = list(
+				"interaction_allowed" = TRUE,
+				"interaction_clearance" = 2,
+				"interaction_restrictions" = list("Remove immediately if distress"),
+				"interaction_logging" = TRUE
+			)
 		)
 	)
 
@@ -552,6 +600,10 @@
 			var/mob/living/simple_animal/hostile/scp3199/scp = new /mob/living/simple_animal/hostile/scp3199()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
+		if("Split Personality Necklace")
+			var/obj/item/clothing/neck/scp/split_personality_necklace/necklace = new /obj/item/clothing/neck/scp/split_personality_necklace()
+			necklace.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
+			return necklace
 		else
 			return null
 

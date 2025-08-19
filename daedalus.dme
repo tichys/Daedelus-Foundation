@@ -4420,10 +4420,10 @@
 #include "code\modules\SCP\SCPs\SCP-3199.dm"
 
 // SCP Clothing and Armor
-#include "code\game\objects\items\weapons\SCP\clothing.dm"
-#include "code\game\objects\items\weapons\SCP\accessories.dm"
-#include "code\game\objects\items\weapons\SCP\armor.dm"
-#include "code\game\objects\items\weapons\SCP\helmet.dm"
+#include "code\modules\SCP\clothing\clothing.dm"
+#include "code\modules\SCP\clothing\accessories.dm"
+#include "code\modules\SCP\clothing\armor.dm"
+#include "code\modules\SCP\clothing\helmet.dm"
 
 #include "code\modules\research\xenobiology\crossbreeding\recurring.dm"
 #include "code\modules\research\xenobiology\crossbreeding\regenerative.dm"

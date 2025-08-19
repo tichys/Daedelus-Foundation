@@ -73,7 +73,6 @@
 		produce_egg()
 
 /mob/living/simple_animal/hostile/scp3199/proc/check_containment_status()
-	var/turf/current_turf = get_turf(src)
 	var/area/current_area = get_area(src)
 
 	// Check if we're in a proper containment area
@@ -291,7 +290,7 @@
 		return
 
 	var/turf/spawn_turf = get_turf(src)
-	var/mob/living/simple_animal/hostile/scp3199/new_scp = new /mob/living/simple_animal/hostile/scp3199(spawn_turf)
+	new /mob/living/simple_animal/hostile/scp3199(spawn_turf)
 
 	to_chat(src, "<span class='notice'>Spawned SCP-3199 at [spawn_turf].</span>")
 	log_admin("[key_name(src)] spawned SCP-3199 at [spawn_turf].")
