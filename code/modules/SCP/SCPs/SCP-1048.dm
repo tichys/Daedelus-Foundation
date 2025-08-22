@@ -352,12 +352,7 @@
 
 	// Create special effect
 	for(var/i = 1 to 3)
-		spawn(i * 10)
-			var/list/directions = list(NORTH, SOUTH, EAST, WEST, NORTHEAST, NORTHWEST, SOUTHEAST, SOUTHWEST)
-			var/direction = pick(directions)
-			var/turf/T = get_step(src, direction)
-			if(T)
-				playsound(T, 'sound/weapons/punch1.ogg', 30, TRUE)
+		addtimer(CALLBACK(src, PROC_REF(create_masterpiece_effect), i), i * 10)
 
 // Update construction progress
 /mob/living/simple_animal/hostile/scp1048/proc/update_construction_progress()

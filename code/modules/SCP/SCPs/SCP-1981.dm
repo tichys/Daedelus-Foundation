@@ -8,313 +8,133 @@
 	icon_state = "scp1981"
 	w_class = WEIGHT_CLASS_SMALL
 
-	// Maximum Enhanced SCP-1981 variables
-	var/video_manipulation = 0
-	var/max_video_manipulation = 100
-	var/reality_distortion = 0
-	var/max_reality_distortion = 100
-	var/temporal_effects = 0
-	var/max_temporal_effects = 100
-	var/video_evolution = 1
-	var/max_video_evolution = 5
-	var/distortion_potency = 1
-	var/max_distortion_potency = 10
-	var/temporal_mastery = 0
-	var/max_temporal_mastery = 100
-	var/video_cooldown = 0
-	var/video_cooldown_time = 30 SECONDS
-	var/reality_cooldown = 0
-	var/reality_cooldown_time = 20 SECONDS
-	var/temporal_cooldown = 0
-	var/temporal_cooldown_time = 45 SECONDS
+	// Modular systems
+	var/datum/scp1981_video_system/video_system
+	var/datum/scp1981_reality_system/reality_system
+	var/datum/scp1981_temporal_system/temporal_system
+	var/datum/scp1981_synthesis_system/synthesis_system
+	var/datum/scp1981_research_system/research_system
 
-	// Persistence tracking
-	var/video_events = 0
-	var/reality_events = 0
-	var/temporal_events = 0
-	var/distortion_events = 0
-	var/video_masteries = 0
-	var/reality_masteries = 0
-	var/temporal_masteries = 0
-	var/evolution_events = 0
+	// Basic tracking variables
+	var/total_viewers = 0
+	var/people_affected = 0
+	var/activation_events = 0
 
 /obj/item/scp1981/Initialize()
 	. = ..()
 
+	// Initialize modular systems
+	video_system = new /datum/scp1981_video_system(src)
+	reality_system = new /datum/scp1981_reality_system(src)
+	temporal_system = new /datum/scp1981_temporal_system(src)
+	synthesis_system = new /datum/scp1981_synthesis_system(src)
+	research_system = new /datum/scp1981_research_system(src)
+
 	// Initialize SCP datum
-	SCP = new /datum/scp(
-		src,
-		"SCP-1981",
-		SCP_EUCLID,
-		"1981",
-
-	)
-
-	SCP.min_playercount = 20
-	SCP.min_time = 30 MINUTES
+	SCP = new /datum/scp(src, "RONALD REAGAN CUT UP WHILE TALKING", SCP_EUCLID, "1981")
 
 	// Register with SCP persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-1981"] = new /datum/scp_instance("SCP-1981", src)
 
+	// Start processing
+	START_PROCESSING(SSobj, src)
+
 /obj/item/scp1981/Destroy()
+	STOP_PROCESSING(SSobj, src)
 	return ..()
 
-// Core mechanics
+// Core automated processing
 /obj/item/scp1981/process()
 	. = ..()
 
-	// Process video manipulation
-	process_video_manipulation()
+	// Process all modular systems
+	if(video_system)
+		video_system.process_video()
+	if(reality_system)
+		reality_system.process_reality()
+	if(temporal_system)
+		temporal_system.process_temporal()
+	if(synthesis_system)
+		synthesis_system.process_synthesis()
+	if(research_system)
+		research_system.process_research()
 
-	// Process reality distortion
-	process_reality_distortion()
+	// Update tracking data
+	update_tracking_data()
 
-	// Process temporal effects
-	process_temporal_effects()
+	// Automatic escalation based on prolonged exposure
+	check_escalation_conditions()
 
-	// Process video evolution
-	process_video_evolution()
+/obj/item/scp1981/proc/update_tracking_data()
+	// Count current nearby viewers
+	var/current_viewers = 0
+	for(var/mob/living/carbon/human/H in range(6, src))
+		if(H.stat != DEAD)
+			current_viewers++
 
-// Process video manipulation
-/obj/item/scp1981/proc/process_video_manipulation()
-	if(video_manipulation > 0 && prob(1))
-		// Create video effects
-		for(var/mob/living/carbon/human/H in range(5, src))
-			if(H != src && !H.SCP)
-				to_chat(H, "<span class='danger'>You see disturbing video imagery...</span>")
-				video_events++
+	if(current_viewers > 0)
+		activation_events++
+		total_viewers += current_viewers
 
-// Process reality distortion
-/obj/item/scp1981/proc/process_reality_distortion()
-	if(reality_distortion > 0 && prob(1))
-		// Create reality effects
-		for(var/mob/living/carbon/human/H in range(4, src))
-			if(H != src && !H.SCP)
-				to_chat(H, "<span class='danger'>Reality seems to distort around you...</span>")
-				reality_events++
+/obj/item/scp1981/proc/check_escalation_conditions()
+	// Check if conditions warrant escalation of effects
+	var/list/nearby_viewers = list()
+	for(var/mob/living/carbon/human/H in range(6, src))
+		if(H.stat != DEAD)
+			nearby_viewers += H
 
-// Process temporal effects
-/obj/item/scp1981/proc/process_temporal_effects()
-	if(temporal_effects > 0 && prob(1))
-		// Create temporal effects
-		for(var/mob/living/carbon/human/H in range(6, src))
-			if(H != src && !H.SCP)
-				to_chat(H, "<span class='danger'>Time seems to behave strangely...</span>")
-				temporal_events++
+	// Escalate if multiple people have been viewing for a while
+	if(nearby_viewers.len > 2 && activation_events > 100)
+		escalate_all_systems()
 
-// Process video evolution
-/obj/item/scp1981/proc/process_video_evolution()
-	if(video_manipulation >= max_video_manipulation && video_evolution < max_video_evolution)
-		if(prob(1))
-			evolve_video_stage()
+	// Special escalation if someone stays too long
+	if(nearby_viewers.len > 0 && activation_events > 200)
+		trigger_ultimate_video_event(nearby_viewers)
 
-// Evolve video stage
-/obj/item/scp1981/proc/evolve_video_stage()
-	video_evolution = min(max_video_evolution, video_evolution + 1)
-	evolution_events++
+/obj/item/scp1981/proc/escalate_all_systems()
+	// Escalate all systems simultaneously
+	if(video_system)
+		video_system.increase_video_manipulation()
+	if(reality_system)
+		reality_system.increase_reality_distortion()
+	if(temporal_system)
+		temporal_system.increase_temporal_effects()
 
-	var/evolution_message = ""
-	switch(video_evolution)
-		if(2)
-			evolution_message = "SCP-1981 evolves enhanced video manipulation!"
-		if(3)
-			evolution_message = "SCP-1981 evolves reality distortion abilities!"
-		if(4)
-			evolution_message = "SCP-1981 evolves temporal manipulation powers!"
-		if(5)
-			evolution_message = "SCP-1981 achieves ultimate video evolution!"
-
-	visible_message("<span class='danger'>[evolution_message]</span>")
-
-// Maximum enhanced abilities
-/obj/item/scp1981/proc/video_manipulation_ability()
-	video_manipulation = min(max_video_manipulation, video_manipulation + 20)
-	video_events++
-
-	to_chat(usr, "<span class='notice'>SCP-1981 manipulates video. Manipulation: [video_manipulation]/[max_video_manipulation]</span>")
-
-/obj/item/scp1981/proc/reality_distortion_ability()
-	if(world.time < reality_cooldown)
-		to_chat(usr, "<span class='warning'>SCP-1981 needs time to distort reality again.</span>")
-		return
-
-	reality_cooldown = world.time + reality_cooldown_time
-	reality_distortion = min(max_reality_distortion, reality_distortion + 20)
-	reality_events++
-
-	to_chat(usr, "<span class='notice'>SCP-1981 distorts reality. Distortion: [reality_distortion]/[max_reality_distortion]</span>")
-
-/obj/item/scp1981/proc/temporal_effects_ability()
-	if(world.time < temporal_cooldown)
-		to_chat(usr, "<span class='warning'>SCP-1981 needs time to create temporal effects again.</span>")
-		return
-
-	temporal_cooldown = world.time + temporal_cooldown_time
-	temporal_effects = min(max_temporal_effects, temporal_effects + 20)
-	temporal_events++
-
-	to_chat(usr, "<span class='notice'>SCP-1981 creates temporal effects. Effects: [temporal_effects]/[max_temporal_effects]</span>")
-
-/obj/item/scp1981/proc/distortion_potency_ability()
-	if(distortion_potency >= max_distortion_potency)
-		to_chat(usr, "<span class='warning'>SCP-1981 has reached maximum distortion potency.</span>")
-		return
-
-	distortion_potency = min(max_distortion_potency, distortion_potency + 1)
-	distortion_events++
-
-	to_chat(usr, "<span class='notice'>SCP-1981's distortion potency increases. Potency: [distortion_potency]/[max_distortion_potency]</span>")
-
-/obj/item/scp1981/proc/temporal_mastery_ability()
-	if(temporal_mastery >= max_temporal_mastery)
-		to_chat(usr, "<span class='warning'>SCP-1981 has reached maximum temporal mastery.</span>")
-		return
-
-	temporal_mastery = min(max_temporal_mastery, temporal_mastery + 10)
-	temporal_masteries++
-
-	to_chat(usr, "<span class='notice'>SCP-1981's temporal mastery is enhanced. Mastery: [temporal_mastery]/[max_temporal_mastery]</span>")
-
-/obj/item/scp1981/proc/evolve_video_ability()
-	if(video_evolution >= max_video_evolution)
-		to_chat(usr, "<span class='warning'>SCP-1981 has reached maximum evolution.</span>")
-		return
-
-	if(video_manipulation < max_video_manipulation)
-		to_chat(usr, "<span class='warning'>SCP-1981 needs more video manipulation to evolve.</span>")
-		return
-
-	evolve_video_stage()
-
-/obj/item/scp1981/proc/ultimate_video_ability()
-	if(video_evolution < max_video_evolution)
-		to_chat(usr, "<span class='warning'>SCP-1981 needs maximum evolution for ultimate video.</span>")
-		return
-
-	// Ultimate video affects all nearby targets
-	for(var/mob/living/carbon/human/H in range(10, src))
-		if(H != src && !H.SCP)
-			to_chat(H, "<span class='danger'>You experience SCP-1981's ultimate video manipulation!</span>")
-			H.adjustBruteLoss(50)
-
-	to_chat(usr, "<span class='notice'>SCP-1981 performs ultimate video manipulation on all nearby targets.</span>")
-
-/obj/item/scp1981/proc/video_synthesis_ability()
-	if(video_manipulation < max_video_manipulation)
-		to_chat(usr, "<span class='warning'>SCP-1981 needs more video manipulation to synthesize.</span>")
-		return
-
-	// Create a powerful video effect
+	// Announce escalation
 	for(var/mob/living/carbon/human/H in range(8, src))
-		if(H != src && !H.SCP)
-			to_chat(H, "<span class='danger'>You feel overwhelming video distortion and reality warping...</span>")
+		if(H.stat != DEAD)
+			to_chat(H, "<span class='danger'>The video recording's effects intensify dramatically!</span>")
 
-	to_chat(usr, "<span class='notice'>SCP-1981 synthesizes video and affects all nearby targets.</span>")
+/obj/item/scp1981/proc/trigger_ultimate_video_event(list/targets)
+	// Major event that affects all nearby people
+	people_affected += targets.len
 
-// Enhanced status display
-/obj/item/scp1981/proc/get_video_status()
-	var/message = "<h2>SCP-1981 Video Status</h2>"
-	message += "<b>Video Manipulation:</b> [video_manipulation]/[max_video_manipulation]<br>"
-	message += "<b>Reality Distortion:</b> [reality_distortion]/[max_reality_distortion]<br>"
-	message += "<b>Temporal Effects:</b> [temporal_effects]/[max_temporal_effects]<br>"
-	message += "<b>Video Evolution:</b> [video_evolution]/[max_video_evolution]<br>"
-	message += "<b>Distortion Potency:</b> [distortion_potency]/[max_distortion_potency]<br>"
-	message += "<b>Temporal Mastery:</b> [temporal_mastery]/[max_temporal_mastery]<br>"
+	for(var/mob/living/carbon/human/H in targets)
+		to_chat(H, "<span class='danger'>You experience SCP-1981's ultimate video manipulation!</span>")
+		H.adjustBruteLoss(25)
+		H.stamina.adjust(-30)
 
-	return message
+	// Reset activation counter to prevent spam
+	activation_events = 0
 
-// Enhanced verbs
-/obj/item/scp1981/verb/video_manipulation()
-	set name = "Video Manipulation"
-	set category = "SCP-1981"
-	set desc = "Manipulate video with SCP-1981."
-
-	video_manipulation_ability()
-
-/obj/item/scp1981/verb/reality_distortion()
-	set name = "Reality Distortion"
-	set category = "SCP-1981"
-	set desc = "Distort reality with SCP-1981."
-
-	reality_distortion_ability()
-
-/obj/item/scp1981/verb/temporal_effects()
-	set name = "Temporal Effects"
-	set category = "SCP-1981"
-	set desc = "Create temporal effects with SCP-1981."
-
-	temporal_effects_ability()
-
-/obj/item/scp1981/verb/distortion_potency()
-	set name = "Distortion Potency"
-	set category = "SCP-1981"
-	set desc = "Increase SCP-1981's distortion potency."
-
-	distortion_potency_ability()
-
-/obj/item/scp1981/verb/temporal_mastery()
-	set name = "Temporal Mastery"
-	set category = "SCP-1981"
-	set desc = "Enhance SCP-1981's temporal mastery."
-
-	temporal_mastery_ability()
-
-/obj/item/scp1981/verb/evolve_video()
-	set name = "Evolve Video"
-	set category = "SCP-1981"
-	set desc = "Evolve SCP-1981's video capabilities."
-
-	evolve_video_ability()
-
-/obj/item/scp1981/verb/ultimate_video()
-	set name = "Ultimate Video"
-	set category = "SCP-1981"
-	set desc = "Perform ultimate video manipulation on all nearby targets."
-
-	ultimate_video_ability()
-
-/obj/item/scp1981/verb/video_synthesis()
-	set name = "Video Synthesis"
-	set category = "SCP-1981"
-	set desc = "Synthesize video and affect all nearby targets."
-
-	video_synthesis_ability()
-
-// Admin verb to view SCP-1981 persistence data
-/obj/item/scp1981/verb/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP-1981"
-	set desc = "View SCP-1981 persistence data."
-
-	if(!check_rights(R_ADMIN))
-		to_chat(usr, "<span class='warning'>You don't have permission to view persistence data.</span>")
+// Interaction handling - automatic responses to player actions
+/obj/item/scp1981/attack_hand(mob/living/carbon/human/user)
+	. = ..()
+	if(!.)
 		return
 
-	var/message = "<h2>SCP-1981 Persistence Data</h2>"
-	message += "<b>Video Events:</b> [video_events]<br>"
-	message += "<b>Reality Events:</b> [reality_events]<br>"
-	message += "<b>Temporal Events:</b> [temporal_events]<br>"
-	message += "<b>Distortion Events:</b> [distortion_events]<br>"
-	message += "<b>Video Masteries:</b> [video_masteries]<br>"
-	message += "<b>Reality Masteries:</b> [reality_masteries]<br>"
-	message += "<b>Temporal Masteries:</b> [temporal_masteries]<br>"
-	message += "<b>Evolution Events:</b> [evolution_events]<br>"
-	message += "<b>Video Manipulation:</b> [video_manipulation]/[max_video_manipulation]<br>"
-	message += "<b>Reality Distortion:</b> [reality_distortion]/[max_reality_distortion]<br>"
-	message += "<b>Temporal Effects:</b> [temporal_effects]/[max_temporal_effects]<br>"
-	message += "<b>Video Evolution:</b> [video_evolution]/[max_video_evolution]<br>"
-	message += "<b>Distortion Potency:</b> [distortion_potency]/[max_distortion_potency]<br>"
-	message += "<b>Temporal Mastery:</b> [temporal_mastery]/[max_temporal_mastery]<br>"
+	// Automatic response to interaction
+	if(user.stat != DEAD)
+		to_chat(user, "<span class='danger'>As you touch the video recording, you see disturbing imagery...</span>")
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1981"]
-		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+		// Trigger systems based on interaction
+		if(video_system)
+			video_system.increase_video_manipulation()
+		if(reality_system)
+			reality_system.increase_reality_distortion()
 
-	to_chat(usr, "<span class='notice'>[message]</span>")
-
-// Override examine for SCP-1981
+// Examine override
 /obj/item/scp1981/examine(mob/user)
 	. = ..()
 
@@ -324,4 +144,98 @@
 			to_chat(user, "<span class='warning'>This is SCP-1981, a video recording that causes reality distortion.</span>")
 		else
 			to_chat(user, "<span class='danger'>A disturbing video recording that seems to distort reality.</span>")
+
+// Status display for admin/research purposes
+/obj/item/scp1981/proc/get_status()
+	var/list/status = list()
+	status += "=== SCP-1981 Status ==="
+
+	if(video_system)
+		status += "Video Manipulation: [video_system.video_manipulation]/[video_system.max_video_manipulation]"
+		status += "Video Evolution: [video_system.video_evolution]/[video_system.max_video_evolution]"
+		status += "Video Events: [video_system.video_events]"
+
+	if(reality_system)
+		status += "Reality Distortion: [reality_system.reality_distortion]/[reality_system.max_reality_distortion]"
+		status += "Distortion Potency: [reality_system.distortion_potency]/[reality_system.max_distortion_potency]"
+		status += "Reality Events: [reality_system.reality_events]"
+
+	if(temporal_system)
+		status += "Temporal Effects: [temporal_system.temporal_effects]/[temporal_system.max_temporal_effects]"
+		status += "Temporal Mastery: [temporal_system.temporal_mastery]/[temporal_system.max_temporal_mastery]"
+		status += "Temporal Events: [temporal_system.temporal_events]"
+
+	if(synthesis_system)
+		status += "Synthesis Events: [synthesis_system.synthesis_events]"
+
+	status += "=== Statistics ==="
+	status += "Total Viewers: [total_viewers]"
+	status += "People Affected: [people_affected]"
+	status += "Activation Events: [activation_events]"
+
+	return status
+
+// Admin verb for status checking
+/obj/item/scp1981/verb/show_status_verb()
+	set name = "Show SCP Status"
+	set category = "SCP-1981"
+	set desc = "Display SCP-1981 status (Admin Only)"
+
+	if(!check_rights(R_ADMIN))
+		return
+
+	var/list/status = get_status()
+	for(var/line in status)
+		to_chat(src, "<span class='notice'>[line]</span>")
+
+// Persistence system
+/obj/item/scp1981/proc/save_persistence_data()
+	if(!SCP)
+		return
+
+	var/list/data = list(
+		"total_viewers" = total_viewers,
+		"people_affected" = people_affected,
+		"activation_events" = activation_events,
+		"video_manipulation" = video_system ? video_system.video_manipulation : 0,
+		"video_evolution" = video_system ? video_system.video_evolution : 1,
+		"reality_distortion" = reality_system ? reality_system.reality_distortion : 0,
+		"distortion_potency" = reality_system ? reality_system.distortion_potency : 1,
+		"temporal_effects" = temporal_system ? temporal_system.temporal_effects : 0,
+		"temporal_mastery" = temporal_system ? temporal_system.temporal_mastery : 0,
+		"video_events" = video_system ? video_system.video_events : 0,
+		"reality_events" = reality_system ? reality_system.reality_events : 0,
+		"temporal_events" = temporal_system ? temporal_system.temporal_events : 0,
+		"synthesis_events" = synthesis_system ? synthesis_system.synthesis_events : 0
+	)
+
+	// Store data for research integration
+	if(research_system)
+		research_system.research_data = data
+
+/obj/item/scp1981/proc/load_persistence_data()
+	// Load data from research system if available
+	if(research_system && research_system.research_data && research_system.research_data.len > 0)
+		var/list/data = research_system.research_data
+		total_viewers = data["total_viewers"] || 0
+		people_affected = data["people_affected"] || 0
+		activation_events = data["activation_events"] || 0
+
+		if(video_system)
+			video_system.video_manipulation = data["video_manipulation"] || 0
+			video_system.video_evolution = data["video_evolution"] || 1
+			video_system.video_events = data["video_events"] || 0
+
+		if(reality_system)
+			reality_system.reality_distortion = data["reality_distortion"] || 0
+			reality_system.distortion_potency = data["distortion_potency"] || 1
+			reality_system.reality_events = data["reality_events"] || 0
+
+		if(temporal_system)
+			temporal_system.temporal_effects = data["temporal_effects"] || 0
+			temporal_system.temporal_mastery = data["temporal_mastery"] || 0
+			temporal_system.temporal_events = data["temporal_events"] || 0
+
+		if(synthesis_system)
+			synthesis_system.synthesis_events = data["synthesis_events"] || 0
 

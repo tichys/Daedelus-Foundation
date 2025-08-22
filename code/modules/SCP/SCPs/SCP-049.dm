@@ -5,7 +5,7 @@
 	name = "SCP-049"
 	desc = "A tall humanoid figure wearing the black robes and bird-like mask of a medieval plague doctor."
 	icon = 'icons/scp/scp-049.dmi'
-	icon_state = "scp049"
+	icon_state = ""
 	real_name = "SCP-049"
 
 	// Pestilence mechanics
@@ -66,10 +66,8 @@
 	// Set species properly
 	set_species(/datum/species/scp049)
 
-	// Create SCP datum and enable advanced component system
+	// Create SCP datum
 	SCP = new /datum/scp(src, "Plague Doctor", SCP_EUCLID, "049", SCP_SENTIENT)
-	SCP.uses_advanced_components = TRUE
-	SCP.compInit_advanced()
 
 	// Initialize SCP-049 specific skills
 	initialize_scp_049_skills()
@@ -86,14 +84,18 @@
 	// Load persistence data
 	load_persistence_data()
 
+	// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
+
 /mob/living/carbon/human/scp049/proc/initialize_scp_049_skills()
-	var/datum/scp_advanced_component/advanced_skill_system/skill_system = SCP.get_component("skill_system")
-	if(skill_system)
-		skill_system.add_skill("Spread Pestilence", 30 SECONDS, list("requires_proximity"))
-		skill_system.add_skill("Cure Target", 60 SECONDS, list("requires_proximity"))
-		skill_system.add_skill("Breach Doors", 120 SECONDS, list("requires_power"))
-		skill_system.add_skill("Research Cure", 45 SECONDS, list("requires_materials"))
-		skill_system.add_skill("Evolve Pestilence", 300 SECONDS, list("requires_breach"))
+	// Basic skill system - no advanced components needed
+	// Skills are handled through verbs instead
+	return
 
 /mob/living/carbon/human/scp049/proc/setup_pestilence_hud()
 	// Add pestilence HUD
@@ -166,8 +168,7 @@
 	playsound(target, 'sound/scp/scp049/SCP049_3.ogg', 30, 0)
 
 	// Start pestilence effects
-	spawn(10 SECONDS)
-		apply_pestilence_effects(target)
+	addtimer(CALLBACK(src, PROC_REF(apply_pestilence_effects), target), 10 SECONDS)
 
 /mob/living/carbon/human/scp049/proc/apply_pestilence_effects(mob/living/carbon/human/target)
 	if(!target || !HAS_TRAIT(target, TRAIT_PESTILENCE))
@@ -195,8 +196,7 @@
 					infect_with_pestilence(H)
 
 	// Continue effects with shorter interval for more aggressive progression
-	spawn(20 SECONDS)
-		apply_pestilence_effects(target)
+	addtimer(CALLBACK(src, PROC_REF(apply_pestilence_effects), target), 20 SECONDS)
 
 // Cure mechanics
 /mob/living/carbon/human/scp049/proc/cure_target(mob/living/carbon/human/target)
@@ -410,34 +410,29 @@
 
 // Persistence system integration
 /mob/living/carbon/human/scp049/proc/save_persistence_data()
-	if(!SCP || !SCP.uses_advanced_components)
-		return
-
-	var/datum/scp_advanced_component/advanced_persistence_system/persistence = SCP.get_component("persistence_system")
-	if(persistence)
-		var/list/persistence_data = list(
-			"pestilence_level" = pestilence_level,
-			"cure_potency" = cure_potency,
-			"evolution_stage" = evolution_stage,
-			"research_progress" = research_progress,
-			"infections_performed" = infections_performed,
-			"cures_attempted" = cures_attempted,
-			"cures_successful" = cures_successful,
-			"doors_breached" = doors_breached,
-			"research_breakthroughs" = research_breakthroughs,
-			"evolution_events" = evolution_events,
-			"total_pestilence_spread" = total_pestilence_spread,
-			"total_damage_dealt" = total_damage_dealt
-		)
-		persistence.save_data("scp049_stats", persistence_data)
+	// Basic persistence - save to global list
+	var/list/persistence_data = list(
+		"pestilence_level" = pestilence_level,
+		"cure_potency" = cure_potency,
+		"evolution_stage" = evolution_stage,
+		"research_progress" = research_progress,
+		"infections_performed" = infections_performed,
+		"cures_attempted" = cures_attempted,
+		"cures_successful" = cures_successful,
+		"doors_breached" = doors_breached,
+		"research_breakthroughs" = research_breakthroughs,
+		"evolution_events" = evolution_events,
+		"total_pestilence_spread" = total_pestilence_spread,
+		"total_damage_dealt" = total_damage_dealt
+	)
+	// Store in global persistence system if available
+	if(SSscp_persistence && SSscp_persistence.manager)
+		SSscp_persistence.manager.save_scp_data("SCP-049", persistence_data)
 
 /mob/living/carbon/human/scp049/proc/load_persistence_data()
-	if(!SCP || !SCP.uses_advanced_components)
-		return
-
-	var/datum/scp_advanced_component/advanced_persistence_system/persistence = SCP.get_component("persistence_system")
-	if(persistence)
-		var/list/persistence_data = persistence.load_data("scp049_stats")
+	// Basic persistence - load from global list
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/list/persistence_data = SSscp_persistence.manager.load_scp_data("SCP-049")
 		if(persistence_data)
 			pestilence_level = persistence_data["pestilence_level"] || 0
 			cure_potency = persistence_data["cure_potency"] || 1

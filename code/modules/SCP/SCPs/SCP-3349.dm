@@ -1,58 +1,58 @@
 // SCP-3349: Reality-Bending Entity
 // An entity that can manipulate reality and create environmental anomalies
 
-/mob/living/carbon/scp/scp3349
+/mob/living/carbon/human/scp3349
 	name = "reality bender"
 	desc = "A mysterious entity that seems to distort reality around it. The air around it shimmers unnaturally."
 	icon = 'icons/scp/scp-3349.dmi'
 	icon_state = "reality_bender"
 	status_flags = 0
-	use_custom_sprite = TRUE
 	maxHealth = 200
 	health = 200
-	max_scp_health = 200
-	scp_health = 200
-	max_scp_armor = 75
-	scp_armor = 75
 
-	// Reality manipulation abilities
-	var/reality_distortion_cooldown = 0
-	var/reality_distortion_cooldown_time = 25 SECONDS
-	var/anomaly_creation_cooldown = 0
-	var/anomaly_creation_cooldown_time = 40 SECONDS
-	var/distortion_radius = 5
-	var/anomaly_duration = 60 SECONDS
-	var/list/created_anomalies = list()
+	// Modular systems
+	var/datum/scp3349_distortion_system/distortion_system
+	var/datum/scp3349_anomaly_system/anomaly_system
+	var/datum/scp3349_evolution_system/evolution_system
+	var/datum/scp3349_environment_system/environment_system
+	var/datum/scp3349_research_system/research_system
 
-/mob/living/carbon/scp/scp3349/Initialize(mapload, new_species = "SCP-3349")
+/mob/living/carbon/human/scp3349/Initialize(mapload)
 	. = ..()
+	set_species(/datum/species/scp3349)
 	SCP = new /datum/scp(src, "reality bender", SCP_KETER, "3349", SCP_PLAYABLE)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
+		// Initialize systems after a short delay
+	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
 
-	// Add abilities
-	add_ability("distort_reality", "distort_reality_ability")
-	add_ability("create_anomaly", "create_anomaly_ability")
-	add_passive_effect("reality_distortion", "reality_distortion_effect")
+	// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
 
-	// Auto-registered via datum/scp
+/mob/living/carbon/human/scp3349/proc/initialize_systems()
+	distortion_system = new /datum/scp3349_distortion_system(src)
+	anomaly_system = new /datum/scp3349_anomaly_system(src)
+	evolution_system = new /datum/scp3349_evolution_system(src)
+	environment_system = new /datum/scp3349_environment_system(src)
+	research_system = new /datum/scp3349_research_system(src)
 
-/mob/living/carbon/scp/scp3349/process_scp_effects()
+/mob/living/carbon/human/scp3349/Life(datum/controller/process/mobs/parent)
 	. = ..()
-
 	if(stat == DEAD)
 		return
+	// Update modular systems
+	distortion_system?.process_distortion()
+	anomaly_system?.process_anomalies()
+	evolution_system?.process_evolution()
+	environment_system?.process_environment()
+	research_system?.process_research()
 
-	// Passive reality distortion effects
-	if(prob(3))
-		visible_message("<span class='notice'>The air around [src] shimmers with reality distortion.</span>")
-
-	// Clean up expired anomalies
-	for(var/obj/effect/reality_anomaly/anomaly in created_anomalies)
-		if(!anomaly || anomaly.gc_destroyed)
-			created_anomalies -= anomaly
-
-/mob/living/carbon/scp/scp3349/UnarmedAttack(atom/A)
+/mob/living/carbon/human/scp3349/UnarmedAttack(atom/A)
 	if(!A || !istype(A, /mob/living))
 		return ..()
 
@@ -70,99 +70,24 @@
 	playsound(src, 'sound/effects/explosion1.ogg', 50)
 
 	// Log interaction
-	SCP.log_interaction(L, "reality_distortion_attack")
-	SCP.award_research(L, "anomaly", 20)
+	SCP?.log_interaction(L, "reality_distortion_attack")
+	SCP?.award_research(L, "anomaly", 20)
 
 	return ..()
 
-/mob/living/carbon/scp/scp3349/get_status_tab_items()
+/mob/living/carbon/human/scp3349/get_status_tab_items()
 	. = ..()
-	. += "Reality Distortion Cooldown: [max(0, round((reality_distortion_cooldown - world.time) / 10))] seconds"
-	. += "Anomaly Creation Cooldown: [max(0, round((anomaly_creation_cooldown - world.time) / 10))] seconds"
-	. += "Active Anomalies: [created_anomalies.len]"
+	. += "Reality bends subtly in your presence."
 
-/mob/living/carbon/scp/scp3349/examine(mob/user)
+/mob/living/carbon/human/scp3349/examine(mob/user)
 	. = ..()
 	. += "<span class='notice'>This entity can manipulate reality and create environmental anomalies.</span>"
-	if(created_anomalies.len > 0)
-		. += "<span class='warning'>The entity has created [created_anomalies.len] reality anomalies.</span>"
+	. += "<span class='warning'>Localized anomalies may form spontaneously.</span>"
 
-/mob/living/carbon/scp/scp3349/scp_death()
+/mob/living/carbon/human/scp3349/death(gibbed)
 	visible_message("<span class='danger'>[src] dissolves into reality distortion!</span>")
 	playsound(src, 'sound/effects/explosion2.ogg', 50)
-
-	// Remove all created anomalies
-	for(var/obj/effect/reality_anomaly/anomaly in created_anomalies)
-		if(anomaly && !anomaly.gc_destroyed)
-			qdel(anomaly)
-	created_anomalies = list()
-
-	..()
-
-// Reality manipulation abilities
-/mob/living/carbon/scp/scp3349/proc/distort_reality_ability()
-	set name = "Distort Reality"
-	set desc = "Create a localized reality distortion field"
-	set category = "SCP"
-
-	if(reality_distortion_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Reality distortion is still recharging...</span>")
-		return
-
-	to_chat(src, "<span class='notice'>You create a reality distortion field around you.</span>")
-	visible_message("<span class='danger'>[src] creates a reality distortion field!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Affect all living beings in range
-	for(var/mob/living/L in range(distortion_radius, src))
-		if(L == src)
-			continue
-		if(L.stat == DEAD)
-			continue
-
-		to_chat(L, "<span class='danger'>Reality seems to bend and distort around you!</span>")
-		L.adjustBruteLoss(10)
-
-		SCP.log_interaction(L, "reality_distortion_field")
-		SCP.award_research(L, "anomaly", 15)
-
-	reality_distortion_cooldown = world.time + reality_distortion_cooldown_time
-
-/mob/living/carbon/scp/scp3349/proc/create_anomaly_ability()
-	set name = "Create Anomaly"
-	set desc = "Create a permanent reality anomaly"
-	set category = "SCP"
-
-	if(anomaly_creation_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Anomaly creation is still recharging...</span>")
-		return
-
-	var/list/anomaly_types = list("Gravity Well", "Time Distortion", "Spatial Rift", "Reality Bubble")
-	var/anomaly_type = input(src, "Choose anomaly type:", "Create Anomaly") as null|anything in anomaly_types
-
-	if(!anomaly_type)
-		return
-
-	var/turf/target_turf = get_turf(src)
-	if(!target_turf)
-		return
-
-	to_chat(src, "<span class='notice'>You create a [anomaly_type] anomaly.</span>")
-	visible_message("<span class='danger'>[src] creates a [anomaly_type] anomaly!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Create the anomaly
-	var/obj/effect/reality_anomaly/anomaly = new /obj/effect/reality_anomaly(target_turf, anomaly_type, anomaly_duration)
-	created_anomalies += anomaly
-
-	anomaly_creation_cooldown = world.time + anomaly_creation_cooldown_time
-
-/mob/living/carbon/scp/scp3349/proc/reality_distortion_effect()
-	// Passive reality distortion effects
-	if(prob(1))
-		visible_message("<span class='notice'>The air around [src] shimmers with reality distortion.</span>")
+	return ..()
 
 // Reality Anomaly Object
 /obj/effect/reality_anomaly
@@ -187,8 +112,7 @@
 	setup_anomaly_effect()
 
 	// Auto-destruct after duration
-	spawn(duration)
-		qdel(src)
+	addtimer(CALLBACK(src, PROC_REF(qdel), src), duration)
 
 /obj/effect/reality_anomaly/proc/setup_anomaly_effect()
 	switch(anomaly_type)

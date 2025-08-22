@@ -628,8 +628,7 @@
 	trigger_event("containment_breach_alert", alert_data)
 
 	if(auto_containment_enabled)
-		spawn(containment_response_time)
-			emergency_containment_response()
+		addtimer(CALLBACK(src, PROC_REF(emergency_containment_response)), containment_response_time)
 
 /datum/scp_advanced_component/advanced_containment_system/proc/emergency_containment_response()
 	// Implement emergency response procedures
@@ -655,13 +654,12 @@
 
 /datum/scp_advanced_component/advanced_containment_system/proc/on_containment_restored(event_data)
 	// Begin integrity restoration
-	spawn()
-		restore_containment_integrity()
+	addtimer(CALLBACK(src, PROC_REF(restore_containment_integrity)), 0)
 
 /datum/scp_advanced_component/advanced_containment_system/proc/restore_containment_integrity()
-	while(containment_integrity < max_containment_integrity)
-		sleep(10 SECONDS)
+	if(containment_integrity < max_containment_integrity)
 		adjust_containment_integrity(integrity_repair_rate)
+		addtimer(CALLBACK(src, PROC_REF(restore_containment_integrity)), 10 SECONDS)
 
 /datum/scp_advanced_component/advanced_containment_system/proc/on_damage_taken(event_data)
 	var/damage_amount = event_data["amount"] || 0
@@ -691,3 +689,124 @@
 
 /datum/scp_advanced_component/advanced_containment_system/get_status_info()
 	return "Containment: [containment_integrity]%, Security Level: [security_level]/[max_security_level]"
+
+// ---------------------------------------------------------------------------
+// Advanced Persistence System
+// Provides save/load facilities for SCP-specific long-lived state via a simple
+// key/value store scoped to the owning SCP/mob. Designed to be lightweight and
+// independent so it can compile even when other subsystems are unavailable.
+// ---------------------------------------------------------------------------
+
+var/global/list/ADV_PERSIST_STORE = list()
+
+/datum/scp_advanced_component/advanced_persistence_system
+	name = "Advanced Persistence System"
+	description = "Persists SCP state across sessions and important lifecycle events"
+	component_category = "core"
+	component_priority = COMPONENT_PRIORITY_LOW
+	update_frequency = 10 SECONDS
+
+	// Local cache of persisted data. Structure:
+	// list(key => any_serializable_value)
+	var/list/persisted_data
+
+	// Optional namespace/id to distinguish multiple SCPs on the same mob
+	var/persistence_namespace = "default"
+
+/datum/scp_advanced_component/advanced_persistence_system/on_initialize()
+	if(!persisted_data)
+		persisted_data = list()
+
+	// Subscribe to useful lifecycle events if available
+	// We guard calls so missing broadcaster won't error
+	if(manager)
+		// Register with the component manager's event bus
+		manager.subscribe_to_event(COMPONENT_EVENT_DEATH, src)
+		manager.subscribe_to_event(COMPONENT_EVENT_REVIVE, src)
+		// Map handlers for direct dispatch
+		if(!event_handlers)
+			event_handlers = list()
+		event_handlers[COMPONENT_EVENT_DEATH] = PROC_REF(on_scp_death)
+		event_handlers[COMPONENT_EVENT_REVIVE] = PROC_REF(on_scp_spawn)
+
+	// Attempt to load any previously saved data for this SCP
+	load_all_data()
+	return TRUE
+
+/datum/scp_advanced_component/advanced_persistence_system/on_update()
+	// Periodic auto-save for safety
+	auto_save()
+
+/datum/scp_advanced_component/advanced_persistence_system/get_status_info()
+	return "Persisted keys: [persisted_data?.len || 0]"
+
+// Compute a stable owner id for namespacing persistence. Prefer the SCP datum
+// if present on the mob, otherwise fall back to mob ckey/name.
+/datum/scp_advanced_component/advanced_persistence_system/proc/get_owner_id()
+	var/id = ""
+	if(parent_mob)
+		// Try to discover an attached SCP controller datum pattern
+		if(istype(parent_mob:SCP))
+			// Some SCP mobs hold a `SCP` datum reference
+			var/datum/scp/ctrl = parent_mob:SCP
+			if(ctrl && istext(ctrl?.designation))
+				id = "SCP-[ctrl.designation]"
+		if(!length(id))
+			// Fallback to ckey/name to scope data per player instance
+			id = (parent_mob:ckey) ? "ckey:[parent_mob:ckey]" : "name:[parent_mob:name]"
+	return "[persistence_namespace]|[id]"
+
+// Save a single value under a key
+/datum/scp_advanced_component/advanced_persistence_system/proc/save_data(key, data)
+	if(!persisted_data)
+		persisted_data = list()
+	persisted_data[key] = data
+	return TRUE
+
+// Load a single value by key
+/datum/scp_advanced_component/advanced_persistence_system/proc/load_data(key)
+	if(!persisted_data)
+		return null
+	return persisted_data[key]
+
+// Clear a specific key
+/datum/scp_advanced_component/advanced_persistence_system/proc/clear_data(key)
+	if(!persisted_data)
+		return FALSE
+	persisted_data -= key
+	return TRUE
+
+// Return a shallow copy of all data
+/datum/scp_advanced_component/advanced_persistence_system/proc/get_all_data()
+	if(!persisted_data)
+		return list()
+	var/list/copy = list()
+	for(var/K in persisted_data)
+		copy[K] = persisted_data[K]
+	return copy
+
+// Persist the entire structure to a lightweight global store. For now we keep
+// data in-memory under a global assoc keyed by owner id to avoid external deps.
+// This can be swapped to SSresearch_persistence or savefiles later.
+// Global map lives on the component manager to avoid polluting global namespace.
+/datum/scp_advanced_component/advanced_persistence_system/proc/auto_save()
+	if(!persisted_data)
+		return
+	ADV_PERSIST_STORE[get_owner_id()] = get_all_data()
+
+// Load from the lightweight global store back into local cache
+/datum/scp_advanced_component/advanced_persistence_system/proc/load_all_data()
+	var/list/incoming = ADV_PERSIST_STORE[get_owner_id()]
+	if(islist(incoming))
+		persisted_data = list()
+		for(var/K in incoming)
+			persisted_data[K] = incoming[K]
+		return TRUE
+	return FALSE
+
+// Lifecycle hooks to opportunistically save
+/datum/scp_advanced_component/advanced_persistence_system/proc/on_scp_death(event_data)
+	auto_save()
+
+/datum/scp_advanced_component/advanced_persistence_system/proc/on_scp_spawn(event_data)
+	load_all_data()

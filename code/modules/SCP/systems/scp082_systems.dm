@@ -217,8 +217,7 @@
     target.visible_message("<span class='danger'>[owner] grabs [target] for consumption!</span>")
 
     // Begin feeding sequence
-    spawn(0)
-        execute_feeding_sequence(target)
+    addtimer(CALLBACK(src, PROC_REF(execute_feeding_sequence), target), 0)
 
     return TRUE
 

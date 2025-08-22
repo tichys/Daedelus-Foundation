@@ -29,28 +29,28 @@
 
 /mob/living/carbon/human/scp343/Initialize()
 	. = ..()
-	
+
 	// Set species properly
 	set_species(/datum/species/scp343)
 
 	// Initialize SCP datum
-	SCP = new /datum/scp(
-		src,
-		"SCP-343",
-		SCP_SAFE,
-		"343",
-		SCP_SENTIENT
-	)
-
-	// Set session start time
-	session_start_time = world.time
+	SCP = new /datum/scp(src, "God", SCP_SAFE, "343", SCP_PLAYABLE)
+	SCP.min_playercount = 30
+	SCP.min_time = 15 MINUTES
 
 	// Initialize core systems after a short delay to ensure proper initialization
-	spawn(1)
-		initialize_scp343_systems()
+	addtimer(CALLBACK(src, PROC_REF(initialize_scp343_systems)), 1)
 
 	// Start processing
 	START_PROCESSING(SSobj, src)
+
+	// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
 
 /mob/living/carbon/human/scp343/proc/initialize_scp343_systems()
 	// Initialize core systems

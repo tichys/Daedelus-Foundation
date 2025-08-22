@@ -666,7 +666,7 @@
 			return scp
 		if("SCP-173")
 			// Create SCP-173 object
-			var/mob/living/carbon/scp/scp173/scp = new /mob/living/carbon/scp/scp173()
+			var/mob/living/carbon/human/scp173/scp = new /mob/living/carbon/human/scp173()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("SCP-096")
@@ -689,7 +689,7 @@
 			H3.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return H3
 		if("SCP-3199")
-			var/mob/living/simple_animal/hostile/scp3199/scp = new /mob/living/simple_animal/hostile/scp3199()
+			var/mob/living/carbon/human/scp3199/scp = new /mob/living/carbon/human/scp3199()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("Split Personality Necklace")

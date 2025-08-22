@@ -1,52 +1,62 @@
 // SCP-5295: Temporal Entity
 // An entity that can manipulate time and create temporal anomalies
 
-/mob/living/carbon/scp/scp5295
+/mob/living/carbon/human/scp5295
 	name = "temporal entity"
 	desc = "A mysterious entity that seems to exist outside of normal time. Temporal distortions occur around it."
 	icon = 'icons/scp/scp-5295.dmi'
 	icon_state = "temporal"
 	status_flags = 0
-	use_custom_sprite = TRUE
 	maxHealth = 225
 	health = 225
-	max_scp_health = 225
-	scp_health = 225
-	max_scp_armor = 70
-	scp_armor = 70
 
-	// Temporal manipulation abilities
-	var/time_dilation_cooldown = 0
-	var/time_dilation_cooldown_time = 30 SECONDS
-	var/temporal_anomaly_cooldown = 0
-	var/temporal_anomaly_cooldown_time = 50 SECONDS
-	var/time_dilation_radius = 4
-	var/temporal_anomaly_duration = 45 SECONDS
+	// Systems
+	var/datum/scp5295_temporal_system/temporal_system
+	var/datum/scp5295_reality_system/reality_system
+	var/datum/scp5295_evolution_system/evolution_system
+	var/datum/scp5295_containment_system/containment_system
+	var/datum/scp5295_environmental_system/environmental_system
+	var/datum/scp5295_research_system/research_system
 
-/mob/living/carbon/scp/scp5295/Initialize(mapload, new_species = "SCP-5295")
+/mob/living/carbon/human/scp5295/Initialize(mapload)
 	. = ..()
+	set_species(/datum/species/scp5295)
 	SCP = new /datum/scp(src, "temporal entity", SCP_KETER, "5295", SCP_PLAYABLE)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
 
-	// Add abilities
-	add_ability("dilate_time", "dilate_time_ability")
-	add_ability("create_temporal_anomaly", "create_temporal_anomaly_ability")
-	add_passive_effect("temporal_distortion", "temporal_distortion_effect")
+	// Initialize systems after mob exists
+	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
 
-	// Auto-registered via datum/scp
+	// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/scp/scp5295/process_scp_effects()
+/mob/living/carbon/human/scp5295/proc/initialize_systems()
+	temporal_system = new /datum/scp5295_temporal_system(src)
+	reality_system = new /datum/scp5295_reality_system(src)
+	evolution_system = new /datum/scp5295_evolution_system(src)
+	containment_system = new /datum/scp5295_containment_system(src)
+	environmental_system = new /datum/scp5295_environmental_system(src)
+	research_system = new /datum/scp5295_research_system(src)
+
+/mob/living/carbon/human/scp5295/Life(datum/controller/process/mobs/parent)
 	. = ..()
-
 	if(stat == DEAD)
 		return
+	// Update modular systems
+	temporal_system?.process_temporal()
+	reality_system?.process_reality()
+	evolution_system?.process_evolution()
+	containment_system?.process_containment()
+	environmental_system?.process_environment()
+	research_system?.process_research()
 
-	// Passive temporal distortion effects
-	if(prob(2))
-		visible_message("<span class='notice'>Temporal distortions occur around [src].</span>")
-
-/mob/living/carbon/scp/scp5295/UnarmedAttack(atom/A)
+/mob/living/carbon/human/scp5295/UnarmedAttack(atom/A)
 	if(!A || !istype(A, /mob/living))
 		return ..()
 
@@ -80,90 +90,24 @@
 	playsound(src, 'sound/effects/explosion1.ogg', 50)
 
 	// Log interaction
-	SCP.log_interaction(L, "temporal_manipulation_attack")
-	SCP.award_research(L, "anomaly", 30)
+	SCP?.log_interaction(L, "temporal_manipulation_attack")
+	SCP?.award_research(L, "anomaly", 30)
 
 	return ..()
 
-/mob/living/carbon/scp/scp5295/get_status_tab_items()
+/mob/living/carbon/human/scp5295/get_status_tab_items()
 	. = ..()
-	. += "Time Dilation Cooldown: [max(0, round((time_dilation_cooldown - world.time) / 10))] seconds"
-	. += "Temporal Anomaly Cooldown: [max(0, round((temporal_anomaly_cooldown - world.time) / 10))] seconds"
+	. += "Temporal disturbances ripple subtly around you."
 
-/mob/living/carbon/scp/scp5295/examine(mob/user)
+/mob/living/carbon/human/scp5295/examine(mob/user)
 	. = ..()
 	. += "<span class='notice'>This entity can manipulate time and create temporal anomalies.</span>"
 	. += "<span class='warning'>Time seems to flow differently around it.</span>"
 
-/mob/living/carbon/scp/scp5295/scp_death()
+/mob/living/carbon/human/scp5295/death(gibbed)
 	visible_message("<span class='danger'>[src] dissolves into temporal distortion!</span>")
 	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	..()
-
-// Temporal manipulation abilities
-/mob/living/carbon/scp/scp5295/proc/dilate_time_ability()
-	set name = "Dilate Time"
-	set desc = "Create a time dilation field"
-	set category = "SCP"
-
-	if(time_dilation_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Time dilation is still recharging...</span>")
-		return
-
-	to_chat(src, "<span class='notice'>You create a time dilation field.</span>")
-	visible_message("<span class='danger'>[src] creates a time dilation field!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Affect all living beings in range
-	for(var/mob/living/L in range(time_dilation_radius, src))
-		if(L == src)
-			continue
-		if(L.stat == DEAD)
-			continue
-
-		// Time dilation effects
-		L.adjustBruteLoss(15)
-		to_chat(L, "<span class='danger'>Time seems to slow down around you!</span>")
-
-		SCP.log_interaction(L, "time_dilation_field")
-		SCP.award_research(L, "anomaly", 25)
-
-	time_dilation_cooldown = world.time + time_dilation_cooldown_time
-
-/mob/living/carbon/scp/scp5295/proc/create_temporal_anomaly_ability()
-	set name = "Create Temporal Anomaly"
-	set desc = "Create a temporal anomaly"
-	set category = "SCP"
-
-	if(temporal_anomaly_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Temporal anomaly creation is still recharging...</span>")
-		return
-
-	var/list/anomaly_types = list("Time Loop", "Temporal Rift", "Chronological Distortion", "Temporal Storm")
-	var/anomaly_type = input(src, "Choose anomaly type:", "Create Temporal Anomaly") as null|anything in anomaly_types
-
-	if(!anomaly_type)
-		return
-
-	var/turf/target_turf = get_turf(src)
-	if(!target_turf)
-		return
-
-	to_chat(src, "<span class='notice'>You create a [anomaly_type] anomaly.</span>")
-	visible_message("<span class='danger'>[src] creates a [anomaly_type] anomaly!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Create the temporal anomaly
-	new /obj/effect/temporal_anomaly(target_turf, anomaly_type, temporal_anomaly_duration)
-
-	temporal_anomaly_cooldown = world.time + temporal_anomaly_cooldown_time
-
-/mob/living/carbon/scp/scp5295/proc/temporal_distortion_effect()
-	// Passive temporal distortion effects
-	if(prob(1))
-		visible_message("<span class='notice'>Temporal distortions occur around [src].</span>")
+	return ..()
 
 // Temporal Anomaly Object
 /obj/effect/temporal_anomaly
@@ -188,8 +132,7 @@
 	setup_temporal_anomaly_effect()
 
 	// Auto-destruct after duration
-	spawn(duration)
-		qdel(src)
+	addtimer(CALLBACK(src, PROC_REF(qdel), src), duration)
 
 /obj/effect/temporal_anomaly/proc/setup_temporal_anomaly_effect()
 	switch(anomaly_type)

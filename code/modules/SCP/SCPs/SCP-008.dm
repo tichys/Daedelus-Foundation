@@ -175,9 +175,7 @@
 	evolution_system.add_infection_caused()
 
 	// Start infection timer
-	spawn(get_infection_duration(infection_type))
-		if(target && target.stat != DEAD)
-			zombify_target(target)
+	addtimer(CALLBACK(src, PROC_REF(zombify_target), target), get_infection_duration(infection_type))
 
 	// Update persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
@@ -440,9 +438,7 @@
 	to_chat(target, "<span class='danger'>You have been infected by a zombie!</span>")
 
 	// Start infection timer
-	spawn(300) // 30 seconds
-		if(target && target.stat != DEAD)
-			zombify_target(target)
+	addtimer(CALLBACK(src, PROC_REF(zombify_target), target), 300)
 
 /mob/living/simple_animal/hostile/scp008_zombie/proc/zombify_target(mob/living/carbon/human/target)
 	if(!target || target.stat == DEAD)

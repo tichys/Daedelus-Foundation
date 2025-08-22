@@ -34,7 +34,7 @@
 
 /mob/living/carbon/human/scp106/Initialize()
 	. = ..()
-	
+
 	// Set species properly
 	set_species(/datum/species/scp106)
 
@@ -69,6 +69,14 @@
 
 	// Start processing
 	START_PROCESSING(SSobj, src)
+
+	// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
 
 /mob/living/carbon/human/scp106/process()
 	. = ..()

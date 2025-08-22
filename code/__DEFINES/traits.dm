@@ -1068,3 +1068,14 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 // SCP-343 Traits
 #define TRAIT_DIVINE_POWER "divine_power"
 #define TRAIT_REALITY_MANIPULATION "reality_manipulation"
+
+// SCP-5295 Traits
+#define TRAIT_TEMPORAL_IMMUNITY "temporal_immunity"
+#define TRAIT_REALITY_ANCHORING "reality_anchoring"
+#define TRAIT_CHRONOLOGICAL_AWARENESS "chronological_awareness"
+
+// SCP-2020 Traits
+#define TRAIT_PHASING_ABILITY "phasing_ability"
+#define TRAIT_TELEPORTATION_MASTERY "teleportation_mastery"
+#define TRAIT_STEALTH_CAPABILITY "stealth_capability"
+#define TRAIT_DIMENSIONAL_MOVEMENT "dimensional_movement"

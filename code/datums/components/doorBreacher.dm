@@ -1,72 +1,89 @@
-// Door Breacher Component
-// Allows SCPs to breach doors and security systems
+// Door Breacher Component from Foundation-19 PR #13
+// Allows entities to breach through doors with special effects
 
 /datum/component/doorBreacher
-	var/breach_cooldown = 0
-	var/breach_cooldown_time = 120 SECONDS
+	/// The range at which doors can be breached
 	var/breach_range = 5
+	/// The power/force of the breach
 	var/breach_power = 50
-	var/emp_effect = TRUE
-	var/breach_sound = 'sound/effects/explosion1.ogg'
+	/// Cooldown between breaches
+	var/breach_cooldown_time = 120 SECONDS
+	/// Current cooldown
+	var/breach_cooldown = 0
+	/// Sound to play when breaching
+	var/breach_sound = 'sound/effects/meteorimpact.ogg'
+	/// Message to display when breaching
+	var/breach_message = "breaches through the doors!"
 
-/datum/component/doorBreacher/Initialize(breach_range = 5, breach_power = 50, emp_effect = TRUE)
-	. = ..()
-	src.breach_range = breach_range
-	src.breach_power = breach_power
-	src.emp_effect = emp_effect
+/datum/component/doorBreacher/Initialize(range = 5, power = 50, cooldown = 120 SECONDS, sound = null, message = null)
+	if(!ismob(parent))
+		return COMPONENT_INCOMPATIBLE
+	
+	breach_range = range
+	breach_power = power
+	breach_cooldown_time = cooldown
+	if(sound)
+		breach_sound = sound
+	if(message)
+		breach_message = message
+	
+	// Register signal for door breaching
+	RegisterSignal(parent, COMSIG_MOB_BREACH_DOORS, PROC_REF(breach_doors))
 
 /datum/component/doorBreacher/proc/breach_doors()
-	var/mob/living/parent_mob = parent
-	if(!parent_mob)
-		return FALSE
-
+	SIGNAL_HANDLER
+	
+	var/mob/living/breacher = parent
+	
+	// Check cooldown
 	if(world.time < breach_cooldown)
-		to_chat(parent_mob, "<span class='warning'>Door breaching systems are recharging...</span>")
-		return FALSE
-
-	breach_cooldown = world.time + breach_cooldown_time
-
-	var/list/doors_in_range = list()
-	for(var/obj/machinery/door/D in range(breach_range, parent_mob))
-		if(D.density)
-			doors_in_range += D
-
-	if(doors_in_range.len == 0)
-		to_chat(parent_mob, "<span class='warning'>No doors found in range.</span>")
-		return FALSE
-
-	// Breach doors
-	for(var/obj/machinery/door/D in doors_in_range)
-		breach_door(D)
-
-	// EMP effect on nearby electronics
-	if(emp_effect)
-		for(var/obj/machinery/M in range(breach_range, parent_mob))
-			if(M != parent_mob)
-				M.emp_act(EMP_LIGHT)
-
-	playsound(parent_mob, breach_sound, 50, 0)
-	to_chat(parent_mob, "<span class='notice'>Breached [length(doors_in_range)] doors.</span>")
-	return TRUE
-
-/datum/component/doorBreacher/proc/breach_door(obj/machinery/door/D)
-	if(!D)
+		to_chat(breacher, "<span class='warning'>You need to wait before breaching again...</span>")
 		return
+	
+	breach_cooldown = world.time + breach_cooldown_time
+	
+	// Find doors in range
+	var/list/doors_to_breach = list()
+	for(var/obj/machinery/door/D in range(breach_range, breacher))
+		if(D.density && !D.welded) // Only breach closed, non-welded doors
+			doors_to_breach += D
+	
+	if(!length(doors_to_breach))
+		to_chat(breacher, "<span class='warning'>No doors in range to breach.</span>")
+		breach_cooldown = world.time // Reset cooldown if no doors found
+		return
+	
+	// Breach all doors
+	visible_message("<span class='danger'>[breacher] [breach_message]</span>")
+	playsound(breacher, breach_sound, 80, TRUE)
+	
+	for(var/obj/machinery/door/D in doors_to_breach)
+		breach_single_door(D, breacher)
+	
+	// Update any persistence tracking
+	if(istype(breacher, /mob/living/carbon/human/scp049))
+		var/mob/living/carbon/human/scp049/scp = breacher
+		scp.doors_breached += length(doors_to_breach)
+		scp.save_persistence_data()
 
-		// Try to force open
-	if(prob(30))
-		D.open()
+/datum/component/doorBreacher/proc/breach_single_door(obj/machinery/door/door, mob/living/breacher)
+	// Force open the door
+	INVOKE_ASYNC(door, TYPE_PROC_REF(/obj/machinery/door, open), 1) // Force open
+	
+	// Apply damage to the door
+	door.take_damage(breach_power)
+	
+	// Special effects
+	playsound(door, 'sound/effects/bang.ogg', 50, TRUE)
+	
+	// Spark effect
+	var/datum/effect_system/spark_spread/sparks = new
+	sparks.set_up(3, 1, door)
+	sparks.start()
+	
+	// If door is weak enough, break it
+	if(door.atom_integrity <= breach_power)
+		door.deconstruct(FALSE)
 
-	// Visual effects
-	var/turf/T = get_turf(D)
-	if(T)
-		var/datum/effect_system/spark_spread/s = new /datum/effect_system/spark_spread
-		s.set_up(3, 1, T)
-		s.start()
-
-// Register the component
-/datum/component/doorBreacher/RegisterWithParent()
-	// Component is ready
-
-/datum/component/doorBreacher/UnregisterFromParent()
-	// Component cleanup
+// Signal definition for door breaching
+#define COMSIG_MOB_BREACH_DOORS "mob_breach_doors"

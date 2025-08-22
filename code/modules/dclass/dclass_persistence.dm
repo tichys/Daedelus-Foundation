@@ -257,8 +257,8 @@
 
 	// Save basic player data
 	var/datum/db_query/query_save_player = SSdbcore.NewQuery({"
-		INSERT INTO [format_table_name("dclass_players")] 
-		(ckey, name, round_count, total_playtime, total_escape_attempts, total_successful_escapes, 
+		INSERT INTO [format_table_name("dclass_players")]
+		(ckey, name, round_count, total_playtime, total_escape_attempts, total_successful_escapes,
 		total_contraband_found, total_work_completed, total_alliances_formed, total_players_betrayed,
 		highest_level_achieved, longest_survival_time, most_valuable_contraband, favorite_escape_route,
 		achievements, statistics, last_round_data, persistence_version, last_updated)
@@ -354,17 +354,17 @@
 		data.longest_survival_time = text2num(query_load_player.item[12]) || 0
 		data.most_valuable_contraband = query_load_player.item[13] || ""
 		data.favorite_escape_route = query_load_player.item[14] || ""
-		
+
 		// Parse JSON fields
 		try
 			data.achievements = json_decode(query_load_player.item[15]) || list()
 			data.statistics = json_decode(query_load_player.item[16]) || list()
 			data.last_round_data = json_decode(query_load_player.item[17]) || list()
-		catch(var/exception/e)
+		catch(var/exception)
 			data.achievements = list()
 			data.statistics = list()
 			data.last_round_data = list()
-		
+
 		data.persistence_version = text2num(query_load_player.item[18]) || 1
 
 	qdel(query_load_player)
@@ -421,7 +421,7 @@
 /datum/dclass_persistence_manager/proc/load_persistence_data()
 	// Try to load from database first, fall back to file
 	load_persistence_from_database()
-	
+
 	// If database loading failed or was incomplete, load from file
 	if(persistent_data.len == 0)
 		load_persistence_from_file()

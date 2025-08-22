@@ -112,16 +112,8 @@
 	client.hidden_images += I
 	I.appearance_flags = KEEP_TOGETHER
 
-/*	if(hud_used && hud_used.fov_blocker)
-		fov_blocker
-
-		var/icon/new_blocker = icon("icon"='icons/mob/vision_cone.dmi', "icon_state"=hud_used.fov_blocker.icon_state)
-		var/icon/the_mob = icon("icon"='icons/mob/clothing/under/masking_helpers.dmi', "icon_state"="[(type == FEMALE_UNIFORM_FULL) ? "female_full" : "female_top"]")
-		female_clothing_icon.Blend(female_s, ICON_MULTIPLY)
-*/
-
-/*	if(src.client)
-		var/image/I = null
+	if(src.client)
+		I = null
 		for(I in src.client.hidden_atoms)
 			I.override = 0
 			client.images -= I
@@ -133,7 +125,7 @@
 		src.client.hidden_mobs = list()
 		client.hidden_images = list()
 		if(hud_used && hud_used.fov)
-//			hud_used.fov.dir = src.dir
+			hud_used.fov.dir = src.dir
 			if(hud_used.fov.alpha != 0)
 				var/mob/living/M
 				var/list/mobs2hide = list()
@@ -171,11 +163,6 @@
 					src.client.images += I
 					src.client.hidden_atoms += I
 					src.client.hidden_mobs += M
-					if(src.pulling == M)//If we're pulling them we don't want them to be invisible, too hard to play like that.
-						I.override = 0
-					if(src.pulledby == M)
-						I.icon = 'icons/mob/mob.dmi'
-						I.icon_state = "anon"
 		for(var/image/HUD in client.images)
 			if(HUD.icon != 'icons/mob/hud.dmi')
 				continue
@@ -183,7 +170,7 @@
 				if(HUD.loc == M)
 					client.hidden_images += HUD
 					client.images -= HUD
-					break*/
+					break
 
 /mob/proc/can_see_cone(mob/L)
 	if(!isliving(src) || !isliving(L))

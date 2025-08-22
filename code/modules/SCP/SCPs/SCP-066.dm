@@ -69,8 +69,7 @@
 	session_start_time = world.time
 
 	// Initialize core systems after a short delay
-	spawn(1)
-		initialize_scp066_systems()
+	addtimer(CALLBACK(src, PROC_REF(initialize_scp066_systems)), 1)
 
 	// Grant language and register for SCP persistence
 	grant_language(/datum/language/common, TRUE, TRUE)

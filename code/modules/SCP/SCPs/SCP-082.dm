@@ -29,29 +29,39 @@
 
 /mob/living/carbon/human/scp082/Initialize()
 	. = ..()
-	
-	// Set species properly
 	set_species(/datum/species/scp082)
+	SCP = new /datum/scp(src, "cannibalistic humanoid", SCP_KETER, "082", SCP_PLAYABLE)
+	SCP.min_playercount = 30
+	SCP.min_time = 15 MINUTES
 
-	// Initialize core systems
+	// Initialize core systems after a short delay to ensure proper initialization
+	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
+
+	// Grant language and register for SCP persistence
+	grant_language(/datum/language/common, TRUE, TRUE)
+
+	// Register with SCP persistence system
+	if(SSscp_persistence && SSscp_persistence.manager)
+		SSscp_persistence.manager.scp_instances["SCP-082"] = new /datum/scp_instance("SCP-082", src)
+
+	// Start processing
+	START_PROCESSING(SSobj, src)
+
+	// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
+
+/mob/living/carbon/human/scp082/proc/initialize_systems()
 	rage_system = new /datum/scp082_rage_system(src)
 	consumption_system = new /datum/scp082_consumption_system(src)
 	strength_system = new /datum/scp082_strength_system(src)
 	terror_system = new /datum/scp082_terror_system(src)
 	enhancement_system = new /datum/scp082_enhancement_system(src)
 	research_integration = new /datum/scp082_research_integration(src)
-
-	// Initialize SCP datum
-	SCP = new /datum/scp(
-		src,
-		"SCP-082",
-		SCP_EUCLID,
-		"082",
-		SCP_PLAYABLE
-	)
-
-	SCP.min_playercount = 15
-	SCP.min_time = 25 MINUTES
 
 	// Set up human-specific properties for SCP-082
 	maxHealth = 400 // Enhanced health for SCP-082
@@ -61,9 +71,6 @@
 	fovangle = 120 // Wider vision than normal
 	update_fov_angles()
 	update_cone_show()
-
-	// Start processing
-	START_PROCESSING(SSobj, src)
 
 /mob/living/carbon/human/scp082/process()
 	. = ..()

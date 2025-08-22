@@ -290,12 +290,7 @@
 
 	// Create musical notes effect around the composition
 	for(var/i = 1 to 5)
-		spawn(i * 10)
-			var/list/directions = list(NORTH, SOUTH, EAST, WEST, NORTHEAST, NORTHWEST, SOUTHEAST, SOUTHWEST)
-			var/direction = pick(directions)
-			var/turf/T = get_step(src, direction)
-			if(T)
-				playsound(T, 'sound/weapons/punch1.ogg', 30, TRUE)
+		addtimer(CALLBACK(src, PROC_REF(create_musical_effect), i), i * 10)
 
 // Change composition style
 /obj/item/paper/scp012/proc/change_composition_style(new_style)
@@ -524,5 +519,12 @@
 	status_items += "Harmonic Resonance Events: [harmonic_resonance_events]"
 
 	return status_items
+
+/obj/item/paper/scp012/proc/create_musical_effect(var/i)
+	var/list/directions = list(NORTH, SOUTH, EAST, WEST, NORTHEAST, NORTHWEST, SOUTHEAST, SOUTHWEST)
+	var/direction = pick(directions)
+	var/turf/T = get_step(src, direction)
+	if(T)
+		playsound(T, 'sound/weapons/punch1.ogg', 30, TRUE)
 
 

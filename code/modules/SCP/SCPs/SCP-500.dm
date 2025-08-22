@@ -208,12 +208,7 @@
 	to_chat(target, "<span class='notice'>You feel a regenerative effect taking hold!</span>")
 
 	// Temporary regeneration effect
-	spawn(300) // 30 seconds
-		if(target)
-			target.adjustBruteLoss(-5)
-			target.adjustFireLoss(-5)
-			target.adjustToxLoss(-5)
-			to_chat(target, "<span class='notice'>The regenerative effect fades.</span>")
+	addtimer(CALLBACK(src, PROC_REF(fade_regeneration), target), 300)
 
 // Create healing effect
 /obj/item/reagent_containers/pill/scp500/proc/create_healing_effect(mob/living/carbon/human/target)
@@ -222,12 +217,7 @@
 
 	// Create healing particles
 	for(var/i = 1 to 5)
-		spawn(i * 5)
-			var/list/directions = list(NORTH, SOUTH, EAST, WEST, NORTHEAST, NORTHWEST, SOUTHEAST, SOUTHWEST)
-			var/direction = pick(directions)
-			var/turf/T = get_step(target, direction)
-			if(T)
-				playsound(T, 'sound/weapons/punch1.ogg', 20, TRUE)
+		addtimer(CALLBACK(src, PROC_REF(create_healing_particle), target, i), i * 5)
 
 // Attack behavior - attempt cure when used
 /obj/item/reagent_containers/pill/scp500/attack(mob/living/carbon/human/M, mob/living/carbon/human/user)
@@ -409,5 +399,19 @@
 	status_items += "Known Cures: [known_cures.len]"
 
 	return status_items
+
+/obj/item/reagent_containers/pill/scp500/proc/fade_regeneration(mob/living/carbon/human/target)
+	if(target)
+		target.adjustBruteLoss(-5)
+		target.adjustFireLoss(-5)
+		target.adjustToxLoss(-5)
+		to_chat(target, "<span class='notice'>The regenerative effect fades.</span>")
+
+/obj/item/reagent_containers/pill/scp500/proc/create_healing_particle(mob/living/carbon/human/target, var/i)
+	var/list/directions = list(NORTH, SOUTH, EAST, WEST, NORTHEAST, NORTHWEST, SOUTHEAST, SOUTHWEST)
+	var/direction = pick(directions)
+	var/turf/T = get_step(target, direction)
+	if(T)
+		playsound(T, 'sound/weapons/punch1.ogg', 20, TRUE)
 
 

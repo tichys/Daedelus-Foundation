@@ -147,7 +147,7 @@
 	SIGNAL_HANDLER
 	if(trait_string == TRAIT_SCP151_PANIC)
 		to_chat(H, span_warning("You feel an overwhelming sense of panic! The walls are closing in!"))
-		spawn(0) H.emote("scream") // Call emote in a separate thread to avoid sleeping the signal handler
+		addtimer(CALLBACK(H, TYPE_PROC_REF(/mob, emote), "scream"), 0) // Call emote in a separate thread to avoid sleeping the signal handler
 		H.adjust_timed_status_effect(30 SECONDS, /datum/status_effect/jitter)
 
 /obj/structure/scp151/proc/on_mob_panic_trait_loss(mob/living/carbon/human/H, signal_name, trait_string)
