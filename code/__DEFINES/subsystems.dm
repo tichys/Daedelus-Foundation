@@ -240,6 +240,7 @@
 #define FIRE_PRIORITY_AMBIENCE 5
 #define FIRE_PRIORITY_CODEX 5
 #define FIRE_PRIORITY_TITLE 5
+#define FIRE_PRIORITY_INCONE 5
 
 // D-Class Management Subsystem
 #define FIRE_PRIORITY_DCLASS 15

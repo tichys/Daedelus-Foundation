@@ -386,6 +386,8 @@
 
 	// Get player data for access management
 	var/list/player_data = list()
+
+	// Add online players
 	for(var/client/C in GLOB.clients)
 		if(C.mob && ishuman(C.mob))
 			var/mob/living/carbon/human/H = C.mob
@@ -398,6 +400,36 @@
 				"online" = TRUE
 			)
 			player_data += list(player_info)
+
+	// Add persistent player data from access management system
+	if(player_permissions)
+		for(var/ckey in player_permissions)
+			var/list/pdata = player_permissions[ckey]
+			var/online = FALSE
+			var/current_job = pdata["job"] || "Unknown"
+
+			// Check if player is currently online
+			for(var/client/C in GLOB.clients)
+				if(C.key == ckey)
+					online = TRUE
+					if(C.mob && ishuman(C.mob))
+						var/mob/living/carbon/human/H = C.mob
+						current_job = H.job
+					break
+
+			var/list/player_info = list(
+				"key" = ckey,
+				"name" = pdata["name"] || "Unknown",
+				"job" = current_job,
+				"rank" = pdata["rank"] || 1,
+				"clearance" = pdata["clearance"] || 1,
+				"online" = online,
+				"notes" = pdata["notes"] || "",
+				"created_date" = pdata["created_date"] || "Unknown",
+				"last_updated" = pdata["last_updated"] || "Never"
+			)
+			player_data += list(player_info)
+
 	data["player_data"] = player_data
 
 	// Get spawn schedule data
@@ -517,6 +549,67 @@
 				force_contain_scp(scp_id)
 				. = TRUE
 
+		// Player Access Management handlers
+		if("add_player_to_access")
+			var/player_key = params["player_key"]
+			var/player_name = params["player_name"]
+			var/job = params["job"]
+			var/rank = text2num(params["rank"] || "1")
+			var/clearance = text2num(params["clearance"] || "1")
+			var/notes = params["notes"] || ""
+
+			if(player_key && player_name)
+				// Add player to the access management system
+				if(!player_permissions)
+					player_permissions = list()
+
+				player_permissions[player_key] = list(
+					"name" = player_name,
+					"job" = job,
+					"rank" = rank,
+					"clearance" = clearance,
+					"notes" = notes,
+					"created_date" = time2text(world.time, "YYYY-MM-DD HH:MM"),
+					"created_by" = admin_client.key,
+					"last_updated" = time2text(world.time, "YYYY-MM-DD HH:MM"),
+					"updated_by" = admin_client.key
+				)
+
+				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) has been added to the Player Access Management system.</span>")
+				world.log << "SCPManagementInterface: Player [player_key] added by [admin_client.key]"
+				. = TRUE
+
+		if("remove_player_from_access")
+			var/player_key = params["player_key"]
+			if(player_key && player_permissions && player_permissions[player_key])
+				var/player_name = player_permissions[player_key]["name"]
+				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) has been removed from the Player Access Management system.</span>")
+				player_permissions -= player_key
+				world.log << "SCPManagementInterface: Player [player_key] removed by [admin_client.key]"
+				. = TRUE
+
+		if("update_player_permissions")
+			var/player_key = params["player_key"]
+			var/rank = text2num(params["rank"] || "1")
+			var/clearance = text2num(params["clearance"] || "1")
+			var/job = params["job"]
+			var/notes = params["notes"]
+
+			if(player_key && player_permissions && player_permissions[player_key])
+				player_permissions[player_key]["rank"] = rank
+				player_permissions[player_key]["clearance"] = clearance
+				if(job)
+					player_permissions[player_key]["job"] = job
+				if(notes)
+					player_permissions[player_key]["notes"] = notes
+				player_permissions[player_key]["last_updated"] = time2text(world.time, "YYYY-MM-DD HH:MM")
+				player_permissions[player_key]["updated_by"] = admin_client.key
+
+				var/player_name = player_permissions[player_key]["name"]
+				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) permissions have been updated.</span>")
+				world.log << "SCPManagementInterface: Player [player_key] permissions updated by [admin_client.key]"
+				. = TRUE
+
 		if("view_scp_logs")
 			var/scp_id = params["scp_id"]
 			if(scp_id)
@@ -578,7 +671,7 @@
 			return scp
 		if("SCP-096")
 			// Create SCP-096 object
-			var/mob/living/carbon/scp/scp096/scp = new /mob/living/carbon/scp/scp096()
+			var/mob/living/carbon/human/scp096/scp = new /mob/living/carbon/human/scp096()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("SCP-035")
@@ -587,10 +680,9 @@
 			H.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return H
 		if("SCP-049")
-			var/mob/living/carbon/human/H2 = new /mob/living/carbon/human()
-			H2.real_name = "SCP-049"
-			H2.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
-			return H2
+			var/mob/living/carbon/human/scp049/scp = new /mob/living/carbon/human/scp049()
+			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
+			return scp
 		if("SCP-2427-3")
 			var/mob/living/carbon/human/H3 = new /mob/living/carbon/human()
 			H3.real_name = "SCP-2427-3"

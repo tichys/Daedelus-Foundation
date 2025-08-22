@@ -1,3 +1,6 @@
+// Vision cone system defines
+#define FOV_DEFAULT 1
+
 /* Note from Carnie:
 		The way datum/mind stuff works has been changed a lot.
 		Minds now represent IC characters rather than following a client around constantly.
@@ -200,6 +203,14 @@
 		initialize_persistent_data()
 
 	current.update_atom_languages()
+	current.update_fov_angles()
+
+	// Enable vision cone for humans when mind is transferred
+	if(ishuman(current))
+		var/mob/living/carbon/human/H = current
+		if(!H.fovangle)
+			H.fovangle = FOV_DEFAULT
+			H.update_cone_show()
 
 	SEND_SIGNAL(src, COMSIG_MIND_TRANSFERRED, old_current)
 	SEND_SIGNAL(current, COMSIG_MOB_MIND_TRANSFERRED_INTO)

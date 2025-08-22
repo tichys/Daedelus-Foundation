@@ -4,9 +4,10 @@
 /mob/living/carbon/scp/scp5295
 	name = "temporal entity"
 	desc = "A mysterious entity that seems to exist outside of normal time. Temporal distortions occur around it."
-	icon = 'icons/scp/scp-173.dmi'
+	icon = 'icons/scp/scp-5295.dmi'
 	icon_state = "temporal"
 	status_flags = 0
+	use_custom_sprite = TRUE
 	maxHealth = 225
 	health = 225
 	max_scp_health = 225

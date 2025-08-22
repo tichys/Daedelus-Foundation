@@ -40,6 +40,8 @@
 #define AI_DETECT_HUD "19"
 /// Displays launchpads' targeting reticle
 #define DIAG_LAUNCHPAD_HUD "22"
+/// Shows pestilence effects for those afflicted with it
+#define PESTILENCE_HUD "23"
 
 //by default everything in the hud_list of an atom is an image
 //a value in hud_list with one of these will change that behavior

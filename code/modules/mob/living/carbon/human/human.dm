@@ -41,6 +41,18 @@
 	GLOB.human_list += src
 	become_atmos_sensitive()
 
+	// Initialize vision cone system
+	fovangle = FOV_DEFAULT // Enable vision cone by default
+	update_fov_angles()
+	update_cone_show()
+	
+	// Initialize observer quality and blink management systems
+	observer_quality = new /datum/observer_quality(src)
+	blink_manager = new /datum/blink_manager(src)
+	
+	// Start blink processing
+	START_PROCESSING(SSobj, blink_manager)
+
 /mob/living/carbon/human/proc/setup_human_dna()
 	//initialize dna. for spawned humans; overwritten by other code
 	create_dna(src)

@@ -109,6 +109,10 @@
 		}\
 	} while (0)
 
+// Pestilence System Traits
+#define TRAIT_PESTILENCE "pestilence"
+#define TRAIT_PESTILENCE_IMMUNE "pestilence_immune"
+
 #define HAS_TRAIT(target, trait) (target.status_traits?[trait] ? TRUE : FALSE)
 #define HAS_TRAIT_FROM(target, trait, source) (target.status_traits?[trait] && (source in target.status_traits[trait]))
 #define HAS_TRAIT_FROM_ONLY(target, trait, source) (target.status_traits?[trait] && (source in target.status_traits[trait]) && (length(target.status_traits[trait]) == 1))
@@ -257,6 +261,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NO_ADDICTION "no_addiction"
 /// Makes whispers clearly heard from seven tiles away, the full hearing range
 #define TRAIT_GOOD_HEARING "good_hearing"
+#define TRAIT_CYCLOPS_LEFT "cyclops_left"
+#define TRAIT_CYCLOPS_RIGHT "cyclops_right"
 /// This mob's speech is heard through walls by dead players/observers even if it has no client. Idk a better name
 #define TRAIT_IMPORTANT_SPEAKER "important_speaker"
 
@@ -1030,3 +1036,35 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 
 /// Experiencing panic due to SCP-151
 #define TRAIT_SCP151_PANIC "scp151_panic"
+
+// SCP-035 Traits
+#define TRAIT_POSSESSION_IMMUNE "possession_immune"
+#define TRAIT_CORRUPTION_RESISTANT "corruption_resistant"
+
+// SCP-457 Traits
+#define TRAIT_FIRE_IMMUNE "fire_immune"
+#define TRAIT_HEAT_RESISTANT "heat_resistant"
+
+// SCP-682 Traits
+#define TRAIT_ADAPTIVE_EVOLUTION "adaptive_evolution"
+#define TRAIT_RAPID_REGENERATION "rapid_regeneration"
+
+// SCP-939 Traits
+#define TRAIT_VOICE_MIMICRY "voice_mimicry"
+#define TRAIT_PACK_COORDINATION "pack_coordination"
+
+// SCP-106 Traits
+#define TRAIT_DIMENSIONAL_PHASING "dimensional_phasing"
+#define TRAIT_CORROSIVE_TOUCH "corrosive_touch"
+
+// SCP-082 Traits
+#define TRAIT_ENHANCED_STRENGTH "enhanced_strength"
+#define TRAIT_CANNIBALISTIC "cannibalistic"
+
+// SCP-096 Traits
+#define TRAIT_RAGE_MANAGEMENT "rage_management"
+#define TRAIT_FACE_REVELATION "face_revelation"
+
+// SCP-343 Traits
+#define TRAIT_DIVINE_POWER "divine_power"
+#define TRAIT_REALITY_MANIPULATION "reality_manipulation"

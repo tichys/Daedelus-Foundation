@@ -1,3 +1,6 @@
+// SCP-008 - The Zombie Plague
+// Complete Redesign Implementation
+
 /obj/item/reagent_containers/glass/bottle/scp008
 	name = "SCP-008"
 	desc = "A sealed container containing a highly contagious zombie plague. Extremely dangerous."
@@ -8,9 +11,21 @@
 	var/list/infected_targets = list()
 	var/list/zombified_targets = list()
 
+	// Core system datums
+	var/datum/scp008_infection_system/infection_system
+	var/datum/scp008_horde_system/horde_system
+	var/datum/scp008_evolution_system/evolution_system
+	var/datum/scp008_containment_system/containment_system
+	var/datum/scp008_environmental_system/environmental_system
+	var/datum/scp008_research_integration/research_integration
+
 	// Persistence tracking
-	var/infections_caused = 0
-	var/zombifications_caused = 0
+	var/total_infections_caused = 0
+	var/total_host_deaths = 0
+	var/total_evolution_stages = 0
+	var/total_containment_encounters = 0
+	var/total_environmental_control = 0
+	var/session_start_time = 0
 	var/containment_status = "contained"
 
 /obj/item/reagent_containers/glass/bottle/scp008/Initialize()
@@ -22,40 +37,121 @@
 		"SCP-008",
 		SCP_KETER,
 		"008",
-		
+		SCP_SENTIENT
 	)
 
-	SCP.min_playercount = 20
-	SCP.min_time = 30 MINUTES
+	// Initialize core systems
+	infection_system = new /datum/scp008_infection_system(src)
+	horde_system = new /datum/scp008_horde_system(src)
+	evolution_system = new /datum/scp008_evolution_system(src)
+	containment_system = new /datum/scp008_containment_system(src)
+	environmental_system = new /datum/scp008_environmental_system(src)
+	research_integration = new /datum/scp008_research_integration(src)
 
-	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-008"] = new /datum/scp_instance("SCP-008", src)
+	// Set session start time
+	session_start_time = world.time
+
+	// Start processing
+	START_PROCESSING(SSobj, src)
 
 /obj/item/reagent_containers/glass/bottle/scp008/Destroy()
-	infected_targets = list()
-	zombified_targets = list()
+	QDEL_NULL(infection_system)
+	QDEL_NULL(horde_system)
+	QDEL_NULL(evolution_system)
+	QDEL_NULL(containment_system)
+	QDEL_NULL(environmental_system)
+	QDEL_NULL(research_integration)
+	infected_targets.Cut()
+	zombified_targets.Cut()
 	return ..()
 
-// Core mechanics
 /obj/item/reagent_containers/glass/bottle/scp008/process()
 	. = ..()
 
-	// Spread infection if containment is breached
-	if(containment_breached)
-		spread_infection()
+	// Update all systems
+	infection_system?.process()
+	horde_system?.process()
+	evolution_system?.process()
+	containment_system?.process()
+	environmental_system?.process()
+	research_integration?.process()
 
-// Spread infection to nearby targets
-/obj/item/reagent_containers/glass/bottle/scp008/proc/spread_infection()
-	for(var/mob/living/carbon/human/H in range(3, src))
-		if(H.SCP || H.stat == DEAD)
-			continue
+	// Process SCP-008 specific effects
+	process_scp008_effects()
 
-		if(!(H in infected_targets) && !(H in zombified_targets))
-			infect_target(H)
+/obj/item/reagent_containers/glass/bottle/scp008/proc/process_scp008_effects()
+	// Update appearance based on infection strength
+	update_scp008_appearance()
 
-// Infect a target with SCP-008
-/obj/item/reagent_containers/glass/bottle/scp008/proc/infect_target(mob/living/carbon/human/target)
+	// Process infection spread
+	process_infection_spread()
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/update_scp008_appearance()
+	var/infection_type = infection_system.get_infection_type()
+
+	switch(infection_type)
+		if("airborne")
+			icon_state = "bottle"
+		if("contact")
+			icon_state = "bottle_contact"
+		if("fluid")
+			icon_state = "bottle_fluid"
+		if("aerosol")
+			icon_state = "bottle_aerosol"
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/process_infection_spread()
+	// Only spread if containment is breached
+	if(!containment_breached)
+		return
+
+	var/infection_type = infection_system.get_infection_type()
+	var/spread_range = get_spread_range(infection_type)
+
+	// Check for nearby targets to infect
+	for(var/mob/living/carbon/human/H in range(spread_range, src))
+		if(H != src && !H.SCP && H.stat != DEAD)
+			if(!(H in infected_targets) && !(H in zombified_targets))
+				attempt_infection(H, infection_type)
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/get_spread_range(infection_type)
+	switch(infection_type)
+		if("airborne")
+			return 3
+		if("contact")
+			return 1
+		if("fluid")
+			return 2
+		if("aerosol")
+			return 5
+		else
+			return 2
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/attempt_infection(mob/living/carbon/human/target, infection_type)
+	if(!target || target.stat == DEAD)
+		return
+
+	// Calculate infection chance based on type and strength
+	var/infection_chance = get_infection_chance(infection_type)
+
+	if(prob(infection_chance))
+		infect_target(target, infection_type)
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/get_infection_chance(infection_type)
+	var/base_chance = infection_system.current_strength / 10
+
+	switch(infection_type)
+		if("airborne")
+			return base_chance * 0.8
+		if("contact")
+			return base_chance * 1.2
+		if("fluid")
+			return base_chance * 1.5
+		if("aerosol")
+			return base_chance * 2.0
+		else
+			return base_chance
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/infect_target(mob/living/carbon/human/target, infection_type)
 	if(!target || target.stat == DEAD)
 		return
 
@@ -63,18 +159,23 @@
 		return
 
 	infected_targets += target
-	infections_caused++
+	total_infections_caused++
+	containment_breached = TRUE
 	containment_status = "breached"
 
 	visible_message("<span class='danger'>[target] has been infected with SCP-008!</span>")
 	to_chat(target, "<span class='danger'>You have been infected with SCP-008! You feel your body beginning to decay...</span>")
 
 	// Apply infection effects
-	target.adjustBruteLoss(infection_strength)
-	target.adjustToxLoss(infection_strength)
+	var/damage = get_infection_damage(infection_type)
+	target.adjustBruteLoss(damage)
+	target.adjustToxLoss(damage)
+
+	// Add to evolution progress
+	evolution_system.add_infection_caused()
 
 	// Start infection timer
-	spawn(300) // 30 seconds
+	spawn(get_infection_duration(infection_type))
 		if(target && target.stat != DEAD)
 			zombify_target(target)
 
@@ -84,303 +185,283 @@
 		if(instance)
 			instance.add_interaction_record(target, "infection")
 
-// Transform target into zombie
+/obj/item/reagent_containers/glass/bottle/scp008/proc/get_infection_damage(infection_type)
+	var/base_damage = infection_system.current_strength / 10
+
+	switch(infection_type)
+		if("airborne")
+			return base_damage * 0.8
+		if("contact")
+			return base_damage * 1.0
+		if("fluid")
+			return base_damage * 1.3
+		if("aerosol")
+			return base_damage * 1.8
+		else
+			return base_damage
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/get_infection_duration(infection_type)
+	switch(infection_type)
+		if("airborne")
+			return 300 // 30 seconds
+		if("contact")
+			return 180 // 18 seconds
+		if("fluid")
+			return 240 // 24 seconds
+		if("aerosol")
+			return 120 // 12 seconds
+		else
+			return 300
+
 /obj/item/reagent_containers/glass/bottle/scp008/proc/zombify_target(mob/living/carbon/human/target)
 	if(!target || target.stat == DEAD)
 		return
 
 	infected_targets -= target
 	zombified_targets += target
-	zombifications_caused++
+	total_host_deaths++
 
 	visible_message("<span class='danger'>[target] has been completely zombified by SCP-008!</span>")
 	to_chat(target, "<span class='danger'>You have been completely transformed into a zombie! You are now part of the SCP-008 horde.</span>")
 
 	// Create zombie mob
 	var/mob/living/simple_animal/hostile/scp008_zombie/zombie = new /mob/living/simple_animal/hostile/scp008_zombie(target.loc)
-	zombie.name = "[target.name] (Zombie)"
-	zombie.desc = "A zombified version of [target.name], infected with SCP-008."
 
-	// Transfer player to zombie
-	if(target.mind)
-		target.mind.transfer_to(zombie)
+	// Add to horde system
+	horde_system.horde_members += zombie
+
+	// Transfer target's appearance to zombie
+	zombie.name = "[target.name] (Zombie)"
+	zombie.desc = "A zombie created by SCP-008. It was once [target.name]."
+
+	// Add to evolution progress
+	evolution_system.add_host_death()
 
 	// Remove original target
-	target.gib()
+	target.ghostize()
+	qdel(target)
 
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008"]
-		if(instance)
-			instance.add_interaction_record(target, "zombification")
+/obj/item/reagent_containers/glass/bottle/scp008/proc/is_spreading_infection()
+	return infected_targets.len > 0 || zombified_targets.len > 0
 
-// Breach containment
-/obj/item/reagent_containers/glass/bottle/scp008/proc/breach_containment()
+/obj/item/reagent_containers/glass/bottle/scp008/proc/add_evolution_record(stage)
+	total_evolution_stages = max(total_evolution_stages, stage)
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/add_containment_record()
+	total_containment_encounters++
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/add_environmental_record()
+	total_environmental_control++
+
+// Reagent interaction - when SCP-008 is used as a reagent
+/obj/item/reagent_containers/glass/bottle/scp008/proc/on_reagent_use(mob/living/carbon/human/user)
+	if(!user || user.stat == DEAD)
+		return
+
+	// Breach containment when used
 	containment_breached = TRUE
-	containment_status = "breached"
 
-	visible_message("<span class='danger'>SCP-008 containment has been breached! The zombie plague is spreading!</span>")
+	// Infect the user
+	var/infection_type = infection_system.get_infection_type()
+	infect_target(user, infection_type)
+
+	visible_message("<span class='danger'>[user] has been exposed to SCP-008!</span>")
 
 	// Update persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008"]
 		if(instance)
-			instance.add_interaction_record(null, "containment_breach")
-
-// Attack behavior - infect on touch
-/obj/item/reagent_containers/glass/bottle/scp008/attack(mob/living/carbon/human/M, mob/living/carbon/human/user)
-	if(ishuman(M))
-		infect_target(M)
-		breach_containment()
-		return TRUE
-	return ..()
-
-// Verb commands
-/obj/item/reagent_containers/glass/bottle/scp008/verb/breach_containment_verb()
-	set name = "Breach Containment"
-	set category = "SCP"
-	set desc = "Deliberately breach SCP-008 containment."
-
-	breach_containment()
-	to_chat(usr, "<span class='notice'>You have breached SCP-008 containment.</span>")
-
-/obj/item/reagent_containers/glass/bottle/scp008/verb/infect_target_verb()
-	set name = "Infect Target"
-	set category = "SCP"
-	set desc = "Attempt to infect a nearby target."
-
-	var/list/targets = list()
-	for(var/mob/living/carbon/human/H in range(3, src))
-		if(H != usr && H.stat != DEAD)
-			targets += H
-
-	if(!targets.len)
-		to_chat(usr, "<span class='warning'>No suitable targets nearby.</span>")
-		return
-
-	var/mob/living/carbon/human/target = input(usr, "Choose a target to infect:", "Infect Target") as null|anything in targets
-	if(target)
-		infect_target(target)
-		breach_containment()
-
-// Admin verb to view SCP-008 persistence data
-/obj/item/reagent_containers/glass/bottle/scp008/verb/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP"
-	set desc = "View SCP-008 persistence data."
-
-	if(!check_rights(R_ADMIN))
-		to_chat(usr, "<span class='warning'>You don't have permission to view persistence data.</span>")
-		return
-
-	var/message = "<h2>SCP-008 Persistence Data</h2>"
-	message += "<b>Containment Status:</b> [containment_status]<br>"
-	message += "<b>Containment Breached:</b> [containment_breached ? "Yes" : "No"]<br>"
-	message += "<b>Infections Caused:</b> [infections_caused]<br>"
-	message += "<b>Zombifications Caused:</b> [zombifications_caused]<br>"
-	message += "<b>Infected Targets:</b> [infected_targets.len]<br>"
-	message += "<b>Zombified Targets:</b> [zombified_targets.len]<br>"
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008"]
-		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
-
-	to_chat(usr, "<span class='notice'>[message]</span>")
-
-// SCP-008 Zombie (the actual zombie entity)
-/mob/living/simple_animal/hostile/scp008_zombie
-	name = "SCP-008 Zombie"
-	desc = "A humanoid figure with pale, decaying skin and bloodshot eyes. It appears to be infected with SCP-008."
-	icon = 'icons/mob/animal.dmi'
-	icon_state = "scp008_zombie"
-	maxHealth = 100
-	health = 100
-	see_invisible = SEE_INVISIBLE_LIVING
-	see_in_dark = 8
-	status_flags = 0
-
-	// Zombie specific variables
-	var/attack_strength = 30
-	var/regeneration_rate = 1
-	var/list/infected_targets = list()
-
-	// Persistence tracking
-	var/kills_count = 0
-	var/infections_caused = 0
-	var/containment_status = "breached"
-
-/mob/living/simple_animal/hostile/scp008_zombie/Initialize()
-	. = ..()
-
-	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-008-Zombie-[src]"] = new /datum/scp_instance("SCP-008-Zombie-[src]", src)
-
-/mob/living/simple_animal/hostile/scp008_zombie/Destroy()
-	infected_targets = list()
-	return ..()
-
-// Core mechanics
-/mob/living/simple_animal/hostile/scp008_zombie/Life()
-	. = ..()
-
-	// Regenerate health
-	regenerate()
-
-	// Find and attack targets
-	var/mob/living/carbon/human/target = find_target()
-	if(target)
-		attack_target(target)
-
-// Regeneration system
-/mob/living/simple_animal/hostile/scp008_zombie/proc/regenerate()
-	if(health < maxHealth)
-		adjustBruteLoss(-regeneration_rate)
-		adjustFireLoss(-regeneration_rate)
-		adjustToxLoss(-regeneration_rate)
-
-// Find potential targets
-/mob/living/simple_animal/hostile/scp008_zombie/proc/find_target()
-	var/mob/living/carbon/human/closest = null
-	var/shortest_distance = 999
-
-	for(var/mob/living/carbon/human/H in view(7, src))
-		if(H == src || H.SCP || H.stat == DEAD)
-			continue
-		var/distance = get_dist(src, H)
-		if(distance < shortest_distance)
-			shortest_distance = distance
-			closest = H
-
-	return closest
-
-// Attack target
-/mob/living/simple_animal/hostile/scp008_zombie/proc/attack_target(mob/living/carbon/human/target)
-	if(!target)
-		return
-
-	// Move towards target
-	step_towards(src, target)
-
-	// Attack if close enough
-	if(get_dist(src, target) <= 1)
-		UnarmedAttack(target)
-
-// Attack behavior
-/mob/living/simple_animal/hostile/scp008_zombie/UnarmedAttack(atom/A)
-	if(ishuman(A))
-		var/mob/living/carbon/human/H = A
-
-		visible_message("<span class='danger'>[src] viciously attacks [H]!</span>")
-		playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
-
-		H.adjustBruteLoss(attack_strength)
-
-		// Infect target
-		if(!(H in infected_targets))
-			infect_target(H)
-
-		// Track kills
-		if(H.stat == DEAD)
-			kills_count++
-
-		// Update persistence system
-		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008-Zombie-[src]"]
-			if(instance)
-				instance.add_interaction_record(H, "attack")
-
-		return
-
-	return ..()
-
-// Infect a target
-/mob/living/simple_animal/hostile/scp008_zombie/proc/infect_target(mob/living/carbon/human/target)
-	if(!target || target.stat == DEAD)
-		return
-
-	if(target in infected_targets)
-		return
-
-	infected_targets += target
-	infections_caused++
-
-	to_chat(target, "<span class='danger'>You have been infected by [src]!</span>")
-
-	// Apply infection effects
-	target.adjustBruteLoss(20)
-	target.adjustToxLoss(20)
-
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008-Zombie-[src]"]
-		if(instance)
-			instance.add_interaction_record(target, "infection")
+			instance.add_interaction_record(user, "reagent_exposure")
 
 // Status display
-/mob/living/simple_animal/hostile/scp008_zombie/get_status_tab_items()
-	. = ..()
-	. += "Containment Status: [containment_status]"
-	. += "Kills: [kills_count]"
-	. += "Infections Caused: [infections_caused]"
-	. += "Infected Targets: [infected_targets.len]"
+/obj/item/reagent_containers/glass/bottle/scp008/proc/get_status_tab_items()
+	var/list/status = list()
+	status += "Infection Strength: [infection_system.current_strength]/[infection_system.max_strength]"
+	status += "Infection Type: [infection_system.get_infection_type()]"
+	status += "Infected Targets: [infected_targets.len]"
+	status += "Zombified Targets: [zombified_targets.len]"
+	status += "Horde Size: [horde_system.horde_members.len]"
+	status += "Evolution Stage: [evolution_system.current_stage]/[evolution_system.max_stage]"
+	status += "Containment Level: [containment_system.containment_level]"
+	status += "Total Infections: [total_infections_caused]"
+	status += "Environmental Control: [environmental_system.controlled_room_types.len]"
+	return status
 
 // Examine behavior
-/mob/living/simple_animal/hostile/scp008_zombie/examine(mob/user)
+/obj/item/reagent_containers/glass/bottle/scp008/examine(mob/user)
 	. = ..()
 
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
 		if(H.SCP)
-			to_chat(user, "<span class='warning'>This is an SCP-008 zombie, created by the zombie plague.</span>")
+			to_chat(user, "<span class='warning'>This is SCP-008, a zombie plague. Current evolution stage: [evolution_system.current_stage]</span>")
 		else
-			to_chat(user, "<span class='danger'>A decaying humanoid figure with bloodshot eyes. It looks extremely dangerous and contagious.</span>")
+			to_chat(user, "<span class='danger'>A sealed container containing a highly contagious zombie plague. The contents seem to writhe and move unnaturally.</span>")
 
-// Death behavior
-/mob/living/simple_animal/hostile/scp008_zombie/death()
-	visible_message("<span class='danger'>[src] collapses, finally dead!</span>")
-	playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
-	..()
+			// Apply fear effect to non-SCP humans
+			if(H.sanity)
+				H.sanity.adjust_sanity(-3)
+				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
 
-// Verb commands
-/mob/living/simple_animal/hostile/scp008_zombie/verb/infect_nearby()
-	set name = "Infect Nearby"
-	set category = "SCP"
-	set desc = "Attempt to infect all nearby targets."
+// Persistence integration
+/obj/item/reagent_containers/glass/bottle/scp008/proc/get_persistence_data()
+	var/list/data = list()
+	data["total_infections_caused"] = total_infections_caused
+	data["total_host_deaths"] = total_host_deaths
+	data["total_evolution_stages"] = total_evolution_stages
+	data["total_containment_encounters"] = total_containment_encounters
+	data["total_environmental_control"] = total_environmental_control
+	data["session_duration"] = world.time - session_start_time
+	data["current_infection_strength"] = infection_system.current_strength
+	data["current_evolution_stage"] = evolution_system.current_stage
+	data["current_containment_level"] = containment_system.containment_level
+	return data
 
-	var/infected_count = 0
-	for(var/mob/living/carbon/human/H in range(3, src))
-		if(H != src && H.stat != DEAD)
-			infect_target(H)
-			infected_count++
-
-	if(infected_count > 0)
-		to_chat(src, "<span class='notice'>You infected [infected_count] nearby targets!</span>")
-	else
-		to_chat(src, "<span class='warning'>No suitable targets nearby to infect.</span>")
-
-// Admin verb to view zombie persistence data
-/mob/living/simple_animal/hostile/scp008_zombie/verb/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP"
-	set desc = "View SCP-008 Zombie persistence data."
-
-	if(!check_rights(R_ADMIN))
-		to_chat(src, "<span class='warning'>You don't have permission to view persistence data.</span>")
+/obj/item/reagent_containers/glass/bottle/scp008/proc/load_persistence_data(list/data)
+	if(!data)
 		return
 
-	var/message = "<h2>SCP-008 Zombie Persistence Data</h2>"
-	message += "<b>Containment Status:</b> [containment_status]<br>"
-	message += "<b>Kills:</b> [kills_count]<br>"
-	message += "<b>Infections Caused:</b> [infections_caused]<br>"
-	message += "<b>Infected Targets:</b> [infected_targets.len]<br>"
+	total_infections_caused = data["total_infections_caused"] || 0
+	total_host_deaths = data["total_host_deaths"] || 0
+	total_evolution_stages = data["total_evolution_stages"] || 0
+	total_containment_encounters = data["total_containment_encounters"] || 0
+	total_environmental_control = data["total_environmental_control"] || 0
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008-Zombie-[src]"]
-		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+// Research integration
+/obj/item/reagent_containers/glass/bottle/scp008/proc/contribute_research_data()
+	if(!SSresearch_persistence || !SSresearch_persistence.manager)
+		return
 
-	to_chat(src, "<span class='notice'>[message]</span>")
+	// Create research project if it doesn't exist
+	var/project_name = "SCP-008 Outbreak Analysis"
+	var/project_description = "Analysis of SCP-008's infection spreading and horde formation patterns"
+	var/research_field = "SCP-008_OUTBREAK"
+	var/lead_researcher = "System"
+
+	var/datum/research_persistence_project/project = SSresearch_persistence.manager.add_research_project(
+		project_name,
+		project_description,
+		research_field,
+		lead_researcher,
+		1000,
+		1
+	)
+
+	if(project)
+		// Update project with current data
+		project.progress = min(100, (total_infections_caused * 2) + (total_host_deaths * 3) + (total_evolution_stages * 10))
+
+		// Mark as completed if enough data
+		if(project.progress >= 100)
+			project.status = "COMPLETED"
+
+			// Add scientific discovery
+			SSresearch_persistence.manager.add_scientific_discovery(
+				"SCP-008 Outbreak Patterns",
+				"Comprehensive analysis of SCP-008's infection spreading and horde formation mechanics",
+				"SCP_RESEARCH",
+				"SCP-008",
+				"System",
+				3 // High significance
+			)
+
+// Legacy compatibility
+/obj/item/reagent_containers/glass/bottle/scp008/proc/spread_infection()
+	// Legacy infection spread handled by new systems
+	process_infection_spread()
+
+// ============================================================================
+// SCP-008 ZOMBIE MOB
+// ============================================================================
+
+/mob/living/simple_animal/hostile/scp008_zombie
+	name = "SCP-008 Zombie"
+	desc = "A zombie created by SCP-008. It moves slowly but relentlessly."
+	icon = 'icons/mob/human.dmi'
+	icon_state = "zombie"
+	icon_living = "zombie"
+	icon_dead = "zombie_dead"
+	icon_gib = "zombie_gib"
+
+	maxHealth = 100
+	health = 100
+
+	melee_damage_lower = 20
+	melee_damage_upper = 30
+	attack_sound = 'sound/hallucinations/growl1.ogg'
+
+	environment_smash = 1
+	obj_damage = 20
+
+	del_on_death = TRUE
+
+	var/infection_strength = 25
+	var/can_infect = TRUE
+	var/infection_cooldown = 0
+	var/infection_cooldown_time = 30 SECONDS
+
+/mob/living/simple_animal/hostile/scp008_zombie/Initialize()
+	. = ..()
+
+	// Set up zombie AI
+	AIStatus = AI_ON
+
+	// Start processing
+	START_PROCESSING(SSobj, src)
+
+/mob/living/simple_animal/hostile/scp008_zombie/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/mob/living/simple_animal/hostile/scp008_zombie/process()
+	. = ..()
+
+	// Process infection spread
+	if(can_infect && world.time >= infection_cooldown + infection_cooldown_time)
+		process_infection_spread()
+		infection_cooldown = world.time
+
+/mob/living/simple_animal/hostile/scp008_zombie/proc/process_infection_spread()
+	// Check for nearby humans to infect
+	for(var/mob/living/carbon/human/H in range(2, src))
+		if(H.stat != DEAD && !H.SCP)
+			if(prob(infection_strength))
+				attempt_infection(H)
+
+/mob/living/simple_animal/hostile/scp008_zombie/proc/attempt_infection(mob/living/carbon/human/target)
+	if(!target || target.stat == DEAD)
+		return
+
+	// Apply infection damage
+	target.adjustBruteLoss(infection_strength)
+	target.adjustToxLoss(infection_strength)
+
+	// Notify target
+	to_chat(target, "<span class='danger'>You have been infected by a zombie!</span>")
+
+	// Start infection timer
+	spawn(300) // 30 seconds
+		if(target && target.stat != DEAD)
+			zombify_target(target)
+
+/mob/living/simple_animal/hostile/scp008_zombie/proc/zombify_target(mob/living/carbon/human/target)
+	if(!target || target.stat == DEAD)
+		return
+
+	visible_message("<span class='danger'>[target] has been zombified!</span>")
+	to_chat(target, "<span class='danger'>You have been completely transformed into a zombie!</span>")
+
+	// Create new zombie
+	var/mob/living/simple_animal/hostile/scp008_zombie/new_zombie = new /mob/living/simple_animal/hostile/scp008_zombie(target.loc)
+	new_zombie.name = "[target.name] (Zombie)"
+	new_zombie.desc = "A zombie created by SCP-008. It was once [target.name]."
+
+	// Remove original target
+	target.ghostize()
+	qdel(target)
+
+// ============================================================================
+// END OF SCP-008 REDESIGN
+// ============================================================================
 
 

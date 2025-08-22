@@ -97,9 +97,19 @@
 		UnregisterSignal(owner.current, COMSIG_MOB_EYECONTACT)
 
 /datum/antagonist/scp/scp096/proc/on_face_seen(mob/living/source, mob/living/seer)
-	// Trigger aggressive behavior when face is seen
-	to_chat(owner.current, span_danger("Someone has seen your face! You must eliminate them!"))
-	// Add berserk effect - would need mood system implementation
+	// Only trigger if the seer can see SCP-096 within their vision cone
+	if(ishuman(seer))
+		var/mob/living/carbon/human/H = seer
+		if(H.fovangle && H.can_see_cone(source))
+			// Trigger aggressive behavior when face is seen within vision cone
+			to_chat(owner.current, span_danger("Someone has seen your face within their vision cone! You must eliminate them!"))
+			// Add berserk effect - would need mood system implementation
+		else
+			// Face seen but not within vision cone - no reaction
+			to_chat(owner.current, span_notice("Someone saw your face, but it was outside their vision cone. No reaction triggered."))
+	else
+		// Non-human seer - trigger normally
+		to_chat(owner.current, span_danger("Someone has seen your face! You must eliminate them!"))
 
 // SCP-008 Antagonist (Zombie Plague)
 /datum/antagonist/scp/scp008

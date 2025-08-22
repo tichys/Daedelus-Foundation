@@ -4,9 +4,10 @@
 /mob/living/carbon/scp/scp3349
 	name = "reality bender"
 	desc = "A mysterious entity that seems to distort reality around it. The air around it shimmers unnaturally."
-	icon = 'icons/scp/scp-173.dmi'
+	icon = 'icons/scp/scp-3349.dmi'
 	icon_state = "reality_bender"
 	status_flags = 0
+	use_custom_sprite = TRUE
 	maxHealth = 200
 	health = 200
 	max_scp_health = 200

@@ -1,4 +1,5 @@
 import { BooleanLike } from 'common/react';
+import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
 import {
@@ -6,6 +7,7 @@ import {
   Button,
   Dropdown,
   Flex,
+  Grid,
   Input,
   LabeledList,
   Modal,
@@ -15,6 +17,7 @@ import {
   Section,
   Table,
   Tabs,
+  TextArea,
 } from '../components';
 import { Window } from '../layouts';
 
@@ -663,10 +666,25 @@ const PlayersTab = (props: {
   scp_templates: Record<string, SCPTemplate>;
 }) => {
   const { player_data, scp_templates, act } = props;
+  const [addPlayerModalOpen, setAddPlayerModalOpen] = React.useState(false);
+  const [addPlayerFormData, setAddPlayerFormData] = React.useState({
+    player_key: '',
+    player_name: '',
+    job: '',
+    rank: 1,
+    clearance: 1,
+    notes: '',
+  });
 
   return (
     <Box>
       <Section title="Player Access Management">
+        <Box style={{ marginBottom: '10px' }}>
+          <Button color="green" onClick={() => setAddPlayerModalOpen(true)}>
+            Add New Player
+          </Button>
+        </Box>
+
         <Table>
           <Table.Row header>
             <Table.Cell>Player</Table.Cell>
@@ -703,6 +721,185 @@ const PlayersTab = (props: {
           ))}
         </Table>
       </Section>
+
+      {/* Add Player Modal */}
+      {addPlayerModalOpen && (
+        <Modal maxWidth="600px">
+          <Box>
+            <Box
+              style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                marginBottom: '20px',
+                textAlign: 'center',
+                color: '#66ff66',
+              }}
+            >
+              👤 Add New Player to Access Management
+            </Box>
+
+            <Grid>
+              <Grid.Column size={6}>
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                    Player Ckey
+                  </Box>
+                  <Input
+                    value={addPlayerFormData.player_key}
+                    onChange={(e, value) =>
+                      setAddPlayerFormData({
+                        ...addPlayerFormData,
+                        player_key: value,
+                      })
+                    }
+                    placeholder="e.g., playername"
+                    fluid
+                  />
+                </Box>
+              </Grid.Column>
+
+              <Grid.Column size={6}>
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                    Player Name
+                  </Box>
+                  <Input
+                    value={addPlayerFormData.player_name}
+                    onChange={(e, value) =>
+                      setAddPlayerFormData({
+                        ...addPlayerFormData,
+                        player_name: value,
+                      })
+                    }
+                    placeholder="e.g., John Doe"
+                    fluid
+                  />
+                </Box>
+              </Grid.Column>
+            </Grid>
+
+            <Grid>
+              <Grid.Column size={6}>
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                    Job
+                  </Box>
+                  <Input
+                    value={addPlayerFormData.job}
+                    onChange={(e, value) =>
+                      setAddPlayerFormData({
+                        ...addPlayerFormData,
+                        job: value,
+                      })
+                    }
+                    placeholder="e.g., Security Officer"
+                    fluid
+                  />
+                </Box>
+              </Grid.Column>
+
+              <Grid.Column size={3}>
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                    Rank
+                  </Box>
+                  <NumberInput
+                    value={addPlayerFormData.rank}
+                    minValue={1}
+                    maxValue={10}
+                    step={1}
+                    onChange={(value) =>
+                      setAddPlayerFormData({
+                        ...addPlayerFormData,
+                        rank: value,
+                      })
+                    }
+                  />
+                </Box>
+              </Grid.Column>
+
+              <Grid.Column size={3}>
+                <Box style={{ marginBottom: '15px' }}>
+                  <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                    Clearance
+                  </Box>
+                  <NumberInput
+                    value={addPlayerFormData.clearance}
+                    minValue={1}
+                    maxValue={5}
+                    step={1}
+                    onChange={(value) =>
+                      setAddPlayerFormData({
+                        ...addPlayerFormData,
+                        clearance: value,
+                      })
+                    }
+                  />
+                </Box>
+              </Grid.Column>
+            </Grid>
+
+            <Box style={{ marginBottom: '20px' }}>
+              <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                Notes
+              </Box>
+              <TextArea
+                value={addPlayerFormData.notes}
+                onChange={(e, value) =>
+                  setAddPlayerFormData({
+                    ...addPlayerFormData,
+                    notes: value,
+                  })
+                }
+                placeholder="Optional notes about this player..."
+              />
+            </Box>
+
+            <Flex justify="space-between">
+              <Button
+                color="red"
+                onClick={() => {
+                  setAddPlayerModalOpen(false);
+                  setAddPlayerFormData({
+                    player_key: '',
+                    player_name: '',
+                    job: '',
+                    rank: 1,
+                    clearance: 1,
+                    notes: '',
+                  });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="green"
+                onClick={() => {
+                  act('add_player_to_access', {
+                    player_key: addPlayerFormData.player_key,
+                    player_name: addPlayerFormData.player_name,
+                    job: addPlayerFormData.job,
+                    rank: addPlayerFormData.rank,
+                    clearance: addPlayerFormData.clearance,
+                    notes: addPlayerFormData.notes,
+                  });
+                  setAddPlayerModalOpen(false);
+                  setAddPlayerFormData({
+                    player_key: '',
+                    player_name: '',
+                    job: '',
+                    rank: 1,
+                    clearance: 1,
+                    notes: '',
+                  });
+                }}
+              >
+                Add Player
+              </Button>
+            </Flex>
+          </Box>
+        </Modal>
+      )}
     </Box>
   );
 };

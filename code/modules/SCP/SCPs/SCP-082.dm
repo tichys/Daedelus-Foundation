@@ -1,161 +1,190 @@
-// SCP-082: Large Aggressive Humanoid
-// A massive, aggressive humanoid with enhanced strength and regeneration
+// SCP-082 - Fernand the Cannibal
+// A massive, aggressive humanoid with enhanced strength, regeneration, and cannibalistic tendencies
 
-/mob/living/carbon/scp/scp082
-	name = "large humanoid"
-	desc = "A massive, muscular humanoid with aggressive tendencies. It towers over most beings."
+/mob/living/carbon/human/scp082
+	name = "SCP-082"
+	desc = "A massive, muscular humanoid with aggressive tendencies and cannibalistic behavior. It towers over most beings."
 	icon = 'icons/scp/scp-082.dmi'
 	icon_state = "humanoid"
+	real_name = "SCP-082"
 	status_flags = 0
-	maxHealth = 300
-	health = 300
-	max_scp_health = 300
-	scp_health = 300
-	max_scp_armor = 100
-	scp_armor = 100
 
-	// Enhanced abilities
-	var/rage_cooldown = 0
-	var/rage_cooldown_time = 30 SECONDS
-	var/regeneration_cooldown = 0
-	var/regeneration_cooldown_time = 20 SECONDS
-	var/rage_damage_multiplier = 2.0
-	var/regeneration_amount = 25
-	var/is_raging = FALSE
+	// Core system datums
+	var/datum/scp082_rage_system/rage_system
+	var/datum/scp082_consumption_system/consumption_system
+	var/datum/scp082_strength_system/strength_system
+	var/datum/scp082_terror_system/terror_system
+	var/datum/scp082_enhancement_system/enhancement_system
+	var/datum/scp082_research_integration/research_integration
 
-/mob/living/carbon/scp/scp082/Initialize(mapload, new_species = "SCP-082")
+	// Persistence tracking
+	var/rage_activations = 0
+	var/regenerations = 0
+	var/meals_consumed = 0
+	var/strength_uses = 0
+	var/total_damage_dealt = 0
+	var/targets_consumed = 0
+	var/rage_escalations = 0
+	var/strength_boosts = 0
+
+/mob/living/carbon/human/scp082/Initialize()
 	. = ..()
-	SCP = new /datum/scp(src, "large humanoid", SCP_EUCLID, "082", SCP_PLAYABLE)
-	SCP.min_playercount = 25
-	SCP.min_time = 10 MINUTES
+	
+	// Set species properly
+	set_species(/datum/species/scp082)
 
-	// Add abilities
-	add_ability("rage_mode", "rage_mode_ability")
-	add_ability("regenerate", "regenerate_ability")
-	add_passive_effect("enhanced_strength", "enhanced_strength_effect")
+	// Initialize core systems
+	rage_system = new /datum/scp082_rage_system(src)
+	consumption_system = new /datum/scp082_consumption_system(src)
+	strength_system = new /datum/scp082_strength_system(src)
+	terror_system = new /datum/scp082_terror_system(src)
+	enhancement_system = new /datum/scp082_enhancement_system(src)
+	research_integration = new /datum/scp082_research_integration(src)
 
-	// Auto-registered via datum/scp
+	// Initialize SCP datum
+	SCP = new /datum/scp(
+		src,
+		"SCP-082",
+		SCP_EUCLID,
+		"082",
+		SCP_PLAYABLE
+	)
 
-/mob/living/carbon/scp/scp082/process_scp_effects()
+	SCP.min_playercount = 15
+	SCP.min_time = 25 MINUTES
+
+	// Set up human-specific properties for SCP-082
+	maxHealth = 400 // Enhanced health for SCP-082
+	health = maxHealth
+
+	// Initialize vision cone
+	fovangle = 120 // Wider vision than normal
+	update_fov_angles()
+	update_cone_show()
+
+	// Start processing
+	START_PROCESSING(SSobj, src)
+
+/mob/living/carbon/human/scp082/process()
 	. = ..()
 
-	if(stat == DEAD)
-		return
+	// Update all systems
+	rage_system?.process_rage()
+	consumption_system?.process_consumption()
+	strength_system?.process_strength()
+	terror_system?.process_terror()
+	enhancement_system?.process_enhancement()
+	research_integration?.process_research()
 
-	// Passive regeneration when health is low
-	if(health < maxHealth * 0.3 && regeneration_cooldown <= world.time)
-		adjust_scp_health(regeneration_amount * 0.5)
-		regeneration_cooldown = world.time + regeneration_cooldown_time
-		to_chat(src, "<span class='notice'>Your wounds begin to heal.</span>")
+// SCP-082 Status Display
+/mob/living/carbon/human/scp082/proc/get_scp082_status_items()
+	var/list/status_items = list()
 
-	// Rage effects
-	if(is_raging && prob(10))
-		visible_message("<span class='danger'>[src] roars in rage!</span>")
-		playsound(src, 'sound/effects/explosion1.ogg', 50)
+	// Rage system status
+	if(rage_system)
+		status_items += "Rage Level: [rage_system.rage_level]/[rage_system.max_rage_level]"
+		status_items += "Combat Efficiency: [rage_system.combat_efficiency]x"
+		status_items += "Berserk Mode: [rage_system.berserk_mode ? "ACTIVE" : "INACTIVE"]"
+		status_items += "Intimidation Radius: [rage_system.intimidation_radius]"
 
-/mob/living/carbon/scp/scp082/UnarmedAttack(atom/A)
-	if(!A || !istype(A, /mob/living))
-		return ..()
+	// Consumption system status
+	if(consumption_system)
+		status_items += "Hunger Level: [consumption_system.hunger_level]/[consumption_system.max_hunger_level]"
+		status_items += "Satiation Level: [consumption_system.satiation_level]/[consumption_system.max_satiation_level]"
+		status_items += "Consumption Efficiency: [consumption_system.consumption_efficiency]x"
+		if(consumption_system.feeding_in_progress)
+			status_items += "Currently Feeding: [consumption_system.feeding_target]"
 
-	var/mob/living/L = A
-	if(L.stat == DEAD)
-		return ..()
+	// Strength system status
+	if(strength_system)
+		status_items += "Current Strength: [strength_system.current_strength]/[strength_system.max_strength]"
+		status_items += "Lifting Capacity: [strength_system.lifting_capacity] kg"
+		status_items += "Destructive Force: [strength_system.destructive_force]"
+		status_items += "Grappling Power: [strength_system.grappling_power]"
 
-	// Enhanced damage when raging
-	var/damage_multiplier = is_raging ? rage_damage_multiplier : 1.0
-	var/damage = 20 * damage_multiplier
+	// Terror system status
+	if(terror_system)
+		status_items += "Intimidation Level: [terror_system.intimidation_level]/[terror_system.max_intimidation_level]"
+		status_items += "Terror Intensity: [terror_system.terror_intensity]/[terror_system.max_terror_intensity]"
+		status_items += "Presence Radius: [terror_system.presence_radius]"
 
-	L.adjustBruteLoss(damage)
+	// Enhancement system status
+	if(enhancement_system)
+		status_items += "Regeneration Rate: [enhancement_system.regeneration_rate]/[enhancement_system.max_regeneration_rate]"
+		status_items += "Adaptation Level: [enhancement_system.adaptation_level]/[enhancement_system.max_adaptation_level]"
+		status_items += "Physical Growth: [enhancement_system.physical_growth]/[enhancement_system.max_physical_growth]"
+		status_items += "Metabolic Efficiency: [enhancement_system.metabolic_efficiency]x"
 
-	if(is_raging)
-		to_chat(src, "<span class='danger'>You crush [L] with your enhanced strength!</span>")
-		to_chat(L, "<span class='danger'>[src] crushes you with incredible force!</span>")
-	else
-		to_chat(src, "<span class='notice'>You attack [L] with your massive strength.</span>")
-		to_chat(L, "<span class='danger'>[src] attacks you with overwhelming force!</span>")
+	return status_items
 
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
+// Override get_status_tab_items to include SCP-082 specific information
+/mob/living/carbon/human/scp082/get_status_tab_items()
+	var/list/status_items = ..()
+	status_items += get_scp082_status_items()
+	return status_items
 
-	// Log interaction
-	SCP.log_interaction(L, "enhanced_attack")
-	SCP.award_research(L, "combat", 15)
-
-	return ..()
-
-/mob/living/carbon/scp/scp082/get_status_tab_items()
+// Enhanced examine for SCP-082
+/mob/living/carbon/human/scp082/examine(mob/user)
 	. = ..()
-	. += "Rage Mode: [is_raging ? "ACTIVE" : "Inactive"]"
-	. += "Rage Cooldown: [max(0, round((rage_cooldown - world.time) / 10))] seconds"
-	. += "Regeneration Cooldown: [max(0, round((regeneration_cooldown - world.time) / 10))] seconds"
 
-/mob/living/carbon/scp/scp082/examine(mob/user)
+	if(rage_system)
+		. += "<span class='notice'>Rage Level: [rage_system.rage_level]/[rage_system.max_rage_level]</span>"
+		if(rage_system.berserk_mode)
+			. += "<span class='danger'>This entity is in a berserk rage!</span>"
+
+	if(consumption_system)
+		. += "<span class='notice'>Hunger Level: [consumption_system.hunger_level]/[consumption_system.max_hunger_level]</span>"
+		if(consumption_system.hunger_level > 70)
+			. += "<span class='warning'>This entity appears extremely hungry!</span>"
+
+	if(strength_system)
+		. += "<span class='notice'>Physical Strength: [strength_system.current_strength]</span>"
+
+	if(enhancement_system && enhancement_system.physical_growth > 0)
+		. += "<span class='notice'>This entity appears larger than normal humans.</span>"
+
+// Research contribution
+/mob/living/carbon/human/scp082/proc/contribute_research_data()
+	var/research_data = list(
+		"scp_type" = "SCP-082",
+		"rage_level" = rage_system?.rage_level || 0,
+		"berserk_mode" = rage_system?.berserk_mode || FALSE,
+		"hunger_level" = consumption_system?.hunger_level || 0,
+		"satiation_level" = consumption_system?.satiation_level || 0,
+		"current_strength" = strength_system?.current_strength || 0,
+		"intimidation_level" = terror_system?.intimidation_level || 0,
+		"adaptation_level" = enhancement_system?.adaptation_level || 0,
+		"physical_growth" = enhancement_system?.physical_growth || 0,
+		"regeneration_rate" = enhancement_system?.regeneration_rate || 0,
+		"timestamp" = world.time
+	)
+
+	research_integration?.research_data["last_update"] = research_data
+
+// Enhanced attack for SCP-082
+/mob/living/carbon/human/scp082/attack_hand(mob/living/carbon/human/target)
+	// Check if this is a consumption attempt
+	if(consumption_system && consumption_system.attempt_consumption(target))
+		meals_consumed++
+		targets_consumed++
+		return
+
+	// Check if this is a strength-enhanced attack
+	if(strength_system && rage_system)
+		var/damage_multiplier = rage_system.channel_rage_for_attack()
+		if(damage_multiplier > 1.0)
+			var/enhanced_damage = 20 * damage_multiplier
+			target.adjustBruteLoss(enhanced_damage)
+			total_damage_dealt += enhanced_damage
+
+			target.visible_message("<span class='danger'>[src] strikes [target] with enhanced strength!</span>")
+			playsound(src, 'sound/effects/phasein.ogg', 50, 0)
+
+			// Apply fear to target
+			if(terror_system && target.sanity)
+				target.sanity.adjust_sanity(-10, "scp082_attack")
+
+			return
+
+	// Default attack
 	. = ..()
-	. += "<span class='notice'>This massive humanoid possesses incredible strength and regenerative abilities.</span>"
-	if(is_raging)
-		. += "<span class='danger'>The humanoid is in a state of rage!</span>"
-	if(health < maxHealth * 0.5)
-		. += "<span class='warning'>The humanoid appears wounded but is regenerating.</span>"
-
-/mob/living/carbon/scp/scp082/scp_death()
-	visible_message("<span class='danger'>[src] collapses with a thunderous crash!</span>")
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	..()
-
-// Enhanced abilities
-/mob/living/carbon/scp/scp082/proc/rage_mode_ability()
-	set name = "Rage Mode"
-	set desc = "Enter a state of enhanced rage and strength"
-	set category = "SCP"
-
-	if(rage_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Rage mode is still recharging...</span>")
-		return
-
-	if(is_raging)
-		to_chat(src, "<span class='warning'>You are already in a rage!</span>")
-		return
-
-	is_raging = TRUE
-	rage_cooldown = world.time + rage_cooldown_time
-
-	to_chat(src, "<span class='danger'>You enter a state of uncontrollable rage!</span>")
-	visible_message("<span class='danger'>[src] enters a state of rage!</span>")
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Enhanced stats during rage
-	adjust_scp_health(50) // Temporary health boost
-
-	// Rage duration
-	spawn(rage_cooldown_time)
-		if(is_raging)
-			is_raging = FALSE
-			to_chat(src, "<span class='notice'>Your rage subsides.</span>")
-			visible_message("<span class='notice'>[src]'s rage subsides.</span>")
-
-/mob/living/carbon/scp/scp082/proc/regenerate_ability()
-	set name = "Regenerate"
-	set desc = "Actively regenerate health"
-	set category = "SCP"
-
-	if(regeneration_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Regeneration is still recharging...</span>")
-		return
-
-	if(health >= maxHealth)
-		to_chat(src, "<span class='warning'>You are already at full health.</span>")
-		return
-
-	to_chat(src, "<span class='notice'>You focus on regenerating your wounds.</span>")
-	visible_message("<span class='notice'>[src]'s wounds begin to heal rapidly.</span>")
-
-	adjust_scp_health(regeneration_amount)
-	regeneration_cooldown = world.time + regeneration_cooldown_time
-
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-
-/mob/living/carbon/scp/scp082/proc/enhanced_strength_effect()
-	// Passive enhanced strength effects
-	if(prob(2))
-		visible_message("<span class='notice'>[src] flexes their massive muscles.</span>")
-
-

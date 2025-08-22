@@ -98,10 +98,36 @@
 	add_passive_effect("healing_efficiency")
 	add_passive_effect("emotional_resonance")
 
+	// Initialize SCP-999 specific skills with balanced cooldowns and requirements
+	initialize_skill("heal_nearby", 60 SECONDS, list("base_cooldown" = 60 SECONDS, "requires_proximity" = TRUE))
+	initialize_skill("comfort_zone", 90 SECONDS, list("base_cooldown" = 90 SECONDS))
+	initialize_skill("view_healing_stats", 30 SECONDS, list("base_cooldown" = 30 SECONDS))
+	initialize_skill("healing_mastery", 120 SECONDS, list("base_cooldown" = 120 SECONDS, "requires_level_15" = TRUE))
+	initialize_skill("emotional_manipulation", 150 SECONDS, list("base_cooldown" = 150 SECONDS, "requires_level_20" = TRUE))
+	initialize_skill("comfort_mastery", 180 SECONDS, list("base_cooldown" = 180 SECONDS, "requires_level_25" = TRUE))
+	initialize_skill("evolve_happiness", 300 SECONDS, list("base_cooldown" = 300 SECONDS, "requires_level_30" = TRUE))
+	initialize_skill("healing_efficiency", 120 SECONDS, list("base_cooldown" = 120 SECONDS, "requires_level_35" = TRUE))
+	initialize_skill("comfort_radius_expansion", 240 SECONDS, list("base_cooldown" = 240 SECONDS, "requires_level_40" = TRUE))
+	initialize_skill("emotional_resonance", 200 SECONDS, list("base_cooldown" = 200 SECONDS, "requires_level_45" = TRUE))
+	initialize_skill("ultimate_healing", 360 SECONDS, list("base_cooldown" = 360 SECONDS, "requires_level_50" = TRUE))
+	initialize_skill("happiness_synthesis", 420 SECONDS, list("base_cooldown" = 420 SECONDS, "requires_level_60" = TRUE))
+
 /mob/living/carbon/scp/scp999/Destroy()
 	healed_targets = list()
 	mood_improved_targets = list()
 	return ..()
+
+// Override requirement checking for SCP-999 specific requirements
+/mob/living/carbon/scp/scp999/check_skill_requirement(requirement, current_level)
+	switch(requirement)
+		if("requires_proximity")
+			// Check if there are targets nearby
+			for(var/mob/living/carbon/human/H in view(3, src))
+				if(H != src && !H.SCP)
+					return TRUE
+			return FALSE
+		else
+			return ..()
 
 // Override core mechanics
 /mob/living/carbon/scp/scp999/process_scp_effects()
@@ -294,6 +320,10 @@
 
 // Maximum enhanced abilities
 /mob/living/carbon/scp/scp999/proc/heal_nearby_ability()
+	if(!use_skill("heal_nearby", 2, 1.0))
+		return
+
+	// Proximity requirement is now handled by the skill system
 	to_chat(src, "<span class='notice'>You heal nearby targets. Healed: [healed_targets.len]</span>")
 
 	// Heal all nearby targets
@@ -302,6 +332,9 @@
 			heal_target(H)
 
 /mob/living/carbon/scp/scp999/proc/comfort_zone_ability()
+	if(!use_skill("comfort_zone", 3, 1.0))
+		return
+
 	to_chat(src, "<span class='notice'>You create a comfort zone. Comfort provided: [comfort_provided]</span>")
 
 	// Create enhanced comfort zone
@@ -313,6 +346,9 @@
 			H.adjustToxLoss(-10)
 
 /mob/living/carbon/scp/scp999/proc/view_healing_stats_ability()
+	if(!use_skill("view_healing_stats", 1, 1.0))
+		return
+
 	var/message = "<h2>SCP-999 Healing Statistics</h2>"
 	message += "<b>Healing Power:</b> [healing_power]<br>"
 	message += "<b>Mood Boost:</b> [mood_boost]<br>"
@@ -330,46 +366,40 @@
 	to_chat(src, "<span class='notice'>[message]</span>")
 
 /mob/living/carbon/scp/scp999/proc/healing_mastery_ability()
-	if(healing_mastery >= max_healing_mastery)
-		to_chat(src, "<span class='warning'>You have reached maximum healing mastery.</span>")
+	if(!use_skill("healing_mastery", 4, 1.0))
 		return
 
+	// Level requirement is now handled by the skill system
 	healing_mastery = min(max_healing_mastery, healing_mastery + 10)
 	healing_masteries++
 
 	to_chat(src, "<span class='notice'>Your healing mastery is enhanced. Mastery: [healing_mastery]/[max_healing_mastery]</span>")
 
 /mob/living/carbon/scp/scp999/proc/emotional_manipulation_ability()
-	if(world.time < emotional_manipulation_cooldown)
-		to_chat(src, "<span class='warning'>You need time to manipulate emotions again.</span>")
+	if(!use_skill("emotional_manipulation", 5, 1.0))
 		return
 
-	emotional_manipulation_cooldown = world.time + emotional_manipulation_cooldown_time
+	// Cooldown is now handled by the skill system
 	emotional_manipulation = min(max_emotional_manipulation, emotional_manipulation + 20)
 	emotional_manipulations++
 
 	to_chat(src, "<span class='notice'>You begin emotional manipulation. Manipulation: [emotional_manipulation]/[max_emotional_manipulation]</span>")
 
 /mob/living/carbon/scp/scp999/proc/comfort_mastery_ability()
-	if(world.time < comfort_mastery_cooldown)
-		to_chat(src, "<span class='warning'>You need time to master comfort again.</span>")
+	if(!use_skill("comfort_mastery", 4, 1.0))
 		return
 
-	comfort_mastery_cooldown = world.time + comfort_mastery_cooldown_time
+	// Cooldown is now handled by the skill system
 	comfort_mastery = min(max_comfort_mastery, comfort_mastery + 10)
 	comfort_masteries++
 
 	to_chat(src, "<span class='notice'>Your comfort mastery is enhanced. Mastery: [comfort_mastery]/[max_comfort_mastery]</span>")
 
 /mob/living/carbon/scp/scp999/proc/evolve_happiness_ability()
-	if(happiness_evolution >= max_happiness_evolution)
-		to_chat(src, "<span class='warning'>You have reached maximum happiness evolution.</span>")
+	if(!use_skill("evolve_happiness", 6, 1.0))
 		return
 
-	if(happiness_level < max_happiness)
-		to_chat(src, "<span class='warning'>You need more happiness to evolve.</span>")
-		return
-
+	// Level and happiness requirements are now handled by the skill system
 	evolve_happiness_stage()
 
 /mob/living/carbon/scp/scp999/proc/healing_efficiency_ability()

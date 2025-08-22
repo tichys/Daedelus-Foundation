@@ -4,13 +4,17 @@ import { useBackend, useLocalState } from '../backend';
 import {
   Box,
   Button,
+  Dropdown,
   Flex,
   Grid,
   Icon,
+  Input,
   Modal,
+  NumberInput,
   ProgressBar,
   Section,
   Table,
+  TextArea,
 } from '../components';
 import { Window } from '../layouts';
 
@@ -53,6 +57,60 @@ export const PersistenceMasterPanel = (props, context) => {
   // Theme system state
   const [currentTheme, setCurrentTheme] = React.useState('dark');
   const [themeOpen, setThemeOpen] = React.useState(false);
+
+  // Theme styles based on current theme
+  const getThemeStyles = () => {
+    switch (currentTheme) {
+      case 'light':
+        return {
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          textColor: '#2c3e50',
+          borderColor: '#bdc3c7',
+          accentColor: '#3498db',
+          cardBackground: 'rgba(255,255,255,0.9)',
+          shadowColor: 'rgba(0,0,0,0.1)',
+        };
+      case 'blue':
+        return {
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          textColor: '#ffffff',
+          borderColor: '#5dade2',
+          accentColor: '#3498db',
+          cardBackground: 'rgba(52, 152, 219, 0.9)',
+          shadowColor: 'rgba(52, 152, 219, 0.3)',
+        };
+      case 'green':
+        return {
+          background: 'linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%)',
+          textColor: '#ffffff',
+          borderColor: '#27ae60',
+          accentColor: '#2ecc71',
+          cardBackground: 'rgba(46, 204, 113, 0.9)',
+          shadowColor: 'rgba(46, 204, 113, 0.3)',
+        };
+      case 'red':
+        return {
+          background: 'linear-gradient(135deg, #cb356b 0%, #bd3f32 100%)',
+          textColor: '#ffffff',
+          borderColor: '#e74c3c',
+          accentColor: '#e74c3c',
+          cardBackground: 'rgba(231, 76, 60, 0.9)',
+          shadowColor: 'rgba(231, 76, 60, 0.3)',
+        };
+      default: // dark
+        return {
+          background:
+            'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+          textColor: '#ffffff',
+          borderColor: '#4a4a4a',
+          accentColor: '#00d4ff',
+          cardBackground: 'rgba(0,0,0,0.8)',
+          shadowColor: 'rgba(0,0,0,0.5)',
+        };
+    }
+  };
+
+  const themeStyles = getThemeStyles();
 
   // Research modal state
   const [researchModalOpen, setResearchModalOpen] = React.useState(false);
@@ -882,6 +940,40 @@ export const PersistenceMasterPanel = (props, context) => {
 
   // Facility modal state
   const [facilityModalOpen, setFacilityModalOpen] = React.useState(false);
+  const [facilityAddRoomModalOpen, setFacilityAddRoomModalOpen] =
+    React.useState(false);
+  const [facilityMaintenanceModalOpen, setFacilityMaintenanceModalOpen] =
+    React.useState(false);
+  const [playerAddPlayerModalOpen, setPlayerAddPlayerModalOpen] =
+    React.useState(false);
+
+  // Form data for new modals
+  const [addRoomFormData, setAddRoomFormData] = React.useState({
+    room_id: '',
+    room_type: '',
+    security_level: '1',
+    health: '100',
+    power_status: '100',
+    description: '',
+  });
+
+  const [maintenanceFormData, setMaintenanceFormData] = React.useState({
+    task_name: '',
+    equipment_type: '',
+    assigned_to: '',
+    priority: 'medium',
+    due_date: '',
+    description: '',
+  });
+
+  const [addPlayerFormData, setAddPlayerFormData] = React.useState({
+    ckey: '',
+    initial_rank: '1',
+    initial_experience: '0',
+    faction_id: '',
+    notes: '',
+  });
+
   const [facilityFormData, setFacilityFormData] = React.useState({
     facility_id: '',
     facility_name: '',
@@ -1776,12 +1868,12 @@ export const PersistenceMasterPanel = (props, context) => {
           top: '60px',
           right: '20px',
           width: '300px',
-          background: 'rgba(0,0,0,0.95)',
-          border: '1px solid rgba(255,255,255,0.3)',
+          background: themeStyles.cardBackground,
+          border: `1px solid ${themeStyles.borderColor}`,
           borderRadius: '8px',
           padding: '15px',
           zIndex: 1000,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          boxShadow: `0 8px 32px ${themeStyles.shadowColor}`,
         }}
       >
         <Box
@@ -1813,9 +1905,9 @@ export const PersistenceMasterPanel = (props, context) => {
                 padding: '10px',
                 background:
                   currentTheme === theme.id
-                    ? 'rgba(255,255,255,0.1)'
+                    ? themeStyles.accentColor + '20'
                     : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${currentTheme === theme.id ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'}`,
+                border: `1px solid ${currentTheme === theme.id ? themeStyles.accentColor : themeStyles.borderColor}`,
                 borderRadius: '4px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
@@ -1861,12 +1953,11 @@ export const PersistenceMasterPanel = (props, context) => {
         left: 0,
         right: 0,
         bottom: 0,
-        background:
-          'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        background: themeStyles.background,
         padding: '20px',
         zIndex: 10,
         fontFamily: 'monospace',
-        color: '#ffffff',
+        color: themeStyles.textColor,
         overflow: 'hidden',
       }}
     >
@@ -1878,8 +1969,8 @@ export const PersistenceMasterPanel = (props, context) => {
           left: 0,
           right: 0,
           height: '50px',
-          background: 'rgba(0,0,0,0.9)',
-          borderBottom: '2px solid rgba(255,255,255,0.3)',
+          background: themeStyles.cardBackground,
+          borderBottom: `2px solid ${themeStyles.borderColor}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -2698,22 +2789,7 @@ export const PersistenceMasterPanel = (props, context) => {
             <EnhancedButton
               icon="🔧"
               color="average"
-              onClick={() => {
-                addNotification(
-                  'Maintenance',
-                  'Scheduling facility maintenance...',
-                  'info',
-                );
-                setTimeout(
-                  () =>
-                    addNotification(
-                      'Maintenance',
-                      'Maintenance scheduled successfully',
-                      'success',
-                    ),
-                  1500,
-                );
-              }}
+              onClick={() => setFacilityMaintenanceModalOpen(true)}
               tooltip="Schedule maintenance"
             >
               MAINTENANCE
@@ -2721,22 +2797,7 @@ export const PersistenceMasterPanel = (props, context) => {
             <EnhancedButton
               icon="⚡"
               color="blue"
-              onClick={() => {
-                addNotification(
-                  'Power Systems',
-                  'Checking power grid status...',
-                  'info',
-                );
-                setTimeout(
-                  () =>
-                    addNotification(
-                      'Power Systems',
-                      'Power grid operational',
-                      'success',
-                    ),
-                  1200,
-                );
-              }}
+              onClick={() => act('facility_power_grid_status')}
               tooltip="Power grid status"
             >
               POWER GRID
@@ -2833,6 +2894,15 @@ export const PersistenceMasterPanel = (props, context) => {
         {facilityActiveTab === 'rooms' && (
           <Box>
             <Section title="Room Management">
+              <Box style={{ marginBottom: '15px' }}>
+                <Button
+                  icon="plus"
+                  color="green"
+                  onClick={() => setFacilityAddRoomModalOpen(true)}
+                >
+                  Add Room
+                </Button>
+              </Box>
               <Table>
                 <Table.Row header>
                   <Table.Cell>Room ID</Table.Cell>
@@ -2841,24 +2911,40 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Security Level</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>ROOM-001</Table.Cell>
-                  <Table.Cell>Containment Cell</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      OPERATIONAL
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>Level 5</Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      onClick={() => setSelectedRoom('ROOM-001')}
-                    >
-                      View
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+                {data.facility_data?.rooms?.map((room) => (
+                  <Table.Row key={room.room_id}>
+                    <Table.Cell>{room.room_id}</Table.Cell>
+                    <Table.Cell>{room.room_type}</Table.Cell>
+                    <Table.Cell>
+                      <Box
+                        style={{
+                          color:
+                            room.status === 'OPERATIONAL'
+                              ? '#66ff66'
+                              : '#ff6666',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {room.status}
+                      </Box>
+                    </Table.Cell>
+                    <Table.Cell>Level {room.security_level}</Table.Cell>
+                    <Table.Cell>
+                      <Button
+                        size="small"
+                        onClick={() => setSelectedRoom(room.room_id)}
+                      >
+                        View
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                )) || (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No room data available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -4307,7 +4393,14 @@ export const PersistenceMasterPanel = (props, context) => {
                     >
                       SPENT THIS MONTH
                     </Box>
-                    <Box style={{ fontSize: '20px' }}>$125,000</Box>
+                    <Box style={{ fontSize: '20px' }}>
+                      $
+                      {data.technology_data?.research_budget
+                        ? Math.round(
+                            data.technology_data.research_budget / 1000,
+                          ) + 'K'
+                        : '0K'}
+                    </Box>
                   </Box>
                 </Grid.Column>
               </Grid>
@@ -5868,7 +5961,7 @@ export const PersistenceMasterPanel = (props, context) => {
                     </select>
                   </Box>
                   <Button
-                    onClick={() => act('player_add_player')}
+                    onClick={() => setPlayerAddPlayerModalOpen(true)}
                     icon="plus"
                     size="small"
                     color="green"
@@ -5887,36 +5980,52 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Status</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>PLAYER-001</Table.Cell>
-                  <Table.Cell>DrSmith</Table.Cell>
-                  <Table.Cell>Senior Researcher</Table.Cell>
-                  <Table.Cell>Foundation</Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      ONLINE
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Flex style={{ gap: '5px' }}>
-                      <Button
-                        size="small"
-                        onClick={() => setSelectedPlayer('PLAYER-001')}
+                {data.player_data?.players?.map((player) => (
+                  <Table.Row key={player.player_id}>
+                    <Table.Cell>{player.player_id}</Table.Cell>
+                    <Table.Cell>{player.username}</Table.Cell>
+                    <Table.Cell>{player.rank}</Table.Cell>
+                    <Table.Cell>{player.faction}</Table.Cell>
+                    <Table.Cell>
+                      <Box
+                        style={{
+                          color:
+                            player.status === 'ONLINE' ? '#66ff66' : '#ff6666',
+                          fontWeight: 'bold',
+                        }}
                       >
-                        View
-                      </Button>
-                      <Button
-                        size="small"
-                        color="blue"
-                        onClick={() =>
-                          act('player_edit_player', { player: 'PLAYER-001' })
-                        }
-                      >
-                        Edit
-                      </Button>
-                    </Flex>
-                  </Table.Cell>
-                </Table.Row>
+                        {player.status}
+                      </Box>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Flex style={{ gap: '5px' }}>
+                        <Button
+                          size="small"
+                          onClick={() => setSelectedPlayer(player.player_id)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          size="small"
+                          color="blue"
+                          onClick={() =>
+                            act('player_edit_player', {
+                              player: player.player_id,
+                            })
+                          }
+                        >
+                          Edit
+                        </Button>
+                      </Flex>
+                    </Table.Cell>
+                  </Table.Row>
+                )) || (
+                  <Table.Row>
+                    <Table.Cell colSpan={6} textAlign="center">
+                      No player data available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -5935,27 +6044,51 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Status</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>FAC-001</Table.Cell>
-                  <Table.Cell>SCP Foundation</Table.Cell>
-                  <Table.Cell>45</Table.Cell>
-                  <Table.Cell>
-                    <ProgressBar value={85} maxValue={100} color="good" />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Box style={{ color: '#66ff66', fontWeight: 'bold' }}>
-                      ACTIVE
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      onClick={() => setSelectedFaction('FAC-001')}
-                    >
-                      View
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+                {data.player_data?.factions?.map((faction) => (
+                  <Table.Row key={faction.faction_id}>
+                    <Table.Cell>{faction.faction_id}</Table.Cell>
+                    <Table.Cell>{faction.name}</Table.Cell>
+                    <Table.Cell>{faction.members}</Table.Cell>
+                    <Table.Cell>
+                      <ProgressBar
+                        value={faction.influence}
+                        maxValue={100}
+                        color={
+                          faction.influence > 70
+                            ? 'good'
+                            : faction.influence > 40
+                              ? 'average'
+                              : 'bad'
+                        }
+                      />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Box
+                        style={{
+                          color:
+                            faction.status === 'ACTIVE' ? '#66ff66' : '#ff6666',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {faction.status}
+                      </Box>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Button
+                        size="small"
+                        onClick={() => setSelectedFaction(faction.faction_id)}
+                      >
+                        View
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                )) || (
+                  <Table.Row>
+                    <Table.Cell colSpan={6} textAlign="center">
+                      No faction data available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -5973,27 +6106,33 @@ export const PersistenceMasterPanel = (props, context) => {
                   <Table.Cell>Unlocked By</Table.Cell>
                   <Table.Cell>Actions</Table.Cell>
                 </Table.Row>
-                <Table.Row>
-                  <Table.Cell>ACH-001</Table.Cell>
-                  <Table.Cell>First Containment</Table.Cell>
-                  <Table.Cell>
-                    Successfully contain an SCP for the first time
-                  </Table.Cell>
-                  <Table.Cell>12 players</Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      size="small"
-                      color="blue"
-                      onClick={() =>
-                        act('player_view_achievement', {
-                          achievement: 'ACH-001',
-                        })
-                      }
-                    >
-                      View
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+                {data.player_data?.achievements?.map((achievement) => (
+                  <Table.Row key={achievement.achievement_id}>
+                    <Table.Cell>{achievement.achievement_id}</Table.Cell>
+                    <Table.Cell>{achievement.name}</Table.Cell>
+                    <Table.Cell>{achievement.description}</Table.Cell>
+                    <Table.Cell>{achievement.unlocked_by}</Table.Cell>
+                    <Table.Cell>
+                      <Button
+                        size="small"
+                        color="blue"
+                        onClick={() =>
+                          act('player_view_achievement', {
+                            achievement: achievement.achievement_id,
+                          })
+                        }
+                      >
+                        View
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                )) || (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center">
+                      No achievement data available
+                    </Table.Cell>
+                  </Table.Row>
+                )}
               </Table>
             </Section>
           </Box>
@@ -22448,6 +22587,613 @@ export const PersistenceMasterPanel = (props, context) => {
                   </Box>
                 </Box>
               </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Add Room Modal */}
+        {facilityAddRoomModalOpen && (
+          <Modal maxWidth="600px">
+            <Box>
+              <Box
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  marginBottom: '20px',
+                  textAlign: 'center',
+                  color: '#66ffff',
+                }}
+              >
+                🏢 Add New Room
+              </Box>
+
+              <Grid>
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Room ID
+                    </Box>
+                    <Input
+                      value={addRoomFormData.room_id}
+                      onChange={(e, value) =>
+                        setAddRoomFormData({
+                          ...addRoomFormData,
+                          room_id: value,
+                        })
+                      }
+                      placeholder="e.g., ROOM-001"
+                      fluid
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Room Type
+                    </Box>
+                    <Dropdown
+                      selected={addRoomFormData.room_type}
+                      options={[
+                        { text: 'Containment Chamber', value: 'containment' },
+                        { text: 'Laboratory', value: 'laboratory' },
+                        { text: 'Office', value: 'office' },
+                        { text: 'Storage', value: 'storage' },
+                        { text: 'Security', value: 'security' },
+                        { text: 'Medical', value: 'medical' },
+                        { text: 'Engineering', value: 'engineering' },
+                        { text: 'Research', value: 'research' },
+                      ]}
+                      onSelected={(value) =>
+                        setAddRoomFormData({
+                          ...addRoomFormData,
+                          room_type: value,
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+              </Grid>
+
+              <Grid>
+                <Grid.Column size={4}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Security Level
+                    </Box>
+                    <NumberInput
+                      value={parseInt(addRoomFormData.security_level, 10)}
+                      minValue={1}
+                      maxValue={5}
+                      onChange={(value) =>
+                        setAddRoomFormData({
+                          ...addRoomFormData,
+                          security_level: value.toString(),
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={4}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Health (%)
+                    </Box>
+                    <NumberInput
+                      value={parseInt(addRoomFormData.health, 10)}
+                      minValue={0}
+                      maxValue={100}
+                      onChange={(value) =>
+                        setAddRoomFormData({
+                          ...addRoomFormData,
+                          health: value.toString(),
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={4}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Power Status (%)
+                    </Box>
+                    <NumberInput
+                      value={parseInt(addRoomFormData.power_status, 10)}
+                      minValue={0}
+                      maxValue={100}
+                      onChange={(value) =>
+                        setAddRoomFormData({
+                          ...addRoomFormData,
+                          power_status: value.toString(),
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+              </Grid>
+
+              <Box style={{ marginBottom: '20px' }}>
+                <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                  Description
+                </Box>
+                <TextArea
+                  value={addRoomFormData.description}
+                  onChange={(e, value) =>
+                    setAddRoomFormData({
+                      ...addRoomFormData,
+                      description: value,
+                    })
+                  }
+                  placeholder="Enter room description..."
+                  rows={3}
+                />
+              </Box>
+
+              <Flex justify="space-between">
+                <Button
+                  color="red"
+                  onClick={() => {
+                    setFacilityAddRoomModalOpen(false);
+                    setAddRoomFormData({
+                      room_id: '',
+                      room_type: '',
+                      security_level: '1',
+                      health: '100',
+                      power_status: '100',
+                      description: '',
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="green"
+                  onClick={() => {
+                    act('facility_submit_room', { room_data: addRoomFormData });
+                    setFacilityAddRoomModalOpen(false);
+                    setAddRoomFormData({
+                      room_id: '',
+                      room_type: '',
+                      security_level: '1',
+                      health: '100',
+                      power_status: '100',
+                      description: '',
+                    });
+                  }}
+                >
+                  Add Room
+                </Button>
+              </Flex>
+            </Box>
+          </Modal>
+        )}
+
+        {/* Maintenance Scheduling Modal */}
+        {facilityMaintenanceModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '8px',
+                padding: '20px',
+                minWidth: '600px',
+                maxWidth: '800px',
+                maxHeight: '80vh',
+                overflow: 'auto',
+              }}
+            >
+              <Box
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  marginBottom: '20px',
+                  textAlign: 'center',
+                  color: '#ffaa00',
+                }}
+              >
+                🔧 Schedule Maintenance Task
+              </Box>
+
+              <Grid>
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Task Name
+                    </Box>
+                    <Input
+                      value={maintenanceFormData.task_name}
+                      onChange={(e, value) =>
+                        setMaintenanceFormData({
+                          ...maintenanceFormData,
+                          task_name: value,
+                        })
+                      }
+                      placeholder="e.g., Replace Air Filters"
+                      fluid
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Equipment Type
+                    </Box>
+                    <Dropdown
+                      selected={maintenanceFormData.equipment_type}
+                      options={[
+                        { displayText: 'HVAC System', value: 'hvac' },
+                        { displayText: 'Security System', value: 'security' },
+                        { displayText: 'Power Generation', value: 'power' },
+                        { displayText: 'Life Support', value: 'life_support' },
+                        {
+                          displayText: 'Containment Equipment',
+                          value: 'containment',
+                        },
+                        {
+                          displayText: 'Laboratory Equipment',
+                          value: 'laboratory',
+                        },
+                        { displayText: 'Medical Equipment', value: 'medical' },
+                        {
+                          displayText: 'Research Equipment',
+                          value: 'research',
+                        },
+                        {
+                          displayText: 'Communication System',
+                          value: 'communication',
+                        },
+                        {
+                          displayText: 'Environmental Control',
+                          value: 'environmental',
+                        },
+                      ]}
+                      onSelected={(value) =>
+                        setMaintenanceFormData({
+                          ...maintenanceFormData,
+                          equipment_type: value,
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+              </Grid>
+
+              <Grid>
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Assigned Team
+                    </Box>
+                    <Dropdown
+                      selected={maintenanceFormData.assigned_to}
+                      options={[
+                        {
+                          displayText: 'Engineering Team',
+                          value: 'Engineering Team',
+                        },
+                        {
+                          displayText: 'Security Team',
+                          value: 'Security Team',
+                        },
+                        { displayText: 'Medical Team', value: 'Medical Team' },
+                        {
+                          displayText: 'Research Team',
+                          value: 'Research Team',
+                        },
+                        {
+                          displayText: 'Facility Maintenance',
+                          value: 'Facility Maintenance',
+                        },
+                        {
+                          displayText: 'Technical Support',
+                          value: 'Technical Support',
+                        },
+                        { displayText: 'Safety Team', value: 'Safety Team' },
+                      ]}
+                      onSelected={(value) =>
+                        setMaintenanceFormData({
+                          ...maintenanceFormData,
+                          assigned_to: value,
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={3}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Priority
+                    </Box>
+                    <Dropdown
+                      selected={maintenanceFormData.priority}
+                      options={[
+                        { displayText: 'Low', value: 'low' },
+                        { displayText: 'Medium', value: 'medium' },
+                        { displayText: 'High', value: 'high' },
+                        { displayText: 'Critical', value: 'critical' },
+                      ]}
+                      onSelected={(value) =>
+                        setMaintenanceFormData({
+                          ...maintenanceFormData,
+                          priority: value,
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={3}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Due Date
+                    </Box>
+                    <Input
+                      value={maintenanceFormData.due_date}
+                      onChange={(e, value) =>
+                        setMaintenanceFormData({
+                          ...maintenanceFormData,
+                          due_date: value,
+                        })
+                      }
+                      placeholder="YYYY-MM-DD"
+                      fluid
+                    />
+                  </Box>
+                </Grid.Column>
+              </Grid>
+
+              <Box style={{ marginBottom: '20px' }}>
+                <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                  Description & Instructions
+                </Box>
+                <TextArea
+                  value={maintenanceFormData.description}
+                  onChange={(e, value) =>
+                    setMaintenanceFormData({
+                      ...maintenanceFormData,
+                      description: value,
+                    })
+                  }
+                  placeholder="Enter detailed maintenance instructions and requirements..."
+                  rows={4}
+                />
+              </Box>
+
+              <Flex justify="space-between">
+                <Button
+                  color="red"
+                  onClick={() => {
+                    setFacilityMaintenanceModalOpen(false);
+                    setMaintenanceFormData({
+                      task_name: '',
+                      equipment_type: '',
+                      assigned_to: '',
+                      priority: 'medium',
+                      due_date: '',
+                      description: '',
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="green"
+                  onClick={() => {
+                    act('facility_submit_maintenance', {
+                      maintenance_data: maintenanceFormData,
+                    });
+                    setFacilityMaintenanceModalOpen(false);
+                    setMaintenanceFormData({
+                      task_name: '',
+                      equipment_type: '',
+                      assigned_to: '',
+                      priority: 'medium',
+                      due_date: '',
+                      description: '',
+                    });
+                  }}
+                >
+                  Schedule Task
+                </Button>
+              </Flex>
+            </Box>
+          </Box>
+        )}
+
+        {/* Add Player Modal */}
+        {playerAddPlayerModalOpen && (
+          <Box
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.8)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.9)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '8px',
+                padding: '20px',
+                minWidth: '500px',
+                maxWidth: '700px',
+                maxHeight: '80vh',
+                overflow: 'auto',
+              }}
+            >
+              <Box
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  marginBottom: '20px',
+                  textAlign: 'center',
+                  color: '#66ff66',
+                }}
+              >
+                👤 Add New Player
+              </Box>
+
+              <Grid>
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Player Ckey
+                    </Box>
+                    <Input
+                      value={addPlayerFormData.ckey}
+                      onChange={(e, value) =>
+                        setAddPlayerFormData({
+                          ...addPlayerFormData,
+                          ckey: value,
+                        })
+                      }
+                      placeholder="e.g., playername"
+                      fluid
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Initial Rank
+                    </Box>
+                    <NumberInput
+                      value={parseInt(addPlayerFormData.initial_rank, 10)}
+                      minValue={1}
+                      maxValue={10}
+                      onChange={(value) =>
+                        setAddPlayerFormData({
+                          ...addPlayerFormData,
+                          initial_rank: value.toString(),
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+              </Grid>
+
+              <Grid>
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Initial Experience
+                    </Box>
+                    <NumberInput
+                      value={parseInt(addPlayerFormData.initial_experience, 10)}
+                      minValue={0}
+                      maxValue={10000}
+                      onChange={(value) =>
+                        setAddPlayerFormData({
+                          ...addPlayerFormData,
+                          initial_experience: value.toString(),
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+
+                <Grid.Column size={6}>
+                  <Box style={{ marginBottom: '15px' }}>
+                    <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                      Faction
+                    </Box>
+                    <Dropdown
+                      selected={addPlayerFormData.faction_id}
+                      options={[
+                        { displayText: 'Foundation', value: 'foundation' },
+                        { displayText: 'D-Class', value: 'dclass' },
+                        { displayText: 'Security', value: 'security' },
+                        { displayText: 'Medical', value: 'medical' },
+                        { displayText: 'Research', value: 'research' },
+                        { displayText: 'Engineering', value: 'engineering' },
+                        { displayText: 'Civilian', value: 'civilian' },
+                      ]}
+                      onSelected={(value) =>
+                        setAddPlayerFormData({
+                          ...addPlayerFormData,
+                          faction_id: value,
+                        })
+                      }
+                    />
+                  </Box>
+                </Grid.Column>
+              </Grid>
+
+              <Box style={{ marginBottom: '20px' }}>
+                <Box style={{ marginBottom: '5px', fontWeight: 'bold' }}>
+                  Notes
+                </Box>
+                <TextArea
+                  value={addPlayerFormData.notes}
+                  onChange={(e, value) =>
+                    setAddPlayerFormData({ ...addPlayerFormData, notes: value })
+                  }
+                  placeholder="Optional notes about this player..."
+                  rows={3}
+                />
+              </Box>
+
+              <Flex justify="space-between">
+                <Button
+                  color="red"
+                  onClick={() => {
+                    setPlayerAddPlayerModalOpen(false);
+                    setAddPlayerFormData({
+                      ckey: '',
+                      initial_rank: '1',
+                      initial_experience: '0',
+                      faction_id: '',
+                      notes: '',
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="green"
+                  onClick={() => {
+                    act('player_submit_player', {
+                      player_data: addPlayerFormData,
+                    });
+                    setPlayerAddPlayerModalOpen(false);
+                    setAddPlayerFormData({
+                      ckey: '',
+                      initial_rank: '1',
+                      initial_experience: '0',
+                      faction_id: '',
+                      notes: '',
+                    });
+                  }}
+                >
+                  Add Player
+                </Button>
+              </Flex>
             </Box>
           </Box>
         )}

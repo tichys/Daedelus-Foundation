@@ -63,6 +63,9 @@
 
 	/// A lazily initiated "food" version of the clothing for moths
 	var/obj/item/food/clothing/moth_snack
+	
+	// Vision cone system variables
+	var/block2add = 0 // FOV blocking flags for vision cone system
 
 /obj/item/clothing/Initialize(mapload)
 	if(clothing_flags & VOICEBOX_TOGGLABLE)

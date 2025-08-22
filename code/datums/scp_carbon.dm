@@ -63,6 +63,10 @@
 	// Marker for one-time restoration from persistence
 	var/skills_restored = FALSE
 
+	// Modular System (Optional)
+	var/list/enabled_features = list() // List of enabled features for this SCP
+	var/list/feature_configs = list() // Configuration for each feature
+
 /mob/living/carbon/scp/Initialize()
 	. = ..()
 
@@ -76,6 +80,9 @@
 	// Register with SCP persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances[persistence_id] = new /datum/scp_instance(persistence_id, src)
+
+	// Initialize modular features
+	setup_modular_features()
 
 	// Ensure base bodyparts are instantiated before adding organs
 	ensure_bodyparts_created()
@@ -177,6 +184,45 @@
 		var/obj/item/organ/appendix/A = new /obj/item/organ/appendix()
 		A.Insert(src)
 
+// Modular Feature Management Methods
+
+// Setup modular features - override in specific SCPs
+/mob/living/carbon/scp/proc/setup_modular_features()
+	// Default features - override in specific SCPs to customize
+	enabled_features = list(
+		"skill_system" = TRUE,
+		"containment_system" = TRUE,
+		"persistence_system" = TRUE,
+		"effect_system" = TRUE,
+		"ability_system" = TRUE,
+		"interaction_system" = TRUE
+	)
+
+// Process modular features
+/mob/living/carbon/scp/proc/process_modular_features()
+	// Override in specific SCPs to add custom feature processing
+	return
+
+// Enable a feature
+/mob/living/carbon/scp/proc/enable_feature(feature_name)
+	enabled_features[feature_name] = TRUE
+
+// Disable a feature
+/mob/living/carbon/scp/proc/disable_feature(feature_name)
+	enabled_features[feature_name] = FALSE
+
+// Check if a feature is enabled
+/mob/living/carbon/scp/proc/is_feature_enabled(feature_name)
+	return enabled_features[feature_name] || FALSE
+
+// Configure a feature
+/mob/living/carbon/scp/proc/configure_feature(feature_name, config_data)
+	feature_configs[feature_name] = config_data
+
+// Get feature configuration
+/mob/living/carbon/scp/proc/get_feature_config(feature_name)
+	return feature_configs[feature_name]
+
 // Core SCP mechanics
 /mob/living/carbon/scp/Life()
 	. = ..()
@@ -189,6 +235,9 @@
 
 	// Check containment status
 	check_containment()
+
+	// Process modular features
+	process_modular_features()
 
 // Process SCP-specific effects
 /mob/living/carbon/scp/proc/process_scp_effects()
@@ -526,6 +575,12 @@
 	. += "Level Up Cooldown: [max(0, (level_up_cooldown - world.time) / 10)]s"
 	. += "Passive Effects: [passive_effects.len]"
 	. += "Abilities: [scp_abilities.len]"
+	
+	// Add modular feature status
+	. += "Features: [enabled_features.len] enabled"
+	for(var/feature_name in enabled_features)
+		if(enabled_features[feature_name])
+			. += "Feature: [feature_name] - Enabled"
 
 // Examine behavior
 /mob/living/carbon/scp/examine(mob/user)
@@ -626,90 +681,7 @@
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
-// Containment-related verbs for all SCPs
 
-/mob/living/carbon/scp/verb/attempt_breach()
-	set name = "Attempt Breach"
-	set category = "SCP"
-	set desc = "Attempt to breach containment."
-
-	attempt_containment_breach()
-
-/mob/living/carbon/scp/verb/enhance_resistance()
-	set name = "Enhance Resistance"
-	set category = "SCP"
-	set desc = "Enhance your containment resistance."
-
-	enhance_containment_resistance()
-
-/mob/living/carbon/scp/verb/reduce_integrity()
-	set name = "Reduce Integrity"
-	set category = "SCP"
-	set desc = "Reduce containment integrity."
-
-	reduce_containment_integrity()
-
-/mob/living/carbon/scp/verb/restore_integrity()
-	set name = "Restore Integrity"
-	set category = "SCP"
-	set desc = "Restore containment integrity."
-
-	restore_containment_integrity()
-
-/mob/living/carbon/scp/verb/view_containment_report()
-	set name = "View Containment Report"
-	set category = "SCP"
-	set desc = "View detailed containment status report."
-
-	to_chat(src, "<span class='notice'>[get_containment_report()]</span>")
-
-/mob/living/carbon/scp/verb/add_protocol()
-	set name = "Add Protocol"
-	set category = "SCP"
-	set desc = "Add a containment protocol."
-
-	var/protocol_name = input(src, "Enter protocol name:", "Add Protocol") as text
-	if(protocol_name)
-		var/protocol_desc = input(src, "Enter protocol description:", "Protocol Description") as text
-		if(protocol_desc)
-			add_containment_protocol(protocol_name, protocol_desc)
-
-/mob/living/carbon/scp/verb/remove_protocol()
-	set name = "Remove Protocol"
-	set category = "SCP"
-	set desc = "Remove a containment protocol."
-
-	if(!containment_protocols.len)
-		to_chat(src, "<span class='warning'>No protocols to remove.</span>")
-		return
-
-	var/protocol_name = input(src, "Choose protocol to remove:", "Remove Protocol") as null|anything in containment_protocols
-	if(protocol_name)
-		remove_containment_protocol(protocol_name)
-
-/mob/living/carbon/scp/verb/add_security()
-	set name = "Add Security"
-	set category = "SCP"
-	set desc = "Add a security measure."
-
-	var/measure_name = input(src, "Enter security measure name:", "Add Security") as text
-	if(measure_name)
-		var/measure_desc = input(src, "Enter security measure description:", "Security Description") as text
-		if(measure_desc)
-			add_security_measure(measure_name, measure_desc)
-
-/mob/living/carbon/scp/verb/remove_security()
-	set name = "Remove Security"
-	set category = "SCP"
-	set desc = "Remove a security measure."
-
-	if(!security_measures.len)
-		to_chat(src, "<span class='warning'>No security measures to remove.</span>")
-		return
-
-	var/measure_name = input(src, "Choose security measure to remove:", "Remove Security") as null|anything in security_measures
-	if(measure_name)
-		remove_security_measure(measure_name)
 
 // Skill and Leveling System Methods
 

@@ -7,6 +7,7 @@
 	icon = 'icons/scp/SCP-131.dmi'
 	icon_state = "scp131"
 	real_name = "SCP-131"
+	use_custom_sprite = TRUE
 
 	// SCP-131 specific variables
 	var/partner = null

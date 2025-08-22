@@ -135,17 +135,17 @@ SUBSYSTEM_DEF(dclass)
 /datum/dclass_manager/proc/initialize_guard_patrols()
 	guard_patrols["cell_block"] = list(
 		"route" = list("cell_1", "cell_2", "cell_3", "cell_4", "cell_5"),
-		"frequency" = 120, // Every 2 minutes
+		"frequency" = 1800, // Every 30 minutes (reduced from 2 minutes)
 		"last_patrol" = 0
 	)
 	guard_patrols["common_areas"] = list(
 		"route" = list("cafeteria", "rec_room", "showers", "work_area"),
-		"frequency" = 180, // Every 3 minutes
+		"frequency" = 2400, // Every 40 minutes (reduced from 3 minutes)
 		"last_patrol" = 0
 	)
 	guard_patrols["security_checkpoints"] = list(
 		"route" = list("checkpoint_1", "checkpoint_2", "checkpoint_3"),
-		"frequency" = 300, // Every 5 minutes
+		"frequency" = 3600, // Every 60 minutes (reduced from 5 minutes)
 		"last_patrol" = 0
 	)
 
@@ -168,7 +168,9 @@ SUBSYSTEM_DEF(dclass)
 	if(available_guards.len > 0)
 		var/mob/living/carbon/human/guard = pick(available_guards)
 		// Send guard on patrol (simplified for now)
-		to_chat(guard, "<span class='notice'>You are assigned to patrol [patrol_name].</span>")
+		// Reduced frequency to prevent spam - only send message occasionally
+		if(prob(25)) // 25% chance to send message
+			to_chat(guard, "<span class='notice'>You are assigned to patrol [patrol_name].</span>")
 
 // Initialize work assignments
 /datum/dclass_manager/proc/initialize_work_assignments()
