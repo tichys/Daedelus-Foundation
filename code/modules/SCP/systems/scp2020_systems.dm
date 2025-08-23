@@ -72,6 +72,9 @@
 	teleport_cooldown = world.time + teleport_cooldown_time
 	teleport_events++
 
+	// Track progression event
+	track_scp2020_teleportation(owner, target_turf, teleport_type)
+
 	playsound(owner, 'sound/effects/phasein.ogg', 50)
 	owner.forceMove(target_turf)
 	playsound(owner, 'sound/effects/phasein.ogg', 50)

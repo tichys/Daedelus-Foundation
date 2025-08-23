@@ -170,7 +170,8 @@ DEFINE_INTERACTABLE(/atom/movable/screen/movable/action_button)
  */
 /mob/proc/update_mob_action_buttons(update_flags = ALL, force = FALSE)
 	for(var/datum/action/current_action as anything in actions)
-		current_action.build_all_button_icons(update_flags, force)
+		if(current_action) // Add null check to prevent runtime errors
+			current_action.build_all_button_icons(update_flags, force)
 
 /**
  * This proc handles adding all of the mob's actions to their screen
@@ -188,6 +189,8 @@ DEFINE_INTERACTABLE(/atom/movable/screen/movable/action_button)
 		return
 
 	for(var/datum/action/action as anything in actions)
+		if(!action) // Add null check to prevent runtime errors
+			continue
 		var/atom/movable/screen/movable/action_button/button = action.viewers[hud_used]
 		action.build_all_button_icons()
 		if(reload_screen)

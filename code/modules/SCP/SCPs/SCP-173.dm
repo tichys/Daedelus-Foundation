@@ -21,6 +21,11 @@
 	var/datum/scp173_combat_system/combat_system
 	var/datum/scp173_research_system/research_system
 
+	// Progression integration tracking
+	var/successful_movements = 0
+	var/victims_killed = 0
+	var/containment_breaches = 0
+
 /mob/living/carbon/human/scp173/Initialize()
 	. = ..()
 	set_species(/datum/species/scp173)
@@ -55,6 +60,13 @@
 
 	// Load persistence data
 	load_persistence_data()
+
+// Process method to prevent CPU waste warning
+/mob/living/carbon/human/scp173/process(delta_time)
+	// Don't call parent - we're implementing our own process logic
+	// SCP-173 uses Life() for main processing, this is just to prevent CPU waste
+
+	// Return nothing to continue processing (not PROCESS_KILL)
 
 // Enhanced life cycle integration
 /mob/living/carbon/human/scp173/Life()

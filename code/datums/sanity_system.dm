@@ -120,8 +120,8 @@
 	owner = null
 	return ..()
 
-/datum/sanity/process()
-	. = ..()
+/datum/sanity/process(delta_time)
+	// Don't call parent - we're implementing our own process logic
 
 	// Update sanity level
 	update_sanity()
@@ -143,6 +143,8 @@
 
 	// Check for sanity state changes
 	check_sanity_state_change()
+
+	// Return nothing to continue processing (not PROCESS_KILL)
 
 /datum/sanity/proc/update_sanity()
 	var/sanity_change = 0

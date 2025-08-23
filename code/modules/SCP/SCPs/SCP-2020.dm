@@ -17,6 +17,11 @@
 	var/people_observed = 0
 	var/activation_events = 0
 
+	// Progression integration tracking
+	var/teleportations = 0
+	var/stealth_actions = 0
+	var/victims_eliminated = 0
+
 /mob/living/carbon/human/scp2020/Initialize(mapload, new_species = "SCP-2020")
 	. = ..()
 	set_species(/datum/species/scp2020)

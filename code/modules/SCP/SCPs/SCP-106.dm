@@ -78,8 +78,8 @@
 	overlays_standing[EYE_LAYER] = null
 	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp106/process()
-	. = ..()
+/mob/living/carbon/human/scp106/process(delta_time)
+	// Don't call parent - we're implementing our own process logic
 
 	// Update all systems
 	phasing_system?.process_phasing()
@@ -88,6 +88,8 @@
 	hunting_system?.process_hunting()
 	containment_system?.process_containment()
 	research_integration?.process_research()
+
+	// Return nothing to continue processing (not PROCESS_KILL)
 
 // SCP-106 Status Display
 /mob/living/carbon/human/scp106/proc/get_scp106_status_items()

@@ -34,7 +34,7 @@
 
 /mob/living/carbon/human/scp939/Initialize()
 	. = ..()
-	
+
 	// Set species properly
 	set_species(/datum/species/scp939)
 
@@ -70,8 +70,8 @@
 	// Start processing
 	START_PROCESSING(SSobj, src)
 
-/mob/living/carbon/human/scp939/process()
-	. = ..()
+/mob/living/carbon/human/scp939/process(delta_time)
+	// Don't call parent - we're implementing our own process logic
 
 	// Update all systems
 	voice_system?.process_voice()
@@ -80,6 +80,8 @@
 	territory_system?.process_territory()
 	hunting_system?.process_hunting()
 	research_integration?.process_research()
+
+	// Return nothing to continue processing (not PROCESS_KILL)
 
 // SCP-939 Status Display
 /mob/living/carbon/human/scp939/proc/get_scp939_status_items()

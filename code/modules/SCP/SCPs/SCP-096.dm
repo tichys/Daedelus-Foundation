@@ -22,6 +22,11 @@
 	var/datum/scp096_hysteria_system/hysteria_system
 	var/datum/scp096_research_system/research_system
 
+	// Progression integration tracking
+	var/rage_activations = 0
+	var/victims_hunted = 0
+	var/containment_escapes = 0
+
 /mob/living/carbon/human/scp096/Initialize()
 	. = ..()
 

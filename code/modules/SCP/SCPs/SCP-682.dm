@@ -41,7 +41,7 @@
 
 /mob/living/carbon/human/scp682/Initialize(mapload)
 	. = ..()
-	
+
 	// Set species properly
 	set_species(/datum/species/scp682)
 
@@ -96,8 +96,8 @@
 	QDEL_NULL(research_integration)
 	return ..()
 
-/mob/living/carbon/human/scp682/process()
-	. = ..()
+/mob/living/carbon/human/scp682/process(delta_time)
+	// Don't call parent - we're implementing our own process logic
 
 	// Update all systems
 	evolution_system?.process_evolution()
@@ -109,6 +109,8 @@
 
 	// Process SCP-682 specific effects
 	process_scp682_effects()
+
+	// Return nothing to continue processing (not PROCESS_KILL)
 
 /mob/living/carbon/human/scp682/proc/process_scp682_effects()
 	// Update threat level based on evolution stage

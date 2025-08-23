@@ -5,8 +5,7 @@
 	name = "SCP-457"
 	desc = "A living flame that moves with purpose and spreads with intent."
 	icon = 'icons/scp/scp-457.dmi'
-	icon_state = "scp457"
-	real_name = "SCP-457"
+	icon_state = "fireguy"
 
 
 	// Core system datums
@@ -25,6 +24,11 @@
 	var/total_containment_encounters = 0
 	var/total_environmental_control = 0
 	var/session_start_time = 0
+
+	// Progression integration tracking
+	var/fires_created = 0
+	var/damage_dealt = 0
+	var/victims_consumed = 0
 
 /mob/living/carbon/human/scp457/Initialize()
 	. = ..()
@@ -68,9 +72,19 @@
 
 	// Set session start time
 	session_start_time = world.time
+		// Remove bodypart overlays to prevent covering the SCP icon
+	remove_overlay(BODYPARTS_LAYER)
+	remove_overlay(EYE_LAYER)
+	remove_overlay(BODY_LAYER)
+	overlays_standing[BODYPARTS_LAYER] = null
+	overlays_standing[EYE_LAYER] = null
+	overlays_standing[BODY_LAYER] = null
 
 	// Start processing
 	START_PROCESSING(SSobj, src)
+
+	// Create initial fires immediately
+	addtimer(CALLBACK(fire_system, TYPE_PROC_REF(/datum/scp457_fire_system, create_initial_fires)), 1)
 
 /mob/living/carbon/human/scp457/Destroy()
 	QDEL_NULL(heat_system)
@@ -82,8 +96,8 @@
 	consumed_targets.Cut()
 	return ..()
 
-/mob/living/carbon/human/scp457/process()
-	. = ..()
+/mob/living/carbon/human/scp457/process(delta_time)
+	// Don't call parent - we're implementing our own process logic
 
 	// Update all systems
 	heat_system?.process()
@@ -95,6 +109,8 @@
 
 	// Process SCP-457 specific effects
 	process_scp457_effects()
+
+	// Return nothing to continue processing (not PROCESS_KILL)
 
 /mob/living/carbon/human/scp457/proc/process_scp457_effects()
 	// Update icon based on heat level
@@ -111,13 +127,13 @@
 
 	switch(fire_type)
 		if("basic")
-			icon_state = "scp457"
+			icon_state = "fireguy"
 		if("intense")
-			icon_state = "scp457_intense"
+			icon_state = "fireguy"
 		if("blue")
-			icon_state = "scp457_blue"
+			icon_state = "fireguy"
 		if("white")
-			icon_state = "scp457_white"
+			icon_state = "fireguy"
 
 /mob/living/carbon/human/scp457/proc/process_movement_effects()
 	// Create fire trail when moving
@@ -129,20 +145,23 @@
 /mob/living/carbon/human/scp457/proc/process_target_interaction()
 	// Check for nearby targets to consume
 	for(var/mob/living/carbon/human/H in range(2, src))
-		if(H != src && !H.SCP && H.stat != DEAD)
+		if(H != src && !H.SCP && H.stat != DEAD && !QDELETED(H))
 			// Only interact with targets in vision cone
 			if(fovangle && can_see_cone(H))
 				attempt_target_consumption(H)
 
 /mob/living/carbon/human/scp457/proc/attempt_target_consumption(mob/living/carbon/human/target)
 	// Check if target is vulnerable
-	if(target.stat == DEAD)
+	if(target.stat == DEAD || QDELETED(target))
 		return
 
 	// Apply fire damage
 	var/damage = heat_system.get_fire_type() == "white" ? 25 : 15
-	target.adjustFireLoss(damage)
-	target.adjustBruteLoss(damage / 2)
+
+	// Additional safety check before applying damage
+	if(!QDELETED(target) && target.stat != DEAD)
+		target.adjustFireLoss(damage)
+		target.adjustBruteLoss(damage / 2)
 
 	// Add heat when consuming targets
 	heat_system.add_heat(5)
@@ -178,13 +197,20 @@
 /mob/living/carbon/human/scp457/UnarmedAttack(atom/A)
 	if(isliving(A))
 		var/mob/living/L = A
+
+		// Check if target is being deleted
+		if(QDELETED(L))
+			return
+
 		var/damage = 20 + (heat_system.current_heat / 10)
 
-		visible_message("<span class='danger'>[src] engulfs [L] in intense flames!</span>")
-		playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
+		// Additional safety check before applying damage
+		if(!QDELETED(L) && L.stat != DEAD)
+			visible_message("<span class='danger'>[src] engulfs [L] in intense flames!</span>")
+			playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
 
-		L.adjustBruteLoss(damage)
-		L.adjustFireLoss(damage)
+			L.adjustBruteLoss(damage)
+			L.adjustFireLoss(damage)
 
 		// Add heat from attack
 		heat_system.add_heat(3)
@@ -194,10 +220,19 @@
 			add_consumed_target(L)
 			evolution_system.add_target_consumed()
 
-		// Add interaction record removed - not needed
-		return
+			// Add interaction record removed - not needed
+	return
 
 	return ..()
+
+// Manual fire creation verb for testing
+/mob/living/carbon/human/scp457/verb/create_fire()
+	set name = "Create Fire"
+	set category = "SCP-457"
+	set desc = "Manually create a fire at your location"
+
+	if(fire_system)
+		fire_system.create_initial_fires()
 
 // Status display
 /mob/living/carbon/human/scp457/get_status_tab_items()

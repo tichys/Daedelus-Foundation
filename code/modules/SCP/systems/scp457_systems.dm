@@ -86,6 +86,7 @@
 /datum/scp457_fire_system/New(mob/living/carbon/human/scp457/new_owner)
 	. = ..()
 	owner = new_owner
+	current_fire_type = "basic" // Initialize fire type
 	START_PROCESSING(SSobj, src)
 
 /datum/scp457_fire_system/Destroy()
@@ -168,6 +169,9 @@
 	total_fires_created++
 	fires_this_session++
 
+	// Track progression event
+	track_scp457_fire_creation(owner, current_fire_type, T)
+
 	// Apply damage to nearby targets
 	apply_fire_damage(T)
 
@@ -175,13 +179,15 @@
 	var/damage = get_fire_damage()
 
 	for(var/mob/living/L in range(1, fire_turf))
-		if(L != owner && !L.SCP)
-			L.adjustFireLoss(damage)
-			L.adjustBruteLoss(damage / 2)
+		if(L != owner && !L.SCP && !QDELETED(L))
+			// Additional safety check before applying damage
+			if(!QDELETED(L) && L.stat != DEAD)
+				L.adjustFireLoss(damage)
+				L.adjustBruteLoss(damage / 2)
 
-			// Add to consumed targets if they die
-			if(L.stat == DEAD && istype(L, /mob/living/carbon/human))
-				owner.add_consumed_target(L)
+				// Add to consumed targets if they die
+				if(L.stat == DEAD && istype(L, /mob/living/carbon/human))
+					owner.add_consumed_target(L)
 
 /datum/scp457_fire_system/proc/get_fire_damage()
 	switch(current_fire_type)
@@ -596,7 +602,7 @@
 	name = "Living Flame"
 	desc = "A flame created by SCP-457"
 	icon = 'icons/effects/fire.dmi'
-	icon_state = "fire1"
+	icon_state = "1"
 	layer = 3
 	anchored = TRUE
 	var/fire_type = "basic"
@@ -629,25 +635,27 @@
 /obj/effect/scp457_fire/proc/setup_fire_properties()
 	switch(fire_type)
 		if("basic")
-			icon_state = "fire1"
+			icon_state = "1"
 			fire_duration = 60 SECONDS
 		if("intense")
-			icon_state = "fire2"
+			icon_state = "2"
 			fire_duration = 120 SECONDS
 		if("blue")
-			icon_state = "fire3"
+			icon_state = "3"
 			fire_duration = 180 SECONDS
 		if("white")
-			icon_state = "fire4"
+			icon_state = "3"
 			fire_duration = 300 SECONDS
 
 /obj/effect/scp457_fire/proc/apply_damage()
 	var/damage = get_damage_amount()
 
 	for(var/mob/living/L in range(1, src))
-		if(L != owner && !L.SCP)
-			L.adjustFireLoss(damage)
-			L.adjustBruteLoss(damage / 2)
+		if(L != owner && !L.SCP && !QDELETED(L))
+			// Additional safety check before applying damage
+			if(!QDELETED(L) && L.stat != DEAD)
+				L.adjustFireLoss(damage)
+				L.adjustBruteLoss(damage / 2)
 
 /obj/effect/scp457_fire/proc/get_damage_amount()
 	switch(fire_type)

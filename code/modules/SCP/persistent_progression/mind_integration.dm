@@ -17,6 +17,7 @@
 			add_verb(current, /mob/living/carbon/human/proc/change_persistent_faction)
 			add_verb(current, /mob/living/carbon/human/proc/show_available_classes)
 			add_verb(current, /mob/living/carbon/human/proc/show_available_factions)
+			// SCP progression is now integrated into the main persistent progression system
 
 	if(persistent_data)
 		// Update last login
