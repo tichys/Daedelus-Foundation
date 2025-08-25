@@ -199,6 +199,11 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	var/scp_id = scp.SCP.designation
 	var/ckey = scp.ckey
 
+	// Use ckey for additional functionality like player-specific progression tracking
+	if(ckey)
+		// Log the SCP playtime for future implementation
+		world.log << "SCP Progression: Player [ckey] played as SCP [scp_id]"
+
 	// Check SCP-specific achievements
 	switch(scp_id)
 		if("049")
@@ -389,56 +394,51 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 /datum/scp_progression_data/proc/update_scp049_metrics(mob/living/carbon/human/scp)
 	// Update SCP-049 specific metrics
-	if(scp.cures_performed)
-		metrics["cures_performed"] = scp.cures_performed
-	if(scp.containment_breaches)
-		metrics["containment_breaches"] = scp.containment_breaches
-	if(scp.research_progress)
-		metrics["research_progress"] = scp.research_progress
+	if(istype(scp, /mob/living/carbon/human/scp049))
+		var/mob/living/carbon/human/scp049/scp049 = scp
+		metrics["cures_performed"] = scp049.cures_performed
+		metrics["containment_breaches"] = scp049.containment_breaches
+		metrics["research_progress"] = scp049.research_progress
 
 /datum/scp_progression_data/proc/update_scp096_metrics(mob/living/carbon/human/scp)
 	// Update SCP-096 specific metrics
-	if(scp.rage_activations)
-		metrics["rage_activations"] = scp.rage_activations
-	if(scp.victims_hunted)
-		metrics["victims_hunted"] = scp.victims_hunted
-	if(scp.containment_escapes)
-		metrics["containment_breaches"] = scp.containment_escapes
+	if(istype(scp, /mob/living/carbon/human/scp096))
+		var/mob/living/carbon/human/scp096/scp096 = scp
+		metrics["rage_activations"] = scp096.rage_activations
+		metrics["victims_hunted"] = scp096.victims_hunted
+		metrics["containment_breaches"] = scp096.containment_escapes
 
 /datum/scp_progression_data/proc/update_scp173_metrics(mob/living/carbon/human/scp)
 	// Update SCP-173 specific metrics
-	if(scp.successful_movements)
-		metrics["successful_movements"] = scp.successful_movements
-	if(scp.victims_killed)
-		metrics["victims_killed"] = scp.victims_killed
-	if(scp.containment_breaches)
-		metrics["containment_breaches"] = scp.containment_breaches
+	if(istype(scp, /mob/living/carbon/human/scp173))
+		var/mob/living/carbon/human/scp173/scp173 = scp
+		metrics["successful_movements"] = scp173.successful_movements
+		metrics["victims_killed"] = scp173.victims_killed
+		metrics["containment_breaches"] = scp173.containment_breaches
 
 /datum/scp_progression_data/proc/update_scp457_metrics(mob/living/carbon/human/scp)
 	// Update SCP-457 specific metrics
-	if(scp.fires_created)
-		metrics["fires_created"] = scp.fires_created
-	if(scp.damage_dealt)
-		metrics["damage_dealt"] = scp.damage_dealt
-	if(scp.victims_consumed)
-		metrics["victims_consumed"] = scp.victims_consumed
+	if(istype(scp, /mob/living/carbon/human/scp457))
+		var/mob/living/carbon/human/scp457/scp457 = scp
+		metrics["fires_created"] = scp457.fires_created
+		metrics["damage_dealt"] = scp457.damage_dealt
+		metrics["victims_consumed"] = scp457.victims_consumed
 
 /datum/scp_progression_data/proc/update_scp939_metrics(mob/living/carbon/human/scp)
 	// Update SCP-939 specific metrics
-	if(scp.voice_system)
-		metrics["voices_learned"] = scp.voice_system.learned_voices.len
-	if(scp.pack_system)
-		metrics["pack_coordination"] = scp.pack_system.pack_coordination
-	if(scp.victims_hunted)
-		metrics["victims_hunted"] = scp.victims_hunted
-	if(scp.psychological_manipulations)
-		metrics["psychological_manipulations"] = scp.psychological_manipulations
+	if(istype(scp, /mob/living/carbon/human/scp939))
+		var/mob/living/carbon/human/scp939/scp939 = scp
+		if(scp939.voice_system)
+			metrics["voices_learned"] = scp939.voice_system.learned_voices.len
+		if(scp939.pack_system)
+			metrics["pack_coordination"] = scp939.pack_system.pack_coordination
+		metrics["victims_hunted"] = scp939.victims_hunted
+		metrics["psychological_manipulations"] = scp939.psychological_manipulations
 
 /datum/scp_progression_data/proc/update_scp2020_metrics(mob/living/carbon/human/scp)
 	// Update SCP-2020 specific metrics
-	if(scp.teleportations)
-		metrics["teleportations"] = scp.teleportations
-	if(scp.stealth_actions)
-		metrics["stealth_actions"] = scp.stealth_actions
-	if(scp.victims_eliminated)
-		metrics["victims_eliminated"] = scp.victims_eliminated
+	if(istype(scp, /mob/living/carbon/human/scp2020))
+		var/mob/living/carbon/human/scp2020/scp2020 = scp
+		metrics["teleportations"] = scp2020.teleportations
+		metrics["stealth_actions"] = scp2020.stealth_actions
+		metrics["victims_eliminated"] = scp2020.victims_eliminated

@@ -519,11 +519,11 @@
 /datum/scp682_research_integration/New(mob/living/carbon/human/scp682/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
+	// Don't start processing - already handled by SCP-682's process() method
 	setup_research_projects()
 
 /datum/scp682_research_integration/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	// No longer processing separately
 	return ..()
 
 /datum/scp682_research_integration/proc/process_research()

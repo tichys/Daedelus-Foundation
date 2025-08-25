@@ -716,7 +716,7 @@
 /datum/scp082_research_integration/New(mob/living/carbon/human/scp082/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
+    // Don't start processing - already handled by SCP-082's process() method
 
 /datum/scp082_research_integration/proc/process_research()
     if(world.time >= last_research_update + research_update_interval)

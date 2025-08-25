@@ -179,7 +179,7 @@
 /mob/living/carbon/human/scp457/proc/add_consumed_target(mob/living/carbon/human/target)
 	if(!(target in consumed_targets))
 		consumed_targets += target
-		total_targets_consumed++
+	total_targets_consumed++
 
 /mob/living/carbon/human/scp457/proc/is_spreading_fires()
 	return fire_system.active_fires.len > 0
@@ -207,10 +207,10 @@
 		// Additional safety check before applying damage
 		if(!QDELETED(L) && L.stat != DEAD)
 			visible_message("<span class='danger'>[src] engulfs [L] in intense flames!</span>")
-			playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
+		playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
 
-			L.adjustBruteLoss(damage)
-			L.adjustFireLoss(damage)
+		L.adjustBruteLoss(damage)
+		L.adjustFireLoss(damage)
 
 		// Add heat from attack
 		heat_system.add_heat(3)
@@ -221,7 +221,7 @@
 			evolution_system.add_target_consumed()
 
 			// Add interaction record removed - not needed
-	return
+		return
 
 	return ..()
 

@@ -7,6 +7,12 @@
 	for(var/antagonist in GLOB.special_roles)
 		.[antagonist] = TRUE
 
+	// Add all playable SCPs to the list
+	var/list/playable_scps = get_all_playable_scp_roles()
+	for(var/scp_role in playable_scps)
+		if(!(scp_role in .))
+			.[scp_role] = TRUE
+
 /datum/preference/blob/antagonists/deserialize(input, datum/preferences/preferences)
 	var/list/reference = create_default_value()
 	input |= reference
@@ -39,12 +45,6 @@
 	if(!(antag in client_antags))
 		return
 
-	// Check if player has access to this role before allowing toggle
-	if(is_scp_or_hostile_role(antag))
-		var/list/available_roles = get_available_scp_roles(prefs.parent.ckey)
-		if(!(antag in available_roles))
-			return // Player doesn't have access to this role
-
 	client_antags[antag] = !client_antags[antag]
 	return prefs.update_preference(src, client_antags)
 
@@ -62,19 +62,42 @@
 
 /datum/preference/blob/antagonists/proc/is_scp_or_hostile_role(role)
 	// Check if the role is an SCP or hostile group role
-	var/list/scp_roles = list(
-		ROLE_SCP173,
-		ROLE_SCP096,
-		ROLE_SCP008,
-		ROLE_SCP035,
-		ROLE_SCP049,
-		ROLE_SCP2427_3,
+	var/list/scp_roles = get_all_playable_scp_roles()
+	scp_roles += list(
 		ROLE_SARKIC_CULT,
 		ROLE_CHAOS_INSURGENCY,
 		ROLE_SERPENTS_HAND
 	)
 
 	return (role in scp_roles)
+
+/datum/preference/blob/antagonists/proc/get_all_playable_scp_roles()
+	var/list/playable_scp_roles = list()
+
+	// Define all playable SCPs (not just currently spawned ones)
+	playable_scp_roles = list(
+		"SCP-173",    // The Sculpture
+		"SCP-096",    // The Shy Guy
+		"SCP-035",    // The Possessive Mask
+		"SCP-049",    // The Plague Doctor
+		"SCP-2427-3", // The Mechanical Spider
+		"SCP-457",    // The Burning Man
+		"SCP-343",    // God
+		"SCP-3349",   // Reality Bender
+		"SCP-2343",   // Benevolent Entity
+		"SCP-2020",   // Dimensional Entity
+		"SCP-1507",   // Pink Plastic Flamingo
+		"SCP-131",    // The Eye Pods
+		"SCP-017",    // Shadow Person
+		"SCP-106",    // The Old Man
+		"SCP-082",    // The Cannibal
+		"SCP-939",    // With Many Voices
+		"SCP-999",    // The Tickle Monster
+		"SCP-5295",   // Temporal Entity
+		"SCP-1048"    // The Teddy Bear
+	)
+
+	return playable_scp_roles
 
 /datum/preferences/proc/get_antag_bans()
 	var/list/antag_bans = list()

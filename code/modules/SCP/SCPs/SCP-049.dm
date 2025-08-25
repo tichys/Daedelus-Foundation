@@ -68,7 +68,6 @@
 	// Progression integration tracking
 	var/cures_performed = 0
 	var/containment_breaches = 0
-	var/research_progress = 0
 
 /mob/living/carbon/human/scp049/Initialize()
 	. = ..()

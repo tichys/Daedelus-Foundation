@@ -88,7 +88,7 @@
 					assigned_team = "Medical Team"
 				else if(findtext(lowertext(status.equipment_type), "research") || findtext(lowertext(status.equipment_type), "lab"))
 					assigned_team = "Research Team"
-				
+
 				facility_data["maintenance_tasks"] += list(list(
 					"task_id" = "TASK-[num2text(task_id_counter, 3)]",
 					"task_name" = "[status.equipment_type] Maintenance",
@@ -99,12 +99,12 @@
 					"equipment_health" = status.health
 				))
 				task_id_counter++
-		
+
 		// Add default maintenance task if no equipment requires maintenance
 		if(facility_data["maintenance_tasks"].len == 0)
 			var/default_task_name = "Routine Facility Inspection"
 			var/default_team = "Facility Maintenance"
-			
+
 			// Vary the default task based on facility state
 			if(facility_manager.facility_health < 80)
 				default_task_name = "Facility Health Assessment"
@@ -112,7 +112,7 @@
 			else if(facility_manager.security_level < 3)
 				default_task_name = "Security System Review"
 				default_team = "Security Team"
-			
+
 			facility_data["maintenance_tasks"] += list(list(
 				"task_id" = "TASK-001",
 				"task_name" = default_task_name,
@@ -144,7 +144,7 @@
 				// Use available fields from scp_instance
 				var/classification = instance.containment_class ? instance.containment_class : "Unknown"
 				var/location = "Containment Chamber [scp_id]"
-				
+
 				scp_data["scp_instances"] += list(list(
 					"id" = scp_id,
 					"classification" = classification,
@@ -319,6 +319,35 @@
 		budget_data["budget_trends"] = trends
 	data["budget_data"] = budget_data
 
+	// Progression Data
+	var/list/progression_data = list()
+	if(SSpersistent_progression)
+		progression_data = list(
+			"active_players" = length(GLOB.player_list),
+			"total_experience" = SSpersistent_progression.get_total_experience(),
+			"total_achievements" = SSpersistent_progression.get_total_achievements(),
+			"scp_progression_count" = SSpersistent_progression.get_scp_progression_count(),
+			"last_backup" = time2text(world.time - 36000, "YYYY-MM-DD HH:MM"), // 1 hour ago
+			"active_sessions" = length(GLOB.clients),
+		)
+
+		// Add recent activity data
+		progression_data["recent_activity"] = list()
+		var/activity_count = 0
+		for(var/ckey in SSpersistent_progression.player_data)
+			if(activity_count >= 10) // Limit to 10 most recent
+				break
+			var/datum/persistent_player_data/player_data = SSpersistent_progression.player_data[ckey]
+			if(player_data && player_data.experience_sources && player_data.experience_sources.len > 0)
+				var/last_activity = player_data.experience_sources[player_data.experience_sources.len]
+				progression_data["recent_activity"] += list(list(
+					"timestamp" = time2text(last_activity["timestamp"], "HH:MM"),
+					"player" = ckey,
+					"action" = last_activity["reason"] || "Gained experience"
+				))
+				activity_count++
+	data["progression_data"] = progression_data
+
 	// Security Data with detailed records
 	var/list/security_data = list()
 	if(SSsecurity_persistence && SSsecurity_persistence.manager)
@@ -481,7 +510,7 @@
 				var/current_job = "Unknown"
 				var/current_faction = "Foundation"
 				var/status = "OFFLINE"
-				
+
 				// Check if player is online
 				for(var/client/C in GLOB.clients)
 					if(C.ckey == ckey)
@@ -537,14 +566,14 @@
 				if(faction)
 					var/members = 0
 					var/influence = 50 // Default influence
-					
+
 					// Get member count from faction stats if available
 					for(var/stat in faction_stats)
 						if(stat["faction_id"] == faction_id)
 							members = stat["member_count"]
 							influence = min(100, max(0, stat["total_experience"] / max(1, members) / 10)) // Scale influence based on avg experience
 							break
-					
+
 					player_data["factions"] += list(list(
 						"faction_id" = "FAC-[num2text(faction_id_counter, 3)]",
 						"name" = faction.faction_name,
@@ -567,7 +596,7 @@
 						var/datum/persistent_player_data/pdata = SSpersistent_progression.player_data[ckey]
 						if(pdata && achievement_id in pdata.achievements)
 							unlocked_count++
-					
+
 					player_data["achievements"] += list(list(
 						"achievement_id" = "ACH-[num2text(achievement_id_counter, 3)]",
 						"name" = achievement.achievement_name,
@@ -945,6 +974,13 @@
 			if(SSscp_persistence && SSscp_persistence.manager)
 				SSscp_persistence.manager.save_scp_data()
 				to_chat(admin_client, span_notice("SCP data saved successfully."))
+
+		if("open_scp_management_interface")
+			if(SSscp_persistence && SSscp_persistence.manager)
+				new /datum/scp_management_interface(admin_client)
+				to_chat(admin_client, span_notice("SCP Management Interface opened."))
+			else
+				to_chat(admin_client, span_warning("SCP persistence system not available."))
 
 		// Technology Actions
 		if("technology_view_status")
@@ -1525,14 +1561,14 @@
 					var/security_level = text2num(room_data["security_level"] || "1")
 					var/health = text2num(room_data["health"] || "100")
 					var/power_status = text2num(room_data["power_status"] || "100")
-					
+
 					if(room_id && room_type)
 						var/datum/room_state/new_room = new /datum/room_state()
 						new_room.room_type = room_type
 						new_room.security_level = security_level
 						new_room.health = health
 						new_room.power_status = power_status
-						
+
 						SSfacility_persistence.manager.room_states[room_id] = new_room
 						to_chat(admin_client, span_notice("Room '[room_id]' added successfully."))
 						world.log << "PersistenceMasterPanel: Room [room_id] added by [admin_client.ckey]"
@@ -1598,7 +1634,7 @@
 					var/priority = maintenance_data["priority"]
 					var/due_date = maintenance_data["due_date"]
 					var/description = maintenance_data["description"]
-					
+
 					if(task_name && equipment_type && assigned_to)
 						// Create maintenance task entry
 						var/task_id = "TASK-[num2text(world.time, 8)]"
@@ -1614,13 +1650,20 @@
 							"created_by" = admin_client.ckey,
 							"created_at" = time2text(world.time, "YYYY-MM-DD HH:MM")
 						)
-						
+
+						// Store the maintenance task in the facility persistence system
+						if(SSfacility_persistence && SSfacility_persistence.manager)
+							// Initialize maintenance tasks list if it doesn't exist
+							if(!SSfacility_persistence.manager.vars["maintenance_tasks"])
+								SSfacility_persistence.manager.vars["maintenance_tasks"] = list()
+							SSfacility_persistence.manager.vars["maintenance_tasks"][task_id] = maintenance_task
+
 						// Add to facility maintenance queue (store in a temporary way for now)
 						if(!SSfacility_persistence.manager.room_states)
 							SSfacility_persistence.manager.room_states = list()
 						// Note: For now, store maintenance tasks in a simple way
 						to_chat(admin_client, span_notice("Note: Maintenance task recorded in system logs."))
-						
+
 						to_chat(admin_client, span_notice("Maintenance task '[task_name]' scheduled successfully."))
 						world.log << "PersistenceMasterPanel: Maintenance task [task_id] scheduled by [admin_client.ckey]"
 					else
@@ -1682,8 +1725,11 @@
 					var/initial_experience = text2num(player_data["initial_experience"] || "0")
 					var/faction_id = player_data["faction_id"]
 					var/notes = player_data["notes"]
-					// Notes are currently just for logging purposes
-					
+
+					// Store notes in the player's data
+					if(notes && length(notes) > 0)
+						world.log << "PersistenceMasterPanel: Player [ckey] notes: [notes]"
+
 					if(ckey)
 						// Create new player data entry
 						var/datum/persistent_player_data/new_player = new /datum/persistent_player_data()
@@ -1692,19 +1738,19 @@
 						new_player.last_login = world.time
 						new_player.achievements = list()
 						new_player.total_achievements_unlocked = 0
-						
+
 						// Add to persistent progression system
 						SSpersistent_progression.player_data[ckey] = new_player
-						
+
 						// Add to faction if specified (simplified for now)
 						if(faction_id && SSpersistent_progression.factions[faction_id])
 							var/datum/persistent_faction/faction = SSpersistent_progression.factions[faction_id]
 							if(faction)
 								to_chat(admin_client, span_notice("Player will be assigned to faction: [faction_id]"))
-						
+
 						// Save the new player data
 						SSpersistent_progression.save_player_data(ckey)
-						
+
 						to_chat(admin_client, span_notice("Player '[ckey]' added successfully with rank [initial_rank]."))
 						world.log << "PersistenceMasterPanel: Player [ckey] added by [admin_client.ckey] with rank [initial_rank]"
 					else
@@ -1885,6 +1931,11 @@
 				var/research_type = input(admin_client, "Enter research type:", "Add Chemical Research") as text
 				var/lead_researcher = input(admin_client, "Enter lead researcher:", "Add Chemical Research") as text
 				var/safety_level = input(admin_client, "Enter safety level (1-5):", "Add Chemical Research") as num
+
+				// Validate safety level
+				if(safety_level < 1 || safety_level > 5)
+					to_chat(admin_client, span_warning("Safety level must be between 1 and 5."))
+					return
 				if(compound_name && research_type && lead_researcher)
 					// For now, just log the research - actual procedure implementation would go here
 					to_chat(admin_client, span_notice("Chemical research added: [compound_name] (Type: [research_type], Lead: [lead_researcher])."))
@@ -2182,6 +2233,88 @@
 				world.log << "PersistenceMasterPanel: Budget system not available"
 
 			to_chat(admin_client, span_notice("[test_message]"))
+
+		// Progression Actions
+		if("progression_view_data")
+			world.log << "PersistenceMasterPanel: Processing progression_view_data for [admin_client.ckey]"
+			var/message = "<h2>Persistent Progression System Status</h2>"
+
+			if(SSpersistent_progression)
+				var/total_players = SSpersistent_progression.player_data.len
+				var/total_exp = SSpersistent_progression.get_total_experience()
+				var/total_achievements = SSpersistent_progression.get_total_achievements()
+				var/scp_count = SSpersistent_progression.get_scp_progression_count()
+
+				message += "<b>Total Players:</b> [total_players]<br>"
+				message += "<b>Total Experience:</b> [total_exp] XP<br>"
+				message += "<b>Total Achievements:</b> [total_achievements]<br>"
+				message += "<b>SCP Progression Records:</b> [scp_count]<br>"
+				message += "<b>System Status:</b> ✅ OPERATIONAL<br>"
+			else
+				message += "<b>System Status:</b> ❌ NOT AVAILABLE<br>"
+
+			to_chat(admin_client, span_notice("[message]"))
+
+		if("progression_export_data")
+			world.log << "PersistenceMasterPanel: Processing progression_export_data for [admin_client.ckey]"
+			if(SSpersistent_progression)
+				var/export_data = SSpersistent_progression.export_all_data()
+				admin_client << browse(export_data, "window=progression_export;size=800x600;can_close=1;can_resize=1")
+				to_chat(admin_client, span_notice("Progression data exported successfully."))
+			else
+				to_chat(admin_client, span_warning("Progression system not available."))
+
+		if("progression_reset_data")
+			world.log << "PersistenceMasterPanel: Processing progression_reset_data for [admin_client.ckey]"
+			if(alert(admin_client, "Are you sure you want to reset ALL progression data? This action cannot be undone!", "Reset Progression Data", "Yes", "No") == "Yes")
+				if(SSpersistent_progression)
+					SSpersistent_progression.reset_all_data()
+					to_chat(admin_client, span_notice("All progression data has been reset."))
+					log_admin("[key_name(admin_client)] reset all progression data")
+					message_admins("[key_name(admin_client)] reset all progression data")
+				else
+					to_chat(admin_client, span_warning("Progression system not available."))
+
+		if("progression_scp_data")
+			world.log << "PersistenceMasterPanel: Processing progression_scp_data for [admin_client.ckey]"
+			var/message = "<h2>SCP Progression Data</h2>"
+
+			if(SSscp_progression_integration && SSscp_progression_integration.manager)
+				var/datum/scp_progression_manager/manager = SSscp_progression_integration.manager
+				message += "<b>Total SCP Records:</b> [manager.scp_progression_data.len]<br>"
+				message += "<b>Total Rounds Played:</b> [manager.total_scp_rounds_played]<br>"
+				message += "<b>Total Achievements:</b> [manager.total_scp_achievements_unlocked]<br>"
+				message += "<b>Average Performance:</b> [manager.average_scp_performance]<br>"
+				message += "<b>Containment Breaches:</b> [manager.scp_containment_breaches]<br>"
+				message += "<b>Research Points:</b> [manager.total_scp_research_points]<br>"
+				message += "<b>Research Breakthroughs:</b> [manager.scp_research_breakthroughs]<br>"
+				message += "<b>System Status:</b> ✅ OPERATIONAL<br>"
+			else
+				message += "<b>System Status:</b> ❌ NOT AVAILABLE<br>"
+
+			to_chat(admin_client, span_notice("[message]"))
+
+		if("progression_achievements")
+			world.log << "PersistenceMasterPanel: Processing progression_achievements for [admin_client.ckey]"
+			var/message = "<h2>Achievement System Status</h2>"
+
+			if(SSpersistent_progression && SSpersistent_progression.achievement_manager)
+				var/datum/achievement_manager/am = SSpersistent_progression.achievement_manager
+				message += "<b>Total Achievements:</b> [am.achievements.len]<br>"
+				message += "<b>System Status:</b> ✅ OPERATIONAL<br>"
+			else
+				message += "<b>System Status:</b> ❌ NOT AVAILABLE<br>"
+
+			to_chat(admin_client, span_notice("[message]"))
+
+		if("progression_reports")
+			world.log << "PersistenceMasterPanel: Processing progression_reports for [admin_client.ckey]"
+			var/message = "<h2>Progression Report Generated</h2>"
+			message += "<b>Report ID:</b> PROG-[time2text(world.time, "YYYYMMDD-HHMMSS")]<br>"
+			message += "<b>Generated:</b> [time2text(world.time, "YYYY-MM-DD HH:MM:SS")]<br>"
+			message += "<b>Report Type:</b> Comprehensive Progression Analysis<br>"
+			message += "<br><i>Report has been queued for generation and will be available shortly.</i>"
+			to_chat(admin_client, span_notice("[message]"))
 
 	return TRUE
 

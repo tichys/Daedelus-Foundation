@@ -103,6 +103,20 @@
 	var/current_infection = owner.infection_system.current_strength
 	var/infection_type = owner.infection_system.get_infection_type()
 
+	// Apply infection type-specific behavior
+	switch(infection_type)
+		if("aggressive")
+			// Aggressive infection increases horde coordination
+			horde_coordination = min(max_horde_coordination, horde_coordination + 2)
+		if("stealth")
+			// Stealth infection reduces detection range
+			territory_radius = max(5, territory_radius - 1)
+		if("resilient")
+			// Resilient infection increases horde member health
+			for(var/mob/living/simple_animal/hostile/scp008_zombie/zombie in horde_members)
+				if(zombie && zombie.health < zombie.maxHealth)
+					zombie.adjustHealth(-5) // Heal 5 damage
+
 	// Calculate horde formation chance based on infection strength
 	var/formation_chance = (current_infection / 100) * 0.2
 
@@ -505,11 +519,11 @@
 /datum/scp008_research_integration/New(obj/item/reagent_containers/glass/bottle/scp008/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
+	// Don't start processing - already handled by SCP-008's process() method
 	setup_research_projects()
 
 /datum/scp008_research_integration/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	// No longer processing separately
 	return ..()
 
 /datum/scp008_research_integration/process()

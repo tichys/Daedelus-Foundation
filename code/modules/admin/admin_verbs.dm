@@ -24,8 +24,8 @@ GLOBAL_PROTECT(admin_verbs_default)
 	/client/proc/requests
 	)
 GLOBAL_LIST_INIT(admin_verbs_admin, world.AVerbsAdmin())
-GLOBAL_LIST_INIT(admin_verbs_scp, list(/mob/proc/open_scp_management, /mob/proc/quick_scp_management))
-GLOBAL_PROTECT(admin_verbs_scp)
+
+
 GLOBAL_PROTECT(admin_verbs_admin)
 /world/proc/AVerbsAdmin()
 	return list(
@@ -88,15 +88,10 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/set_player_rank,
 	/client/proc/reset_player_progress,
 	/client/proc/view_player_progress,
-	/client/proc/persistent_progression_panel,
 	/client/proc/master_persistence_panel,
-	/client/proc/facility_persistence_panel,
-	/client/proc/scp_persistence_panel,
-	/client/proc/technology_persistence_panel,
-	/client/proc/medical_persistence_panel,
-	/client/proc/security_persistence_panel,
-	/client/proc/research_persistence_panel,
-	/client/proc/personnel_persistence_panel,
+	/client/proc/open_error_monitor,
+	/client/proc/open_scp_documentation,
+	/client/proc/open_research_laboratory,
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel))
 GLOBAL_PROTECT(admin_verbs_ban)
@@ -313,7 +308,6 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 			add_verb(src, /client/proc/togglebuildmodeself)
 		if(rights & R_ADMIN)
 			add_verb(src, GLOB.admin_verbs_admin)
-			add_verb(src, GLOB.admin_verbs_scp)
 		if(rights & R_BAN)
 			add_verb(src, GLOB.admin_verbs_ban)
 		if(rights & R_FUN)
@@ -342,7 +336,6 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 		GLOB.admin_verbs_default,
 		/client/proc/togglebuildmodeself,
 		GLOB.admin_verbs_admin,
-		GLOB.admin_verbs_scp,
 		GLOB.admin_verbs_ban,
 		GLOB.admin_verbs_fun,
 		GLOB.admin_verbs_server,

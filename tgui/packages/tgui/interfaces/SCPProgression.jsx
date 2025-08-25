@@ -372,8 +372,8 @@ export const SCPProgression = (props) => {
                       </LabeledList.Item>
                       <LabeledList.Item label="Last Update">
                         <Box style={{ color: '#ff0088' }}>
-                          {scp_progression_data[selectedSCP].last_update ? 
-                            new Date(scp_progression_data[selectedSCP].last_update * 1000).toLocaleString() : 
+                          {scp_progression_data[selectedSCP].last_update ?
+                            new Date(scp_progression_data[selectedSCP].last_update * 1000).toLocaleString() :
                             'Never'
                           }
                         </Box>
@@ -428,23 +428,23 @@ export const SCPProgression = (props) => {
                         margin: '5px',
                       }}
                     >
-                      <Box style={{ 
-                        fontSize: '14px', 
-                        fontWeight: 'bold', 
+                      <Box style={{
+                        fontSize: '14px',
+                        fontWeight: 'bold',
                         color: achievement.unlocked ? '#00ff00' : '#888888',
                         marginBottom: '5px'
                       }}>
                         {achievement.name}
                       </Box>
-                      <Box style={{ 
-                        fontSize: '12px', 
+                      <Box style={{
+                        fontSize: '12px',
                         color: achievement.unlocked ? '#ffffff' : '#666666',
                         marginBottom: '5px'
                       }}>
                         {achievement.description}
                       </Box>
-                      <Box style={{ 
-                        fontSize: '10px', 
+                      <Box style={{
+                        fontSize: '10px',
                         color: achievement.unlocked ? '#00ffff' : '#444444'
                       }}>
                         Status: {achievement.unlocked ? 'UNLOCKED' : 'LOCKED'}

@@ -285,6 +285,32 @@
 	var/level = get_skill_level(skill)
 	return SSskills.level_names[level]
 
+// Additional skill-related procs for skill progression system
+/datum/mind/proc/get_skill_milestones()
+	if(!persistent_data)
+		return list()
+
+	var/list/milestones = list()
+	for(var/skill_type in known_skills)
+		var/skill_level = get_skill_level(skill_type)
+		if(skill_level >= SKILL_LEVEL_EXPERT)
+			if(!(skill_type in milestones))
+				milestones[skill_type] = list()
+			milestones[skill_type] += skill_level
+	return milestones
+
+/datum/mind/proc/get_skill_progression_class()
+	if(!persistent_data)
+		return "general"
+
+	return persistent_data.current_class_id || "general"
+
+/datum/mind/proc/get_skill_progression_boost()
+	if(!persistent_data)
+		return 1.0
+
+	return persistent_data.skill_boost_multiplier || 1.0
+
 /datum/mind/proc/print_levels(user)
 	var/list/shown_skills = list()
 	for(var/i in known_skills)

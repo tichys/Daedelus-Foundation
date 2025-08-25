@@ -361,6 +361,11 @@
 			data.statistics = json_decode(query_load_player.item[16]) || list()
 			data.last_round_data = json_decode(query_load_player.item[17]) || list()
 		catch(var/exception)
+			// Log the exception details for debugging
+			log_world("DClass Persistence: Exception during data loading: [exception]")
+			// Note: Exception object properties may not be available in all contexts
+
+			// Set default values on error
 			data.achievements = list()
 			data.statistics = list()
 			data.last_round_data = list()

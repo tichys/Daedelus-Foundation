@@ -130,6 +130,12 @@
 	data["scp_research_points"] = get_scp_research_points()
 	data["scp_research_breakthroughs"] = get_scp_research_breakthroughs()
 	data["scp_interaction_events"] = get_scp_interaction_events()
+
+	// Class information
+	if(current_class)
+		data["class_description"] = current_class.class_description
+		data["class_exp_multiplier"] = current_class.experience_multiplier
+		data["class_max_rank"] = current_class.max_rank
 	else
 		data["class_description"] = "No class selected"
 		data["class_exp_multiplier"] = 1.0
@@ -683,7 +689,7 @@
 
 /datum/persistent_progression_ui/proc/calculate_scp_performance_score(datum/scp_progression_data/prog_data)
 	var/score = 0
-	
+
 	// Add base score from metrics
 	score += prog_data.metrics["victims_hunted"] * 10
 	score += prog_data.metrics["containment_breaches"] * 50
@@ -700,7 +706,7 @@
 	score += prog_data.metrics["victims_consumed"] * 15
 	score += prog_data.metrics["psychological_manipulations"] * 5
 	score += prog_data.metrics["victims_eliminated"] * 15
-	
+
 	return score
 
 /datum/persistent_progression_ui/proc/get_scp_rank(ckey)
@@ -708,7 +714,7 @@
 		return "Novice"
 
 	var/total_exp = get_scp_total_experience(ckey)
-	
+
 	if(total_exp >= 10000)
 		return "Master"
 	else if(total_exp >= 5000)
@@ -738,7 +744,7 @@
 		return list()
 
 	var/list/all_achievements = list()
-	
+
 	// Define all SCP achievements
 	var/list/achievement_definitions = list(
 		"scp049_first_cure" = list("name" = "First Cure", "description" = "Perform your first cure as SCP-049"),
@@ -754,26 +760,26 @@
 		"scp2020_first_teleport" = list("name" = "First Teleport", "description" = "Perform your first teleport as SCP-2020"),
 		"scp2020_stealth_operative" = list("name" = "Stealth Operative", "description" = "Perform 30 stealth actions as SCP-2020")
 	)
-	
+
 	// Check which achievements the player has unlocked
 	for(var/achievement_id in achievement_definitions)
 		var/list/achievement_data = achievement_definitions[achievement_id]
 		var/unlocked = FALSE
-		
+
 		// Check if player has this achievement in any SCP progression data
 		for(var/scp_id in list("049", "096", "173", "457", "939", "2020"))
 			var/datum/scp_progression_data/prog_data = SSscp_progression_integration.manager.get_scp_progression_data(scp_id, ckey)
 			if(prog_data && (achievement_id in prog_data.achievements))
 				unlocked = TRUE
 				break
-		
+
 		all_achievements += list(list(
 			"id" = achievement_id,
 			"name" = achievement_data["name"],
 			"description" = achievement_data["description"],
 			"unlocked" = unlocked
 		))
-	
+
 	return all_achievements
 
 /datum/persistent_progression_ui/proc/get_total_scp_rounds()

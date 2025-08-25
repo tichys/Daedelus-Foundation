@@ -42,23 +42,16 @@
 		i++
 		background_color = i %% 2 ? "#7c5500" : "#533200"
 
-		var/access_status = "DISABLED"
-		var/access_color = "red"
-		var/access_tooltip = "No access granted by admins"
 
-		if(antagonist in available_roles)
-			access_status = "ENABLED"
-			access_color = "green"
-			access_tooltip = "Access granted by admins"
 
 		. += {"
 		<div class='flexRow' style='justify-content: space-between; background-color:[background_color]'>
 			<div style='padding-left: 0.5em;padding-right: 0.5em'>
 				<span class='computerText'>[antagonist]</span>
+				[antagonist in available_roles ? "<span style='color: green; font-size: 10px;'> (Available)</span>" : "<span style='color: red; font-size: 10px;'> (Restricted)</span>"]
 			</div>
 			<div>
-				<span class='computerText' style='color: [access_color]; margin-right: 0.5em;' title='[access_tooltip]'>[access_status]</span>
-				[button_element(prefs, client_antags[antagonist] ? "ENABLED" : "DISABLED", "pref_act=[/datum/preference/blob/antagonists];toggle_antag=[antagonist]", style = "margin-right: 0.5em", disabled = !(antagonist in available_roles))]
+				[button_element(prefs, client_antags[antagonist] ? "ENABLED" : "DISABLED", "pref_act=[/datum/preference/blob/antagonists];toggle_antag=[antagonist]", style = "margin-right: 0.5em")]
 			</div>
 		</div>
 		"}
@@ -78,16 +71,39 @@
 
 /datum/preference_group/scp_antagonists/proc/is_scp_or_hostile_role(role)
 	// Check if the role is an SCP or hostile group role
-	var/list/scp_roles = list(
-		ROLE_SCP173,
-		ROLE_SCP096,
-		ROLE_SCP008,
-		ROLE_SCP035,
-		ROLE_SCP049,
-		ROLE_SCP2427_3,
+	var/list/scp_roles = get_all_playable_scp_roles()
+	scp_roles += list(
 		ROLE_SARKIC_CULT,
 		ROLE_CHAOS_INSURGENCY,
 		ROLE_SERPENTS_HAND
 	)
 
 	return (role in scp_roles)
+
+/datum/preference_group/scp_antagonists/proc/get_all_playable_scp_roles()
+	var/list/playable_scp_roles = list()
+
+	// Define all playable SCPs (not just currently spawned ones)
+	playable_scp_roles = list(
+		"SCP-173",    // The Sculpture
+		"SCP-096",    // The Shy Guy
+		"SCP-035",    // The Possessive Mask
+		"SCP-049",    // The Plague Doctor
+		"SCP-2427-3", // The Mechanical Spider
+		"SCP-457",    // The Burning Man
+		"SCP-343",    // God
+		"SCP-3349",   // Reality Bender
+		"SCP-2343",   // Benevolent Entity
+		"SCP-2020",   // Dimensional Entity
+		"SCP-1507",   // Pink Plastic Flamingo
+		"SCP-131",    // The Eye Pods
+		"SCP-017",    // Shadow Person
+		"SCP-106",    // The Old Man
+		"SCP-082",    // The Cannibal
+		"SCP-939",    // With Many Voices
+		"SCP-999",    // The Tickle Monster
+		"SCP-5295",   // Temporal Entity
+		"SCP-1048"    // The Teddy Bear
+	)
+
+	return playable_scp_roles

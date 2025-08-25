@@ -48,6 +48,74 @@ SUBSYSTEM_DEF(persistent_progression)
 
 	return ..()
 
+// Helper functions for master panel integration
+/datum/controller/subsystem/persistent_progression/proc/get_total_experience()
+	var/total_exp = 0
+	for(var/ckey in player_data)
+		var/datum/persistent_player_data/player = player_data[ckey]
+		if(player)
+			total_exp += player.total_experience
+	return total_exp
+
+/datum/controller/subsystem/persistent_progression/proc/get_total_achievements()
+	var/total_achievements = 0
+	for(var/ckey in player_data)
+		var/datum/persistent_player_data/player = player_data[ckey]
+		if(player)
+			total_achievements += player.achievements.len
+	return total_achievements
+
+/datum/controller/subsystem/persistent_progression/proc/get_scp_progression_count()
+	if(SSscp_progression_integration && SSscp_progression_integration.manager)
+		return SSscp_progression_integration.manager.scp_progression_data.len
+	return 0
+
+/datum/controller/subsystem/persistent_progression/proc/export_all_data()
+	var/list/export_data = list()
+	export_data["timestamp"] = world.time
+	export_data["total_players"] = player_data.len
+	export_data["total_experience"] = get_total_experience()
+	export_data["total_achievements"] = get_total_achievements()
+	export_data["scp_progression_count"] = get_scp_progression_count()
+
+	// Add player data
+	export_data["players"] = list()
+	for(var/ckey in player_data)
+		var/datum/persistent_player_data/player = player_data[ckey]
+		if(player)
+			export_data["players"][ckey] = player.export_to_json()
+
+	// Add class data
+	export_data["classes"] = list()
+	for(var/class_id in classes)
+		var/datum/persistent_class/class = classes[class_id]
+		if(class)
+			export_data["classes"][class_id] = class.export_to_json()
+
+	// Add faction data
+	export_data["factions"] = list()
+	for(var/faction_id in factions)
+		var/datum/persistent_faction/faction = factions[faction_id]
+		if(faction)
+			export_data["factions"][faction_id] = faction.export_to_json()
+
+	return json_encode(export_data)
+
+/datum/controller/subsystem/persistent_progression/proc/reset_all_data()
+	world.log << "Persistent Progression: Resetting all data..."
+
+	// Reset all player data
+	for(var/ckey in player_data)
+		var/datum/persistent_player_data/player = player_data[ckey]
+		if(player)
+			player.initialize_default_data()
+
+	// Save all reset data
+	for(var/ckey in player_data)
+		save_player_data(ckey)
+
+	world.log << "Persistent Progression: All data reset successfully"
+
 /datum/controller/subsystem/persistent_progression/proc/load_all_classes()
 	world.log << "Persistent Progression: Loading classes..."
 	classes["security"] = new /datum/persistent_class/security()

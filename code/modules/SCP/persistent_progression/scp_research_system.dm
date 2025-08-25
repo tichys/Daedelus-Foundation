@@ -316,6 +316,124 @@ SUBSYSTEM_DEF(scp_research)
 			// Passive research point gain
 			add_research_points(project_id, 1, project.researcher_ckey)
 
+/datum/scp_research_manager/proc/process_research_projects()
+	for(var/project_id in research_projects)
+		var/datum/research_data/project = research_projects[project_id]
+		if(project.status == "ACTIVE")
+			process_scp_research_with_skills(project)
+
+/datum/scp_research_manager/proc/process_scp_research_with_skills(datum/research_data/project)
+	if(!project)
+		return
+
+	// Get researcher
+	var/mob/living/carbon/human/researcher = get_researcher_by_ckey(project.researcher_ckey)
+	if(!researcher)
+		return
+
+	// Calculate skill-enhanced research progress
+	var/base_progress_rate = 1.0
+	var/skill_enhanced_rate = base_progress_rate
+
+	// Apply research skill bonuses
+	if(SSskill_integration)
+		skill_enhanced_rate = SSskill_integration.manager.apply_research_skill_bonuses(researcher, "scp_study", base_progress_rate)
+
+		// Apply research skill effects
+		SSskill_integration.manager.apply_research_skill_effects(researcher, "SCP-[project.scp_designation] research")
+
+	// Update research progress
+	project.research_level += skill_enhanced_rate * 0.1 // Slower progression for balance
+
+	// Check for level completion
+	if(project.research_level >= project.max_research_level)
+		complete_scp_research_project(project)
+
+	// Check for breakthroughs
+	check_scp_research_breakthrough(project, researcher)
+
+/datum/scp_research_manager/proc/get_researcher_by_ckey(ckey)
+	for(var/mob/living/carbon/human/H in world)
+		if(H.ckey == ckey)
+			return H
+	return null
+
+/datum/scp_research_manager/proc/complete_scp_research_project(datum/research_data/project)
+	if(!project)
+		return
+
+	project.status = "COMPLETED"
+	project.research_level = project.max_research_level
+
+	// Calculate skill-enhanced completion reward
+	var/base_reward = project.completion_reward || 1000
+	var/enhanced_reward = base_reward
+
+	var/mob/living/carbon/human/researcher = get_researcher_by_ckey(project.researcher_ckey)
+	if(researcher && SSskill_integration)
+		enhanced_reward = SSskill_integration.manager.apply_research_skill_bonuses(researcher, "breakthrough", base_reward)
+
+	// Award research points
+	total_research_points += enhanced_reward
+
+	// Award experience to researcher
+	if(researcher && SSskill_integration)
+		SSskill_integration.manager.add_experience(researcher, /datum/skill/research, enhanced_reward * 0.1)
+
+	// Announce completion
+	announce_scp_research_completion(project, enhanced_reward)
+
+/datum/scp_research_manager/proc/check_scp_research_breakthrough(datum/research_data/project, mob/living/carbon/human/researcher)
+	if(!project || !researcher)
+		return
+
+	// Calculate skill-enhanced breakthrough chance
+	var/base_chance = 2 // 2% base chance
+	var/enhanced_chance = base_chance
+
+	if(SSskill_integration)
+		enhanced_chance = SSskill_integration.manager.calculate_research_breakthrough_chance(researcher, base_chance)
+
+	if(prob(enhanced_chance))
+		trigger_scp_research_breakthrough(project, researcher)
+
+/datum/scp_research_manager/proc/trigger_scp_research_breakthrough(datum/research_data/project, mob/living/carbon/human/researcher)
+	if(!project || !researcher)
+		return
+
+	// Add breakthrough discovery
+	var/list/breakthrough = list(
+		"timestamp" = world.time,
+		"type" = "research_breakthrough",
+		"description" = "Major breakthrough in SCP-[project.scp_designation] research",
+		"researcher" = researcher.name
+	)
+	project.discoveries += list(breakthrough)
+
+	// Award breakthrough experience
+	if(SSskill_integration)
+		SSskill_integration.manager.add_experience(researcher, /datum/skill/research, 150)
+
+	// Announce breakthrough
+	to_chat(researcher, "<span class='boldnotice'>BREAKTHROUGH! You've made a major discovery in SCP-[project.scp_designation] research!</span>")
+
+	// Update research metrics
+	research_breakthroughs++
+
+/datum/scp_research_manager/proc/announce_scp_research_completion(datum/research_data/project, reward)
+	if(!project)
+		return
+
+	var/completion_message = "SCP RESEARCH COMPLETED: SCP-[project.scp_designation] research project completed! Reward: [reward] points"
+
+	// Notify researcher
+	var/mob/living/carbon/human/researcher = get_researcher_by_ckey(project.researcher_ckey)
+	if(researcher)
+		to_chat(researcher, "<span class='boldnotice'>[completion_message]</span>")
+
+	// Log completion
+	log_game("SCP research project completed: SCP-[project.scp_designation] - [reward] points")
+
 // Global instance
 GLOBAL_DATUM_INIT(scp_research_manager, /datum/scp_research_manager, new)
 

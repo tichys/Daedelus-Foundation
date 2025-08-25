@@ -726,3 +726,128 @@ SUBSYSTEM_DEF(research_persistence)
 /datum/controller/subsystem/research_persistence/fire()
 	if(manager)
 		manager.process_research()
+
+/datum/research_persistence_manager/proc/process_persistent_research_with_skills(datum/research_persistence_project/project)
+	if(!project)
+		return
+
+	// Get lead researcher
+	var/mob/living/carbon/human/lead_researcher = get_researcher_by_name(project.lead_researcher)
+	if(!lead_researcher)
+		return
+
+	// Calculate skill-enhanced research progress
+	var/base_progress_rate = 1.0
+	var/skill_enhanced_rate = base_progress_rate
+
+	// Apply research skill bonuses
+	if(SSskill_integration)
+		skill_enhanced_rate = SSskill_integration.manager.apply_research_skill_bonuses(lead_researcher, "research", base_progress_rate)
+
+		// Apply research skill effects
+		SSskill_integration.manager.apply_research_skill_effects(lead_researcher, project.project_name)
+
+	// Update project progress
+	project.progress += skill_enhanced_rate * 0.05 // Slower progression for balance
+
+	// Check for completion
+	if(project.progress >= 100)
+		complete_persistent_research_project(project)
+
+	// Check for breakthroughs
+	check_persistent_research_breakthrough(project, lead_researcher)
+
+/datum/research_persistence_manager/proc/get_researcher_by_name(researcher_name)
+	for(var/mob/living/carbon/human/H in world)
+		if(H.real_name == researcher_name)
+			return H
+	return null
+
+/datum/research_persistence_manager/proc/complete_persistent_research_project(datum/research_persistence_project/project)
+	if(!project)
+		return
+
+	project.status = "COMPLETED"
+	project.progress = 100
+	project.actual_completion = world.time
+
+	// Calculate skill-enhanced completion reward
+	var/base_reward = 2000 // Base completion reward
+	var/enhanced_reward = base_reward
+
+	var/mob/living/carbon/human/lead_researcher = get_researcher_by_name(project.lead_researcher)
+	if(lead_researcher && SSskill_integration)
+		enhanced_reward = SSskill_integration.manager.apply_research_skill_bonuses(lead_researcher, "breakthrough", base_reward)
+
+	// Award research points
+	total_research_projects++
+	completed_projects++
+
+	// Award experience to lead researcher
+	if(lead_researcher && SSskill_integration)
+		SSskill_integration.manager.add_experience(lead_researcher, /datum/skill/research, enhanced_reward * 0.1)
+
+	// Award experience to team members
+	award_team_experience(project, enhanced_reward)
+
+	// Announce completion
+	announce_persistent_research_completion(project, enhanced_reward)
+
+/datum/research_persistence_manager/proc/award_team_experience(datum/research_persistence_project/project, total_reward)
+	var/points_per_member = total_reward * 0.05 / max(project.researchers.len, 1)
+
+	for(var/researcher_name in project.researchers)
+		var/mob/living/carbon/human/researcher = get_researcher_by_name(researcher_name)
+		if(researcher && SSskill_integration)
+			SSskill_integration.manager.add_experience(researcher, /datum/skill/research, points_per_member)
+
+/datum/research_persistence_manager/proc/check_persistent_research_breakthrough(datum/research_persistence_project/project, mob/living/carbon/human/lead_researcher)
+	if(!project || !lead_researcher)
+		return
+
+	// Calculate skill-enhanced breakthrough chance
+	var/base_chance = 1 // 1% base chance
+	var/enhanced_chance = base_chance
+
+	if(SSskill_integration)
+		enhanced_chance = SSskill_integration.manager.calculate_research_breakthrough_chance(lead_researcher, base_chance)
+
+	if(prob(enhanced_chance))
+		trigger_persistent_research_breakthrough(project, lead_researcher)
+
+/datum/research_persistence_manager/proc/trigger_persistent_research_breakthrough(datum/research_persistence_project/project, mob/living/carbon/human/lead_researcher)
+	if(!project || !lead_researcher)
+		return
+
+	// Add breakthrough discovery
+	var/list/breakthrough = list(
+		"timestamp" = world.time,
+		"type" = "research_breakthrough",
+		"description" = "Major breakthrough in [project.project_name]",
+		"researcher" = lead_researcher.name
+	)
+	project.discoveries += list(breakthrough)
+
+	// Award breakthrough experience
+	if(SSskill_integration)
+		SSskill_integration.manager.add_experience(lead_researcher, /datum/skill/research, 200)
+
+	// Announce breakthrough
+	to_chat(lead_researcher, "<span class='boldnotice'>BREAKTHROUGH! You've made a major discovery in [project.project_name]!</span>")
+
+	// Update research metrics
+	scientific_breakthroughs++
+
+/datum/research_persistence_manager/proc/announce_persistent_research_completion(datum/research_persistence_project/project, reward)
+	if(!project)
+		return
+
+	var/completion_message = "RESEARCH PROJECT COMPLETED: [project.project_name] has been completed! Reward: [reward] points"
+
+	// Notify lead researcher
+	var/mob/living/carbon/human/lead_researcher = get_researcher_by_name(project.lead_researcher)
+	if(lead_researcher)
+		to_chat(lead_researcher, "<span class='boldnotice'>[completion_message]</span>")
+
+	// Log completion
+	log_game("Research project completed: [project.project_name] - [reward] points")

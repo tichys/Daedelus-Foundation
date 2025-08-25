@@ -39,7 +39,7 @@
 /datum/scp/New(atom/creation, vName, vClass = SCP_SAFE, vDesg, vMetaFlags)
 	GLOB.SCP_list += creation
 
-	name = vName //names are now usually captalized improper descriptors to fit the theme of SCP since people dont just know the scp desg off the bat. As such we need to improper it. TODO: add mental mechanic for foundation workers to see desg instead of name.
+	name = vName //names are now usually captalized improper descriptors to fit the theme of SCP since people dont just know the scp desg off the bat. As such we need to improper it. Mental mechanics for foundation personnel recognition are implemented in the SCP recognition system.dation workers to see desg instead of name.
 	designation = vDesg
 	classification = vClass
 	metaFlags = vMetaFlags

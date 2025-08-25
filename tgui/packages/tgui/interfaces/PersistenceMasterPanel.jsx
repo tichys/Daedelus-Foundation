@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
+import { SkillProgression } from './SkillProgression';
 import {
   Box,
   Button,
@@ -34,6 +35,8 @@ export const PersistenceMasterPanel = (props, context) => {
   const [infrastructureActiveTab, setInfrastructureActiveTab] =
     React.useState('overview');
   const [analyticsActiveTab, setAnalyticsActiveTab] =
+    React.useState('overview');
+  const [scpManagementActiveTab, setScpManagementActiveTab] =
     React.useState('overview');
   const [scipnetCollapsed, setScipnetCollapsed] = React.useState(false);
 
@@ -2096,6 +2099,24 @@ export const PersistenceMasterPanel = (props, context) => {
             onClick={() => setActiveTab('budget')}
             isActive={activeTab === 'budget'}
           />
+          <DesktopIcon
+            icon="📈"
+            label="PROGRESSION"
+            onClick={() => setActiveTab('progression')}
+            isActive={activeTab === 'progression'}
+          />
+          <DesktopIcon
+            icon="🔧"
+            label="SCP MANAGEMENT"
+            onClick={() => setActiveTab('scp_management')}
+            isActive={activeTab === 'scp_management'}
+          />
+          <DesktopIcon
+            icon="⚡"
+            label="SKILL PROGRESSION"
+            onClick={() => setActiveTab('skill_progression')}
+            isActive={activeTab === 'skill_progression'}
+          />
         </Box>
       </Box>
 
@@ -3213,6 +3234,11 @@ export const PersistenceMasterPanel = (props, context) => {
       'scpFilterType',
       'all',
     );
+    const [scpManagementModalOpen, setScpManagementModalOpen] = useLocalState(
+      context,
+      'scpManagementModalOpen',
+      false,
+    );
 
     return (
       <Box
@@ -3260,10 +3286,10 @@ export const PersistenceMasterPanel = (props, context) => {
               marginBottom: '5px',
             }}
           >
-            SCP PERSISTENCE
+            SCP MANAGEMENT
           </Box>
           <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            CONTAINMENT & SECURITY
+            COMPREHENSIVE SCP CONTROL & CONFIGURATION
           </Box>
         </Box>
 
@@ -3272,7 +3298,7 @@ export const PersistenceMasterPanel = (props, context) => {
             {Array(50).fill('─').join('')}
           </Box>
           <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
-            SCP PERSISTENCE SYSTEM
+            SCP MANAGEMENT SYSTEM
           </Box>
           <Box style={{ marginBottom: '15px' }}>
             {Array(50).fill('─').join('')}
@@ -3282,9 +3308,17 @@ export const PersistenceMasterPanel = (props, context) => {
         {/* SCP Controls */}
         <Box style={{ marginBottom: '20px' }}>
           <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
-            SCP CONTROLS:
+            SCP MANAGEMENT CONTROLS:
           </Box>
           <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <EnhancedButton
+              icon="🔧"
+              color="blue"
+              onClick={() => setScpManagementModalOpen(true)}
+              tooltip="Open comprehensive SCP management interface"
+            >
+              OPEN SCP MANAGEMENT
+            </EnhancedButton>
             <ActionButton
               action="scp_view_status"
               icon="📊"
@@ -3899,9 +3933,107 @@ export const PersistenceMasterPanel = (props, context) => {
           </Grid>
         </Box>
 
+        {/* SCP Management Modal */}
+        {scpManagementModalOpen && (
+          <Modal
+            width="90%"
+            height="90%"
+            onClose={() => setScpManagementModalOpen(false)}
+          >
+            <Box
+              style={{
+                background: 'rgba(0,0,0,0.95)',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '10px',
+                padding: '20px',
+                fontFamily: 'monospace',
+                fontSize: '14px',
+                color: '#ffffff',
+                height: '100%',
+                overflow: 'auto',
+              }}
+            >
+              <Box style={{ marginBottom: '20px' }}>
+                <Box
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    marginBottom: '5px',
+                  }}
+                >
+                  SCP MANAGEMENT INTERFACE
+                </Box>
+                <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+                  COMPREHENSIVE SCP CONTROL & CONFIGURATION
+                </Box>
+              </Box>
+
+              <Box style={{ marginBottom: '20px' }}>
+                <Box style={{ marginBottom: '15px' }}>
+                  {Array(50).fill('─').join('')}
+                </Box>
+                <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+                  SCP MANAGEMENT SYSTEM
+                </Box>
+                <Box style={{ marginBottom: '15px' }}>
+                  {Array(50).fill('─').join('')}
+                </Box>
+              </Box>
+
+              {/* SCP Management Content */}
+              <Box style={{ lineHeight: '1.6' }}>
+                <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+                  SCP MANAGEMENT FEATURES:
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • SCP Template Management
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Player Access Control
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Spawn Condition Configuration
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Containment Protocol Management
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Research Settings Configuration
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Interaction Settings Management
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Global SCP Management Modes
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • Auto-Containment Configuration
+                </Box>
+                <Box style={{ marginBottom: '10px' }}>
+                  • SCP Rotation Management
+                </Box>
+              </Box>
+
+              <Box style={{ marginTop: '20px', textAlign: 'center' }}>
+                <EnhancedButton
+                  icon="🔧"
+                  color="blue"
+                  onClick={() => {
+                    act('open_scp_management_interface');
+                    setScpManagementModalOpen(false);
+                  }}
+                  tooltip="Open full SCP management interface"
+                >
+                  OPEN FULL SCP MANAGEMENT INTERFACE
+                </EnhancedButton>
+              </Box>
+            </Box>
+          </Modal>
+        )}
+
         <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
-          SCP persistence system monitoring containment status, breach risks,
-          and research progress.
+          SCP management system providing comprehensive control over SCP
+          configurations, player access, and containment protocols.
         </Box>
       </Box>
     );
@@ -8855,6 +8987,518 @@ export const PersistenceMasterPanel = (props, context) => {
     );
   };
 
+  // Progression Management Interface
+  const ProgressionInterface = () => {
+    const progression_data = data.progression_data || {};
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            PERSISTENT PROGRESSION
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            PERSONNEL DEVELOPMENT & ACHIEVEMENT TRACKING
+          </Box>
+        </Box>
+
+        {/* Progression Overview */}
+        <Box style={{ marginBottom: '30px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            PROGRESSION OVERVIEW:
+          </Box>
+          <Grid>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(0,255,0,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#66ff66',
+                  }}
+                >
+                  ACTIVE PLAYERS
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  {progression_data?.active_players || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Online</Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,165,0,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#ffaa66',
+                  }}
+                >
+                  TOTAL EXPERIENCE
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  {(progression_data?.total_experience || 0).toLocaleString()}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>XP Earned</Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(255,0,255,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#ff66ff',
+                  }}
+                >
+                  ACHIEVEMENTS
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  {progression_data?.total_achievements || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Unlocked</Box>
+              </Box>
+            </Grid.Column>
+            <Grid.Column size={3}>
+              <Box
+                style={{
+                  background: 'rgba(0,255,255,0.1)',
+                  padding: '15px',
+                  borderRadius: '5px',
+                  marginBottom: '10px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    color: '#66ffff',
+                  }}
+                >
+                  SCP PROGRESSION
+                </Box>
+                <Box style={{ fontSize: '20px' }}>
+                  {progression_data?.scp_progression_count || 0}
+                </Box>
+                <Box style={{ fontSize: '12px', opacity: 0.8 }}>Active</Box>
+              </Box>
+            </Grid.Column>
+          </Grid>
+        </Box>
+
+        {/* Progression Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            PROGRESSION CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <EnhancedButton
+              icon="📊"
+              color="good"
+              onClick={() => act('progression_view_data')}
+              tooltip="View detailed progression data"
+            >
+              VIEW DATA
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📈"
+              color="blue"
+              onClick={() => act('progression_export_data')}
+              tooltip="Export progression data"
+            >
+              EXPORT DATA
+            </EnhancedButton>
+            <EnhancedButton
+              icon="🔄"
+              color="average"
+              onClick={() => act('progression_reset_data')}
+              tooltip="Reset progression data (ADMIN ONLY)"
+            >
+              RESET DATA
+            </EnhancedButton>
+            <EnhancedButton
+              icon="👹"
+              color="purple"
+              onClick={() => act('progression_scp_data')}
+              tooltip="View SCP progression data"
+            >
+              SCP PROGRESSION
+            </EnhancedButton>
+            <EnhancedButton
+              icon="🏆"
+              color="good"
+              onClick={() => act('progression_achievements')}
+              tooltip="View achievement data"
+            >
+              ACHIEVEMENTS
+            </EnhancedButton>
+            <EnhancedButton
+              icon="📋"
+              color="blue"
+              onClick={() => act('progression_reports')}
+              tooltip="Generate progression reports"
+            >
+              REPORTS
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* Progression Status */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            PROGRESSION STATUS:
+          </Box>
+          <Box
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              padding: '15px',
+              borderRadius: '5px',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            <Box style={{ marginBottom: '10px' }}>
+              <strong>System Status:</strong>{' '}
+              <span style={{ color: '#66ff66' }}>OPERATIONAL</span>
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              <strong>Data Integrity:</strong>{' '}
+              <span style={{ color: '#66ff66' }}>100%</span>
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              <strong>Last Backup:</strong>{' '}
+              <span style={{ color: '#ffff66' }}>
+                {progression_data?.last_backup || 'Unknown'}
+              </span>
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              <strong>Active Sessions:</strong>{' '}
+              <span style={{ color: '#66ffff' }}>
+                {progression_data?.active_sessions || 0}
+              </span>
+            </Box>
+            <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+              Progression system is fully operational and tracking all player
+              development metrics.
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Recent Activity */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            RECENT ACTIVITY:
+          </Box>
+          <Box
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              padding: '15px',
+              borderRadius: '5px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              maxHeight: '200px',
+              overflow: 'auto',
+            }}
+          >
+            {progression_data?.recent_activity &&
+            progression_data.recent_activity.length > 0 ? (
+              progression_data.recent_activity.map((activity, index) => (
+                <Box
+                  key={index}
+                  style={{ marginBottom: '8px', fontSize: '12px' }}
+                >
+                  <span style={{ color: '#ffff66' }}>
+                    [{activity.timestamp}]
+                  </span>{' '}
+                  <span style={{ color: '#66ffff' }}>{activity.player}</span>{' '}
+                  <span style={{ color: '#ffffff' }}>{activity.action}</span>
+                </Box>
+              ))
+            ) : (
+              <Box style={{ fontSize: '12px', opacity: 0.7 }}>
+                No recent activity recorded.
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Box>
+    );
+  };
+
+  // SCP Management Interface
+  const SCPManagementInterface = ({
+    scpManagementActiveTab,
+    setScpManagementActiveTab,
+  }) => {
+    return (
+      <Box
+        style={{
+          background: 'rgba(0,0,0,0.7)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          borderRadius: '5px',
+          padding: '20px',
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: '#ffffff',
+          minHeight: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Back to Desktop Button */}
+        <Box
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            padding: '8px 16px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            transition: 'all 0.3s ease',
+          }}
+          onClick={() => setActiveTab('desktop')}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.1)';
+          }}
+        >
+          ← BACK TO DESKTOP
+        </Box>
+        <Box style={{ marginBottom: '20px' }}>
+          <Box
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+            }}
+          >
+            SCP MANAGEMENT
+          </Box>
+          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
+            COMPREHENSIVE SCP CONTROL & CONFIGURATION
+          </Box>
+        </Box>
+
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+          <Box style={{ textAlign: 'center', marginBottom: '15px' }}>
+            SCP MANAGEMENT SYSTEM
+          </Box>
+          <Box style={{ marginBottom: '15px' }}>
+            {Array(50).fill('─').join('')}
+          </Box>
+        </Box>
+
+        {/* SCP Management Controls */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            SCP MANAGEMENT CONTROLS:
+          </Box>
+          <Flex wrap="wrap" style={{ gap: '10px', marginBottom: '20px' }}>
+            <EnhancedButton
+              icon="🔧"
+              color="blue"
+              onClick={() => act('open_scp_management_interface')}
+              tooltip="Open comprehensive SCP management interface"
+            >
+              OPEN SCP MANAGEMENT
+            </EnhancedButton>
+            <ActionButton
+              action="scp_view_status"
+              icon="📊"
+              color="blue"
+              successMessage="SCP status retrieved"
+              tooltip="View SCP containment status"
+            >
+              VIEW STATUS
+            </ActionButton>
+            <ActionButton
+              action="scp_save_data"
+              icon="💾"
+              color="good"
+              successMessage="SCP data saved successfully"
+              errorMessage="Failed to save SCP data"
+              tooltip="Save SCP data"
+            >
+              SAVE DATA
+            </ActionButton>
+            <EnhancedButton
+              icon="🚨"
+              color="bad"
+              onClick={() => {
+                addNotification(
+                  'Containment Alert',
+                  'Checking containment systems...',
+                  'warning',
+                );
+                setTimeout(
+                  () =>
+                    addNotification(
+                      'Containment Alert',
+                      'All containment systems operational',
+                      'success',
+                    ),
+                  1500,
+                );
+              }}
+              tooltip="Emergency containment check"
+            >
+              CONTAINMENT CHECK
+            </EnhancedButton>
+          </Flex>
+        </Box>
+
+        {/* SCP Management Features */}
+        <Box style={{ marginBottom: '20px' }}>
+          <Box style={{ marginBottom: '15px', fontWeight: 'bold' }}>
+            SCP MANAGEMENT FEATURES:
+          </Box>
+          <Box style={{ lineHeight: '1.6' }}>
+            <Box style={{ marginBottom: '10px' }}>
+              • SCP Template Management
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>• Player Access Control</Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • Spawn Condition Configuration
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • Containment Protocol Management
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • Research Settings Configuration
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • Interaction Settings Management
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • Global SCP Management Modes
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • Auto-Containment Configuration
+            </Box>
+            <Box style={{ marginBottom: '10px' }}>
+              • SCP Rotation Management
+            </Box>
+          </Box>
+        </Box>
+
+        {/* SCP Status Overview */}
+        <Box style={{ lineHeight: '1.6' }}>
+          <Box style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+            CONTAINMENT STATUS:{' '}
+            {scp_data?.active_breaches > 0 ? 'BREACH DETECTED' : 'SECURE'}
+            <DataStatusIndicator data={scp_data} label="SCP" />
+          </Box>
+          {scp_data?.active_breaches > 0 && (
+            <Box
+              style={{
+                color: '#ff6666',
+                marginBottom: '10px',
+                fontWeight: 'bold',
+              }}
+            >
+              WARNING: {scp_data.active_breaches} ACTIVE BREACH(ES) DETECTED
+            </Box>
+          )}
+          <Box>
+            GLOBAL STABILITY: {scp_data?.global_containment_stability || 0}%
+          </Box>
+          <Box>RESEARCH PROGRESS: {scp_data?.research_progress || 0}%</Box>
+          <Box>SCP INSTANCES: {scp_data?.scp_instances_count || 0}</Box>
+          <Box>
+            CONTAINMENT EFFECTIVENESS:{' '}
+            {scp_data?.containment_effectiveness
+              ? Math.round(scp_data.containment_effectiveness * 100)
+              : 0}
+            %
+          </Box>
+          <Box>
+            MANAGEMENT MODE: {scp_data?.global_management_mode || 'STANDARD'}
+          </Box>
+          <Box>
+            AUTO-CONTAINMENT:{' '}
+            {scp_data?.auto_containment_enabled ? 'ENABLED' : 'DISABLED'}
+          </Box>
+          <Box>
+            SCP ROTATION:{' '}
+            {scp_data?.scp_rotation_enabled ? 'ENABLED' : 'DISABLED'}
+          </Box>
+        </Box>
+
+        <Box style={{ fontSize: '12px', opacity: 0.7, textAlign: 'center' }}>
+          SCP management system providing comprehensive control over SCP
+          configurations, player access, and containment protocols.
+        </Box>
+      </Box>
+    );
+  };
+
   // Budget Management Interface
   const BudgetInterface = ({
     budgetModal,
@@ -10773,6 +11417,20 @@ export const PersistenceMasterPanel = (props, context) => {
                 />
               );
             }
+            if (activeTab === 'progression') {
+              return <ProgressionInterface />;
+            }
+            if (activeTab === 'scp_management') {
+              return (
+                <SCPManagementInterface
+                  scpManagementActiveTab={scpManagementActiveTab}
+                  setScpManagementActiveTab={setScpManagementActiveTab}
+                />
+              );
+            }
+            if (activeTab === 'skill_progression') {
+              return <SkillProgressionInterface />;
+            }
 
             return (
               <Box style={{ color: 'red', fontSize: '16px', padding: '20px' }}>
@@ -10781,7 +11439,7 @@ export const PersistenceMasterPanel = (props, context) => {
                 <br />
                 Available tabs: terminal, facility, scp, technology, medical,
                 security, research, personnel, players, infrastructure,
-                analytics, budget
+                analytics, budget, progression, scp_management, skill_progression
               </Box>
             );
           })()}
@@ -23245,5 +23903,38 @@ export const PersistenceMasterPanel = (props, context) => {
         </style>
       </Window.Content>
     </Window>
+  );
+};
+
+// Skill Progression Interface Component
+const SkillProgressionInterface = (props, context) => {
+  return (
+    <Box
+      style={{
+        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        border: '2px solid rgba(255,255,255,0.3)',
+        borderRadius: '15px',
+        padding: '20px',
+        height: '100%',
+        overflow: 'auto',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+      }}
+    >
+      <Box
+        style={{
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: '#66ffff',
+          marginBottom: '20px',
+          textAlign: 'center',
+          borderBottom: '2px solid rgba(255,255,255,0.2)',
+          paddingBottom: '10px',
+        }}
+      >
+        ⚡ SKILL PROGRESSION SYSTEM
+      </Box>
+
+      <SkillProgression />
+    </Box>
   );
 };

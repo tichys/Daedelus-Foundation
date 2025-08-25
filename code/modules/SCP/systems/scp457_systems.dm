@@ -543,11 +543,11 @@
 /datum/scp457_research_integration/New(mob/living/carbon/human/scp457/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
+	// Don't start processing - already handled by SCP-457's process() method
 	setup_research_projects()
 
 /datum/scp457_research_integration/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	// No longer processing separately
 	return ..()
 
 /datum/scp457_research_integration/process()

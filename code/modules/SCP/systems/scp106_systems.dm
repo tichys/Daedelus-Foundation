@@ -26,7 +26,6 @@
 /datum/scp106_phasing_system/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
 
 /datum/scp106_phasing_system/proc/process_phasing()
     // Regenerate dimensional energy
@@ -155,7 +154,6 @@
 /datum/scp106_pocket_dimension_system/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
 
 /datum/scp106_pocket_dimension_system/proc/process_dimensions()
     if(world.time >= last_maintenance + dimension_maintenance_interval)
@@ -355,7 +353,6 @@
 /datum/scp106_corrosion_system/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
 
 /datum/scp106_corrosion_system/proc/process_corrosion()
     if(corrosion_cooldown > 0)
@@ -450,7 +447,6 @@
 
     New()
         . = ..()
-        START_PROCESSING(SSobj, src)
 
     process()
         damage_tick++
@@ -489,7 +485,6 @@
 /datum/scp106_hunting_system/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
 
 /datum/scp106_hunting_system/proc/process_hunting()
     if(stalking_cooldown > 0)
@@ -631,7 +626,6 @@
 /datum/scp106_containment_system/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
 
 /datum/scp106_containment_system/proc/process_containment()
     // Check containment status
@@ -718,7 +712,7 @@
 /datum/scp106_research_integration/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
     owner = new_owner
-    START_PROCESSING(SSobj, src)
+    // Don't start processing - already handled by SCP-106's process() method
 
 /datum/scp106_research_integration/proc/process_research()
     if(world.time >= last_research_update + research_update_interval)

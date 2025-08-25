@@ -2,13 +2,11 @@ import { useBackend, useLocalState } from '../backend';
 import {
   Box,
   Button,
+  Flex,
+  Grid,
   LabeledList,
   ProgressBar,
   Section,
-  Stack,
-  Tabs,
-  Flex,
-  Grid,
   Table,
 } from '../components';
 import { Window } from '../layouts';
@@ -487,7 +485,8 @@ export const PersistentProgression = (props) => {
                 marginTop: '20px',
               }}
             >
-              SCP progression tracking system - monitoring anomalous entity performance.
+              SCP progression tracking system - monitoring anomalous entity
+              performance.
             </Box>
 
             <Section title="SCP Progression Overview">
@@ -535,37 +534,43 @@ export const PersistentProgression = (props) => {
 
             <Section title="SCP-Specific Metrics">
               <Grid style={{ gap: '15px' }}>
-                {safeData.scp_metrics && Object.keys(safeData.scp_metrics).length > 0 ? (
-                  Object.entries(safeData.scp_metrics).map(([scp_id, metrics]) => (
-                    <Grid.Column size={4} key={scp_id}>
-                      <Box
-                        style={{
-                          border: '1px solid rgba(255,255,255,0.3)',
-                          padding: '15px',
-                          borderRadius: '5px',
-                          background: 'rgba(0,0,0,0.3)',
-                        }}
-                      >
+                {safeData.scp_metrics &&
+                Object.keys(safeData.scp_metrics).length > 0 ? (
+                  Object.entries(safeData.scp_metrics).map(
+                    ([scp_id, metrics]) => (
+                      <Grid.Column size={4} key={scp_id}>
                         <Box
                           style={{
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            marginBottom: '10px',
-                            color: '#66ff66',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            padding: '15px',
+                            borderRadius: '5px',
+                            background: 'rgba(0,0,0,0.3)',
                           }}
                         >
-                          SCP-{scp_id}
+                          <Box
+                            style={{
+                              fontSize: '16px',
+                              fontWeight: 'bold',
+                              marginBottom: '10px',
+                              color: '#66ff66',
+                            }}
+                          >
+                            SCP-{scp_id}
+                          </Box>
+                          <LabeledList>
+                            {Object.entries(metrics).map(([metric, value]) => (
+                              <LabeledList.Item
+                                key={metric}
+                                label={metric.toUpperCase()}
+                              >
+                                <Box style={{ color: '#ffff66' }}>{value}</Box>
+                              </LabeledList.Item>
+                            ))}
+                          </LabeledList>
                         </Box>
-                        <LabeledList>
-                          {Object.entries(metrics).map(([metric, value]) => (
-                            <LabeledList.Item key={metric} label={metric.toUpperCase()}>
-                              <Box style={{ color: '#ffff66' }}>{value}</Box>
-                            </LabeledList.Item>
-                          ))}
-                        </LabeledList>
-                      </Box>
-                    </Grid.Column>
-                  ))
+                      </Grid.Column>
+                    ),
+                  )
                 ) : (
                   <Grid.Column size={12}>
                     <Box
@@ -587,7 +592,8 @@ export const PersistentProgression = (props) => {
 
             <Section title="SCP Achievements">
               <Grid style={{ gap: '10px' }}>
-                {safeData.scp_achievements && safeData.scp_achievements.length > 0 ? (
+                {safeData.scp_achievements &&
+                safeData.scp_achievements.length > 0 ? (
                   safeData.scp_achievements.map((achievement, index) => (
                     <Grid.Column size={6} key={index}>
                       <Box
@@ -595,8 +601,8 @@ export const PersistentProgression = (props) => {
                           border: '1px solid rgba(255,255,255,0.3)',
                           padding: '10px',
                           borderRadius: '3px',
-                          background: achievement.unlocked 
-                            ? 'rgba(0,255,0,0.1)' 
+                          background: achievement.unlocked
+                            ? 'rgba(0,255,0,0.1)'
                             : 'rgba(100,100,100,0.1)',
                         }}
                       >

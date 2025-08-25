@@ -55,6 +55,7 @@
 	var/list/job_supply_management = list()
 	var/list/job_service_contributions = list()
 	var/list/job_dclass_testing = list()
+	var/skill_boost_multiplier = 1.0 // Skill boost multiplier for progression system
 
 /datum/persistent_player_data/New(player_ckey)
 	ckey = player_ckey
@@ -744,3 +745,47 @@
 	stats["incidents"] = length(job_incidents[job_title] || list())
 	stats["disciplinary_actions"] = length(job_disciplinary_actions[job_title] || list())
 	return stats
+
+// Skill summary proc for skill progression system
+/datum/persistent_player_data/proc/get_skill_summary()
+	var/list/summary = list()
+
+	// Get skill data from the mind if available
+	var/datum/mind/player_mind = null
+	for(var/client/C in GLOB.clients)
+		if(C.ckey == ckey)
+			player_mind = C.mob?.mind
+			break
+
+	if(player_mind)
+		var/list/known_skills = player_mind.known_skills
+		var/total_skills = 0
+		var/highest_skill = "None"
+		var/highest_level = 0
+		var/list/skill_distribution = list()
+
+		for(var/skill_type in known_skills)
+			var/skill_level = known_skills[skill_type][SKILL_LVL]
+			if(skill_level > 0)
+				total_skills++
+				if(skill_level > highest_level)
+					highest_level = skill_level
+					highest_skill = get_skill_name(skill_type)
+
+				// Add to distribution
+				if(!skill_distribution["[skill_level]"])
+					skill_distribution["[skill_level]"] = 0
+				skill_distribution["[skill_level]"]++
+
+		summary["total_skills"] = total_skills
+		summary["highest_skill"] = highest_skill
+		summary["highest_level"] = highest_level
+		summary["skill_distribution"] = skill_distribution
+	else
+		// Fallback data
+		summary["total_skills"] = 0
+		summary["highest_skill"] = "None"
+		summary["highest_level"] = 0
+		summary["skill_distribution"] = list()
+
+	return summary

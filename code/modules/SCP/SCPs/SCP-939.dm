@@ -32,6 +32,9 @@
 	var/hunting_strategies_developed = 0
 	var/voice_evolutions_completed = 0
 
+	// Progression integration tracking
+	var/voices_learned = 0
+
 /mob/living/carbon/human/scp939/Initialize()
 	. = ..()
 
