@@ -49,12 +49,12 @@
 	else if(panel_open)
 		icon_state = "breaker_wires"
 	else if(opened)
-		icon_state = "breaker1-nocover" // Assuming this is the open state without cover
+		icon_state = "breaker1-nocover"
 	else
 		icon_state = "breaker_good" // Default closed state
 	return ..()
 
-	update_overlays()
+/obj/machinery/power/apc/breaker_box/update_overlays()
 	. = ..()
 	if((machine_stat & (BROKEN|MAINT)) || update_state)
 		return

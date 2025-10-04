@@ -133,3 +133,36 @@
 		else
 			to_chat(user, span_warning("You need one floor tile to build atop [src]."))
 		return
+
+//Not Really related to lattices but it's hard to know where to put things
+
+/obj/structure/supportlattice
+	name = "Lattice Support Pole"
+	desc = "A branching lattice framework that supports the structure above it."
+	icon = 'icons/80x80.dmi'
+	icon_state = "lattice-pole"
+	layer = ABOVE_MOB_LAYER
+
+/obj/structure/supportlattice/attackby(obj/item/O, mob/user)
+	. = ..()
+	if(isWelder(O))
+		user.visible_message(SPAN_WARNING("[user] begins to dismantle the lattice structure."), SPAN_WARNING("You begin to dismantle the lattice structure."))
+
+/obj/structure/supportlattice/arch
+	name = "Lattice Support Arch"
+	desc = "A branching lattice framework in the shape of an arch that supports the structure above it."
+	icon_state = "lattice-arch"
+
+//TD: Construction tie in for building support structures.
+
+/obj/structure/supportpole
+	name = "Metal Support Pole"
+	desc = "A solid steel support pole keeping the roof up and not on you."
+	icon = 'icons/80x80.dmi'
+	icon_state = "support-pole"
+	layer = ABOVE_MOB_LAYER
+
+/obj/structure/supportpole/attackby(obj/item/O, mob/user)
+	. = ..()
+	if(isWelder(O))
+		user.visible_message(SPAN_WARNING("[user] begins to dismantle the support pole."), SPAN_WARNING("You begin to dismantle the support pole."))

@@ -161,6 +161,11 @@
 	icon = 'icons/obj/stairs.dmi'
 	icon_state = "np_stair"
 
+/obj/structure/stairs/platform_stairs/update_icon_state()
+	..()
+	icon_state = initial(icon_state)
+	return
+
 /obj/structure/stairs/platform_stairs/south_north_solo
 	icon_state = "p_stair_sn_solo_cap"
 

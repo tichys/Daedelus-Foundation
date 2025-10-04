@@ -188,3 +188,7 @@
 	icon_state = "mesh_catwalk"
 	base_icon_state = "mesh_catwalk"
 	tile_type = /obj/item/stack/overfloor_catwalk/iron
+
+/obj/strcture/overfloor_catwalk/mesh/update_overlays() //Prevents lattice from spawning beneath mesh catwalk
+	..()
+	. = list() // Cheesy, but it works.

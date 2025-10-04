@@ -299,6 +299,7 @@
 	desc = "A generic wooden crate, I wonder what's inside?"
 	icon = 'icons/obj/aquaticprops.dmi'
 	icon_state = "woodencrate"
+	layer = ABOVE_OBJ_LAYER
 
 /obj/structure/closet/crate/utilitycart
 	name = "Utility Cart"

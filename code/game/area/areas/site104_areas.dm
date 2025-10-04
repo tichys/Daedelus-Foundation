@@ -329,6 +329,38 @@ Comment these out for now, while I port everything else over.
 /area/site104/cryogenics/bay/commandbay
 	name = "Cryogenics Command Bay"
 
+/area/site104/lcz/
+	name = "Light Containment Zone"
+	requires_power = 0
+	dynamic_lighting = 1
+
+/area/site104/lcz/warehouse
+	name = "Light Containment Warehouse"
+
+/area/site104/lcz/warehouse/securityoffice
+	name = "LCZ Warehouse Security Office"
+
+/area/site104/lcz/warehouse/monitoring
+	name = "LCZ Warehouse Monitoring Center"
+
+/area/site104/lcz/warehouse/offloading
+	name = "LCZ Warehouse Secure Dock"
+
+/area/site104/lcz/warehousehall
+	name = "LCZ Warehouse Hallway"
+
+/area/site104/lcz/shelterc
+	name = "LCZ Blackout-Shelter C"
+
+/area/site104/lcz/entrancehall
+	name = "LCZ Entrance Hall"
+
+/area/site104/lcz/entrancecheckpoint
+	name = "LCZ Entrance Checkpoint"
+
+/area/site104/lcz/entranceexit
+	name = "LCZ External Airlock"
+
 /area/site104/hcz
 	name = "Heavy Containment Zone"
 	requires_power = 0

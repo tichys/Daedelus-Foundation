@@ -66,3 +66,55 @@
 	icon = 'icons/obj/aquaticprops.dmi'
 	icon_state = "barrel_weld"
 	volume = 2500
+
+/obj/item/reagent_containers/barrel/cooking
+	name = "Cooking Barrel"
+	desc = "A barrel filled with a cooking-related reagent."
+	icon = 'icons/obj/aquaticprops.dmi'
+	volume = 2500
+
+/obj/item/reagent_containers/barrel/cooking/InitializeBarrelReagent()
+	var/list/barrelreagents = list(
+		/datum/reagent/consumable/cooking_oil = 30,
+		/datum/reagent/consumable/sugar = 25,
+		/datum/reagent/consumable/soysauce = 15,
+		/datum/reagent/consumable/ketchup = 15,
+		/datum/reagent/consumable/salt = 20,
+		/datum/reagent/consumable/blackpepper = 10,
+		/datum/reagent/consumable/coco = 10,
+		/datum/reagent/consumable/garlic = 15,
+		/datum/reagent/consumable/flour = 20,
+		/datum/reagent/consumable/rice = 15,
+		/datum/reagent/consumable/vanilla = 10,
+		/datum/reagent/consumable/eggyolk = 10,
+		/datum/reagent/consumable/eggwhite = 10,
+		/datum/reagent/consumable/corn_starch = 10,
+		/datum/reagent/consumable/corn_syrup = 10,
+		/datum/reagent/consumable/honey = 15,
+		/datum/reagent/consumable/mayonnaise = 10,
+		/datum/reagent/consumable/quality_oil = 20,
+		/datum/reagent/consumable/cornmeal = 15,
+		/datum/reagent/consumable/yoghurt = 10,
+		/datum/reagent/consumable/peanut_butter = 15,
+		/datum/reagent/consumable/vinegar = 10,
+		/datum/reagent/consumable/bbqsauce = 15,
+		/datum/reagent/consumable/gravy = 10,
+		/datum/reagent/consumable/pancakebatter = 15,
+		/datum/reagent/consumable/whipped_cream = 10,
+		/datum/reagent/consumable/milk = 25,
+		/datum/reagent/consumable/soymilk = 15,
+		/datum/reagent/consumable/cream = 15,
+		/datum/reagent/consumable/coffee = 20,
+		/datum/reagent/consumable/tea = 20,
+		/datum/reagent/consumable/grapejuice = 15,
+		/datum/reagent/consumable/orangejuice = 20,
+		/datum/reagent/consumable/tomatojuice = 15,
+		/datum/reagent/consumable/limejuice = 15,
+		/datum/reagent/consumable/applejuice = 20,
+		/datum/reagent/consumable/pineapplejuice = 15,
+		/datum/reagent/consumable/pumpkinjuice = 10,
+		/datum/reagent/consumable/sodawater = 15,
+		/datum/reagent/consumable/grenadine = 10
+	)
+	selected_reagent = pick_weight(barrelreagents)
+	list_reagents = list(selected_reagent = volume)
