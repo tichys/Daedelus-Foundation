@@ -17,8 +17,8 @@ import {
 } from '../components';
 import { Window } from '../layouts';
 
-export const FoundationPolitics = (props, context) => {
-  const { act, data } = useBackend(context);
+export const FoundationPolitics = (props) => {
+  const { act, data } = useBackend();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedFaction, setSelectedFaction] = useState(null);
@@ -252,7 +252,7 @@ const DepartmentsTab = ({
   selectedDepartment,
   setSelectedDepartment,
 }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Flex>
@@ -299,7 +299,7 @@ const DepartmentsTab = ({
 };
 
 const DepartmentDetailView = ({ department }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title={department.name}>
@@ -426,7 +426,7 @@ const DepartmentDetailView = ({ department }) => {
 };
 
 const FactionsTab = ({ factions, selectedFaction, setSelectedFaction }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Flex>
@@ -473,7 +473,7 @@ const FactionsTab = ({ factions, selectedFaction, setSelectedFaction }) => {
 };
 
 const FactionDetailView = ({ faction }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title={faction.name}>

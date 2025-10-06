@@ -15,8 +15,8 @@ import {
 } from '../components';
 import { Window } from '../layouts';
 
-export const RoleplayCharacterSheet = (props, context) => {
-  const { act, data } = useBackend(context);
+export const RoleplayCharacterSheet = (props) => {
+  const { act, data } = useBackend();
   const [activeTab, setActiveTab] = useState('basic');
   const [editing, setEditing] = useState(false);
 
@@ -116,6 +116,12 @@ export const RoleplayCharacterSheet = (props, context) => {
               >
                 Appearance
               </Tabs.Tab>
+              <Tabs.Tab
+                selected={activeTab === 'preferences'}
+                onClick={() => setActiveTab('preferences')}
+              >
+                Preferences Integration
+              </Tabs.Tab>
             </Tabs>
 
             <Box height="calc(100% - 50px)" overflowY="auto">
@@ -141,6 +147,9 @@ export const RoleplayCharacterSheet = (props, context) => {
               {activeTab === 'appearance' && (
                 <AppearanceTab character={character} editing={editing} />
               )}
+              {activeTab === 'preferences' && (
+                <PreferencesTab character={character} />
+              )}
             </Box>
           </Flex.Item>
         </Flex>
@@ -150,7 +159,7 @@ export const RoleplayCharacterSheet = (props, context) => {
 };
 
 const BasicInfoTab = ({ character, editing }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title="Basic Information">
@@ -228,7 +237,7 @@ const BasicInfoTab = ({ character, editing }) => {
 };
 
 const PersonalityTab = ({ character, personality_traits, editing }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title="Personality">
@@ -463,7 +472,7 @@ const DevelopmentTab = ({ character, achievements }) => {
 };
 
 const AppearanceTab = ({ character, editing }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title="Character Appearance">
@@ -590,6 +599,128 @@ const AppearanceTab = ({ character, editing }) => {
                   'No style description.'}
               </Box>
             )}
+          </Section>
+        </Stack.Item>
+      </Stack>
+    </Section>
+  );
+};
+
+const PreferencesTab = ({ character }) => {
+  const { act, data } = useBackend();
+  const { preferences_summary, character_sheet_status } = data;
+
+  return (
+    <Section title="Character Setup Preferences Integration">
+      <Stack vertical>
+        <Stack.Item>
+          <Section title="Preferences Status">
+            <LabeledList>
+              <LabeledList.Item label="Preferences Loaded">
+                {preferences_summary?.preferences_loaded ? 'Yes' : 'No'}
+              </LabeledList.Item>
+              <LabeledList.Item label="Character Sheet Status">
+                {character_sheet_status?.has_character ? 'Active' : 'Inactive'}
+              </LabeledList.Item>
+              <LabeledList.Item label="Last Synced">
+                {character_sheet_status?.last_updated
+                  ? new Date(
+                      character_sheet_status.last_updated * 1000,
+                    ).toLocaleString()
+                  : 'Never'}
+              </LabeledList.Item>
+              <LabeledList.Item label="Successful Reads">
+                {preferences_summary?.successful_reads || 0}
+              </LabeledList.Item>
+              <LabeledList.Item label="Total Cache Entries">
+                {preferences_summary?.total_cache_entries || 0}
+              </LabeledList.Item>
+            </LabeledList>
+          </Section>
+        </Stack.Item>
+
+        <Stack.Item>
+          <Section title="Current Preferences Data">
+            {preferences_summary?.preferences_loaded ? (
+              <LabeledList>
+                <LabeledList.Item label="Character Name">
+                  {preferences_summary.character_name}
+                </LabeledList.Item>
+                <LabeledList.Item label="Age">
+                  {preferences_summary.age}
+                </LabeledList.Item>
+                <LabeledList.Item label="Gender">
+                  {preferences_summary.gender}
+                </LabeledList.Item>
+                <LabeledList.Item label="Species">
+                  {preferences_summary.species}
+                </LabeledList.Item>
+                <LabeledList.Item label="Hair Style">
+                  {preferences_summary.hair_style}
+                </LabeledList.Item>
+                <LabeledList.Item label="Hair Color">
+                  {preferences_summary.hair_color}
+                </LabeledList.Item>
+                <LabeledList.Item label="Eye Color">
+                  {preferences_summary.eye_color}
+                </LabeledList.Item>
+                <LabeledList.Item label="Clothing Style">
+                  {preferences_summary.clothing_style}
+                </LabeledList.Item>
+                <LabeledList.Item label="Flavor Text">
+                  {preferences_summary.flavor_text}
+                </LabeledList.Item>
+              </LabeledList>
+            ) : (
+              <Box color="red">No preferences data available.</Box>
+            )}
+          </Section>
+        </Stack.Item>
+
+        <Stack.Item>
+          <Section title="Sync Actions">
+            <Flex>
+              <Flex.Item width="50%">
+                <Button
+                  fluid
+                  icon="download"
+                  onClick={() => act('sync_from_preferences')}
+                  tooltip="Update character sheet with current preferences data"
+                >
+                  Sync From Preferences
+                </Button>
+              </Flex.Item>
+              <Flex.Item width="50%">
+                <Button
+                  fluid
+                  icon="upload"
+                  onClick={() => act('sync_to_preferences')}
+                  tooltip="Update preferences with character sheet changes"
+                >
+                  Sync To Preferences
+                </Button>
+              </Flex.Item>
+            </Flex>
+          </Section>
+        </Stack.Item>
+
+        <Stack.Item>
+          <Section title="Integration Information">
+            <Box>
+              <strong>How Integration Works:</strong>
+              <br />
+              • The character sheet automatically syncs with your character
+              setup preferences
+              <br />
+              • Changes made in the character sheet can be synced back to
+              preferences
+              <br />
+              • Character name and background automatically sync to preferences
+              <br />
+              • Appearance details are pulled from your character setup
+              <br />• Use the sync buttons to manually update data in either
+              direction
+            </Box>
           </Section>
         </Stack.Item>
       </Stack>

@@ -162,7 +162,7 @@
 			infected_count++
 
 	// Update persistence
-	infections_performed++
+		infections_performed++
 	total_pestilence_spread += infected_count
 
 	// Enhanced effects (Foundation-19 style)

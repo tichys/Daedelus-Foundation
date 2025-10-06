@@ -11,9 +11,12 @@
 
 /datum/foundation_politics_ui/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "FoundationPolitics")
+	if (!ui)
+		ui = new(user, src, "FoundationPolitics", "SCP Foundation - Politics & Hierarchy", 800, 600)
 		ui.open()
+
+/datum/foundation_politics_ui/ui_state(mob/user)
+	return GLOB.always_state
 
 /datum/foundation_politics_ui/ui_data(mob/user)
 	var/list/data = list()

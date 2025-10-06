@@ -50,8 +50,9 @@
 		return TRUE
 
 	if(href_list["character_setup"])
-		var/datum/preferences/preferences = parent.client.prefs
-		preferences.html_show(usr)
+		// Open new TGUI Character Setup
+		var/datum/character_setup_ui/CS = new(usr)
+		CS.ui_interact(usr)
 		return TRUE
 
 	if(href_list["ready"])

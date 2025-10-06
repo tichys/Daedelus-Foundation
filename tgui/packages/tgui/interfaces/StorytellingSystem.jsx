@@ -17,8 +17,8 @@ import {
 } from '../components';
 import { Window } from '../layouts';
 
-export const StorytellingSystem = (props, context) => {
-  const { act, data } = useBackend(context);
+export const StorytellingSystem = (props) => {
+  const { act, data } = useBackend();
   const [activeTab, setActiveTab] = useState('stories');
   const [selectedStory, setSelectedStory] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -137,7 +137,7 @@ const StoriesTab = ({
   editing,
   setEditing,
 }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Flex>
@@ -194,7 +194,7 @@ const StoriesTab = ({
 };
 
 const StoryDetailView = ({ story, editing, setEditing }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title={story.story_title}>
@@ -354,7 +354,7 @@ const StoryDetailView = ({ story, editing, setEditing }) => {
 };
 
 const TemplatesTab = ({ templates }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title="Story Templates">
@@ -412,7 +412,7 @@ const TemplatesTab = ({ templates }) => {
 };
 
 const CollaborationsTab = ({ sessions }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Section title="Collaborative Sessions">
@@ -475,7 +475,7 @@ const CollaborationsTab = ({ sessions }) => {
 };
 
 const MyWorkTab = ({ user_stories, user_contributions }) => {
-  const { act } = useBackend(context);
+  const { act } = useBackend();
 
   return (
     <Flex>

@@ -22,6 +22,135 @@
 			var/character_name = user.real_name || user.name
 			character = SSroleplay_character.manager.create_character(user.ckey, character_name, character_type)
 
+			// Sync with character setup preferences
+			sync_with_character_preferences()
+
+/datum/roleplay_character_ui/proc/get_comprehensive_character_data_from_preferences()
+	var/list/comprehensive_data = list()
+
+	if(!user || !user.client || !user.client.prefs)
+		return comprehensive_data
+
+	var/prefs = user.client.prefs
+
+	// Basic character information - try to get from preferences first
+	comprehensive_data["real_name"] = user.real_name || user.name || "Unknown"
+	comprehensive_data["age"] = "Unknown"
+	comprehensive_data["gender"] = "Unknown"
+	comprehensive_data["body_type"] = "Unknown"
+	comprehensive_data["species"] = "Unknown"
+	comprehensive_data["flavor_text"] = "No flavor text set"
+
+	// Appearance details - try to get from preferences
+	comprehensive_data["hair_style"] = "Unknown"
+	comprehensive_data["hair_color"] = "Unknown"
+	comprehensive_data["facial_hair_style"] = "Unknown"
+	comprehensive_data["facial_hair_color"] = "Unknown"
+	comprehensive_data["eye_color"] = "Unknown"
+	comprehensive_data["skin_tone"] = "Unknown"
+
+	// Clothing preferences
+	comprehensive_data["jumpsuit_style"] = "Unknown"
+	comprehensive_data["backpack"] = "Unknown"
+	comprehensive_data["undershirt"] = "Unknown"
+	comprehensive_data["underwear"] = "Unknown"
+	comprehensive_data["socks"] = "Unknown"
+
+	// Additional features
+	comprehensive_data["hair_gradient"] = "None"
+	comprehensive_data["hair_gradient_color"] = "Unknown"
+	comprehensive_data["facial_hair_gradient"] = "None"
+	comprehensive_data["facial_hair_gradient_color"] = "Unknown"
+
+	// Species-specific features
+	comprehensive_data["species_name"] = "Human"
+	comprehensive_data["species_description"] = "Species: Human"
+	comprehensive_data["species_features"] = list()
+
+	// For now, just use basic mob properties to avoid preference system issues
+	if(prefs)
+		comprehensive_data["preferences_available"] = TRUE
+		comprehensive_data["successful_reads"] = 1  // At least we got the real name
+		comprehensive_data["total_cache_entries"] = 0
+	else
+		comprehensive_data["preferences_available"] = FALSE
+		comprehensive_data["successful_reads"] = 0
+		comprehensive_data["total_cache_entries"] = 0
+
+	return comprehensive_data
+
+/datum/roleplay_character_ui/proc/sync_with_character_preferences()
+	if(!character || !user)
+		return
+
+	// Get comprehensive character data from preferences
+	var/list/pref_data = get_comprehensive_character_data_from_preferences()
+
+	// Update character name from preferences or mob
+	if(pref_data["real_name"] && pref_data["real_name"] != "")
+		character.character_name = pref_data["real_name"]
+	else if(user.real_name && user.real_name != "")
+		character.character_name = user.real_name
+
+	// Update character type based on current job
+	character.character_type = determine_character_type()
+
+	// Update the character in the manager
+	if(SSroleplay_character && SSroleplay_character.manager)
+		SSroleplay_character.manager.character_sheets[character.ckey] = character
+
+	// Update character last modified timestamp
+	character.character_last_updated = world.time
+
+/datum/roleplay_character_ui/proc/sync_character_to_preferences()
+	if(!character || !user || !user.client || !user.client.prefs)
+		return FALSE
+
+	var/prefs = user.client.prefs
+
+	// Try to update preferences using the proper update_preference method
+	var/successful_updates = 0
+
+	// Update real name if we have it
+	if(character.character_name && character.character_name != user.real_name)
+		user.set_real_name(character.character_name)
+		successful_updates++
+
+	// Update flavor text if we have it
+	if(character.character_background && character.character_background != user.desc)
+		user.desc = character.character_background
+		successful_updates++
+
+	// Update character last updated timestamp
+	character.character_last_updated = world.time
+
+	return successful_updates > 0
+
+/datum/roleplay_character_ui/proc/get_character_preferences_summary()
+	var/list/summary = list()
+
+	if(!user)
+		return summary
+
+	var/list/pref_data = get_comprehensive_character_data_from_preferences()
+
+	summary["preferences_loaded"] = pref_data["preferences_available"] || FALSE
+	summary["character_name"] = pref_data["real_name"] || "Not Set"
+	summary["age"] = pref_data["age"] || "Not Set"
+	summary["gender"] = pref_data["gender"] || "Not Set"
+	summary["species"] = pref_data["species_name"] || "Not Set"
+	summary["hair_style"] = pref_data["hair_style"] || "Not Set"
+	summary["hair_color"] = pref_data["hair_color"] || "Not Set"
+	summary["eye_color"] = pref_data["eye_color"] || "Not Set"
+	summary["flavor_text"] = pref_data["flavor_text"] || "Not Set"
+	summary["clothing_style"] = pref_data["jumpsuit_style"] || "Not Set"
+
+	// Add debug information
+	summary["successful_reads"] = pref_data["successful_reads"] || 0
+	summary["total_cache_entries"] = pref_data["total_cache_entries"] || 0
+
+	return summary
+
 /datum/roleplay_character_ui/proc/determine_character_type()
 	if(!user)
 		return "foundation"
@@ -43,14 +172,20 @@
 /datum/roleplay_character_ui/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
-		ui = new(user, src, "RoleplayCharacterSheet")
+		ui = new(user, src, "RoleplayCharacterSheet", "SCP Foundation - Character Sheet", 800, 600)
 		ui.open()
+
+/datum/roleplay_character_ui/ui_state(mob/user)
+	return GLOB.always_state
 
 /datum/roleplay_character_ui/ui_data(mob/user)
 	var/list/data = list()
 
 	if(!character)
 		load_character()
+	else
+		// Always sync with current preferences when opening the sheet
+		sync_with_character_preferences()
 
 	if(character)
 		data["character"] = list(
@@ -92,6 +227,17 @@
 	// Editable status
 	data["editable"] = can_edit_character(user)
 
+	// Add preferences summary for integration display
+	data["preferences_summary"] = get_character_preferences_summary()
+
+	// Add character sheet status
+	data["character_sheet_status"] = list(
+		"has_character" = !!character,
+		"character_loaded" = !!character,
+		"preferences_synced" = !!user?.client?.prefs,
+		"last_updated" = character?.character_last_updated || 0
+	)
+
 	return data
 
 /datum/roleplay_character_ui/proc/get_character_relationships()
@@ -101,16 +247,13 @@
 		return relationships
 
 	// Get relationships for this character
-	for(var/relationship_id in SSroleplay_character.manager.character_relationships)
-		var/relationship = SSroleplay_character.manager.character_relationships[relationship_id]
-		if(relationship["character1"] == character.ckey || relationship["character2"] == character.ckey)
-			var/other_character = relationship["character1"] == character.ckey ? relationship["character2"] : relationship["character1"]
-			relationships += list(list(
-				"other_character" = other_character,
-				"type" = relationship["type"],
-				"strength" = relationship["strength"],
-				"trust" = relationship["trust"]
-			))
+	var/list/character_relationships = character.character_relationships
+	if(character_relationships && character_relationships.len > 0)
+		for(var/relationship in character_relationships)
+			if(istype(relationship, /list))
+				relationships += relationship
+			else
+				relationships += list("relationship" = relationship)
 
 	return relationships
 
@@ -118,95 +261,81 @@
 	if(!user || !character)
 		return FALSE
 
-	// Only the character owner can edit
+	// Only the character owner can edit their character sheet
 	return user.ckey == character.ckey
 
 /datum/roleplay_character_ui/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
-
-	if(!character || !can_edit_character(usr))
+	if(.)
 		return
 
 	switch(action)
-		if("update_character")
-			var/field = params["field"]
-			var/value = params["value"]
-
-			if(field && value != null)
-				character.vars[field] = value
-				character.character_last_updated = world.time
-				. = TRUE
-
-		if("toggle_trait")
+		if("add_trait")
 			var/trait = params["trait"]
-			if(trait)
-				if(!character.personality)
-					character.personality = new /datum/roleplay_personality()
-
-				if(character.personality.traits[trait])
-					character.personality.traits -= trait
-				else
-					character.personality.traits[trait] = 1
-
+			if(trait && character && character.personality)
+				character.personality.traits |= trait
 				character.character_last_updated = world.time
 				. = TRUE
 
-		if("update_quirks")
-			var/list/quirks = params["quirks"]
-			if(quirks)
-				if(!character.personality)
-					character.personality = new /datum/roleplay_personality()
-
-				character.personality.quirks = quirks
+		if("remove_trait")
+			var/trait = params["trait"]
+			if(trait && character && character.personality)
+				character.personality.traits -= trait
 				character.character_last_updated = world.time
 				. = TRUE
 
-		if("update_face_details")
-			var/list/details = params["details"]
-			if(details)
-				if(!character.appearance)
-					character.appearance = new /datum/roleplay_appearance()
-
-				character.appearance.face_details = details
+		if("add_quirk")
+			var/quirk = params["quirk"]
+			if(quirk && character && character.personality)
+				character.personality.quirks |= quirk
 				character.character_last_updated = world.time
 				. = TRUE
 
-		if("update_body_details")
-			var/list/details = params["details"]
-			if(details)
-				if(!character.appearance)
-					character.appearance = new /datum/roleplay_appearance()
-
-				character.appearance.body_details = details
+		if("remove_quirk")
+			var/quirk = params["quirk"]
+			if(quirk && character && character.personality)
+				character.personality.quirks -= quirk
 				character.character_last_updated = world.time
 				. = TRUE
 
-		if("update_clothing_preferences")
-			var/list/preferences = params["preferences"]
-			if(preferences)
-				if(!character.appearance)
-					character.appearance = new /datum/roleplay_appearance()
-
-				character.appearance.clothing_preferences = preferences
+		if("add_fear")
+			var/fear = params["fear"]
+			if(fear && character && character.personality)
+				character.personality.fears |= fear
 				character.character_last_updated = world.time
 				. = TRUE
 
-		if("update_unique_features")
-			var/list/features = params["features"]
-			if(features)
-				if(!character.appearance)
-					character.appearance = new /datum/roleplay_appearance()
+		if("remove_fear")
+			var/fear = params["fear"]
+			if(fear && character && character.personality)
+				character.personality.fears -= fear
+				character.character_last_updated = world.time
+				. = TRUE
 
-				character.appearance.unique_features = features
+		if("add_aspiration")
+			var/aspiration = params["aspiration"]
+			if(aspiration && character && character.personality)
+				character.personality.aspirations |= aspiration
+				character.character_last_updated = world.time
+				. = TRUE
+
+		if("remove_aspiration")
+			var/aspiration = params["aspiration"]
+			if(aspiration && character && character.personality)
+				character.personality.aspirations -= aspiration
+				character.character_last_updated = world.time
+				. = TRUE
+
+		if("update_character_goals")
+			var/goals = params["goals"]
+			if(goals != null && character)
+				character.character_goals = goals
 				character.character_last_updated = world.time
 				. = TRUE
 
 		if("update_character_style")
 			var/style = params["style"]
-			if(style != null)
-				if(!character.appearance)
-					character.appearance = new /datum/roleplay_appearance()
-
+			if(style != null && character && character.appearance)
 				character.appearance.character_style = style
 				character.character_last_updated = world.time
 				. = TRUE
@@ -216,107 +345,82 @@
 			to_chat(usr, "<span class='notice'>Character saved successfully!</span>")
 			. = TRUE
 
+		if("sync_to_preferences")
+			// Sync character sheet changes back to preferences
+			sync_character_to_preferences()
+			to_chat(usr, "<span class='notice'>Character sheet synced to preferences!</span>")
+			. = TRUE
+
+		if("sync_from_preferences")
+			// Sync preferences to character sheet
+			sync_with_character_preferences()
+			to_chat(usr, "<span class='notice'>Character sheet synced from preferences!</span>")
+			. = TRUE
+
+		if("update_character_background")
+			var/background = params["background"]
+			if(background != null)
+				character.character_background = background
+				character.character_last_updated = world.time
+				// Auto-sync background to mob for now
+				if(user)
+					user.desc = background
+				. = TRUE
+
+		if("update_character_name")
+			var/name = params["name"]
+			if(name && name != "")
+				character.character_name = name
+				character.character_last_updated = world.time
+				// Auto-sync name to mob
+				if(user && user.real_name != name)
+					user.set_real_name(name)
+				. = TRUE
+
 // Verb to open character sheet
 /mob/verb/open_character_sheet()
 	set name = "Open Character Sheet"
-	set category = "Roleplay"
+	set category = "IC"
 	set desc = "Open your roleplay character sheet"
 
-	var/datum/roleplay_character_ui/ui = new /datum/roleplay_character_ui(src)
+	if(!client)
+		return
+
+	var/datum/roleplay_character_ui/ui = new(src)
 	ui.ui_interact(src)
 
-// Admin verb to view any character sheet
-/mob/proc/view_character_sheet(ckey)
+// Verb to view another player's character sheet (read-only)
+/mob/verb/view_character_sheet(mob/target in world)
 	set name = "View Character Sheet"
-	set category = "Admin"
-	set desc = "View a player's character sheet"
+	set category = "IC"
+	set desc = "View another player's character sheet (read-only)"
 
-	if(!check_rights(R_ADMIN))
+	if(!client || !target || !target.client)
 		return
 
-	if(!ckey)
-		ckey = input("Enter player ckey:", "View Character Sheet") as text|null
-
-	if(!ckey)
-		return
-
-	var/datum/roleplay_character_sheet/character = null
-	if(SSroleplay_character && SSroleplay_character.manager)
-		character = SSroleplay_character.manager.get_character(ckey)
-
-	if(!character)
-		to_chat(src, "<span class='warning'>No character found for [ckey].</span>")
-		return
-
-	// Create a temporary UI for viewing
-	var/datum/roleplay_character_ui/ui = new /datum/roleplay_character_ui(src)
-	ui.character = character
+	var/datum/roleplay_character_ui/ui = new(target)
 	ui.ui_interact(src)
 
-// Integration with existing systems
-/datum/roleplay_character_ui/proc/integrate_with_existing_systems()
-	if(!character || !character.linked_mind)
-		return
-
-	var/datum/mind/mind = character.linked_mind
-
-	// Integrate with skill system
-	if(mind.known_skills && character.skills)
-		character.skills.update_skills_from_mind(mind)
-
-	// Integrate with personnel system
-	if(character.linked_personnel_record)
-		// Sync character data with personnel record
-		character.linked_personnel_record.real_name = character.character_name
-
-	// Award experience for roleplay activities
-	award_roleplay_experience()
-
+// Award experience for roleplay activities
 /datum/roleplay_character_ui/proc/award_roleplay_experience()
 	if(!character || !character.growth)
 		return
 
-	// Award experience for various roleplay activities
-	var/experience_gained = 0
+	// Award experience for opening the character sheet
+	character.growth.roleplay_experience_points += 5
 
-	// Experience for character depth
-	if(character.character_background && length(character.character_background) > 100)
-		experience_gained += 10
+	// Check for level up
+	var/current_level = character.growth.character_level
+	var/required_exp = current_level * 100
 
-	// Experience for personality traits
-	if(character.personality && character.personality.traits)
-		experience_gained += length(character.personality.traits) * 5
+	if(character.growth.roleplay_experience_points >= required_exp)
+		character.growth.character_level++
+		character.growth.roleplay_experience_points -= required_exp
+		to_chat(user, "<span class='notice'>Character level increased to [character.growth.character_level]!</span>")
 
-	// Experience for relationships
-	if(character.character_relationships)
-		experience_gained += length(character.character_relationships) * 15
+	// Update personnel record if linked
+	if(character.linked_personnel_record)
+		character.linked_personnel_record.real_name = character.character_name
 
-	// Experience for achievements
-	if(character.character_achievements)
-		experience_gained += length(character.character_achievements) * 25
-
-	if(experience_gained > 0)
-		character.growth.add_experience(experience_gained, "Character Development")
-		to_chat(usr, "<span class='notice'>Gained [experience_gained] roleplay experience for character development!</span>")
-
-// Hook into existing systems
-/datum/roleplay_character_ui/proc/setup_integration_hooks()
-	// Hook into mind system for skill updates
-	// if(character && character.linked_mind)
-	// 	RegisterSignal(character.linked_mind, COMSIG_MIND_SKILL_UPDATED, PROC_REF(on_skill_updated))
-	// 	Signal will be implemented when mind system signals are available
-
-	// Hook into personnel system for record updates
-	// if(character && character.linked_personnel_record)
-	// 	RegisterSignal(character.linked_personnel_record, COMSIG_PERSONNEL_RECORD_UPDATED, PROC_REF(on_personnel_updated))
-	// 	Signal will be implemented when personnel system signals are available
-
-/datum/roleplay_character_ui/proc/on_skill_updated(datum/mind/mind, skill_type, new_level)
-	if(character && character.skills)
-		character.skills.update_skills_from_mind(mind)
-		character.character_last_updated = world.time
-
-/datum/roleplay_character_ui/proc/on_personnel_updated(datum/personnel_record/record)
-	if(character)
-		character.character_name = record.real_name
-		character.character_last_updated = world.time
+	// Sync with character preferences
+	sync_character_to_preferences()

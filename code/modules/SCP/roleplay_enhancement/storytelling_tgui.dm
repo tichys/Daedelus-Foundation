@@ -10,9 +10,12 @@
 
 /datum/storytelling_ui/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "StorytellingSystem")
+	if (!ui)
+		ui = new(user, src, "StorytellingSystem", "SCP Foundation - Storytelling System", 800, 600)
 		ui.open()
+
+/datum/storytelling_ui/ui_state(mob/user)
+	return GLOB.always_state
 
 /datum/storytelling_ui/ui_data(mob/user)
 	var/list/data = list()
