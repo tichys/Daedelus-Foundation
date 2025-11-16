@@ -51,6 +51,7 @@
 	/// The font color, face and the signature of the above.
 	var/list/add_info_style
 
+	var/author_ckey
 	var/show_written_words = TRUE
 
 	/// The (text for the) stamps on the paper.
