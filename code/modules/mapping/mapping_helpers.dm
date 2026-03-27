@@ -87,6 +87,14 @@
 	name = "lava baseturf editor"
 	baseturf = /turf/open/lava/smooth
 
+/obj/effect/baseturf_helper/dirt
+	name = "dirt baseturf editor"
+	baseturf = /turf/open/misc/dirt
+
+/obj/effect/baseturf_helper/openspace
+	name = "open space baseturf editor"
+	baseturf = /turf/open/openspace
+
 /obj/effect/baseturf_helper/reinforced_plating
 	name = "reinforced plating baseturf editor"
 	baseturf = /turf/open/floor/plating/reinforced
@@ -99,7 +107,7 @@
 /obj/effect/baseturf_helper/reinforced_plating/ceiling/replace_baseturf(turf/thing)
 	var/turf/ceiling = GetAbove(thing)
 	if(isnull(ceiling))
-		CRASH("baseturf helper is attempting to modify the Z level above but there is no Z level above above it.")
+		CRASH("baseturf helper is attempting to modify the Z level above but there is no Z level above it.")
 	if(isspaceturf(ceiling) || istype(ceiling, /turf/open/openspace))
 		return
 	return ..(ceiling)
@@ -731,6 +739,26 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	json_cache[json_url] = json_data
 	query_in_progress = FALSE
 	return json_data
+
+/obj/effect/mapping_helpers/flag_height_setter
+	name = "Flag Height Setter"
+	icon = 'icons/effects/mapping_helpers.dmi'
+	icon_state = "flag_height_setter" // Assuming you have or will create this icon state
+	late = TRUE
+	var/target_height = 48 // Default height, can be changed by mappers
+
+/obj/effect/mapping_helpers/flag_height_setter/LateInitialize()
+	var/obj/structure/flag_base/flag = locate() in loc
+	if(flag)
+		if(target_height < flag.min_pole_height || target_height > flag.max_pole_height || (target_height - flag.min_pole_height) % flag.pole_height_step != 0)
+			WARNING("Flag Height Setter at [x],[y],[z] has an invalid target_height ([target_height]). Setting to default min_pole_height ([flag.min_pole_height]).")
+			flag.current_pole_height = flag.min_pole_height
+		else
+			flag.current_pole_height = target_height
+		flag.update_flag_overlay()
+	else
+		WARNING("Flag Height Setter at [x],[y],[z] could not find a flag_base to modify.")
+	qdel(src)
 
 //DM Editor 'simplified' maphelpers.
 #if defined(SIMPLE_MAPHELPERS)
