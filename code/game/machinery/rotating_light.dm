@@ -33,7 +33,7 @@
 
 /obj/machinery/rotating_alarm
 	name = "Industrial alarm"
-	desc = "An industrial rotating alarm light."
+	desc = "An industrial rotating alarm light. Turns on during the most important of emergencies!"
 	icon = 'icons/obj/rotating_alarm.dmi'
 	icon_state = "alarm"
 	idle_power_usage = 0
@@ -51,6 +51,21 @@
 
 	var/static/list/spinning_lights_cache = list()
 
+/obj/machinery/rotating_alarm/directional/north
+	pixel_y = 15
+	dir = 2
+
+/obj/machinery/rotating_alarm/directional/south
+	pixel_y = -15
+	dir = 1
+
+/obj/machinery/rotating_alarm/directional/east
+	pixel_x = 17
+	dir = 8
+
+/obj/machinery/rotating_alarm/directional/west
+	pixel_x = -17
+	dir = 4
 
 /obj/machinery/rotating_alarm/Initialize()
 	. = ..()
