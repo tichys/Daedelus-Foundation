@@ -170,3 +170,25 @@
 	)
 
 	research_integration?.research_data["last_update"] = research_data
+
+// Progression Integration Hooks
+/mob/living/carbon/human/scp106/proc/on_breach()
+	containment_breaches++
+	hook_scp_breach("SCP-106", src)
+
+/mob/living/carbon/human/scp106/proc/on_pocket_capture(mob/living/carbon/human/victim)
+	if(victim && victim.ckey)
+		hook_scp_interaction(victim, "SCP-106", INTERACTION_TYPE_CONTAINMENT, list("captured" = TRUE))
+		start_scp_survival_tracking(victim, "SCP-106", INTERACTION_RISK_CRITICAL)
+		victims_dragged++
+
+/mob/living/carbon/human/scp106/proc/on_pocket_escape(mob/living/carbon/human/escapee)
+	if(escapee && escapee.ckey)
+		stop_scp_survival_tracking(escapee, "SCP-106")
+		hook_scp_interaction(escapee, "SCP-106", INTERACTION_TYPE_SURVIVAL, list("escaped" = TRUE))
+		escape_attempts++
+
+/mob/living/carbon/human/scp106/proc/on_corrosion_use(mob/living/carbon/human/target)
+	if(target && target.ckey)
+		hook_scp_combat(target, "SCP-106", corrosion_potency, 0)
+		corrosion_events++

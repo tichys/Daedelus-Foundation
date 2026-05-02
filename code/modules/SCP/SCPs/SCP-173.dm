@@ -179,3 +179,28 @@
 /mob/living/carbon/human/scp173/Logout()
 	save_persistence_data()
 	. = ..()
+
+// Progression Integration Hooks
+/mob/living/carbon/human/scp173/proc/on_breach()
+	containment_breaches++
+	hook_scp_breach("SCP-173", src)
+	
+	for(var/mob/living/carbon/human/H in range(10, src))
+		if(H != src)
+			hook_scp_interaction(H, "SCP-173", INTERACTION_TYPE_OBSERVATION)
+
+/mob/living/carbon/human/scp173/proc/on_recontainment(list/participants)
+	hook_scp_recontainment("SCP-173", participants)
+
+/mob/living/carbon/human/scp173/proc/on_kill(mob/living/carbon/human/victim)
+	if(victim && victim.ckey)
+		hook_player_death_near_scp(victim, "SCP-173")
+		hook_scp_combat(victim, "SCP-173", 100, 0)
+
+/mob/living/carbon/human/scp173/proc/on_observation_start(mob/living/carbon/human/observer)
+	if(observer && observer.ckey)
+		hook_scp_observation(observer, "SCP-173")
+
+/mob/living/carbon/human/scp173/proc/on_observation_end(mob/living/carbon/human/observer)
+	if(observer && observer.ckey)
+		stop_scp_survival_tracking(observer, "SCP-173")

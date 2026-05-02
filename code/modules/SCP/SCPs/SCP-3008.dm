@@ -1449,6 +1449,17 @@
 		occupant.verbs += /mob/living/carbon/human/proc/escape_ikea
 		occupant.verbs += /mob/living/carbon/human/proc/ikea_survival_tips
 		occupant.verbs += /mob/living/carbon/human/proc/debug_ikea_interior
+		hook_scp_interaction(occupant, "SCP-3008", INTERACTION_TYPE_EXPLORATION)
+
+/obj/structure/scp3008/proc/on_ikea_entry(mob/living/carbon/human/entrant)
+	if(!entrant)
+		return
+	hook_scp_breach("SCP-3008", src)
+
+/obj/structure/scp3008/proc/on_staff_attack(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-3008", 20, 0)
 
 /datum/ikea_interior/proc/remove_occupant(mob/living/carbon/human/occupant)
 	if(occupant in occupants)

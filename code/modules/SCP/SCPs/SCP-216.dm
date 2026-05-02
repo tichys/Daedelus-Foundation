@@ -210,6 +210,7 @@
 			playsound(src, 'sound/structures/safe_toggle.ogg', 50, TRUE)
 			open = FALSE
 			SEND_SIGNAL(src, COMSIG_SCP216_CLOSE)
+			hook_scp_interaction(user, "SCP-216", "safe_close")
 			update_icon()
 
 			// Handle temporal displacement on close
@@ -243,6 +244,7 @@
 			playsound(src, 'sound/structures/safe_toggle.ogg', 50, TRUE)
 			open = TRUE
 			SEND_SIGNAL(src, COMSIG_SCP216_OPEN)
+			hook_scp_interaction(user, "SCP-216", "safe_open")
 			update_icon()
 		// JUMPSCARE!!
 		if(open && (num2text(current_code, 7) in all_codes))
@@ -271,6 +273,7 @@
 		if(!(num2text(current_code, 7) in all_codes))
 			GenerateRandomItemsAt(current_code)
 		SEND_SIGNAL(src, COMSIG_SCP216_CODE_CHANGED, current_code)
+		hook_scp_interaction(user, "SCP-216", "code_change")
 		attack_hand(user)
 		return
 
@@ -306,6 +309,7 @@
 
 	all_codes[num2text(code_loc, 7)] += A
 	SEND_SIGNAL(src, COMSIG_SCP216_ITEM_INSERTED, A, user)
+	hook_scp_interaction(user, "SCP-216", "item_inserted")
 	to_chat(user, span_notice("You place the [A.name] into the safe."))
 
 	attack_hand(user)
@@ -320,4 +324,5 @@
 	else // In case we want to get funky and put mobs into it
 		A.forceMove(get_turf(src))
 	SEND_SIGNAL(src, COMSIG_SCP216_ITEM_RETRIEVED, A, user)
+	hook_scp_interaction(user, "SCP-216", "item_retrieved")
 	attack_hand(user)

@@ -527,4 +527,19 @@
 	if(T)
 		playsound(T, 'sound/weapons/punch1.ogg', 30, TRUE)
 
+/obj/item/paper/scp012/proc/on_composer_affected(mob/living/carbon/human/composer)
+	if(!composer)
+		return
+	hook_scp_interaction(composer, "SCP-012", INTERACTION_TYPE_OBSERVATION)
+
+/obj/item/paper/scp012/proc/on_completion_attempt(mob/living/carbon/human/composer)
+	if(!composer)
+		return
+	hook_scp_combat(composer, "SCP-012", 0, 10)
+
+/obj/item/paper/scp012/proc/on_composer_death(mob/living/carbon/human/composer)
+	if(!composer)
+		return
+	hook_player_death_near_scp(composer, "SCP-012")
+
 

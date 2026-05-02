@@ -521,3 +521,10 @@
 	status_items += "Available Materials: [available_materials.len]"
 
 	return status_items
+
+/mob/living/simple_animal/hostile/scp1048/proc/on_construction_completed(structure_type)
+	hook_scp_breach("SCP-1048", src)
+	hook_facility_damage_near_scp("SCP-1048", 1)
+
+/mob/living/simple_animal/hostile/scp1048/proc/on_material_collected(material_type)
+	return

@@ -135,3 +135,18 @@
 	target.adjustBruteLoss(15)
 	to_chat(target, "<span class='userdanger'>The mechanical spider attacks you!</span>")
 	to_chat(src, "<span class='warning'>You attack [target]!</span>")
+
+/mob/living/simple_animal/hostile/scp2427_3/proc/on_purity_check(mob/living/carbon/human/target, is_pure)
+	if(!target)
+		return
+	hook_scp_interaction(target, "SCP-2427-3", INTERACTION_TYPE_OBSERVATION)
+
+/mob/living/simple_animal/hostile/scp2427_3/proc/on_consume(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-2427-3", 100, 0)
+	hook_player_death_near_scp(victim, "SCP-2427-3")
+
+/mob/living/simple_animal/hostile/scp2427_3/proc/on_door_breach(obj/machinery/door/door)
+	hook_scp_breach("SCP-2427-3", src)
+	hook_facility_damage_near_scp("SCP-2427-3", 1)

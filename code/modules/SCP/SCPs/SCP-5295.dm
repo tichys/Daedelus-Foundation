@@ -107,7 +107,22 @@
 /mob/living/carbon/human/scp5295/death(gibbed)
 	visible_message("<span class='danger'>[src] dissolves into temporal distortion!</span>")
 	playsound(src, 'sound/effects/explosion2.ogg', 50)
+	hook_scp_recontainment("SCP-5295", list())
 	return ..()
+
+/mob/living/carbon/human/scp5295/proc/on_temporal_manipulation(mob/living/carbon/human/target, effect_type)
+	if(!target)
+		return
+	hook_scp_combat(target, "SCP-5295", 20, 0)
+
+/mob/living/carbon/human/scp5295/proc/on_anomaly_created(anomaly_type)
+	hook_scp_breach("SCP-5295", src)
+	hook_facility_damage_near_scp("SCP-5295", 1)
+
+/mob/living/carbon/human/scp5295/proc/on_reality_distortion(mob/living/carbon/human/affected)
+	if(!affected)
+		return
+	hook_scp_interaction(affected, "SCP-5295", INTERACTION_TYPE_OBSERVATION)
 
 // Temporal Anomaly Object
 /obj/effect/temporal_anomaly

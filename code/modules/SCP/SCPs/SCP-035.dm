@@ -765,4 +765,20 @@
 
 	return status_items
 
+/obj/item/clothing/mask/scp035/proc/on_possession(mob/living/carbon/human/host)
+	if(!host)
+		return
+	hook_scp_breach("SCP-035", src)
+	hook_scp_interaction(host, "SCP-035", INTERACTION_TYPE_CONTAINMENT)
+
+/obj/item/clothing/mask/scp035/proc/on_corruption(mob/living/carbon/human/host, level)
+	if(!host)
+		return
+	hook_scp_combat(host, "SCP-035", 0, level)
+
+/obj/item/clothing/mask/scp035/proc/on_telepathy(mob/living/carbon/human/target)
+	if(!target)
+		return
+	hook_scp_interaction(target, "SCP-035", INTERACTION_TYPE_COMMUNICATION)
+
 

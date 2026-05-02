@@ -195,3 +195,19 @@
 
 	// Default attack
 	. = ..()
+
+/mob/living/carbon/human/scp082/proc/on_rage_activation()
+	rage_activations++
+	hook_scp_breach("SCP-082", src)
+
+/mob/living/carbon/human/scp082/proc/on_consumption(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	meals_consumed++
+	targets_consumed++
+	hook_scp_combat(victim, "SCP-082", 100, 0)
+	hook_player_death_near_scp(victim, "SCP-082")
+
+/mob/living/carbon/human/scp082/proc/on_regeneration()
+	regenerations++
+	hook_scp_damage("SCP-082", (health / maxHealth) * 100)

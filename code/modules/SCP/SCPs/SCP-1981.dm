@@ -114,6 +114,7 @@
 		to_chat(H, "<span class='danger'>You experience SCP-1981's ultimate video manipulation!</span>")
 		H.adjustBruteLoss(25)
 		H.stamina.adjust(-30)
+		hook_scp_interaction(H, "SCP-1981", "ultimate_video_event")
 
 	// Reset activation counter to prevent spam
 	activation_events = 0
@@ -127,6 +128,8 @@
 	// Automatic response to interaction
 	if(user.stat != DEAD)
 		to_chat(user, "<span class='danger'>As you touch the video recording, you see disturbing imagery...</span>")
+
+		hook_scp_interaction(user, "SCP-1981", "video_viewing")
 
 		// Trigger systems based on interaction
 		if(video_system)

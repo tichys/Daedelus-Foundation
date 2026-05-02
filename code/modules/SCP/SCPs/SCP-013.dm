@@ -138,3 +138,14 @@
 	desc = "A packet of six Blue Lady cigarettes. The SCP logo is stamped on the paper."
 
 	spawn_type = /obj/item/clothing/mask/cigarette/scp013
+
+/obj/item/clothing/mask/cigarette/scp013/proc/on_effect_start(mob/living/carbon/human/user)
+	if(!user)
+		return
+	hook_scp_interaction(user, "SCP-013", INTERACTION_TYPE_OBSERVATION)
+
+/obj/item/clothing/mask/cigarette/scp013/proc/on_stage_change(mob/living/carbon/human/user, stage)
+	if(!user)
+		return
+	if(stage >= 7)
+		hook_scp_breach("SCP-013", src)

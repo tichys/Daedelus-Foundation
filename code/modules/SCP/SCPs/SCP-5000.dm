@@ -135,4 +135,14 @@
 
 	suit.chaos_field_cooldown = world.time + suit.chaos_field_cooldown_time
 
+/obj/item/clothing/suit/scp5000/proc/on_probability_shift(mob/living/carbon/human/wearer)
+	if(!wearer)
+		return
+	hook_scp_interaction(wearer, "SCP-5000", INTERACTION_TYPE_CONTAINMENT)
+
+/obj/item/clothing/suit/scp5000/proc/on_chaos_field(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-5000", 25, 0)
+
 

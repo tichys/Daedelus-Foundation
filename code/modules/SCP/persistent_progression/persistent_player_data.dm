@@ -5,6 +5,7 @@
 	var/list/faction_data = list()
 	var/list/unlocked_items = list()
 	var/list/unlocked_titles = list()
+	var/list/unlocked_cosmetics = list()
 	var/list/achievements = list()
 	var/total_experience = 0
 	var/rounds_played = 0
@@ -32,10 +33,22 @@
 	var/current_round_team_contributions = 0
 	var/current_round_map_exploration = 0
 	var/current_round_pacifist = TRUE
-	// Job-specific tracking
+	var/list/event_history = list()
+	var/list/currency = list()
+	var/list/settings = list()
+	var/total_playtime = 0
+	var/first_login = 0
+	var/list/daily_login_streak = list()
+	var/current_streak = 0
+	var/longest_streak = 0
+	var/list/friends_list = list()
+	var/list/blocked_list = list()
+	var/list/notes = list()
+	var/reputation_score = 0
+	var/total_kills = 0
 	var/current_job = ""
-	var/list/job_experience = list()
 	var/list/job_rounds_played = list()
+	var/list/job_experience = list()
 	var/list/job_achievements = list()
 	var/list/job_performance = list()
 	var/list/job_specializations = list()
@@ -55,7 +68,23 @@
 	var/list/job_supply_management = list()
 	var/list/job_service_contributions = list()
 	var/list/job_dclass_testing = list()
-	var/skill_boost_multiplier = 1.0 // Skill boost multiplier for progression system
+	var/skill_boost_multiplier = 1.0
+	var/total_deaths = 0
+	var/total_healing = 0
+	var/total_damage_dealt = 0
+	var/total_objectives = 0
+	var/total_scp_interactions = 0
+	var/total_containment_breaches = 0
+	var/total_research_completed = 0
+	var/total_treatments = 0
+	var/total_constructions = 0
+	var/total_repairs = 0
+	var/total_arrests = 0
+	var/list/sessions = list()
+	var/list/notifications = list()
+	var/data_version = 1
+	var/last_backup = 0
+	var/dirty = FALSE
 
 /datum/persistent_player_data/New(player_ckey)
 	ckey = player_ckey

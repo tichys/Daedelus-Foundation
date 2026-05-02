@@ -85,6 +85,7 @@
 		return
 
 	teleportation_system.perform_teleport(get_turf(target), "player_controlled")
+	teleportations++
 	to_chat(src, "<span class='notice'>You teleport to [target].</span>")
 
 /mob/living/carbon/human/scp2020/verb/phase_through_walls()
@@ -125,6 +126,7 @@
 		return
 
 	stealth_system.activate_stealth()
+	stealth_actions++
 	to_chat(src, "<span class='notice'>You activate stealth mode.</span>")
 
 /mob/living/carbon/human/scp2020/verb/select_hunting_target()
@@ -151,6 +153,7 @@
 
 	hunting_system.current_target = target
 	hunting_system.hunting_intensity = min(hunting_system.max_hunting_intensity, hunting_system.hunting_intensity + 10)
+	hook_scp_interaction(target, "SCP-2020", "hunting_target_selected")
 	to_chat(src, "<span class='notice'>You focus your attention on [target].</span>")
 	to_chat(target, "<span class='danger'>The green humanoid seems to focus its attention on you...</span>")
 

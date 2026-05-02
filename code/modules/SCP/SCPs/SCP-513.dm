@@ -157,4 +157,17 @@
 	if(target && target.stat != DEAD)
 		to_chat(target, "<span class='notice'>The fear begins to subside...</span>")
 
+/obj/item/scp513/proc/on_bell_ring(mob/living/carbon/human/ringer)
+	if(!ringer)
+		return
+	hook_scp_breach("SCP-513", src)
+	hook_scp_interaction(ringer, "SCP-513", INTERACTION_TYPE_CONTAINMENT)
+
+/obj/item/scp513/proc/on_fear_induced(mob/living/carbon/human/victim, level)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-513", 0, level / 10)
+	if(level >= 100)
+		hook_player_death_near_scp(victim, "SCP-513")
+
 

@@ -460,4 +460,17 @@
 // END OF SCP-008 REDESIGN
 // ============================================================================
 
+/obj/item/reagent_containers/glass/bottle/scp008/proc/on_infection(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-008", 0, infection_strength)
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/on_zombification(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_player_death_near_scp(victim, "SCP-008")
+
+/obj/item/reagent_containers/glass/bottle/scp008/proc/on_containment_breach()
+	hook_scp_breach("SCP-008", src)
+
 

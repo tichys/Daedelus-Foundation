@@ -247,3 +247,13 @@
 			to_chat(user, "<span class='warning'>This is SCP-420-J, a substance that enhances quality.</span>")
 		else
 			to_chat(user, "<span class='notice'>A mysterious substance that seems to enhance the quality of things.</span>")
+
+/obj/item/scp420j/proc/on_quality_enhancement(mob/living/carbon/human/user)
+	if(!user)
+		return
+	hook_scp_interaction(user, "SCP-420-J", INTERACTION_TYPE_RESEARCH)
+
+/obj/item/scp420j/proc/on_taste_improvement(mob/living/carbon/human/user)
+	if(!user)
+		return
+	hook_scp_interaction(user, "SCP-420-J", INTERACTION_TYPE_OBSERVATION)

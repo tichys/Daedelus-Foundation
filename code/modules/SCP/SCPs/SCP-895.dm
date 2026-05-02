@@ -163,7 +163,15 @@
 /obj/machinery/camera/scp895/attack_hand(mob/living/carbon/human/user)
 	if(ishuman(user))
 		view_camera_feed(user)
+		hook_scp_interaction(user, "SCP-895", INTERACTION_TYPE_OBSERVATION)
 		return TRUE
 	return ..()
+
+/obj/machinery/camera/scp895/proc/on_sickness_induced(mob/living/carbon/human/victim, level)
+	if(!victim)
+		return
+	hook_scp_interaction(victim, "SCP-895", INTERACTION_TYPE_COMBAT)
+	if(level >= 100)
+		hook_player_death_near_scp(victim, "SCP-895")
 
 

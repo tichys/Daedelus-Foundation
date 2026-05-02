@@ -63,12 +63,14 @@
 	// Reality distortion attack
 	to_chat(src, "<span class='notice'>You distort reality around [L].</span>")
 	to_chat(L, "<span class='danger'>Reality seems to bend and distort around you!</span>")
+	hook_scp_interaction(L, "SCP-3349", "reality_distortion_attack")
 
 	L.adjustBruteLoss(15)
 	// Reality distortion causes confusion
 
 	playsound(src, 'sound/effects/explosion1.ogg', 50)
 
+	hook_scp_combat(L, "SCP-3349", 0, 15)
 	// Log interaction
 	SCP?.log_interaction(L, "reality_distortion_attack")
 	SCP?.award_research(L, "anomaly", 20)

@@ -438,3 +438,13 @@
 		project.progress = min(100, progress)
 
 // END OF SCP-066 IMPLEMENTATION
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_melody_performance(mob/living/carbon/human/target, melody_type)
+	if(!target)
+		return
+	hook_scp_care(target, "SCP-066", melody_type)
+
+/mob/living/simple_animal/hostile/retaliate/scp066/proc/on_eric_detection(mob/living/carbon/human/potential_eric)
+	if(!potential_eric)
+		return
+	hook_scp_interaction(potential_eric, "SCP-066", INTERACTION_TYPE_COMMUNICATION)

@@ -323,6 +323,28 @@
 				3 // High significance
 			)
 
+/mob/living/carbon/human/scp457/proc/on_fire_spread(turf/location)
+	if(!location)
+		return
+	fires_created++
+	total_fires_created++
+	hook_facility_damage_near_scp("SCP-457", 1)
+
+/mob/living/carbon/human/scp457/proc/on_target_consumption(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	victims_consumed++
+	hook_scp_combat(victim, "SCP-457", 100, 0)
+	hook_player_death_near_scp(victim, "SCP-457")
+
+/mob/living/carbon/human/scp457/proc/on_evolution(new_stage)
+	total_evolution_stages = max(total_evolution_stages, new_stage)
+	hook_scp_breach("SCP-457", src)
+
+/mob/living/carbon/human/scp457/proc/on_containment_encounter()
+	total_containment_encounters++
+	return
+
 // Legacy compatibility - removed undefined procs
 
 // ============================================================================

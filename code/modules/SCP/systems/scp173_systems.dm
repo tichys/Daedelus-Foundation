@@ -194,6 +194,10 @@
 		if(H != owner)
 			to_chat(H, "<span class='danger'>SCP-173 has breached containment!</span>")
 
+	// Progression integration
+	if(owner && istype(owner, /mob/living/carbon/human/scp173))
+		owner.on_breach()
+
 // Combat System
 /datum/scp173_combat_system
 	var/mob/living/carbon/human/scp173/owner
@@ -233,6 +237,13 @@
 	// Check for kill
 	if(target.health <= 0)
 		kills_count++
+		// Progression integration
+		if(owner && istype(owner, /mob/living/carbon/human/scp173))
+			owner.on_kill(target)
+	else
+		// Still log combat interaction
+		if(owner && target && target.ckey)
+			hook_scp_combat(target, "SCP-173", attack_damage, 0)
 
 	to_chat(target, "<span class='danger'>You feel a sudden, violent snap!</span>")
 

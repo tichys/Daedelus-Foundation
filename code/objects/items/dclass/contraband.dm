@@ -326,4 +326,151 @@
 	usr.dropItemToGround(src)
 
 	to_chat(usr, "<span class='notice'>You hide the [name] in your secret stash.</span>")
-	player.increase_suspicion(2) // Small suspicion increase for hiding items
+	player.increase_suspicion(2)
+
+// Credit Chip
+/obj/item/dclass_credit_chip
+	name = "D-Class Credit Chip"
+	desc = "A small chip containing D-Class credits."
+	icon = 'icons/obj/economy.dmi'
+	icon_state = "credit_chip"
+	w_class = WEIGHT_CLASS_TINY
+	var/credits = 0
+	var/owner_ckey
+
+/obj/item/dclass_credit_chip/attack_self(mob/user)
+	if(!user.ckey)
+		return
+	var/datum/dclass_player/player = SSdclass.manager.get_dclass_player(user.ckey)
+	if(!player)
+		to_chat(user, span_warning("This chip is not registered to you."))
+		return
+	if(owner_ckey && owner_ckey != user.ckey)
+		to_chat(user, span_warning("This chip belongs to someone else."))
+		return
+	if(!owner_ckey)
+		owner_ckey = user.ckey
+		to_chat(user, span_notice("You claim this credit chip."))
+	player.adjust_credits(credits, "Found credit chip")
+	to_chat(user, span_notice("You claim [credits] credits from the chip."))
+	credits = 0
+	qdel(src)
+
+// Hidden Pouch
+/obj/item/storage/dclass_pouch
+	name = "D-Class Pouch"
+	desc = "A small pouch for hiding contraband."
+	icon = 'icons/obj/storage.dmi'
+	icon_state = "pouch"
+	w_class = WEIGHT_CLASS_SMALL
+	max_integrity = 50
+	var/hidden_compartment = FALSE
+	var/list/compartment_items = list()
+	var/detection_difficulty = 20
+
+/obj/item/storage/dclass_pouch/proc/hide_item(obj/item/I)
+	if(hidden_compartment && length(compartment_items) < 2)
+		compartment_items += I
+		I.forceMove(src)
+		return TRUE
+	return FALSE
+
+/obj/item/storage/dclass_pouch/proc/reveal_hidden_items()
+	. = compartment_items.Copy()
+	for(var/obj/item/I in compartment_items)
+		I.forceMove(get_turf(src))
+	compartment_items = list()
+
+/obj/item/storage/dclass_pouch/attackby(obj/item/I, mob/user, params)
+	if(istype(I, /obj/item/dclass_credit_chip))
+		var/obj/item/dclass_credit_chip/chip = I
+		if(hidden_compartment)
+			hide_item(chip)
+			to_chat(user, span_notice("You hide the credit chip in the secret compartment."))
+			return
+	return ..()
+
+// D-Class Commissary Vendor
+/obj/machinery/dclass_vendor
+	name = "D-Class Commissary"
+	desc = "A vending machine for D-Class purchases."
+	icon = 'icons/obj/vending.dmi'
+	icon_state = "dclass"
+	density = TRUE
+	anchored = TRUE
+	var/contraband_mode = FALSE
+	var/hack_level = 0
+
+	var/list/legitimate_products = list(
+		"better_food" = list("price" = 50, "type" = /obj/item/food/omelette, "name" = "Better Meal"),
+		"snack" = list("price" = 25, "type" = /obj/item/food/candy, "name" = "Snack"),
+		"drink" = list("price" = 20, "type" = /obj/item/reagent_containers/food/drinks/soda_cans/cola, "name" = "Drink"),
+		"entertainment" = list("price" = 100, "type" = /obj/item/toy/cards/deck, "name" = "Deck of Cards"),
+		"extra_blanket" = list("price" = 150, "type" = /obj/item/bedsheet, "name" = "Extra Blanket"),
+		"shower_time" = list("price" = 50, "name" = "Extra Shower Time", "service" = TRUE),
+		"recreation_time" = list("price" = 100, "name" = "Recreation Time", "service" = TRUE)
+	)
+
+	var/list/contraband_products = list(
+		"shiv" = list("price" = 200, "type" = /obj/item/knife/shiv, "name" = "Shiv"),
+		"lockpick" = list("price" = 300, "type" = /obj/item/dclass_contraband/lockpick, "name" = "Lockpick"),
+		"radio" = list("price" = 500, "type" = /obj/item/radio, "name" = "Radio")
+	)
+
+/obj/machinery/dclass_vendor/attack_hand(mob/user)
+	if(!user.ckey)
+		return
+	var/datum/dclass_player/player = SSdclass.manager?.get_dclass_player(user.ckey)
+	if(!player)
+		to_chat(user, span_warning("Only D-Class can use this vendor."))
+		return
+
+	var/list/products = contraband_mode ? contraband_products : legitimate_products
+	var/choice = input(user, "Select a product (Credits: [player.credits])", "D-Class Commissary") as null|anything in products
+
+	if(!choice || !user.ckey)
+		return
+
+	var/list/product = products[choice]
+	if(!product)
+		return
+
+	var/price = product["price"]
+	if(player.credits < price)
+		to_chat(user, span_warning("Insufficient credits. Need [price - player.credits] more."))
+		return
+
+	player.adjust_credits(-price, "Purchase: [product["name"]]")
+
+	if(!product["service"])
+		var/item_type = product["type"]
+		var/obj/item/I = new item_type(get_turf(user))
+		user.put_in_hands(I)
+	else
+		apply_service(choice, player, user)
+
+	to_chat(user, span_notice("You purchase [product["name"]] for [price] credits."))
+
+	if(contraband_mode && prob(30 - player.trust_level * 5))
+		player.add_incident("contraband_purchase", "Caught buying contraband: [choice]", "major")
+		to_chat(user, span_danger("Security caught you buying contraband!"))
+
+/obj/machinery/dclass_vendor/proc/apply_service(service_id, datum/dclass_player/player, mob/user)
+	switch(service_id)
+		if("shower_time")
+			to_chat(user, span_notice("Extra shower time granted. Report to showers."))
+			player.adjust_trust(1, "Purchased shower time")
+		if("recreation_time")
+			to_chat(user, span_notice("Recreation time granted. Enjoy your break."))
+			player.adjust_trust(2, "Purchased recreation time")
+
+/obj/machinery/dclass_vendor/emag_act(mob/user)
+	if(!hack_level)
+		hack_level = 1
+		contraband_mode = TRUE
+		to_chat(user, span_notice("You hack the vendor. Contraband menu unlocked."))
+		return TRUE
+	if(hack_level < 5)
+		hack_level++
+		to_chat(user, span_notice("Hack level increased to [hack_level]."))
+		return TRUE

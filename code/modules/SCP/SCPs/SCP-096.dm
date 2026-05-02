@@ -194,7 +194,33 @@
 // Override death to save persistence data
 /mob/living/carbon/human/scp096/death(gibbed)
 	save_persistence_data()
+	hook_scp_recontainment("SCP-096", list())
 	. = ..()
+
+/mob/living/carbon/human/scp096/proc/on_rage_trigger(trigger_source)
+	rage_activations++
+	hook_scp_breach("SCP-096", src)
+	if(current_target && ishuman(current_target))
+		var/mob/living/carbon/human/H = current_target
+		hook_scp_combat(H, "SCP-096", 0, 0)
+
+/mob/living/carbon/human/scp096/proc/on_face_view(mob/living/carbon/human/viewer)
+	if(!viewer || viewer == src)
+		return
+	hook_scp_interaction(viewer, "SCP-096", INTERACTION_TYPE_OBSERVATION)
+	hook_scp_observation(viewer, "SCP-096")
+
+/mob/living/carbon/human/scp096/proc/on_target_kill(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	kills_count++
+	victims_hunted++
+	hook_scp_combat(victim, "SCP-096", 100, 0)
+	hook_player_death_near_scp(victim, "SCP-096")
+
+/mob/living/carbon/human/scp096/proc/on_containment_escape()
+	containment_escapes++
+	hook_scp_breach("SCP-096", src)
 
 // Override logout to save persistence data
 /mob/living/carbon/human/scp096/Logout()

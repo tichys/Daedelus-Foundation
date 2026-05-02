@@ -157,12 +157,12 @@
 						else//default
 							mobs2hide |= cone(src, list(turn(src.dir, 180)), GLOB.mob_living_list.Copy())
 
-				for(M in mobs2hide)
-					I = image("split", M)
-					I.override = 1
-					src.client.images += I
-					src.client.hidden_atoms += I
-					src.client.hidden_mobs += M
+				I = image(loc = M)
+				I.override = TRUE
+				I.appearance = null
+				src.client.images += I
+				src.client.hidden_atoms += I
+				src.client.hidden_mobs += M
 		for(var/image/HUD in client.images)
 			if(HUD.icon != 'icons/mob/hud.dmi')
 				continue
@@ -286,7 +286,7 @@
 /mob/proc/show_cone()
 	if(!client)
 		return
-	if(hud_used?.fov?.alpha == 255)
+	if(hud_used?.fov?.alpha >= 180)
 		return
 	if(hud_used?.fov)
 		hud_used.fov.alpha = 180 // Softer, more transparent for warm glow
@@ -321,7 +321,8 @@
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	plane = FIELD_OF_VISION_BLOCKER_PLANE
 	screen_loc = "1,1"
-	color = "#000000" // Black for darkness
+	color = "#000000"
+	alpha = 0
 
 /atom/movable/screen/fov
 	icon = 'icons/mob/vision_cone.dmi'
@@ -330,10 +331,11 @@
 	screen_loc = "1,1"
 	mouse_opacity = 0
 	plane = HUD_PLANE-1
-	color = "#FFA500" // Warm orange color like torch light
-	blend_mode = BLEND_ADD // Additive blending for glow effect
+	color = "#FFA500"
+	blend_mode = BLEND_ADD
+	alpha = 0
 
-// Test verbs for debugging
+// Test verbs
 /mob/living/verb/test_vision_cone()
 	set name = "Test Vision Cone"
 	set category = "Debug"

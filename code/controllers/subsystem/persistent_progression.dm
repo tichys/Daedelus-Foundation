@@ -1,4 +1,5 @@
 SUBSYSTEM_DEF(persistent_progression)
+<<<<<<< Updated upstream
 	name = "Persistent Progression"
 	priority = FIRE_PRIORITY_PERSISTENT_PROGRESSION
 	flags = SS_NO_INIT
@@ -20,8 +21,66 @@ SUBSYSTEM_DEF(persistent_progression)
 
 	// Register round end event
 	SSticker.RegisterRoundEndEvent(CALLBACK(src, PROC_REF(process_round_end)))
+=======
+    name = "Persistent Progression"
+    priority = FIRE_PRIORITY_PERSISTENT_PROGRESSION
+    init_order = INIT_ORDER_PERSISTENCE_PROGRESSION
+    wait = 600 // 1 minute
+
+    var/list/player_data = list()
+    var/list/classes = list()
+    var/list/factions = list()
+    var/list/experience_sources = list()
+    var/list/active_trackers = list()
+    var/save_file_path = "data/persistent_progression/"
+    var/round_start_time
+    var/datum/achievement_manager/achievement_manager
+    var/datum/reward_manager/reward_manager
+    var/datum/player_analytics_manager/analytics_manager
+    var/datum/achievement_integration/achievement_integration
+    var/datum/job_integration/job_integration
+    var/datum/faction_integration/faction_integration
+    var/datum/persistent_progression_database_adapter/database_adapter
+    var/use_database = TRUE
+
+/datum/controller/subsystem/persistent_progression/Initialize()
+    world.log << "Persistent Progression Subsystem: Initializing..."
+
+    load_all_classes()
+    load_all_factions()
+    load_all_experience_sources()
+
+    // Initialize managers
+    achievement_manager = new /datum/achievement_manager()
+    reward_manager = new /datum/reward_manager()
+    analytics_manager = new /datum/player_analytics_manager()
+    achievement_integration = new /datum/achievement_integration()
+    job_integration = new /datum/job_integration()
+
+    // Initialize faction integration
+    initialize_faction_integration()
+
+    // Initialize database adapter
+    if(use_database)
+        database_adapter = new /datum/persistent_progression_database_adapter()
+        world.log << "Persistent Progression: Database adapter initialized"
+    else
+        world.log << "Persistent Progression: Using JSON storage (database disabled)"
+
+    round_start_time = world.time
+
+    // Register round end event
+    SSticker.OnRoundend(CALLBACK(src, PROC_REF(process_round_end)))
+
+    world.log << "Persistent Progression Subsystem: Initialized successfully with [classes.len] classes, [factions.len] factions, [experience_sources.len] experience sources"
+>>>>>>> Stashed changes
 
 	return ..()
+
+/datum/controller/subsystem/persistent_progression/proc/initialize_faction_integration()
+    if(!faction_integration)
+        faction_integration = new /datum/faction_integration()
+        world.log << "Persistent Progression: Faction integration initialized"
 
 /datum/controller/subsystem/persistent_progression/proc/load_all_classes()
 	classes["security"] = new /datum/persistent_class/security()

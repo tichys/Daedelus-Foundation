@@ -354,6 +354,31 @@
 		// For now, just store the data
 		research_integration.research_data["last_update"] = research_data
 
+/mob/living/carbon/human/scp682/proc/on_evolution(new_stage)
+	total_evolutions++
+	evolution_stage = new_stage
+	hook_scp_breach("SCP-682", src)
+	if(threat_system)
+		for(var/mob/living/carbon/human/H in threat_system.threat_memory)
+			hook_scp_combat(H, "SCP-682", 0, 0)
+
+/mob/living/carbon/human/scp682/proc/on_adaptation(damage_type, amount)
+	adaptation_points += amount / 10
+	hook_scp_damage("SCP-682", (health / maxHealth) * 100)
+
+/mob/living/carbon/human/scp682/proc/on_breach()
+	total_containment_breaches++
+	containment_status = "breached"
+	hook_scp_breach("SCP-682", src)
+
+/mob/living/carbon/human/scp682/proc/on_combat_kill(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-682", 100, 0)
+	hook_player_death_near_scp(victim, "SCP-682")
+	if(containment_system)
+		containment_system.reduce_containment_integrity(5)
+
 // ============================================================================
 // END OF SCP-682 IMPLEMENTATION
 // ============================================================================

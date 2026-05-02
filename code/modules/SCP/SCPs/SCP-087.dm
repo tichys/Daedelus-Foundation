@@ -251,3 +251,18 @@
 		if(environmental_system)
 			environmental_system.darkness_level = data["darkness_level"] || 1
 			environmental_system.darkness_events = data["darkness_events"] || 0
+
+/obj/structure/scp087/proc/on_descent(mob/living/carbon/human/descender)
+	if(!descender)
+		return
+	hook_scp_interaction(descender, "SCP-087", INTERACTION_TYPE_EXPLORATION)
+
+/obj/structure/scp087/proc/on_horror_event(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-087", 0, 10)
+
+/obj/structure/scp087/proc/on_entity_encounter(mob/living/carbon/human/witness)
+	if(!witness)
+		return
+	hook_scp_interaction(witness, "SCP-087", INTERACTION_TYPE_OBSERVATION)

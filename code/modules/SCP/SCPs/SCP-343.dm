@@ -317,3 +317,18 @@
 // END OF SCP-343 IMPLEMENTATION
 // ============================================================================
 
+/mob/living/carbon/human/scp343/proc/on_divine_protection(mob/living/carbon/human/protected)
+	if(!protected)
+		return
+	hook_scp_care(protected, "SCP-343", "protection")
+
+/mob/living/carbon/human/scp343/proc/on_divine_healing(mob/living/carbon/human/healed)
+	if(!healed)
+		return
+	hook_scp_care(healed, "SCP-343", "healing")
+
+/mob/living/carbon/human/scp343/proc/on_divine_guidance(mob/living/carbon/human/guided)
+	if(!guided)
+		return
+	hook_scp_interaction(guided, "SCP-343", INTERACTION_TYPE_COMMUNICATION)
+

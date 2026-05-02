@@ -131,6 +131,12 @@
 	refinement_system.refinement_progress = 0
 	visible_message("<span class='notice'>SCP-914 begins refining [refinement_system.input_objects.len] objects on [refinement_system.refinement_setting] setting.</span>")
 
+	// Progression integration - log experiment start
+	if(ishuman(usr))
+		var/mob/living/carbon/human/H = usr
+		hook_scp_experiment(H, "SCP-914", EXPERIMENT_TYPE_TECHNICAL)
+		hook_scp_interaction(H, "SCP-914", INTERACTION_TYPE_EXPERIMENT, list("type" = "refinement", "setting" = refinement_system.refinement_setting))
+
 /obj/machinery/scp914/verb/add_to_input(obj/item/item in range(1, src))
 	set name = "Add to Input"
 	set category = "SCP-914"

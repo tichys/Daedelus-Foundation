@@ -161,3 +161,36 @@
 	)
 
 	research_integration?.research_data["last_update"] = research_data
+
+/mob/living/carbon/human/scp939/proc/on_voice_mimic(mob/living/carbon/human/target)
+	if(!target)
+		return
+	voices_mimicked++
+	voices_learned++
+	hook_scp_interaction(target, "SCP-939", INTERACTION_TYPE_COMMUNICATION)
+
+/mob/living/carbon/human/scp939/proc/on_pack_communication(mob/living/carbon/human/pack_member)
+	if(!pack_member)
+		return
+	pack_communications++
+	hook_scp_interaction(pack_member, "SCP-939", INTERACTION_TYPE_COMMUNICATION)
+
+/mob/living/carbon/human/scp939/proc/on_hunt_kill(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	victims_hunted++
+	hunts_completed++
+	hook_scp_combat(victim, "SCP-939", 100, 0)
+	hook_player_death_near_scp(victim, "SCP-939")
+
+/mob/living/carbon/human/scp939/proc/on_territory_claim(area/claimed_area)
+	if(!claimed_area)
+		return
+	territories_claimed++
+	hook_scp_breach("SCP-939", src)
+
+/mob/living/carbon/human/scp939/proc/on_psychological_manipulation(mob/living/carbon/human/target)
+	if(!target)
+		return
+	psychological_manipulations++
+	hook_scp_interaction(target, "SCP-939", INTERACTION_TYPE_COMMUNICATION)

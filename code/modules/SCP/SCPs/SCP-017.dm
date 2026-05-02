@@ -155,4 +155,12 @@
 	if(prob(1))
 		visible_message("<span class='notice'>[src] seems to absorb the light around it.</span>")
 
+/mob/living/carbon/scp/scp017/proc/on_life_drain(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-017", drain_amount, 0)
+
+/mob/living/carbon/scp/scp017/proc/on_phase(location)
+	return
+
 

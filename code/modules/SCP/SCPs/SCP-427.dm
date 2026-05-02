@@ -109,3 +109,14 @@
 	. = ..()
 	if(user in time_used)
 		to_chat(user, "<span class='notice'>The locket's effects fade as you remove it.</span>")
+
+/obj/item/clothing/accessory/scp427/proc/on_healing_applied(mob/living/carbon/human/patient, amount)
+	if(!patient)
+		return
+	hook_scp_care(patient, "SCP-427", "healing")
+
+/obj/item/clothing/accessory/scp427/proc/on_transformation(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_breach("SCP-427", src)
+	hook_player_death_near_scp(victim, "SCP-427")

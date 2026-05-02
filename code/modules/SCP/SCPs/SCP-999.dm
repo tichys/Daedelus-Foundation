@@ -291,6 +291,11 @@
 
 	to_chat(target, "<span class='notice'>You feel completely healed and rejuvenated!</span>")
 
+	// Progression integration
+	if(target && target.ckey)
+		hook_scp_care(target, "SCP-999", "healing")
+		hook_scp_interaction(target, "SCP-999", INTERACTION_TYPE_CARE, list("heal_amount" = heal_amount))
+
 	// Award research points to nearby researchers for observing healing
 	for(var/mob/living/carbon/human/H in view(5, src))
 		if(H != src && H != target && !H.SCP)

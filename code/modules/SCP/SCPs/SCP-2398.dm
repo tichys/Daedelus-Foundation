@@ -26,6 +26,8 @@
 		to_chat(user, "<span class='danger'>You were interrupted!</span>")
 		return
 
+	hook_scp_interaction(user, "SCP-2398", "bat_swing_attempt")
+
 	// Damage user's hands
 	if(prob(hand_fracture_chance))
 		user.adjustBruteLoss(10)
@@ -39,8 +41,10 @@
 
 	// Gib the target
 	if(M)
+		hook_scp_combat(user, "SCP-2398", 0, 100)
 		M.gib()
 
+	hook_scp_interaction(user, "SCP-2398", "bat_swing_complete")
 	// Admin logging
 	to_chat(user, "<span class='notice'>You swing the bat with incredible force!</span>")
 

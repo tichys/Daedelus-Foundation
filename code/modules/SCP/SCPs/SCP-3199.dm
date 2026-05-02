@@ -131,3 +131,19 @@
 		. += "<span class='warning'>The egg will hatch in approximately [time_remaining] minutes.</span>"
 	if(icon_state == "egg_hot")
 		. += "<span class='danger'>The egg is being affected by heat exposure!</span>"
+
+/mob/living/carbon/human/scp3199/proc/on_egg_laid(obj/item/scp3199_egg/egg)
+	hook_scp_breach("SCP-3199", src)
+	hook_facility_damage_near_scp("SCP-3199", 2)
+
+/mob/living/carbon/human/scp3199/proc/on_hatch(mob/living/carbon/human/scp3199/hatchling)
+	if(!hatchling)
+		return
+	hook_scp_breach("SCP-3199", hatchling)
+
+/mob/living/carbon/human/scp3199/proc/on_liquefaction_attack(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-3199", 25, 0)
+	if(victim.stat == DEAD)
+		hook_player_death_near_scp(victim, "SCP-3199")

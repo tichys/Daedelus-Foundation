@@ -480,3 +480,28 @@
 /mob/living/simple_animal/hostile/zombie/scp049_1/Initialize()
 	. = ..()
 	ADD_TRAIT(src, TRAIT_PESTILENCE_IMMUNE, "scp049_1")
+
+
+// Progression Integration Hooks
+/mob/living/carbon/human/scp049/proc/on_cure_attempt(mob/living/carbon/human/target, success)
+	if(!target || !target.ckey)
+		return
+	
+	var/list/data = list("success" = success)
+	hook_scp_interaction(target, "SCP-049", INTERACTION_TYPE_MEDICAL, data)
+	
+	if(success)
+		hook_scp_care(target, "SCP-049", "cure")
+	else
+		hook_scp_combat(target, "SCP-049", 50, 0)
+
+/mob/living/carbon/human/scp049/proc/on_pestilence_spread(mob/living/carbon/human/target)
+	if(!target || !target.ckey)
+		return
+	
+	hook_scp_combat(target, "SCP-049", pestilence_damage, 0)
+	start_scp_survival_tracking(target, "SCP-049", INTERACTION_RISK_HIGH)
+
+/mob/living/carbon/human/scp049/proc/on_evolution()
+	if(SSscp_specializations && SSscp_specializations.manager && src.ckey)
+		SSscp_specializations.manager.add_specialization_xp(src.ckey, SPEC_TRACK_RESEARCH, 100)

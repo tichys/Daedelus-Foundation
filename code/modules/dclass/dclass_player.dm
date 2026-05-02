@@ -1,23 +1,61 @@
 // D-Class Player Datum
 // Handles individual D-Class player data and progression
 
+#define DCLASS_TRUST_HOSTILE 0
+#define DCLASS_TRUST_SUSPICIOUS 1
+#define DCLASS_TRUST_NEUTRAL 2
+#define DCLASS_TRUST_COOPERATIVE 3
+#define DCLASS_TRUST_TRUSTED 4
+
+#define DCLASS_STATUS_GENERAL 0
+#define DCLASS_STATUS_TEST_SUBJECT 1
+#define DCLASS_STATUS_MEDICAL_SUBJECT 2
+#define DCLASS_STATUS_CONTAINMENT_ASSIST 3
+
 /datum/dclass_player
 	var/ckey
 	var/name
+	var/dclass_number
 	var/mob/living/carbon/human/mob
 
 	// Progression
 	var/level = 1
 	var/experience = 0
-	var/reputation = 0 // -100 to 100
+	var/reputation = 0
+	var/trust_level = DCLASS_TRUST_NEUTRAL
+	var/trust_points = 50
+	var/status = DCLASS_STATUS_GENERAL
+
+	// Economy
+	var/credits = 100
+	var/credits_lifetime = 0
+
+	// Sentence & Behavior
+	var/sentence_remaining = -1
+	var/strikes = 0
+	var/warnings = 0
+	var/good_behavior_points = 0
+	var/bad_behavior_points = 0
+
+	// Testing
+	var/tests_completed = 0
+	var/tests_successful = 0
+	var/tests_failed = 0
+	var/research_contributions = 0
+
+	// Escape
 	var/escape_attempts = 0
 	var/successful_escapes = 0
+
+	// Informant
+	var/informant = FALSE
+	var/informant_reports = 0
 
 	// Current Status
 	var/current_work_assignment = null
 	var/current_cell = null
 	var/current_location = null
-	var/suspicion_level = 0 // 0-100
+	var/suspicion_level = 0
 	var/last_seen_time = 0
 	var/is_hiding = FALSE
 
@@ -39,16 +77,25 @@
 	var/list/known_routes = list()
 	var/list/guard_patterns = list()
 
+	// Achievements & Records
+	var/list/achievements = list()
+	var/list/incidents = list()
+	var/list/commendations = list()
+
 	// Persistence
 	var/last_save_time = 0
-	var/save_interval = 300 // 5 minutes
+	var/save_interval = 300
 	var/data_file_path = ""
 
 /datum/dclass_player/New(var/player_ckey)
 	ckey = player_ckey
 	data_file_path = "data/dclass/[ckey].json"
+	generate_dclass_number()
 	initialize_skills()
 	load_data()
+
+/datum/dclass_player/proc/generate_dclass_number()
+	dclass_number = "D-[rand(1000, 9999)]"
 
 /datum/dclass_player/proc/initialize_skills()
 	skills["stealth"] = 1
@@ -358,12 +405,162 @@
 	if(mob)
 		to_chat(mob, "<span class='warning'>Security level changed to [new_level]. Escape attempts are now more difficult.</span>")
 
+// Trust System
+/datum/dclass_player/proc/adjust_trust(amount, reason)
+	var/old_trust = trust_level
+	trust_points = clamp(trust_points + amount, 0, 100)
+	var/new_trust = get_trust_from_points(trust_points)
+	if(new_trust != old_trust)
+		trust_level = new_trust
+		if(mob)
+			to_chat(mob, span_notice("Your trust level is now [get_trust_name(trust_level)]."))
+	return trust_level
+
+/datum/dclass_player/proc/get_trust_from_points(points)
+	switch(points)
+		if(0 to 19)
+			return DCLASS_TRUST_HOSTILE
+		if(20 to 39)
+			return DCLASS_TRUST_SUSPICIOUS
+		if(40 to 59)
+			return DCLASS_TRUST_NEUTRAL
+		if(60 to 79)
+			return DCLASS_TRUST_COOPERATIVE
+		if(80 to 100)
+			return DCLASS_TRUST_TRUSTED
+
+/datum/dclass_player/proc/get_trust_name(level)
+	switch(level)
+		if(DCLASS_TRUST_HOSTILE)
+			return "Hostile"
+		if(DCLASS_TRUST_SUSPICIOUS)
+			return "Suspicious"
+		if(DCLASS_TRUST_NEUTRAL)
+			return "Neutral"
+		if(DCLASS_TRUST_COOPERATIVE)
+			return "Cooperative"
+		if(DCLASS_TRUST_TRUSTED)
+			return "Trusted"
+
+// Credits System
+/datum/dclass_player/proc/adjust_credits(amount, reason)
+	if(amount < 0 && credits + amount < 0)
+		return FALSE
+	credits += amount
+	if(amount > 0)
+		credits_lifetime += amount
+	return TRUE
+
+// Incident & Commendation System
+/datum/dclass_player/proc/add_incident(incident_type, description, severity = "minor")
+	var/list/incident = list(
+		"type" = incident_type,
+		"description" = description,
+		"severity" = severity,
+		"timestamp" = world.time
+	)
+	incidents += list(incident)
+	switch(severity)
+		if("minor")
+			adjust_trust(-5, "Minor incident: [incident_type]")
+			warnings++
+		if("major")
+			adjust_trust(-15, "Major incident: [incident_type]")
+			strikes++
+		if("severe")
+			adjust_trust(-30, "Severe incident: [incident_type]")
+			strikes += 2
+			bad_behavior_points += 50
+	return TRUE
+
+/datum/dclass_player/proc/add_commendation(commendation_type, description, reward_credits = 0)
+	var/list/commendation = list(
+		"type" = commendation_type,
+		"description" = description,
+		"reward" = reward_credits,
+		"timestamp" = world.time
+	)
+	commendations += list(commendation)
+	if(reward_credits > 0)
+		adjust_credits(reward_credits, "Commendation reward: [commendation_type]")
+	adjust_trust(10, "Commendation: [commendation_type]")
+	good_behavior_points += 10
+	return TRUE
+
+// Test Recording
+/datum/dclass_player/proc/record_test(scp_id, test_type, outcome, danger_level)
+	tests_completed++
+	switch(outcome)
+		if("success", "partial_success")
+			tests_successful++
+			var/reward = calculate_test_reward(danger_level)
+			adjust_credits(reward, "Successful test: [scp_id]")
+			adjust_trust(5, "Test cooperation")
+			research_contributions++
+		if("failure")
+			tests_failed++
+			adjust_trust(2, "Test participation")
+		if("refused")
+			adjust_trust(-5, "Test refusal")
+			add_incident("test_refusal", "Refused to participate in test with [scp_id]", "minor")
+
+/datum/dclass_player/proc/calculate_test_reward(danger_level)
+	var/base_reward = 50
+	switch(danger_level)
+		if(1 to 2)
+			base_reward = 75
+		if(3 to 4)
+			base_reward = 150
+		if(5 to INFINITY)
+			base_reward = 300
+	return base_reward + (trust_level * 10)
+
+// Informant System
+/datum/dclass_player/proc/become_informant()
+	if(informant)
+		return FALSE
+	informant = TRUE
+	adjust_trust(20, "Became informant")
+	adjust_credits(500, "Informant signup bonus")
+	return TRUE
+
+/datum/dclass_player/proc/report_escape_plan(plan_name, participants_count)
+	if(!informant)
+		return FALSE
+	informant_reports++
+	var/reward = 200 + (participants_count * 50)
+	adjust_credits(reward, "Reported escape plan")
+	adjust_trust(10, "Reported escape plan")
+	return TRUE
+
+// Sentence Management
+/datum/dclass_player/proc/reduce_sentence(days = 1)
+	if(sentence_remaining == -1)
+		return FALSE
+	sentence_remaining = max(0, sentence_remaining - days)
+	if(sentence_remaining <= 0 && mob)
+		to_chat(mob, span_green("Your sentence has been served. You are now eligible for release."))
+	return TRUE
+
 // Data Persistence
 /datum/dclass_player/proc/save_data()
 	var/list/data = list(
 		"level" = level,
 		"experience" = experience,
 		"reputation" = reputation,
+		"trust_level" = trust_level,
+		"trust_points" = trust_points,
+		"status" = status,
+		"credits" = credits,
+		"credits_lifetime" = credits_lifetime,
+		"strikes" = strikes,
+		"warnings" = warnings,
+		"good_behavior_points" = good_behavior_points,
+		"bad_behavior_points" = bad_behavior_points,
+		"tests_completed" = tests_completed,
+		"tests_successful" = tests_successful,
+		"tests_failed" = tests_failed,
+		"research_contributions" = research_contributions,
 		"escape_attempts" = escape_attempts,
 		"successful_escapes" = successful_escapes,
 		"suspicion_level" = suspicion_level,
@@ -371,7 +568,14 @@
 		"skills" = skills,
 		"abilities" = abilities,
 		"allies" = allies,
-		"enemies" = enemies
+		"enemies" = enemies,
+		"achievements" = achievements,
+		"incidents" = incidents,
+		"commendations" = commendations,
+		"informant" = informant,
+		"informant_reports" = informant_reports,
+		"dclass_number" = dclass_number,
+		"sentence_remaining" = sentence_remaining
 	)
 
 	var/filename = data_file_path
@@ -390,6 +594,19 @@
 	level = data["level"] || 1
 	experience = data["experience"] || 0
 	reputation = data["reputation"] || 0
+	trust_level = data["trust_level"] || DCLASS_TRUST_NEUTRAL
+	trust_points = data["trust_points"] || 50
+	status = data["status"] || DCLASS_STATUS_GENERAL
+	credits = data["credits"] || 100
+	credits_lifetime = data["credits_lifetime"] || 0
+	strikes = data["strikes"] || 0
+	warnings = data["warnings"] || 0
+	good_behavior_points = data["good_behavior_points"] || 0
+	bad_behavior_points = data["bad_behavior_points"] || 0
+	tests_completed = data["tests_completed"] || 0
+	tests_successful = data["tests_successful"] || 0
+	tests_failed = data["tests_failed"] || 0
+	research_contributions = data["research_contributions"] || 0
 	escape_attempts = data["escape_attempts"] || 0
 	successful_escapes = data["successful_escapes"] || 0
 	suspicion_level = data["suspicion_level"] || 0
@@ -398,24 +615,41 @@
 	abilities = data["abilities"] || list()
 	allies = data["allies"] || list()
 	enemies = data["enemies"] || list()
+	achievements = data["achievements"] || list()
+	incidents = data["incidents"] || list()
+	commendations = data["commendations"] || list()
+	informant = data["informant"] || FALSE
+	informant_reports = data["informant_reports"] || 0
+	dclass_number = data["dclass_number"] || dclass_number
+	sentence_remaining = data["sentence_remaining"] || -1
 
 // Utility Functions
 /datum/dclass_player/proc/get_status_info()
 	var/info = "<h3>D-Class Status Report</h3>"
+	info += "<b>Number:</b> [dclass_number]<br>"
 	info += "<b>Name:</b> [name]<br>"
 	info += "<b>Level:</b> [level]/5<br>"
 	info += "<b>Experience:</b> [experience]/[calculate_required_experience(level)]<br>"
+	info += "<b>Trust:</b> [get_trust_name(trust_level)] ([trust_points]%)<br>"
+	info += "<b>Credits:</b> [credits] (Lifetime: [credits_lifetime])<br>"
 	info += "<b>Reputation:</b> [reputation]<br>"
 	info += "<b>Suspicion:</b> [suspicion_level]/100<br>"
+	info += "<b>Tests Completed:</b> [tests_completed] ([tests_successful] successful)<br>"
 	info += "<b>Escape Attempts:</b> [escape_attempts]<br>"
 	info += "<b>Successful Escapes:</b> [successful_escapes]<br>"
 
 	if(current_work_assignment)
 		info += "<b>Current Work:</b> [current_work_assignment]<br>"
 
+	if(strikes > 0 || warnings > 0)
+		info += "<b>Strikes:</b> [strikes]/3 | <b>Warnings:</b> [warnings]<br>"
+
+	if(informant)
+		info += "<b>Informant:</b> Yes ([informant_reports] reports)<br>"
+
 	info += "<b>Contraband:</b> [contraband.len] items<br>"
 	info += "<b>Skills:</b> [skills.len] skills<br>"
-	info += "<b>Abilities:</b> [abilities.len] abilities<br>"
+	info += "<b>Achievements:</b> [achievements.len]<br>"
 
 	return info
 

@@ -38,6 +38,18 @@
 	benevolence_system?.process_benevolence()
 	research_system?.process_research()
 
+/mob/living/carbon/human/scp2343/say(message)
+	. = ..()
+	if(.)
+		for(var/mob/living/carbon/human/H in range(5, src))
+			if(H.stat != DEAD && H != src)
+				hook_scp_interaction(H, "SCP-2343", INTERACTION_TYPE_COMMUNICATION)
+
+/mob/living/carbon/human/scp2343/proc/on_benevolent_act(mob/living/carbon/human/beneficiary)
+	if(!beneficiary)
+		return
+	hook_scp_care(beneficiary, "SCP-2343", "benevolence")
+
 /mob/living/carbon/human/scp2343/examine(mob/living/user)
 	. = ..()
 	to_chat(user, "<span class='notice'>This being seems to have reality-bending powers.</span>")

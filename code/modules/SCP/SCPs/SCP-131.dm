@@ -321,3 +321,13 @@
 			message += "<b>Communication Logs:</b> [instance.communication_logs.len] records<br>"
 
 	to_chat(src, "<span class='notice'>[message]</span>")
+
+/mob/living/carbon/scp/scp131/proc/on_telepathic_communication(mob/living/carbon/human/target)
+	if(!target)
+		return
+	hook_scp_interaction(target, "SCP-131", INTERACTION_TYPE_COMMUNICATION)
+
+/mob/living/carbon/scp/scp131/proc/on_observation(mob/living/carbon/human/observed)
+	if(!observed)
+		return
+	hook_scp_interaction(observed, "SCP-131", INTERACTION_TYPE_OBSERVATION)

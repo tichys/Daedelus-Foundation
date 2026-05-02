@@ -155,3 +155,8 @@
 	if(trait_string == TRAIT_SCP151_PANIC)
 		to_chat(H, span_notice("The suffocating panic begins to subside."))
 		H.adjust_timed_status_effect(-30 SECONDS, /datum/status_effect/jitter)
+
+/obj/structure/scp151/proc/on_drowning_effect(mob/living/carbon/human/victim)
+	if(!victim)
+		return
+	hook_scp_combat(victim, "SCP-151", 0, oxy_damage)

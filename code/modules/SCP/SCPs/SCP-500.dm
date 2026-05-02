@@ -414,4 +414,20 @@
 	if(T)
 		playsound(T, 'sound/weapons/punch1.ogg', 20, TRUE)
 
+/obj/item/reagent_containers/pill/scp500/proc/on_cure_performed(mob/living/carbon/human/patient, mob/living/carbon/human/administered_by)
+	if(!patient)
+		return
+	hook_scp_care(patient, "SCP-500", "cure")
+	if(administered_by)
+		hook_scp_interaction(administered_by, "SCP-500", INTERACTION_TYPE_RESEARCH)
+
+/obj/item/reagent_containers/pill/scp500/proc/on_disease_cured(mob/living/carbon/human/patient, disease_type)
+	if(!patient)
+		return
+	hook_scp_care(patient, "SCP-500", "disease_cure")
+
+/obj/item/reagent_containers/pill/scp500/proc/on_research_breakthrough(breakthrough_type)
+	if(SSscp_research && SSscp_research.manager)
+		SSscp_research.manager.add_research_points("SCP-500_research", 50)
+
 

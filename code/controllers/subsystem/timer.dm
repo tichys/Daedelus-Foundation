@@ -530,6 +530,7 @@ SUBSYSTEM_DEF(timer)
 	)
 #else
 	// Generate a debuggable name for the timer, simpler but wayyyy cheaper, string generation is a bitch and this saves a LOT of time
+<<<<<<< Updated upstream
 	timer_info = list(
 		/* 1 = */ id,
 		/* 2 = */ timeToRun,
@@ -540,6 +541,18 @@ SUBSYSTEM_DEF(timer)
 		/* 7 = */ getcallingtype(),
 		/* 8 = */ callBack.delegate,
 		/* 9 = */ "[source]"
+=======
+	timer_info = alist(
+		1 = id,
+		2 = timeToRun,
+		3 = wait,
+		4 = flags,
+		5 = callBack, /* Safe to hold this directly becasue it's never del'd */
+		6 = "[callBack.object]",
+		7 = getcallingtype(),
+		8 = callBack.delegate,
+		9 = "[source]"
+>>>>>>> Stashed changes
 	)
 #endif
 
