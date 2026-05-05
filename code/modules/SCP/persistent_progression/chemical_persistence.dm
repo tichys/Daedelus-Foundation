@@ -181,7 +181,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	world.log << "Loading existing chemical data..."
 	manager.load_existing_chemical_data()
 
-	world.log << "Chemical records count at initialization: [manager.chemical_records.len]"
+	world.log << "Chemical records count at initialization: [length(manager.chemical_records)]"
 	return ..()
 
 /datum/controller/subsystem/chemical_persistence/fire()
@@ -215,7 +215,7 @@ SUBSYSTEM_DEF(chemical_persistence)
 	record2.danger_level = 1
 	chemical_records["CHEM_OXYGEN"] = record2
 
-	world.log << "Chemical: Loaded [chemical_records.len] chemical records"
+	world.log << "Chemical: Loaded [length(chemical_records)] chemical records"
 
 // Add chemical research project
 /datum/chemical_persistence_manager/proc/add_research_project(var/project_name, var/project_description, var/research_field, var/lead_researcher)
@@ -313,8 +313,8 @@ SUBSYSTEM_DEF(chemical_persistence)
 	var/base_progress = project.progress
 
 	// Progress based on number of researchers
-	if(project.researchers.len > 0)
-		base_progress += project.researchers.len * 2
+	if(length(project.researchers) > 0)
+		base_progress += length(project.researchers) * 2
 
 	// Progress based on experiments conducted
 	base_progress += project.experiments_conducted * 4

@@ -8,22 +8,22 @@
 /datum/scp939_voice_system
     var/mob/living/carbon/human/scp939/owner = null
     var/list/learned_voices = list()
-    var/mimicry_accuracy = 30
-    var/max_mimicry_accuracy = 100
+    var/mimicry_accuracy = SCP939_INITIAL_MIMICRY_ACCURACY
+    var/max_mimicry_accuracy = SCP939_MAX_MIMICRY_ACCURACY
     var/voice_evolution_stage = 1
-    var/max_voice_evolution = 5
+    var/max_voice_evolution = SCP939_MAX_VOICE_EVOLUTION
     var/emotional_manipulation = 0
-    var/max_emotional_manipulation = 100
+    var/max_emotional_manipulation = SCP939_MAX_EMOTIONAL_MANIPULATION
     var/context_adaptation = 0
-    var/max_context_adaptation = 100
+    var/max_context_adaptation = SCP939_MAX_CONTEXT_ADAPTATION
     var/current_mimicked_voice = null
     var/speech_cooldown = 0
-    var/speech_cooldown_time = 15 SECONDS
+    var/speech_cooldown_time = SCP939_SPEECH_COOLDOWN
     var/list/voice_evolution_data = list()
     var/learning_rate = 1.0
-    var/voice_retention = 0.95
+    var/voice_retention = SCP939_VOICE_RETENTION
     var/last_voice_learning = 0
-    var/voice_learning_interval = 30 SECONDS
+    var/voice_learning_interval = SCP939_VOICE_LEARNING_INTERVAL
 
 /datum/scp939_voice_system/New(mob/living/carbon/human/scp939/new_owner)
     . = ..()
@@ -144,7 +144,7 @@
         return FALSE
 
     var/list/requirements = voice_evolution_data[voice_evolution_stage + 1]
-    if(mimicry_accuracy >= requirements["accuracy"] && learned_voices.len >= requirements["voices"] && emotional_manipulation >= requirements["emotional"])
+    if(mimicry_accuracy >= requirements["accuracy"] && length(learned_voices) >= requirements["voices"] && emotional_manipulation >= requirements["emotional"])
 
         voice_evolution_stage++
         mimicry_accuracy = min(max_mimicry_accuracy, mimicry_accuracy + 10)
@@ -161,16 +161,16 @@
     var/mob/living/carbon/human/scp939/owner = null
     var/list/pack_members = list()
     var/pack_coordination = 0
-    var/max_pack_coordination = 100
+    var/max_pack_coordination = SCP939_MAX_PACK_COORDINATION
     var/pack_hierarchy_rank = 1
-    var/max_pack_hierarchy = 5
+    var/max_pack_hierarchy = SCP939_MAX_PACK_HIERARCHY
     var/list/hunting_formation = list()
     var/list/territory_boundaries = list()
     var/list/hierarchy_structure = list()
     var/pack_communication_cooldown = 0
-    var/pack_communication_time = 10 SECONDS
+    var/pack_communication_time = SCP939_PACK_COMMUNICATION_COOLDOWN
     var/last_pack_update = 0
-    var/pack_update_interval = 60 SECONDS
+    var/pack_update_interval = SCP939_PACK_UPDATE_INTERVAL
 
 /datum/scp939_pack_system/New(mob/living/carbon/human/scp939/new_owner)
     . = ..()
@@ -195,7 +195,7 @@
                 other_939.pack_system.pack_members += owner
 
 /datum/scp939_pack_system/proc/update_pack_status()
-    pack_coordination = min(max_pack_coordination, pack_members.len * 20)
+    pack_coordination = min(max_pack_coordination, length(pack_members) * 20)
 
     // Update hierarchy based on experience and coordination
     var/rank = 1
@@ -236,15 +236,15 @@
     var/list/target_profiles = list()
     var/list/manipulation_tactics = list()
     var/fear_induction = 0
-    var/max_fear_induction = 100
+    var/max_fear_induction = SCP939_MAX_FEAR_INDUCTION
     var/trust_exploitation = 0
-    var/max_trust_exploitation = 100
+    var/max_trust_exploitation = SCP939_MAX_TRUST_EXPLOITATION
     var/group_dynamics = 0
-    var/max_group_dynamics = 100
+    var/max_group_dynamics = SCP939_MAX_GROUP_DYNAMICS
     var/psychological_manipulation = 0
-    var/max_psychological_manipulation = 100
+    var/max_psychological_manipulation = SCP939_MAX_PSYCHOLOGICAL_MANIPULATION
     var/last_psychology_update = 0
-    var/psychology_update_interval = 45 SECONDS
+    var/psychology_update_interval = SCP939_PSYCHOLOGY_UPDATE_INTERVAL
 
 /datum/scp939_psychology_system/New(mob/living/carbon/human/scp939/new_owner)
     . = ..()
@@ -337,10 +337,10 @@
     var/list/resource_caches = list()
     var/territory_control = 0
     var/max_territory_control = 100
-    var/territory_radius = 10
-    var/max_territory_radius = 20
+    var/territory_radius = SCP939_BASE_TERRITORY_RADIUS
+    var/max_territory_radius = SCP939_MAX_TERRITORY_RADIUS
     var/last_territory_update = 0
-    var/territory_update_interval = 90 SECONDS
+    var/territory_update_interval = SCP939_TERRITORY_UPDATE_INTERVAL
 
 /datum/scp939_territory_system/New(mob/living/carbon/human/scp939/new_owner)
     . = ..()
@@ -356,7 +356,7 @@
     var/area/current_area = get_area(owner)
     if(current_area && !(current_area in controlled_areas))
         controlled_areas += current_area
-        territory_control = min(max_territory_control, controlled_areas.len * 20)
+        territory_control = min(max_territory_control, length(controlled_areas) * 20)
 
         // Establish patrol routes in new territory
         establish_patrol_routes(current_area)
@@ -390,12 +390,12 @@
     var/mob/living/carbon/human/current_target = null
     var/hunt_mode = FALSE
     var/hunting_experience = 0
-    var/max_hunting_experience = 100
+    var/max_hunting_experience = SCP939_MAX_HUNTING_EXPERIENCE
     var/ambush_prepared = FALSE
     var/list/hunting_strategies = list()
     var/current_strategy = null
     var/last_hunt_update = 0
-    var/hunt_update_interval = 30 SECONDS
+    var/hunt_update_interval = SCP939_HUNT_UPDATE_INTERVAL
 
 /datum/scp939_hunting_system/New(mob/living/carbon/human/scp939/new_owner)
     . = ..()
@@ -467,7 +467,7 @@
 /datum/scp939_hunting_system/proc/select_target()
     identify_targets()
 
-    if(hunting_targets.len > 0)
+    if(length(hunting_targets) > 0)
         current_target = hunting_targets[1]
         hunt_mode = TRUE
         return TRUE
@@ -495,13 +495,13 @@
             execute_territorial_strategy()
 
 /datum/scp939_hunting_system/proc/choose_strategy()
-    if(owner.pack_system && owner.pack_system.pack_members.len > 0)
+    if(owner.pack_system && length(owner.pack_system.pack_members) > 0)
         return "pack_hunt"
     else if(owner.territory_system && owner.territory_system.is_in_controlled_territory(current_target))
         return "territorial"
     else if(owner.psychology_system && owner.psychology_system.target_profiles[current_target.name])
         return "psychological"
-    else if(owner.territory_system && owner.territory_system.ambush_points.len > 0)
+    else if(owner.territory_system && length(owner.territory_system.ambush_points) > 0)
         return "ambush"
     else
         return "lure"
@@ -512,7 +512,7 @@
 
     // Use voice mimicry to lure target
     var/list/available_voices = owner.voice_system.learned_voices
-    if(available_voices.len > 0)
+    if(length(available_voices) > 0)
         var/voice_id = pick(available_voices)
         var/message = "Help! I'm hurt! Please come quickly!"
         owner.voice_system.mimic_voice(voice_id, message, "distress")
@@ -523,7 +523,7 @@
 
     // Move to ambush position
     var/list/ambush_points = owner.territory_system.ambush_points
-    if(ambush_points.len > 0)
+    if(length(ambush_points) > 0)
         var/turf/ambush_point = pick(ambush_points)
         if(get_dist(owner, ambush_point) > 1)
             step_towards(owner, ambush_point)
@@ -606,13 +606,13 @@
 /datum/scp939_research_integration/proc/update_research_data()
     var/current_data = list(
         "voice_evolution_stage" = owner.voice_system?.voice_evolution_stage || 1,
-        "learned_voices_count" = owner.voice_system?.learned_voices?.len || 0,
+        "learned_voices_count" = length(owner.voice_system?.learned_voices) || 0,
         "mimicry_accuracy" = owner.voice_system?.mimicry_accuracy || 0,
         "pack_coordination" = owner.pack_system?.pack_coordination || 0,
-        "pack_members_count" = owner.pack_system?.pack_members?.len || 0,
+        "pack_members_count" = length(owner.pack_system?.pack_members) || 0,
         "psychological_manipulation" = owner.psychology_system?.psychological_manipulation || 0,
         "territory_control" = owner.territory_system?.territory_control || 0,
-        "controlled_areas_count" = owner.territory_system?.controlled_areas?.len || 0,
+        "controlled_areas_count" = length(owner.territory_system?.controlled_areas) || 0,
         "hunting_experience" = owner.hunting_system?.hunting_experience || 0,
         "current_target" = owner.hunting_system?.current_target?.name || "none",
         "hunt_mode" = owner.hunting_system?.hunt_mode || FALSE,

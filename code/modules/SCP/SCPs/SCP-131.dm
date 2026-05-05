@@ -1,333 +1,189 @@
 // SCP-131 - The Eye Pods
-// A pair of small, teardrop-shaped creatures with a single eye each that communicate telepathically
+// Two teardrop-shaped creatures with a single large eye each
+// SCP-131-A is orange, SCP-131-B is brownish and slightly larger
+// They make babbling sounds and can stare down SCP-173, preventing it from moving
 
-/mob/living/carbon/scp/scp131
-	name = "SCP-131"
-	desc = "A pair of small, teardrop-shaped creatures with a single eye each. They appear to be communicating telepathically."
+/mob/living/simple_animal/scp131a
+	name = "SCP-131-A"
+	desc = "A small, teardrop-shaped creature with a single large blue eye. It is orange in color and makes soft babbling noises."
 	icon = 'icons/scp/SCP-131.dmi'
-	icon_state = "scp131"
-	real_name = "SCP-131"
-	use_custom_sprite = TRUE
+	icon_state = "scp131a"
+	icon_living = "scp131a"
+	icon_dead = "scp131a_dead"
+	health = 50
+	maxHealth = 50
+	density = FALSE
+	anchored = FALSE
+	turns_per_move = 2
+	response_help_continuous = "pets"
+	response_help_simple = "pet"
+	response_disarm_continuous = "gently pushes aside"
+	response_harm_continuous = "kicks"
+	harm_intent_damage = 5
+	melee_damage_lower = 0
+	melee_damage_upper = 0
+	attack_sound = 'sound/weapons/tap.ogg'
+	speak = list("Babu!", "Bah!", "Bwee!", "Mmu?")
+	speak_emote = list("babbles", "coos", "burbles")
+	emote_hear = list("babbles softly", "coos", "makes baby-like sounds")
+	emote_see = list("looks around curiously", "blinks its large eye", "wobbles slightly")
 
-	// SCP-131 specific variables
-	var/partner = null
-	var/telepathy_range = 5
-	var/telepathy_cooldown = 0
-	var/telepathy_cooldown_time = 5 SECONDS
-	var/list/telepathic_messages = list()
-	var/list/observed_targets = list()
-	var/emotional_state = "curious"
-	var/list/emotional_states = list("curious", "excited", "worried", "happy", "sad")
+	var/babble_cooldown = 0
+	var/babble_cooldown_time = 10 SECONDS
+	var/list/following = list()
+	var/scp173_stared = FALSE
+	var/observation_range = 6
 
-	// Persistence tracking
-	var/telepathic_communications = 0
-	var/observations_made = 0
-	var/partner_interactions = 0
-
-/mob/living/carbon/scp/scp131/Initialize()
+/mob/living/simple_animal/scp131a/Initialize()
 	. = ..()
+	SCP = new /datum/scp(src, "The Eye Pods", SCP_SAFE, "131")
 
-	// Initialize SCP datum
-	SCP_datum = new /datum/scp(
-		src,
-		"SCP-131",
-		SCP_SAFE,
-		"131",
-		SCP_PLAYABLE
-	)
-
-	SCP_datum.min_playercount = 10
-	SCP_datum.min_time = 15 MINUTES
-
-	// Set up SCP-specific properties
-	max_scp_health = 100
-	scp_health = max_scp_health
-	max_scp_armor = 20
-	scp_armor = max_scp_armor
-
-	// Add SCP abilities
-	add_ability("telepathic_message", "telepathic_message_ability")
-	add_ability("change_emotional_state", "change_emotional_state_ability")
-	add_ability("view_telepathic_log", "view_telepathic_log_ability")
-
-	// Add passive effects
-	add_passive_effect("telepathic_communication")
-	add_passive_effect("emotional_sensitivity")
-	add_passive_effect("partner_bonding")
-
-/mob/living/carbon/scp/scp131/Destroy()
-	telepathic_messages = list()
-	observed_targets = list()
-	return ..()
-
-// Override core mechanics
-/mob/living/carbon/scp/scp131/process_scp_effects()
+/mob/living/simple_animal/scp131a/Life()
 	. = ..()
+	if(stat == DEAD)
+		return
 
-	// Find partner if not already found
-	if(!partner)
-		find_partner()
+	process_babbling()
+	process_following()
+	stare_down_scp173()
 
-	// Communicate with partner
-	if(partner && world.time >= telepathy_cooldown)
-		communicate_with_partner()
+/mob/living/simple_animal/scp131a/proc/process_babbling()
+	if(world.time < babble_cooldown)
+		return
 
-	// Observe nearby beings
-	observe_nearby_beings()
+	babble_cooldown = world.time + babble_cooldown_time
 
-	// Update emotional state
-	update_emotional_state()
+	if(prob(30))
+		var/babble = pick(speak)
+		say(babble)
 
-// Find partner (another SCP-131)
-/mob/living/carbon/scp/scp131/proc/find_partner()
-	for(var/mob/living/carbon/scp/scp131/other in view(10, src))
-		if(other != src && !other.partner)
-			partner = other
-			other.partner = src
-			partner_interactions++
+/mob/living/simple_animal/scp131a/proc/process_following()
+	if(client)
+		return
 
-			visible_message("<span class='notice'>[src] and [other] appear to recognize each other!</span>")
-			to_chat(src, "<span class='notice'>You have found your partner!</span>")
-			to_chat(other, "<span class='notice'>You have found your partner!</span>")
-
-			// Update persistence system
-			add_interaction_record(other, "partner_found")
+	for(var/mob/living/carbon/human/H in range(5, src))
+		if(H.stat != DEAD && !H.SCP)
+			if(prob(10))
+				step_towards(src, H)
 			break
 
-// Communicate with partner
-/mob/living/carbon/scp/scp131/proc/communicate_with_partner()
-	if(!partner)
-		return
+/mob/living/simple_animal/scp131a/proc/stare_down_scp173()
+	for(var/mob/living/carbon/human/scp173/scp in view(observation_range, src))
+		if(scp.stat != DEAD && scp.observation_system)
+			scp.observation_system.observers += src
+			scp.observation_system.observation_quality += 2.0
+			scp.observation_system.is_being_observed = TRUE
+			scp173_stared = TRUE
+			return
 
-	telepathy_cooldown = world.time + telepathy_cooldown_time
-	telepathic_communications++
+	scp173_stared = FALSE
 
-	var/message = generate_telepathic_message()
-	telepathic_messages += message
-
-	// Send message to partner
-	if(partner)
-		to_chat(partner, "<span class='notice'>[src] telepathically: [message]</span>")
-		to_chat(src, "<span class='notice'>You telepathically: [message]</span>")
-
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
-		if(instance)
-			instance.add_communication_log(message, "telepathic_communication")
-
-// Generate telepathic message based on emotional state
-/mob/living/carbon/scp/scp131/proc/generate_telepathic_message()
-	var/list/messages = list()
-
-	switch(emotional_state)
-		if("curious")
-			messages = list("What's that?", "Interesting!", "Let's explore!", "I wonder what that is?")
-		if("excited")
-			messages = list("This is amazing!", "I love this!", "So much to see!", "Everything is wonderful!")
-		if("worried")
-			messages = list("I'm scared...", "Something's wrong", "I don't like this", "Help me!")
-		if("happy")
-			messages = list("I'm so happy!", "Life is beautiful!", "Everything is perfect!", "I love you!")
-		if("sad")
-			messages = list("I'm sad...", "I miss something", "Why am I here?", "I want to go home...")
-		else
-			messages = list("Hello!", "Hi there!", "How are you?", "Nice to meet you!")
-
-	return pick(messages)
-
-// Observe nearby beings
-/mob/living/carbon/scp/scp131/proc/observe_nearby_beings()
-	for(var/mob/living/carbon/human/H in range(telepathy_range, src))
-		if(H == src || H.SCP)
-			continue
-
-		if(!(H in observed_targets))
-			observed_targets += H
-			observations_made++
-
-			// React to the observation
-			react_to_observation(H)
-
-			// Update persistence system
-			add_interaction_record(H, "observation")
-
-// React to observing a being
-/mob/living/carbon/scp/scp131/proc/react_to_observation(mob/living/carbon/human/target)
-	var/reaction = ""
-
-	if(target.health < target.maxHealth * 0.5)
-		emotional_state = "worried"
-		reaction = "worried about [target]'s injuries"
-	else if(target.health >= target.maxHealth)
-		emotional_state = "happy"
-		reaction = "happy to see [target] is healthy"
-	else
-		emotional_state = "curious"
-		reaction = "curious about [target]"
-
-	visible_message("<span class='notice'>[src] looks at [target] with [emotional_state] eyes.</span>")
-	to_chat(src, "<span class='notice'>You feel [reaction].</span>")
-
-// Update emotional state
-/mob/living/carbon/scp/scp131/proc/update_emotional_state()
-	// Emotional state can change based on various factors
-	if(partner && get_dist(src, partner) <= 2)
-		emotional_state = "happy"
-	else if(partner && get_dist(src, partner) > 10)
-		emotional_state = "worried"
-	else if(observations_made > 10)
-		emotional_state = "excited"
-	else
-		emotional_state = "curious"
-
-// Attack behavior (131 doesn't attack, only observes)
-/mob/living/carbon/scp/scp131/UnarmedAttack(atom/A)
-	if(ishuman(A))
-		var/mob/living/carbon/human/H = A
-		react_to_observation(H)
-		return
-
-	return ..()
-
-// SCP-131 specific abilities
-/mob/living/carbon/scp/scp131/proc/telepathic_message_ability()
-	if(!partner)
-		to_chat(src, "<span class='warning'>You don't have a partner to communicate with.</span>")
-		return
-
-	if(world.time < telepathy_cooldown)
-		to_chat(src, "<span class='warning'>You need to wait before sending another message.</span>")
-		return
-
-	var/message = input(src, "Enter your telepathic message:", "Telepathic Message") as text
-	if(message)
-		telepathic_messages += message
-		telepathic_communications++
-
-		to_chat(partner, "<span class='notice'>[src] telepathically: [message]</span>")
-		to_chat(src, "<span class='notice'>You telepathically: [message]</span>")
-
-		// Update persistence system
-		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
-			if(instance)
-				instance.add_communication_log(message, "manual_telepathic_communication")
-
-/mob/living/carbon/scp/scp131/proc/change_emotional_state_ability()
-	var/new_state = input(src, "Choose your emotional state:", "Emotional State") as null|anything in emotional_states
-	if(new_state)
-		emotional_state = new_state
-		to_chat(src, "<span class='notice'>You are now feeling [emotional_state].</span>")
-
-/mob/living/carbon/scp/scp131/proc/view_telepathic_log_ability()
-	var/message = "<h2>SCP-131 Telepathic Log</h2>"
-	message += "<b>Total Communications:</b> [telepathic_communications]<br>"
-	message += "<b>Current Emotional State:</b> [emotional_state]<br>"
-	message += "<b>Partner:</b> [partner ? "Found" : "None"]<br><br>"
-
-	if(length(telepathic_messages))
-		message += "<h3>Recent Messages:</h3>"
-		var/count = 0
-		for(var/msg in telepathic_messages)
-			if(count >= 10) // Show only last 10 messages
-				break
-			message += "[msg]<br>"
-			count++
-	else
-		message += "<i>No telepathic messages yet.</i>"
-
-	to_chat(src, "<span class='notice'>[message]</span>")
-
-// Override status display
-/mob/living/carbon/scp/scp131/get_status_tab_items()
-	. = ..()
-	. += "Emotional State: [emotional_state]"
-	. += "Telepathic Communications: [telepathic_communications]"
-	. += "Observations Made: [observations_made]"
-	. += "Partner Interactions: [partner_interactions]"
-	. += "Observed Targets: [observed_targets.len]"
-	. += "Partner: [partner ? "Found" : "None"]"
-
-// Override examine behavior
-/mob/living/carbon/scp/scp131/examine(mob/user)
+/mob/living/simple_animal/scp131a/attack_hand(mob/living/carbon/human/user)
 	. = ..()
 
-	if(ishuman(user))
-		var/mob/living/carbon/human/H = user
-		if(H.SCP)
-			to_chat(user, "<span class='warning'>This is SCP-131, a pair of telepathic eye-pods that observe and communicate.</span>")
-		else
-			to_chat(user, "<span class='notice'>A small teardrop-shaped creature with a single eye. It seems to be watching you curiously.</span>")
+	if(!user.combat_mode)
+		say(pick("Bah!", "Bwee!", "Mmu!"))
+		emote("coos at [user]", 1)
+		hook_scp_interaction(user, "SCP-131", INTERACTION_TYPE_CARE)
 
-// Override SCP death
-/mob/living/carbon/scp/scp131/scp_death()
-	visible_message("<span class='danger'>[src] closes its eye and stops moving!</span>")
-	playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
+/mob/living/simple_animal/scp131a/examine(mob/user)
+	. = ..()
+	to_chat(user, "<span class='notice'>A small orange teardrop-shaped creature with a single large eye. It babbles like a baby and seems friendly.</span>")
+	to_chat(user, "<span class='notice'>It seems to have an intense gaze that could freeze even the most dangerous entities in their tracks.</span>")
 
-	if(partner)
-		to_chat(partner, "<span class='danger'>You feel a deep sadness as your partner is gone!</span>")
-		// Note: Partner cleanup handled by partner's own death proc
-
+/mob/living/simple_animal/scp131a/death()
+	scp173_stared = FALSE
+	visible_message("<span class='danger'>[src] closes its eye and goes still!</span>")
 	..()
 
-// Verb commands
-/mob/living/carbon/scp/scp131/verb/telepathic_message()
-	set name = "Send Telepathic Message"
-	set category = "SCP"
-	set desc = "Send a telepathic message to your partner."
+/mob/living/simple_animal/scp131b
+	name = "SCP-131-B"
+	desc = "A small, teardrop-shaped creature with a single large green eye. It is brownish-green in color and slightly larger than its partner."
+	icon = 'icons/scp/SCP-131.dmi'
+	icon_state = "scp131b"
+	icon_living = "scp131b"
+	icon_dead = "scp131b_dead"
+	health = 60
+	maxHealth = 60
+	density = FALSE
+	anchored = FALSE
+	turns_per_move = 2
+	response_help_continuous = "pets"
+	response_help_simple = "pet"
+	response_disarm_continuous = "gently pushes aside"
+	response_harm_continuous = "kicks"
+	harm_intent_damage = 5
+	melee_damage_lower = 0
+	melee_damage_upper = 0
+	attack_sound = 'sound/weapons/tap.ogg'
+	speak = list("Bweh!", "Mrrp!", "Bah!", "Wuu?")
+	speak_emote = list("babbles", "murmurs", "chirps")
+	emote_hear = list("babbles softly", "murmurs", "makes baby-like sounds")
+	emote_see = list("looks around alertly", "blinks its large eye", "shifts its weight")
 
-	telepathic_message_ability()
+	var/babble_cooldown = 0
+	var/babble_cooldown_time = 12 SECONDS
+	var/scp173_stared = FALSE
+	var/observation_range = 6
 
-/mob/living/carbon/scp/scp131/verb/change_emotional_state()
-	set name = "Change Emotional State"
-	set category = "SCP"
-	set desc = "Change your emotional state."
+/mob/living/simple_animal/scp131b/Initialize()
+	. = ..()
+	SCP = new /datum/scp(src, "The Eye Pods", SCP_SAFE, "131")
 
-	change_emotional_state_ability()
-
-/mob/living/carbon/scp/scp131/verb/view_telepathic_log()
-	set name = "View Telepathic Log"
-	set category = "SCP"
-	set desc = "View your telepathic communication log."
-
-	view_telepathic_log_ability()
-
-// Override persistence data view
-/mob/living/carbon/scp/scp131/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP"
-	set desc = "View SCP-131 persistence data."
-
-	if(!check_rights(R_ADMIN))
-		to_chat(src, "<span class='warning'>You don't have permission to view persistence data.</span>")
+/mob/living/simple_animal/scp131b/Life()
+	. = ..()
+	if(stat == DEAD)
 		return
 
-	var/message = "<h2>SCP-131 Persistence Data</h2>"
-	message += "<b>Containment Status:</b> [containment_status]<br>"
-	message += "<b>Telepathic Communications:</b> [telepathic_communications]<br>"
-	message += "<b>Observations Made:</b> [observations_made]<br>"
-	message += "<b>Partner Interactions:</b> [partner_interactions]<br>"
-	message += "<b>Current Emotional State:</b> [emotional_state]<br>"
-	message += "<b>Observed Targets:</b> [observed_targets.len]<br>"
-	message += "<b>Partner:</b> [partner ? "Found" : "None"]<br>"
-	message += "<b>SCP Health:</b> [scp_health]/[max_scp_health]<br>"
-	message += "<b>SCP Armor:</b> [scp_armor]/[max_scp_armor]<br>"
+	process_babbling()
+	process_following()
+	stare_down_scp173()
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
-		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
-			message += "<b>Communication Logs:</b> [instance.communication_logs.len] records<br>"
-
-	to_chat(src, "<span class='notice'>[message]</span>")
-
-/mob/living/carbon/scp/scp131/proc/on_telepathic_communication(mob/living/carbon/human/target)
-	if(!target)
+/mob/living/simple_animal/scp131b/proc/process_babbling()
+	if(world.time < babble_cooldown)
 		return
-	hook_scp_interaction(target, "SCP-131", INTERACTION_TYPE_COMMUNICATION)
 
-/mob/living/carbon/scp/scp131/proc/on_observation(mob/living/carbon/human/observed)
-	if(!observed)
+	babble_cooldown = world.time + babble_cooldown_time
+
+	if(prob(25))
+		var/babble = pick(speak)
+		say(babble)
+
+/mob/living/simple_animal/scp131b/proc/process_following()
+	if(client)
 		return
-	hook_scp_interaction(observed, "SCP-131", INTERACTION_TYPE_OBSERVATION)
+
+	for(var/mob/living/carbon/human/H in range(5, src))
+		if(H.stat != DEAD && !H.SCP)
+			if(prob(10))
+				step_towards(src, H)
+			break
+
+/mob/living/simple_animal/scp131b/proc/stare_down_scp173()
+	for(var/mob/living/carbon/human/scp173/scp in view(observation_range, src))
+		if(scp.stat != DEAD && scp.observation_system)
+			scp.observation_system.observers += src
+			scp.observation_system.observation_quality += 2.5
+			scp.observation_system.is_being_observed = TRUE
+			scp173_stared = TRUE
+			return
+
+	scp173_stared = FALSE
+
+/mob/living/simple_animal/scp131b/attack_hand(mob/living/carbon/human/user)
+	. = ..()
+
+	if(!user.combat_mode)
+		say(pick("Mrrp!", "Bah!", "Wuu!"))
+		emote("murmurs at [user]", 1)
+		hook_scp_interaction(user, "SCP-131", INTERACTION_TYPE_CARE)
+
+/mob/living/simple_animal/scp131b/examine(mob/user)
+	. = ..()
+	to_chat(user, "<span class='notice'>A slightly larger brownish-green teardrop-shaped creature with a single large eye. It babbles like a baby and seems friendly.</span>")
+	to_chat(user, "<span class='notice'>It seems to have an intense gaze that could freeze even the most dangerous entities in their tracks.</span>")
+
+/mob/living/simple_animal/scp131b/death()
+	scp173_stared = FALSE
+	visible_message("<span class='danger'>[src] closes its eye and goes still!</span>")
+	..()

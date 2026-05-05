@@ -1,0 +1,253 @@
+@use 'sass:color';
+@use 'sass:meta';
+
+$scp-red: #8b0000;
+$scp-dark-red: #5c0000;
+$scp-amber: #d4a017;
+$scp-green: #0a6e0a;
+$scp-dark-bg: #0a0a0c;
+$scp-panel-bg: #111114;
+$scp-border: #2a2a30;
+$scp-text: #c8c8c8;
+$scp-dim-text: #6a6a70;
+$scp-highlight: #e8e8e8;
+
+@use '../colors.scss' with (
+  $primary: $scp-amber,
+  $good: $scp-green,
+  $bad: $scp-red,
+  $label: $scp-amber,
+  $fg-map-keys: (),
+  $bg-map-keys: ()
+);
+
+@use '../base.scss' with (
+  $color-bg: $scp-dark-bg,
+  $color-fg: $scp-text,
+  $color-bg-grad-spread: 0%,
+  $font-family: ('Consolas', 'Courier New', monospace)
+);
+
+.theme-scp_terminal {
+  @include meta.load-css('../atomic/color.scss');
+
+  @include meta.load-css(
+    '../components/Button.scss',
+    $with: (
+      'color-default': #1a1a20,
+      'color-disabled': #0d0d10,
+      'color-selected': $scp-dark-red,
+      'color-caution': #2a1a00,
+      'color-danger': $scp-dark-red,
+      'color-transparent-text': $scp-text
+    )
+  );
+
+  @include meta.load-css(
+    '../components/Tabs.scss',
+    $with: (
+      'color-default': #1a1a20,
+      'tab-color-selected': $scp-dark-red,
+      'text-color': $scp-dim-text,
+      'text-color-selected': $scp-highlight
+    )
+  );
+
+  @include meta.load-css(
+    '../components/Input.scss',
+    $with: ('border-color': $scp-border)
+  );
+
+  @include meta.load-css(
+    '../components/Section.scss',
+    $with: ('title-text-color': $scp-amber)
+  );
+
+  @include meta.load-css(
+    '../components/Tooltip.scss',
+    $with: ('background-color': #1a1a1e)
+  );
+
+  @include meta.load-css(
+    '../components/Dimmer.scss',
+    $with: ('background-dimness': 0.7)
+  );
+
+  @include meta.load-css(
+    '../components/Modal.scss'
+  );
+
+  @include meta.load-css(
+    '../components/NoticeBox.scss',
+    $with: ('background-color': $scp-dark-red)
+  );
+
+  @include meta.load-css(
+    '../components/NumberInput.scss'
+  );
+
+  @include meta.load-css(
+    '../components/ProgressBar.scss',
+    $with: (
+      'color-default-fill': $scp-amber,
+      'background-color': #1a1a20
+    )
+  );
+
+  @include meta.load-css(
+    '../components/LabeledList.scss'
+  );
+
+  @include meta.load-css(
+    '../components/BlockQuote.scss',
+    $with: ('color-default': $scp-border)
+  );
+
+  @include meta.load-css(
+    '../components/Dropdown.scss'
+  );
+
+  @include meta.load-css('../layouts/Layout.scss');
+  @include meta.load-css('../layouts/Window.scss');
+  @include meta.load-css(
+    '../layouts/TitleBar.scss',
+    $with: (
+      'background-color': $scp-dark-red,
+      'text-color': $scp-highlight
+    )
+  );
+
+  .Layout__content {
+    background-image: none;
+    background-color: $scp-dark-bg;
+  }
+
+  .Layout__content::before {
+    content: ' ';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .Layout__content::after {
+    content: ' ';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    z-index: 99;
+    pointer-events: none;
+  }
+
+  .Window__contentPadding {
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+
+  .TitleBar {
+    font-family: 'Consolas', 'Courier New', monospace;
+    border-bottom: 2px solid $scp-red;
+  }
+
+  .Button {
+    font-family: 'Consolas', 'Courier New', monospace;
+    border: 1px solid $scp-border;
+    border-radius: 0;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+
+    &:hover {
+      border-color: $scp-red;
+      background-color: rgba($scp-red, 0.3);
+    }
+  }
+
+  .Button--selected {
+    background-color: $scp-dark-red;
+    border-color: $scp-red;
+    color: $scp-highlight;
+    box-shadow: 0 0 8px rgba($scp-red, 0.4);
+  }
+
+  .Button--disabled {
+    opacity: 0.3;
+    border-color: #111;
+  }
+
+  .Section {
+    border: 1px solid $scp-border;
+    border-radius: 0;
+    background-color: $scp-panel-bg;
+
+    .Section__title {
+      font-family: 'Consolas', 'Courier New', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid $scp-border;
+    }
+  }
+
+  .Input {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background-color: #0d0d10;
+    border: 1px solid $scp-border;
+    border-radius: 0;
+    color: $scp-amber;
+  }
+
+  .Dropdown {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background-color: #0d0d10;
+    border: 1px solid $scp-border;
+    border-radius: 0;
+  }
+
+  .LabeledList__label {
+    font-family: 'Consolas', 'Courier New', monospace;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+    color: $scp-dim-text;
+  }
+
+  .candystripe:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  .Tab {
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+
+  .Tooltip {
+    font-family: 'Consolas', 'Courier New', monospace;
+    border: 1px solid $scp-border;
+  }
+
+  span {
+    color: $scp-text;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+
+  hr {
+    border: 1px solid $scp-border;
+  }
+}

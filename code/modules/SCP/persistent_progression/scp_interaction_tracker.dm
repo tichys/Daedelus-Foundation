@@ -209,7 +209,7 @@ SUBSYSTEM_DEF(scp_interactions)
 	if(!player)
 		return
 	
-	var/total_contacts = log.scps_interacted.len
+	var/total_contacts = length(log.scps_interacted)
 	var/milestone_id = "contacts_[total_contacts]"
 	
 	if(!(milestone_id in log.milestones_achieved))
@@ -296,10 +296,10 @@ SUBSYSTEM_DEF(scp_interactions)
 	return list(
 		"ckey" = ckey,
 		"total_interactions" = total_interactions,
-		"unique_scps" = scps_interacted.len,
+		"unique_scps" = length(scps_interacted),
 		"first_interaction" = first_interaction_time,
 		"last_interaction" = last_interaction_time,
-		"milestones" = milestones_achieved.len
+		"milestones" = length(milestones_achieved)
 	)
 
 /datum/interaction_event
@@ -372,7 +372,7 @@ SUBSYSTEM_DEF(scp_interactions)
 	
 	var/datum/scp_interaction_log/log = SSscp_interactions.manager.get_player_log(ckey)
 	
-	if(!log || !log.events.len)
+	if(!log || !length(log.events))
 		to_chat(src, "<span class='notice'>No SCP interactions recorded yet.</span>")
 		return
 	
@@ -387,11 +387,11 @@ SUBSYSTEM_DEF(scp_interactions)
 	for(var/scp_id in log.scps_interacted)
 		message += "- [scp_id]<br>"
 	
-	if(log.events.len > 0)
+	if(length(log.events) > 0)
 		message += "<br><h3>Recent Interactions:</h3>"
-		var/recent_count = min(10, log.events.len)
+		var/recent_count = min(10, length(log.events))
 		for(var/i in 1 to recent_count)
-			var/datum/interaction_event/event = log.events[log.events.len - i + 1]
+			var/datum/interaction_event/event = log.events[length(log.events) - i + 1]
 			var/time_ago = round((world.time - event.timestamp) / 600, 0.1)
 			message += "- [event.scp_id] ([event.get_type_name()]) - [time_ago] min ago<br>"
 	

@@ -251,10 +251,10 @@
 	var/datum/event_story_management_manager/manager = SSevent_story_management.manager
 
 	to_chat(src, "<span class='notice'>=== Event & Story Management Debug Info ===</span>")
-	to_chat(src, "<span class='notice'>Active Events: [manager.active_events.len]</span>")
-	to_chat(src, "<span class='notice'>Story Arcs: [manager.story_arcs.len]</span>")
-	to_chat(src, "<span class='notice'>Player Events: [manager.player_initiated_events.len]</span>")
-	to_chat(src, "<span class='notice'>Event Templates: [manager.event_templates.len]</span>")
+	to_chat(src, "<span class='notice'>Active Events: [length(manager.active_events)]</span>")
+	to_chat(src, "<span class='notice'>Story Arcs: [length(manager.story_arcs)]</span>")
+	to_chat(src, "<span class='notice'>Player Events: [length(manager.player_initiated_events)]</span>")
+	to_chat(src, "<span class='notice'>Event Templates: [length(manager.event_templates)]</span>")
 	to_chat(src, "<span class='notice'>Total Events Created: [manager.total_events_created]</span>")
 	to_chat(src, "<span class='notice'>Player Participation Rate: [manager.player_participation_rate]%</span>")
 	to_chat(src, "<span class='notice'>Event Completion Rate: [manager.event_completion_rate]%</span>")

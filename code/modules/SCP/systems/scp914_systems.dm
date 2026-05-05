@@ -130,63 +130,30 @@
 	if(!item)
 		return
 
-	var/refinement_result = calculate_refinement_result(item)
+	var/result_type = scp914_process_item(item, refinement_setting)
 
-	if(refinement_result == "destroyed")
+	if(isnull(result_type))
 		objects_destroyed++
-		qdel(item)
 		owner.visible_message("<span class='danger'>[item] is destroyed by SCP-914!</span>")
-	else if(refinement_result == "enhanced")
-		objects_enhanced++
-		enhance_item(item)
+		qdel(item)
+	else if(result_type == item.type && refinement_setting != SCP914_ONE_TO_ONE)
 		output_objects += item
-		owner.visible_message("<span class='notice'>[item] is enhanced by SCP-914!</span>")
+		item.forceMove(owner)
+		owner.visible_message("<span class='notice'>[item] passes through SCP-914 unchanged.</span>")
 	else
-		output_objects += item
-		owner.visible_message("<span class='notice'>[item] is refined by SCP-914.</span>")
+		var/obj/item/result = new result_type(get_turf(owner))
+		if(result)
+			if(refinement_setting == SCP914_FINE || refinement_setting == SCP914_VERY_FINE)
+				result.name = "refined [result.name]"
+				if(refinement_setting == SCP914_VERY_FINE && prob(30))
+					result.name = "anomalous [result.name]"
+					result.desc = "[result.desc] It crackles with strange energy."
+			output_objects += result
+			objects_enhanced++
+			owner.visible_message("<span class='notice'>[item] is refined into [result.name] by SCP-914!</span>")
+		qdel(item)
 
 	total_materials_processed++
-
-/datum/scp914_refinement_system/proc/calculate_refinement_result(obj/item/item)
-	var/destruction_chance = 0
-	var/enhancement_chance = 0
-
-	switch(refinement_setting)
-		if("ROUGH")
-			destruction_chance = 30
-			enhancement_chance = 10
-		if("COARSE")
-			destruction_chance = 20
-			enhancement_chance = 20
-		if("1:1")
-			destruction_chance = 10
-			enhancement_chance = 30
-		if("FINE")
-			destruction_chance = 5
-			enhancement_chance = 50
-		if("VERY_FINE")
-			destruction_chance = 2
-			enhancement_chance = 80
-
-	// Apply mastery bonuses
-	enhancement_chance += refinement_mastery / 10
-	destruction_chance -= refinement_mastery / 20
-
-	if(prob(destruction_chance))
-		return "destroyed"
-	else if(prob(enhancement_chance))
-		return "enhanced"
-	else
-		return "normal"
-
-/datum/scp914_refinement_system/proc/enhance_item(obj/item/item)
-	if(!item)
-		return
-
-	// Apply various enhancements based on refinement quality
-	if(refinement_quality >= 3.0)
-		item.name = "Enhanced [item.name]"
-		item.desc = "[item.desc] This item has been enhanced by SCP-914."
 
 /datum/scp914_refinement_system/proc/process_refinement_mastery()
 	if(refinements_performed > 0 && refinement_mastery < max_refinement_mastery)

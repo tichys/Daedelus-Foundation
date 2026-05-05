@@ -1,8 +1,11 @@
 SUBSYSTEM_DEF(scp_persistence)
 	name = "SCP Persistence"
-	wait = 300 // Check every 5 seconds
+	wait = 300
 	priority = FIRE_PRIORITY_PERSISTENT_PROGRESSION
 	var/datum/scp_persistence_manager/manager
+	var/list/cached_scp_atoms = list()
+	var/list/cached_scp_mobs = list()
+	var/cache_dirty = TRUE
 
 /datum/controller/subsystem/scp_persistence/Initialize()
 	manager = new /datum/scp_persistence_manager()
@@ -10,8 +13,25 @@ SUBSYSTEM_DEF(scp_persistence)
 	return ..()
 
 /datum/controller/subsystem/scp_persistence/fire()
+	if(cache_dirty)
+		rebuild_scp_cache()
 	if(manager)
-		manager.process_scp()
+		manager.process_scp(cached_scp_atoms, cached_scp_mobs)
+
+/datum/controller/subsystem/scp_persistence/proc/rebuild_scp_cache()
+	cached_scp_atoms = list()
+	cached_scp_mobs = list()
+	for(var/obj/O in world)
+		if(findtext(O.name, "SCP-"))
+			var/id = manager?.get_scp_id(O)
+			if(id)
+				cached_scp_atoms[id] = O
+				if(istype(O, /mob/living/carbon/scp))
+					cached_scp_mobs[id] = O
+	cache_dirty = FALSE
+
+/datum/controller/subsystem/scp_persistence/proc/mark_cache_dirty()
+	cache_dirty = TRUE
 
 // SCP Persistence Manager
 /datum/scp_persistence_manager
@@ -44,95 +64,74 @@ SUBSYSTEM_DEF(scp_persistence)
 	var/performance_tracking_enabled = TRUE
 	var/auto_access_management = TRUE
 
-/datum/scp_persistence_manager/proc/process_scp()
-	// Update SCP instances
-	update_scp_instances()
+/datum/scp_persistence_manager/proc/process_scp(list/cached_atoms, list/cached_mobs)
+	update_scp_instances(cached_atoms, cached_mobs)
 
-	// Update research projects
 	update_research_projects()
 
-	// Update containment protocols
 	update_containment_protocols()
 
-	// Update anomaly effects
 	update_anomaly_effects()
 
-	// Update environmental changes
 	update_environmental_changes()
 
-	// Calculate global metrics
 	calculate_global_metrics()
 
-	// Detect cross-SCP interactions
-	process_cross_scp_interactions()
+	process_cross_scp_interactions(cached_atoms)
 
-	// Save data periodically
-	if(world.time % 6000 == 0) // Every 10 minutes
+	if(world.time % 6000 == 0)
 		save_scp_data()
 
-	// Periodically snapshot skills to player performance if pilots exist
 	for(var/client/C in GLOB.clients)
 		if(C.mob && istype(C.mob, /mob/living/carbon/scp))
 			var/mob/living/carbon/scp/S = C.mob
 			var/datum/player_performance/perf = get_player_performance(C.ckey)
 			perf.register_scp_skill_snapshot(S.SCP_datum ? S.SCP_datum.name : (S.name || "SCP"), S.skill_levels)
 
-	// Process SCP management
 	process_scp_management()
 
-	// Process player performance tracking
 	if(performance_tracking_enabled)
 		process_player_performance()
 
-/datum/scp_persistence_manager/proc/update_scp_instances()
-	// Find and update all SCP objects in the world
-	for(var/obj/O in world)
-		if(findtext(O.name, "SCP-"))
-			var/scp_id = get_scp_id(O)
-			if(scp_id)
-				// Check if SCP should be active based on management system
-				if(!is_scp_enabled(scp_id))
-					continue
+/datum/scp_persistence_manager/proc/update_scp_instances(list/cached_atoms, list/cached_mobs)
+	for(var/scp_id in cached_atoms)
+		var/obj/O = cached_atoms[scp_id]
+		if(!O || QDELETED(O))
+			cached_atoms -= scp_id
+			continue
 
-				if(scp_id in scp_instances)
-					var/datum/scp_instance/instance = scp_instances[scp_id]
-					instance.update_status(O)
-					// If this is a live SCP mob, try to apply persisted skills one-time
-					if(istype(O, /mob/living/carbon/scp))
-						var/mob/living/carbon/scp/S = O
-						if(!S.skills_restored)
-							instance.apply_to_scp(S)
-							S.skills_restored = TRUE
-				else
-					var/datum/scp_instance/new_instance = new /datum/scp_instance(scp_id, O)
-					scp_instances[scp_id] = new_instance
-					new_instance.update_status(O)
-					if(istype(O, /mob/living/carbon/scp))
-						var/mob/living/carbon/scp/S2 = O
-						new_instance.apply_to_scp(S2)
-						S2.skills_restored = TRUE
+		if(!is_scp_enabled(scp_id))
+			continue
+
+		if(scp_id in scp_instances)
+			var/datum/scp_instance/instance = scp_instances[scp_id]
+			instance.update_status(O)
+			if(istype(O, /mob/living/carbon/scp))
+				var/mob/living/carbon/scp/S = O
+				if(!S.skills_restored)
+					instance.apply_to_scp(S)
+					S.skills_restored = TRUE
+		else
+			var/datum/scp_instance/new_instance = new /datum/scp_instance(scp_id, O)
+			scp_instances[scp_id] = new_instance
+			new_instance.update_status(O)
+			if(istype(O, /mob/living/carbon/scp))
+				var/mob/living/carbon/scp/S2 = O
+				new_instance.apply_to_scp(S2)
+				S2.skills_restored = TRUE
 
 // Cross-SCP interactions: proximity-based simple detection and logging
-/datum/scp_persistence_manager/proc/process_cross_scp_interactions()
-	if(scp_instances.len < 2)
+/datum/scp_persistence_manager/proc/process_cross_scp_interactions(list/cached_atoms)
+	if(length(scp_instances) < 2)
 		return
-	var/list/id_to_atom = list()
-	// Build id->atom map by scanning world once
-	for(var/obj/O in world)
-		if(findtext(O.name, "SCP-"))
-			var/id = get_scp_id(O)
-			if(id)
-				id_to_atom[id] = O
-	// Compare pairs
 	for(var/id_a in scp_instances)
-		var/obj/A = id_to_atom[id_a]
+		var/obj/A = cached_atoms[id_a]
 		if(!A) continue
 		for(var/id_b in scp_instances)
 			if(id_b == id_a) continue
-			var/obj/B = id_to_atom[id_b]
+			var/obj/B = cached_atoms[id_b]
 			if(!B) continue
 			if(get_dist(A, B) <= 3)
-				// Log an interaction
 				var/datum/scp_instance/inst_a = scp_instances[id_a]
 				var/datum/scp_instance/inst_b = scp_instances[id_b]
 				if(inst_a) inst_a.add_interaction_record(null, "proximity:[id_b]")
@@ -204,13 +203,26 @@ SUBSYSTEM_DEF(scp_persistence)
 		research_progress = total_progress / project_count
 
 /datum/scp_persistence_manager/proc/save_scp_data()
+	var/list/serializable_instances = list()
+	for(var/scp_id in scp_instances)
+		var/datum/scp_instance/instance = scp_instances[scp_id]
+		serializable_instances[scp_id] = instance.serialize()
+
+	var/list/serializable_research = list()
+	for(var/project_id in research_projects)
+		var/datum/research_project/project = research_projects[project_id]
+		serializable_research[project_id] = list(
+			"project_id" = project.project_id,
+			"project_name" = project.project_name,
+			"progress" = project.progress,
+			"max_progress" = project.max_progress,
+			"research_status" = project.research_status,
+			"priority_level" = project.priority_level
+		)
+
 	var/list/data = list(
-		"scp_instances" = scp_instances,
-		"research_projects" = research_projects,
-		"containment_protocols" = containment_protocols,
-		"anomaly_effects" = anomaly_effects,
-		"communication_logs" = communication_logs,
-		"environmental_changes" = environmental_changes,
+		"scp_instances" = serializable_instances,
+		"research_projects" = serializable_research,
 		"global_containment_stability" = global_containment_stability,
 		"active_breaches" = active_breaches,
 		"research_progress" = research_progress,
@@ -228,10 +240,8 @@ SUBSYSTEM_DEF(scp_persistence)
 		"last_rotation_time" = last_rotation_time
 	)
 
-	// Save to JSON file
 	var/filename = "data/scp_persistence.json"
-	fdel(filename)
-	text2file(json_encode(data), filename)
+	rustg_file_write(json_encode(data), filename)
 
 /datum/scp_persistence_manager/proc/load_scp_data()
 	var/filename = "data/scp_persistence.json"
@@ -297,25 +307,28 @@ SUBSYSTEM_DEF(scp_persistence)
 
 /datum/scp_instance/proc/update_status(var/obj/O)
 	if(O)
-		// Update containment status based on object state
-		containment_status = "contained" // Simplified containment status
+		if(istype(O, /mob/living))
+			var/mob/living/L = O
+			containment_health = round((L.health / L.maxHealth) * 100)
+			if(L.stat == DEAD)
+				containment_status = "terminated"
+				current_state = "dead"
+			else if(containment_health < 50)
+				if(containment_status != "breached")
+					containment_status = "breached"
+					last_breach = world.time
+					add_breach_record()
+				current_state = "agitated"
+			else
+				containment_status = "contained"
+				current_state = "normal"
+		else
+			containment_status = "contained"
+			containment_health = 100
+			current_state = "normal"
 
-		// Update containment health
-		containment_health = 100 // Simplified containment health
-
-		// Update current state
-		current_state = "normal" // Simplified current state
-
-		// Check for breaches
-		if(containment_health < 50 && containment_status != "breached")
-			containment_status = "breached"
-			last_breach = world.time
-			add_breach_record()
-
-		// Update containment effectiveness
 		containment_effectiveness = containment_health / 100
 
-		// Update skill persistence from live SCP mob, if applicable
 		if(istype(O, /mob/living/carbon/scp))
 			var/mob/living/carbon/scp/S = O
 			persisted_skill_levels = islist(S.skill_levels) ? S.skill_levels.Copy() : list()
@@ -329,11 +342,11 @@ SUBSYSTEM_DEF(scp_persistence)
 /datum/scp_instance/proc/apply_to_scp(var/mob/living/carbon/scp/S)
 	if(!S)
 		return
-	if(islist(persisted_skill_levels) && persisted_skill_levels.len)
+	if(islist(persisted_skill_levels) && length(persisted_skill_levels))
 		S.skill_levels = persisted_skill_levels.Copy()
-	if(islist(persisted_skill_experience) && persisted_skill_experience.len)
+	if(islist(persisted_skill_experience) && length(persisted_skill_experience))
 		S.skill_experience = persisted_skill_experience.Copy()
-	if(islist(persisted_skill_cooldowns) && persisted_skill_cooldowns.len)
+	if(islist(persisted_skill_cooldowns) && length(persisted_skill_cooldowns))
 		S.skill_cooldowns = persisted_skill_cooldowns.Copy()
 	S.last_skill_use = last_skill_use
 	S.level_up_cooldown = level_up_cooldown
@@ -346,6 +359,28 @@ SUBSYSTEM_DEF(scp_persistence)
 		"severity" = "Unknown"
 	)
 	breach_history += breach_record
+
+/datum/scp_instance/proc/serialize()
+	return list(
+		"scp_id" = scp_id,
+		"containment_status" = containment_status,
+		"containment_health" = containment_health,
+		"containment_difficulty" = containment_difficulty,
+		"current_state" = current_state,
+		"breach_history" = breach_history,
+		"interaction_history" = interaction_history,
+		"containment_class" = containment_class,
+		"containment_effectiveness" = containment_effectiveness,
+		"research_value" = research_value,
+		"threat_level" = threat_level,
+		"last_breach" = last_breach,
+		"reproduction_count" = reproduction_count,
+		"persisted_skill_levels" = persisted_skill_levels,
+		"persisted_skill_experience" = persisted_skill_experience,
+		"persisted_skill_cooldowns" = persisted_skill_cooldowns,
+		"last_skill_use" = last_skill_use,
+		"level_up_cooldown" = level_up_cooldown
+	)
 
 /datum/scp_instance/proc/add_interaction_record(var/mob/user, var/interaction_type)
 	var/list/interaction_record = list(
@@ -579,12 +614,12 @@ SUBSYSTEM_DEF(scp_persistence)
 	message += "<b>Research Progress:</b> [manager.research_progress]%<br>"
 	message += "<b>Containment Effectiveness:</b> [manager.containment_effectiveness * 100]%<br><br>"
 
-	message += "<h3>SCP Instances ([manager.scp_instances.len])</h3>"
+	message += "<h3>SCP Instances ([length(manager.scp_instances)])</h3>"
 	for(var/scp_id in manager.scp_instances)
 		var/datum/scp_instance/instance = manager.scp_instances[scp_id]
 		message += "<b>[scp_id]:</b> [instance.containment_status] ([instance.containment_health]% health)<br>"
 
-	message += "<h3>Research Projects ([manager.research_projects.len])</h3>"
+	message += "<h3>Research Projects ([length(manager.research_projects)])</h3>"
 	for(var/project_id in manager.research_projects)
 		var/datum/research_project/project = manager.research_projects[project_id]
 		message += "<b>[project.project_name]:</b> [project.progress]% complete ([project.research_status])<br>"
@@ -786,14 +821,14 @@ SUBSYSTEM_DEF(scp_persistence)
 		disable_scp(scp_id)
 
 	// Enable a random subset
-	var/rotation_count = min(5, all_scps.len) // Enable up to 5 SCPs
+	var/rotation_count = min(5, length(all_scps)) // Enable up to 5 SCPs
 	for(var/i = 1 to rotation_count)
-		if(all_scps.len > 0)
+		if(length(all_scps) > 0)
 			var/selected_scp = pick(all_scps)
 			enable_scp(selected_scp)
 			all_scps -= selected_scp
 
-	world.log << "SCP Management: Rotation completed, [enabled_scps.len] SCPs enabled"
+	world.log << "SCP Management: Rotation completed, [length(enabled_scps)] SCPs enabled"
 
 // Check for auto-containment
 /datum/scp_persistence_manager/proc/check_auto_containment()
@@ -1013,12 +1048,12 @@ SUBSYSTEM_DEF(scp_persistence)
 	message += "<b>SCP Rotation:</b> [manager.scp_rotation_enabled ? "Enabled" : "Disabled"]<br>"
 	message += "<b>Management Override:</b> [manager.management_override ? "Active" : "Inactive"]<br><br>"
 
-	message += "<h3>Enabled SCPs ([manager.enabled_scps.len])</h3>"
+	message += "<h3>Enabled SCPs ([length(manager.enabled_scps)])</h3>"
 	for(var/scp_id in manager.enabled_scps)
 		var/status = manager.is_scp_enabled(scp_id) ? "Active" : "Inactive"
 		message += "- [scp_id]: [status]<br>"
 
-	message += "<h3>Disabled SCPs ([manager.disabled_scps.len])</h3>"
+	message += "<h3>Disabled SCPs ([length(manager.disabled_scps)])</h3>"
 	for(var/scp_id in manager.disabled_scps)
 		message += "- [scp_id]<br>"
 
@@ -1072,7 +1107,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 		if("Remove Restriction")
 			var/list/restrictions = manager.get_scp_configuration(scp_id, "restrictions") || list()
-			if(restrictions.len > 0)
+			if(length(restrictions) > 0)
 				var/restriction = input(usr, "Choose restriction to remove:", "Remove Restriction") as null|anything in restrictions
 				if(restriction)
 					restrictions -= restriction
@@ -1184,12 +1219,12 @@ SUBSYSTEM_DEF(scp_persistence)
 				var/list/scp_data = performance.scp_performance[scp_id]
 				message += "<b>[scp_id]:</b> [scp_data["average_score"]] (Rounds: [scp_data["rounds_played"]])<br>"
 
-			message += "<h3>Achievements ([performance.achievements.len])</h3>"
+			message += "<h3>Achievements ([length(performance.achievements)])</h3>"
 			for(var/achievement in performance.achievements)
 				var/list/ach_data = achievement
 				message += "- [ach_data["name"]]: [ach_data["description"]]<br>"
 
-			message += "<h3>Violations ([performance.violations.len])</h3>"
+			message += "<h3>Violations ([length(performance.violations)])</h3>"
 			for(var/violation in performance.violations)
 				var/list/viol_data = violation
 				message += "- [viol_data["type"]] ([viol_data["severity"]]): [viol_data["description"]]<br>"

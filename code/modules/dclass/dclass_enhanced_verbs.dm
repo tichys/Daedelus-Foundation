@@ -18,7 +18,7 @@
 
 	var/info = "<h3>Dynamic Events Status</h3>"
 
-	if(SSdclass.manager.event_manager && SSdclass.manager.event_manager.active_events.len > 0)
+	if(SSdclass.manager.event_manager && length(SSdclass.manager.event_manager.active_events) > 0)
 		info += "<h4>Active Events:</h4>"
 		for(var/datum/dclass_event/event in SSdclass.manager.event_manager.active_events)
 			var/time_remaining = (event.start_time + event.duration - world.time) / 10
@@ -65,7 +65,7 @@
 
 	var/info = "<h3>SCP Interaction</h3>"
 
-	if(nearby_scps.len > 0)
+	if(length(nearby_scps) > 0)
 		info += "<h4>Nearby SCPs:</h4>"
 		for(var/mob/living/carbon/scp/S in nearby_scps)
 			info += "<b>[S.name]:</b> [S.desc]<br>"
@@ -77,15 +77,15 @@
 
 		switch(action)
 			if("Study SCP")
-				if(nearby_scps.len > 0)
+				if(length(nearby_scps) > 0)
 					var/mob/living/carbon/scp/selected_scp = pick(nearby_scps)
 					study_scp(player, selected_scp)
 			if("Use SCP for Distraction")
-				if(nearby_scps.len > 0)
+				if(length(nearby_scps) > 0)
 					var/mob/living/carbon/scp/selected_scp = pick(nearby_scps)
 					use_scp_distraction(player, selected_scp)
 			if("Steal SCP Materials")
-				if(nearby_scps.len > 0)
+				if(length(nearby_scps) > 0)
 					var/mob/living/carbon/scp/selected_scp = pick(nearby_scps)
 					steal_scp_materials(player, selected_scp)
 	else
@@ -247,7 +247,7 @@
 		info += "<span style='color: [color];'>[status] [requirement]</span><br>"
 
 	// Show active events affecting this escape
-	if(SSdclass.manager.event_manager && SSdclass.manager.event_manager.active_events.len > 0)
+	if(SSdclass.manager.event_manager && length(SSdclass.manager.event_manager.active_events) > 0)
 		info += "<br><b>Active Events:</b><br>"
 		for(var/datum/dclass_event/event in SSdclass.manager.event_manager.active_events)
 			info += "- [event.name]: [event.escape_bonus]% bonus<br>"

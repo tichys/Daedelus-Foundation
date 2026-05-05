@@ -375,8 +375,8 @@
 					"id" = scp_id,
 					"containment_health" = instance.containment_health,
 					"containment_status" = instance.containment_status,
-					"interaction_count" = instance.interaction_history.len,
-					"last_interaction" = instance.interaction_history.len > 0 ? time2text(instance.interaction_history[instance.interaction_history.len]["timestamp"], "YYYY-MM-DD HH:MM") : "Never",
+					"interaction_count" = length(instance.interaction_history),
+					"last_interaction" = length(instance.interaction_history) > 0 ? time2text(instance.interaction_history[length(instance.interaction_history)]["timestamp"], "YYYY-MM-DD HH:MM") : "Never",
 					"enabled" = manager.is_scp_enabled(scp_id)
 				))
 
@@ -637,7 +637,7 @@
 		return
 
 	// Check spawn conditions
-	var/player_count = GLOB.clients.len
+	var/player_count = length(GLOB.clients)
 	var/min_players = template["spawn_conditions"]["min_players"]
 
 	if(player_count < min_players)
@@ -709,7 +709,7 @@
 		if(findtext(O.name, scp_id))
 			scp_objects += O
 
-	for(var/mob/M in world)
+	for(var/mob/M in GLOB.mob_list)
 		if(findtext(M.name, scp_id))
 			scp_objects += M
 
@@ -721,7 +721,7 @@
 			scp.containment_status = "contained"
 		// Add more SCP-specific containment logic here
 
-	to_chat(admin_client, "<span class='notice'>Applied containment to [scp_objects.len] instances of [scp_id]</span>")
+	to_chat(admin_client, "<span class='notice'>Applied containment to [length(scp_objects)] instances of [scp_id]</span>")
 
 /datum/scp_management_interface/proc/view_scp_logs(scp_id)
 	if(!scp_id || !SSscp_persistence || !SSscp_persistence.manager)
@@ -733,8 +733,8 @@
 		return
 
 	var/message = "<h2>SCP [scp_id] Interaction Logs</h2>"
-	message += "<b>Total Interactions:</b> [instance.interaction_history.len]<br>"
-	message += "<b>Last Interaction:</b> [instance.interaction_history.len > 0 ? time2text(instance.interaction_history[instance.interaction_history.len]["timestamp"], "YYYY-MM-DD HH:MM") : "Never"]<br><br>"
+	message += "<b>Total Interactions:</b> [length(instance.interaction_history)]<br>"
+	message += "<b>Last Interaction:</b> [length(instance.interaction_history) > 0 ? time2text(instance.interaction_history[length(instance.interaction_history)]["timestamp"], "YYYY-MM-DD HH:MM") : "Never"]<br><br>"
 
 	message += "<h3>Recent Interactions:</h3>"
 	var/count = 0

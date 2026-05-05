@@ -106,7 +106,9 @@
 	if(!character || !user || !user.client || !user.client.prefs)
 		return FALSE
 
-	var/prefs = user.client.prefs
+	var/datum/preferences/prefs = user.client.prefs
+	if(!prefs)
+		return FALSE
 
 	// Try to update preferences using the proper update_preference method
 	var/successful_updates = 0
@@ -248,7 +250,7 @@
 
 	// Get relationships for this character
 	var/list/character_relationships = character.character_relationships
-	if(character_relationships && character_relationships.len > 0)
+	if(character_relationships && length(character_relationships) > 0)
 		for(var/relationship in character_relationships)
 			if(istype(relationship, /list))
 				relationships += relationship

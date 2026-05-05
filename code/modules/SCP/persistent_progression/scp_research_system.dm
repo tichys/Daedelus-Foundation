@@ -106,7 +106,7 @@ SUBSYSTEM_DEF(scp_research)
 	// Initialize research milestones
 	initialize_research_milestones()
 
-	world.log << "SCP Research: Research system initialized with [research_rewards.len] rewards and [research_milestones.len] milestones"
+	world.log << "SCP Research: Research system initialized with [length(research_rewards)] rewards and [length(research_milestones)] milestones"
 
 /datum/scp_research_manager/proc/initialize_research_rewards()
 	// Budget rewards
@@ -306,15 +306,10 @@ SUBSYSTEM_DEF(scp_research)
 
 /datum/controller/subsystem/scp_research/fire()
 	if(manager)
-		manager.process_research()
+		manager.process_research_projects()
 
 /datum/scp_research_manager/proc/process_research()
-	// Process ongoing research projects
-	for(var/project_id in research_projects)
-		var/datum/research_data/project = research_projects[project_id]
-		if(project.status == "ACTIVE")
-			// Passive research point gain
-			add_research_points(project_id, 1, project.researcher_ckey)
+	return
 
 /datum/scp_research_manager/proc/process_research_projects()
 	for(var/project_id in research_projects)
@@ -353,7 +348,7 @@ SUBSYSTEM_DEF(scp_research)
 	check_scp_research_breakthrough(project, researcher)
 
 /datum/scp_research_manager/proc/get_researcher_by_ckey(ckey)
-	for(var/mob/living/carbon/human/H in world)
+	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.ckey == ckey)
 			return H
 	return null
@@ -481,12 +476,12 @@ GLOBAL_DATUM_INIT(scp_research_manager, /datum/scp_research_manager, new)
 	to_chat(src, "<span class='notice'>Completed Projects: [researcher.completed_projects]</span>")
 	to_chat(src, "<span class='notice'>Failed Projects: [researcher.failed_projects]</span>")
 
-	if(researcher.achievements.len > 0)
+	if(length(researcher.achievements) > 0)
 		to_chat(src, "<span class='notice'><b>Achievements:</b></span>")
 		for(var/achievement in researcher.achievements)
 			to_chat(src, "<span class='notice'>- [achievement]</span>")
 
-	if(researcher.completed_research.len > 0)
+	if(length(researcher.completed_research) > 0)
 		to_chat(src, "<span class='notice'><b>Completed Research:</b></span>")
 		for(var/research in researcher.completed_research)
 			to_chat(src, "<span class='notice'>- [research]</span>")

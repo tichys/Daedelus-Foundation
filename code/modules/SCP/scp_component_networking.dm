@@ -64,7 +64,7 @@
 		message_queue += message
 
 	// Enforce queue size limit
-	if(message_queue.len > max_queue_size)
+	if(length(message_queue) > max_queue_size)
 		message_queue.Cut(max_queue_size + 1)
 
 	return TRUE
@@ -93,13 +93,13 @@
 	return TRUE
 
 /datum/scp_component_communicator/proc/process_message_queue()
-	if(!processing_enabled || !message_queue.len)
+	if(!processing_enabled || !length(message_queue))
 		return
 
 	var/messages_processed = 0
 	var/max_process_per_tick = 5
 
-	while(message_queue.len && messages_processed < max_process_per_tick)
+	while(length(message_queue) && messages_processed < max_process_per_tick)
 		var/list/message = message_queue[1]
 		message_queue.Cut(1, 2)
 
@@ -311,8 +311,8 @@
 	network_logs += list(log_entry)
 
 	// Maintain log size
-	if(network_logs.len > max_log_entries)
-		network_logs.Cut(1, network_logs.len - max_log_entries + 1)
+	if(length(network_logs) > max_log_entries)
+		network_logs.Cut(1, length(network_logs) - max_log_entries + 1)
 
 // Global SCP Network Hub Instance
 var/global/datum/scp_network_hub/GLOB_SCP_NETWORK = new /datum/scp_network_hub()

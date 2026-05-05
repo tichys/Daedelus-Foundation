@@ -353,8 +353,8 @@
 	effect_history += list(log_entry)
 
 	// Maintain history size
-	if(effect_history.len > max_history_entries)
-		effect_history.Cut(1, effect_history.len - max_history_entries + 1)
+	if(length(effect_history) > max_history_entries)
+		effect_history.Cut(1, length(effect_history) - max_history_entries + 1)
 
 // Enhanced Component Manager with Effects
 /datum/component_manager_advanced

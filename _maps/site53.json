@@ -1,0 +1,8 @@
+{
+	"version": 1,
+	"map_name": "Site 53",
+	"map_path": "map_files/site53",
+	"map_file": "site53.dmm",
+	"shuttles": {},
+	"run_mapping_tests": false
+}

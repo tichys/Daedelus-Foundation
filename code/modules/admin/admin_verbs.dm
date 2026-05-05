@@ -453,8 +453,9 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	set name = "Game Panel"
 	set category = "Admin.Game"
 	if(holder)
-		holder.Game()
-	SSblackbox.record_feedback("tally", "admin_verb", 1, "Game Panel") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+		var/datum/admin_game_panel_ui/panel = new(holder)
+		panel.ui_interact(usr)
+	SSblackbox.record_feedback("tally", "admin_verb", 1, "Game Panel")
 
 /client/proc/poll_panel()
 	set name = "Server Poll Management"

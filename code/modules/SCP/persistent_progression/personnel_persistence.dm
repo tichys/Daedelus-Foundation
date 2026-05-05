@@ -263,12 +263,12 @@ SUBSYSTEM_DEF(personnel_persistence)
 			base_performance = 70
 
 	// Adjust based on training completion
-	if(record.training_records.len > 0)
+	if(length(record.training_records) > 0)
 		base_performance += 5
 
 	// Adjust based on assignments completed
-	if(record.assignments.len > 0)
-		base_performance += min(10, record.assignments.len * 2)
+	if(length(record.assignments) > 0)
+		base_performance += min(10, length(record.assignments) * 2)
 
 	return max(0, min(100, base_performance))
 
@@ -340,9 +340,9 @@ SUBSYSTEM_DEF(personnel_persistence)
 	personnel_statistics["turnover_rate"] = turnover_rate
 	personnel_statistics["average_performance"] = average_performance
 	personnel_statistics["training_completion"] = training_completion_rate
-	personnel_statistics["active_assignments"] = assignments.len
-	personnel_statistics["pending_reviews"] = performance_reviews.len
-	personnel_statistics["active_training"] = training_records.len
+	personnel_statistics["active_assignments"] = length(assignments)
+	personnel_statistics["pending_reviews"] = length(performance_reviews)
+	personnel_statistics["active_training"] = length(training_records)
 
 /datum/personnel_persistence_manager/proc/process_assignments()
 	for(var/assignment_id in assignments)
@@ -645,7 +645,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 			world.log << "Personnel Persistence: Failed to save promotion [promotion_id]"
 		qdel(query_save_promotion)
 
-	world.log << "Personnel Persistence: Saved [personnel_records.len] personnel records, [assignments.len] assignments, [performance_reviews.len] reviews, [training_records.len] training records, and [promotions.len] promotions to database"
+	world.log << "Personnel Persistence: Saved [length(personnel_records)] personnel records, [length(assignments)] assignments, [length(performance_reviews)] reviews, [length(training_records)] training records, and [length(promotions)] promotions to database"
 
 /datum/personnel_persistence_manager/proc/load_personnel_data()
 	// First, load existing records from datacore
@@ -916,7 +916,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 			promotions[promotion_id] = promotion
 		qdel(query_load_promotions)
 
-	world.log << "Personnel Persistence: Loaded [personnel_records.len] personnel records, [assignments.len] assignments, [performance_reviews.len] reviews, [training_records.len] training records, and [promotions.len] promotions from database"
+	world.log << "Personnel Persistence: Loaded [length(personnel_records)] personnel records, [length(assignments)] assignments, [length(performance_reviews)] reviews, [length(training_records)] training records, and [length(promotions)] promotions from database"
 	*/
 
 // Subsystem initialization
@@ -929,7 +929,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	world.log << "Loading existing personnel records from datacore..."
 	manager.load_existing_personnel_records()
 
-	world.log << "Personnel records count at initialization: [manager.personnel_records.len]"
+	world.log << "Personnel records count at initialization: [length(manager.personnel_records)]"
 	return ..()
 
 /datum/controller/subsystem/personnel_persistence/fire()
@@ -1113,7 +1113,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 
 /datum/personnel_persistence_manager/proc/calculate_training_completion_rate()
 	var/completed_training = 0
-	var/total_training = training_records.len
+	var/total_training = length(training_records)
 
 	for(var/training_id in training_records)
 		var/datum/training_record/training = training_records[training_id]
@@ -1266,10 +1266,10 @@ SUBSYSTEM_DEF(personnel_persistence)
 				world.log << "Personnel: Loaded record for [general_record.fields[DATACORE_NAME]] ([department] - [position])"
 
 	// Update total staff count
-	total_staff = personnel_records.len
+	total_staff = length(personnel_records)
 	active_staff = total_staff
 
-	world.log << "Personnel: Loaded [personnel_records.len] personnel records from datacore"
+	world.log << "Personnel: Loaded [length(personnel_records)] personnel records from datacore"
 
 // Clear persistent storage to ensure only real data is used
 /datum/personnel_persistence_manager/proc/clear_persistent_storage()

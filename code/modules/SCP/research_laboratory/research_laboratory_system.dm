@@ -138,7 +138,7 @@ SUBSYSTEM_DEF(research_laboratory)
 
 	// Find the first team member as lead researcher
 	var/list/members = team["members"]
-	if(members.len > 0)
+	if(length(members) > 0)
 		return get_researcher_by_ckey(members[1]["ckey"])
 
 	return null
@@ -171,7 +171,7 @@ SUBSYSTEM_DEF(research_laboratory)
 
 /datum/research_laboratory_manager/proc/award_experiment_experience(experiment_id, research_points)
 	var/list/team_members = get_experiment_team_members(experiment_id)
-	var/points_per_member = research_points / max(team_members.len, 1)
+	var/points_per_member = research_points / max(length(team_members), 1)
 
 	for(var/member_data in team_members)
 		var/mob/living/carbon/human/researcher = get_researcher_by_ckey(member_data["ckey"])

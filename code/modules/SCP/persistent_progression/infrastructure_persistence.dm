@@ -202,7 +202,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	world.log << "Loading existing infrastructure data..."
 	manager.load_existing_infrastructure_data()
 
-	world.log << "Equipment status count at initialization: [manager.equipment_status.len]"
+	world.log << "Equipment status count at initialization: [length(manager.equipment_status)]"
 	return ..()
 
 /datum/controller/subsystem/infrastructure_persistence/fire()
@@ -247,8 +247,8 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	system1.efficiency = 1.0
 	power_systems["PWR_SMES"] = system1
 
-	world.log << "Infrastructure: Loaded [equipment_status.len] equipment status records"
-	world.log << "Infrastructure: Loaded [power_systems.len] power systems"
+	world.log << "Infrastructure: Loaded [length(equipment_status)] equipment status records"
+	world.log << "Infrastructure: Loaded [length(power_systems)] power systems"
 
 // Add maintenance record
 /datum/infrastructure_persistence_manager/proc/add_maintenance_record(var/equipment_id, var/maintenance_type, var/maintenance_description, var/technician_ckey)
@@ -384,7 +384,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	var/usage_decay = status.operational_hours * 0.1
 
 	// Health decreases based on known issues
-	var/issue_decay = status.known_issues.len * 5
+	var/issue_decay = length(status.known_issues) * 5
 
 	base_health -= health_decay + usage_decay + issue_decay
 

@@ -202,7 +202,7 @@
 	status_items += "Evolution Stage: [evolution_system?.current_stage || 1]/[evolution_system?.max_stage || 5]"
 	status_items += "Containment Level: [containment_system?.containment_level || 1]/[containment_system?.max_containment_level || 4]"
 	status_items += "Protection Aura: [divine_power?.protection_aura_active ? "ACTIVE" : "INACTIVE"]"
-	status_items += "Divine Zones: [environmental_system?.divine_zones?.len || 0]/[environmental_system?.max_zones || 5]"
+	status_items += "Divine Zones: [length(environmental_system?.divine_zones) || 0]/[environmental_system?.max_zones || 5]"
 
 	status_items += "=== Evolution Progress ==="
 	status_items += "Protection Points: [evolution_system?.protection_points || 0]"

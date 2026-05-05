@@ -18,8 +18,8 @@
 	var/datum/scp1499_research_system/research_system
 
 	var/trips_taken = 0
-	var	safe_returns = 0
-	var	original_location
+	var/safe_returns = 0
+	var/original_location
 
 /obj/item/clothing/mask/gas/scp1499/Initialize()
 	. = ..()
@@ -103,15 +103,84 @@
 	var/list/dimension_turfs = list()
 	var/dimension_size = 50
 	var/alien_architecture = TRUE
+	var/dimension_generated = FALSE
+	var/dimension_z = 2
+	var/list/alien_structures = list()
+	var/list/ambient_objects = list()
 
 /datum/scp1499_dimension_system/New(obj/item/P)
 	parent = P
+
+/datum/scp1499_dimension_system/proc/ensure_dimension()
+	if(dimension_generated)
+		return TRUE
+
+	var/list/z_levels = SSmapping.z_list
+	if(length(z_levels) < 2)
+		dimension_z = world.maxz + 1
+		world.incrementMaxZ()
+	else
+		dimension_z = 2
+
+	generate_alien_terrain()
+	dimension_generated = TRUE
+	return TRUE
+
+/datum/scp1499_dimension_system/proc/generate_alien_terrain()
+	var/center_x = 128
+	var/center_y = 128
+	var/radius = dimension_size / 2
+
+	for(var/x = center_x - radius, x <= center_x + radius, x++)
+		for(var/y = center_y - radius, y <= center_y + radius, y++)
+			var/turf/T = locate(x, y, dimension_z)
+			if(!T)
+				continue
+
+			var/dist = sqrt((x - center_x) ** 2 + (y - center_y) ** 2)
+			if(dist > radius)
+				continue
+
+			T = T.ChangeTurf(/turf/open/floor/scp1499_alien, flags = CHANGETURF_INHERIT_AIR)
+			dimension_turfs += T
+
+			if(prob(3))
+				new /obj/structure/scp1499_pillar(T)
+				alien_structures += T
+			else if(prob(2))
+				new /obj/structure/scp1499_flesh_growth(T)
+			else if(prob(1))
+				new /obj/effect/scp1499_ambient_drip(T)
+
+	for(var/i = 1 to 8)
+		var/angle = (i / 8) * 360
+		var/struct_x = center_x + cos(angle) * (radius * 0.6)
+		var/struct_y = center_y + sin(angle) * (radius * 0.6)
+		var/turf/T = locate(round(struct_x), round(struct_y), dimension_z)
+		if(T)
+			new /obj/structure/scp1499_tower(T)
+
+	var/turf/center_turf = locate(center_x, center_y, dimension_z)
+	if(center_turf)
+		new /obj/structure/scp1499_altar(center_turf)
+
+	var/turf/entry_turf = locate(center_x, center_y + 5, dimension_z)
+	if(entry_turf)
+		new /obj/effect/landmark/scp1499_entry(entry_turf)
 
 /datum/scp1499_dimension_system/proc/transport_to_dimension(mob/living/carbon/human/wearer)
 	if(!wearer)
 		return
 
-	wearer.forceMove(locate(wearer.x, wearer.y, 2))
+	ensure_dimension()
+
+	var/turf/target = locate(128, 133, dimension_z)
+	if(!target)
+		target = pick(dimension_turfs)
+	wearer.forceMove(target)
+
+	if(wearer.sanity)
+		wearer.sanity.adjust_sanity(-10, "scp1499_dimension")
 
 /datum/scp1499_dimension_system/proc/return_from_dimension(mob/living/carbon/human/wearer, original_turf)
 	if(!wearer)
@@ -119,6 +188,16 @@
 
 	if(original_turf)
 		wearer.forceMove(original_turf)
+
+	for(var/obj/effect/scp1499_entity/E in spawned_entities_cleanup())
+		qdel(E)
+
+/datum/scp1499_dimension_system/proc/spawned_entities_cleanup()
+	var/list/cleanup = list()
+	for(var/obj/effect/scp1499_entity/E in world)
+		if(E.z == dimension_z)
+			cleanup += E
+	return cleanup
 
 /datum/scp1499_dimension_system/proc/process_dimension(mob/living/carbon/human/wearer, duration)
 	if(!wearer)
@@ -130,6 +209,86 @@
 	if(duration > 1800)
 		wearer.adjust_drowsyness(1)
 		hook_scp_combat(wearer, "SCP-1499", 0, 1)
+
+	if(wearer.sanity && prob(3))
+		wearer.sanity.adjust_sanity(-2, "scp1499_dimension")
+
+/turf/open/floor/scp1499_alien
+	name = "alien surface"
+	desc = "A strange, fleshy surface that seems to pulse faintly."
+	icon = 'icons/turf/floors.dmi'
+	icon_state = "alienplating"
+	footstep = FOOTSTEP_MEAT
+
+/obj/structure/scp1499_pillar
+	name = "alien pillar"
+	desc = "A tall, organic-looking pillar that seems to be growing from the ground."
+	icon = 'icons/turf/walls.dmi'
+	icon_state = "alien1"
+	density = TRUE
+	anchored = TRUE
+	opacity = TRUE
+	max_integrity = 100
+
+/obj/structure/scp1499_flesh_growth
+	name = "fleshy growth"
+	desc = "A pulsating mass of flesh and sinew. It seems alive."
+	icon = 'icons/turf/floors.dmi'
+	icon_state = "alienpod1"
+	density = FALSE
+	anchored = TRUE
+	max_integrity = 30
+
+/obj/structure/scp1499_flesh_growth/attack_hand(mob/user)
+	. = ..()
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	to_chat(H, "<span class='warning'>The growth pulses beneath your touch. It's warm.</span>")
+	if(H.sanity)
+		H.sanity.adjust_sanity(-5, "scp1499_flesh_touch")
+
+/obj/structure/scp1499_tower
+	name = "alien tower"
+	desc = "A massive, twisting structure of alien origin. Strange sounds emanate from within."
+	icon = 'icons/turf/walls.dmi'
+	icon_state = "alien1"
+	density = TRUE
+	anchored = TRUE
+	opacity = TRUE
+	max_integrity = 500
+
+/obj/structure/scp1499_altar
+	name = "alien altar"
+	desc = "A low, flat structure covered in indecipherable symbols. It radiates unease."
+	icon = 'icons/turf/floors.dmi'
+	icon_state = "alienvault"
+	density = TRUE
+	anchored = TRUE
+	max_integrity = 200
+
+/obj/structure/scp1499_altar/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	to_chat(H, "<span class='danger'>Strange visions flood your mind as you touch the altar!</span>")
+	if(H.sanity)
+		H.sanity.adjust_sanity(-25, "scp1499_altar")
+		H.sanity.hallucination_level = min(H.sanity.hallucination_level + 30, H.sanity.max_hallucination)
+	hook_scp_interaction(H, "SCP-1499", INTERACTION_TYPE_EXPLORATION)
+
+/obj/effect/scp1499_ambient_drip
+	name = "strange liquid"
+	desc = "A pool of dark, viscous liquid that seems to move on its own."
+	icon = 'icons/effects/blood.dmi'
+	icon_state = "xfloor1"
+	anchored = TRUE
+	light_power = 2
+	light_outer_range = 1
+	light_color = LIGHT_COLOR_GREEN
+
+/obj/effect/landmark/scp1499_entry
+	name = "SCP-1499 Dimension Entry Point"
 
 /datum/scp1499_entity_system
 	var/obj/item/parent
@@ -147,7 +306,7 @@
 
 	aggression_level = min(100, aggression_level + 0.1)
 
-	if(spawned_entities.len < max_entities && prob(5))
+	if(length(spawned_entities) < max_entities && prob(5))
 		spawn_entity(wearer)
 
 	for(var/obj/effect/scp1499_entity/E in spawned_entities)
@@ -193,7 +352,7 @@
 /datum/scp1499_research_system
 	var/obj/item/parent
 	var/list/trip_log = list()
-	var	total_trip_time = 0
+	var/total_trip_time = 0
 
 /datum/scp1499_research_system/New(obj/item/P)
 	parent = P

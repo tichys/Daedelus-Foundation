@@ -27,10 +27,10 @@
 	var/containment_status = "contained"
 
 	// Combat stats
-	var/attack_damage = 50
-	var/attack_speed = 2.0
-	var/movement_speed = 1.5
-	var/area_attack_range = 3
+	var/attack_damage = SCP682_BASE_ATTACK_DAMAGE
+	var/attack_speed = SCP682_BASE_ATTACK_SPEED
+	var/movement_speed = SCP682_BASE_MOVEMENT_SPEED
+	var/area_attack_range = SCP682_BASE_AREA_ATTACK_RANGE
 
 	// Persistence tracking
 	var/total_damage_taken = 0
@@ -58,15 +58,15 @@
 	SCP.min_time = 45 MINUTES
 
 	// Set up human-specific properties for SCP-682
-	maxHealth = 1000
+	maxHealth = SCP682_MAX_HEALTH
 	health = maxHealth
 
 	// Set up physiology for damage resistance
 	if(!physiology)
 		physiology = new /datum/physiology(src)
-	physiology.brute_mod = 0.8 // Resistant to brute damage
-	physiology.burn_mod = 0.7  // Resistant to burn damage
-	physiology.tox_mod = 0.6   // Resistant to toxin damage
+	physiology.brute_mod = SCP682_INITIAL_BRUTE_MOD
+	physiology.burn_mod = SCP682_INITIAL_BURN_MOD
+	physiology.tox_mod = SCP682_INITIAL_TOX_MOD
 
 	// Initialize core systems
 	evolution_system = new /datum/scp682_evolution_system(src)
@@ -199,7 +199,7 @@
 
 				// Reduce containment integrity when personnel are killed
 				if(containment_system)
-					containment_system.reduce_containment_integrity(5)
+					containment_system.reduce_containment_integrity(SCP682_KILL_CONTAINMENT_REDUCTION)
 
 			// Apply sanity effects
 			if(H.sanity)
@@ -225,10 +225,10 @@
 	. += "Area Attack Range: [area_attack_range]"
 
 	if(evolution_system)
-		. += "Active Adaptations: [evolution_system.active_adaptations.len]"
+		. += "Active Adaptations: [length(evolution_system.active_adaptations)]"
 
 	if(threat_system)
-		. += "Threats in Memory: [threat_system.threat_memory.len]"
+		. += "Threats in Memory: [length(threat_system.threat_memory)]"
 
 	if(regeneration_system)
 		var/regeneration_rate = regeneration_system.calculate_regeneration_rate()
@@ -376,6 +376,7 @@
 		return
 	hook_scp_combat(victim, "SCP-682", 100, 0)
 	hook_player_death_near_scp(victim, "SCP-682")
+	stop_scp_survival_tracking(victim, "SCP-682")
 	if(containment_system)
 		containment_system.reduce_containment_integrity(5)
 

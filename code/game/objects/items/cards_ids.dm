@@ -378,8 +378,10 @@
  * * wildcard_access_list - Mandatory argument. The proc modifies the list passed in this argument and adds accesses the trim does not support to it.
  */
 /obj/item/card/id/proc/build_access_lists(list/accesses, list/basic_access_list, list/wildcard_access_list)
-	if(!length(accesses) || isnull(basic_access_list) || isnull(wildcard_access_list))
+	if(isnull(accesses) || isnull(basic_access_list) || isnull(wildcard_access_list))
 		CRASH("Invalid parameters passed to build_access_lists")
+	if(!length(accesses))
+		return
 
 	var/list/trim_accesses = trim?.access
 

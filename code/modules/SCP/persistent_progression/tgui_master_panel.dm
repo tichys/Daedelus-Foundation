@@ -29,9 +29,9 @@
 			"security_level" = facility_manager.security_level,
 			"power_efficiency" = facility_manager.power_efficiency,
 			"containment_stability" = facility_manager.containment_stability,
-			"room_states_count" = facility_manager.room_states.len,
-			"equipment_operational" = facility_manager.equipment_status.len,
-			"security_systems_count" = facility_manager.security_systems.len,
+			"room_states_count" = length(facility_manager.room_states),
+			"equipment_operational" = length(facility_manager.equipment_status),
+			"security_systems_count" = length(facility_manager.security_systems),
 		)
 
 		// Add detailed equipment status data for Equipment Management interface
@@ -101,7 +101,7 @@
 				task_id_counter++
 
 		// Add default maintenance task if no equipment requires maintenance
-		if(facility_data["maintenance_tasks"].len == 0)
+		if(length(facility_data["maintenance_tasks"]) == 0)
 			var/default_task_name = "Routine Facility Inspection"
 			var/default_team = "Facility Maintenance"
 
@@ -133,7 +133,7 @@
 			"active_breaches" = scp_manager.active_breaches,
 			"research_progress" = scp_manager.research_progress,
 			"containment_effectiveness" = scp_manager.containment_effectiveness,
-			"scp_instances_count" = scp_manager.scp_instances.len,
+			"scp_instances_count" = length(scp_manager.scp_instances),
 		)
 
 		// Add detailed SCP instance data
@@ -151,8 +151,8 @@
 					"containment_status" = instance.containment_status,
 					"location" = location,
 					"containment_health" = instance.containment_health,
-					"interaction_count" = instance.interaction_history.len,
-					"last_interaction" = instance.interaction_history.len > 0 ? time2text(instance.interaction_history[instance.interaction_history.len]["timestamp"], "YYYY-MM-DD HH:MM") : "Never",
+					"interaction_count" = length(instance.interaction_history),
+					"last_interaction" = length(instance.interaction_history) > 0 ? time2text(instance.interaction_history[length(instance.interaction_history)]["timestamp"], "YYYY-MM-DD HH:MM") : "Never",
 					"enabled" = scp_manager.is_scp_enabled(scp_id)
 				))
 
@@ -184,10 +184,10 @@
 	if(SSmedical_persistence && SSmedical_persistence.manager)
 		var/datum/medical_persistence_manager/medical_manager = SSmedical_persistence.manager
 		medical_data = list(
-			"total_patients" = medical_manager.medical_records.len,
-			"total_treatments" = medical_manager.treatment_logs.len,
+			"total_patients" = length(medical_manager.medical_records),
+			"total_treatments" = length(medical_manager.treatment_logs),
 			"active_outbreaks" = medical_manager.active_outbreaks,
-			"research_projects" = medical_manager.research_projects.len,
+			"research_projects" = length(medical_manager.research_projects),
 			"medical_budget" = medical_manager.medical_budget,
 			"containment_effectiveness" = medical_manager.containment_effectiveness,
 		)
@@ -338,8 +338,8 @@
 			if(activity_count >= 10) // Limit to 10 most recent
 				break
 			var/datum/persistent_player_data/player_data = SSpersistent_progression.player_data[ckey]
-			if(player_data && player_data.experience_sources && player_data.experience_sources.len > 0)
-				var/last_activity = player_data.experience_sources[player_data.experience_sources.len]
+			if(player_data && player_data.experience_sources && length(player_data.experience_sources) > 0)
+				var/last_activity = player_data.experience_sources[length(player_data.experience_sources)]
 				progression_data["recent_activity"] += list(list(
 					"timestamp" = time2text(last_activity["timestamp"], "HH:MM"),
 					"player" = ckey,
@@ -360,7 +360,7 @@
 				if(dept)
 					security_budget = dept.allocated_budget
 		security_data = list(
-			"total_personnel" = security_manager.security_records.len,
+			"total_personnel" = length(security_manager.security_records),
 			"total_incidents" = security_manager.total_security_incidents,
 			"active_threats" = security_manager.active_threats,
 			"containment_breaches" = security_manager.containment_breaches,
@@ -376,7 +376,7 @@
 				"name" = record.real_name,
 				"clearance_level" = record.security_clearance,
 				"security_rating" = record.security_rating,
-				"incidents_handled" = record.security_incidents.len,
+				"incidents_handled" = length(record.security_incidents),
 				"last_updated" = time2text(record.last_updated, "YYYY-MM-DD HH:MM")
 			))
 
@@ -415,8 +415,8 @@
 		research_data = list(
 			"total_projects" = research_manager.total_research_projects,
 			"completed_projects" = research_manager.completed_projects,
-			"active_projects" = research_projects_list.len,
-			"scientific_discoveries" = scientific_discoveries_list.len,
+			"active_projects" = length(research_projects_list),
+			"scientific_discoveries" = length(scientific_discoveries_list),
 			"publications" = research_manager.publication_count,
 			"research_budget" = research_manager.research_budget,
 			"research_efficiency" = research_manager.research_efficiency,
@@ -614,8 +614,8 @@
 	// Patient trends from actual medical records
 	if(SSmedical_persistence?.manager)
 		var/datum/medical_persistence_manager/medical_manager = SSmedical_persistence.manager
-		var/total_patients = medical_manager.medical_records.len
-		var/active_treatments = medical_manager.treatment_logs.len
+		var/total_patients = length(medical_manager.medical_records)
+		var/active_treatments = length(medical_manager.treatment_logs)
 
 		// Calculate critical patients based on health ratings
 		var/critical_patients = 0
@@ -641,7 +641,7 @@
 
 		data["analytics"]["outbreak_analysis"] = list(
 			"active_outbreaks" = medical_manager.active_outbreaks,
-			"containment_rate" = medical_manager.active_outbreaks > 0 ? "[round((medical_manager.outbreak_records.len - medical_manager.active_outbreaks) / max(1, medical_manager.outbreak_records.len) * 100)]%" : "100%",
+			"containment_rate" = medical_manager.active_outbreaks > 0 ? "[round((length(medical_manager.outbreak_records) - medical_manager.active_outbreaks) / max(1, length(medical_manager.outbreak_records)) * 100)]%" : "100%",
 			"vaccination_rate" = "[round(medical_manager.containment_effectiveness * 100)]%",
 			"alert_level" = medical_manager.active_outbreaks > 0 ? "HIGH" : "LOW"
 		)
@@ -662,14 +662,14 @@
 		var/datum/research_persistence_manager/research_manager = SSresearch_persistence.manager
 		var/list/research_projects_list = research_manager.research_projects
 		var/list/scientific_discoveries_list = research_manager.scientific_discoveries
-		var/active_projects = research_projects_list.len
+		var/active_projects = length(research_projects_list)
 		var/total_projects = research_manager.total_research_projects
 		var/completed_projects = research_manager.completed_projects
 
 		data["analytics"]["research_progress"] = list(
 			"active_projects" = active_projects,
 			"completion_rate" = total_projects > 0 ? "[round((completed_projects / total_projects) * 100)]%" : "0%",
-			"breakthroughs" = scientific_discoveries_list.len,
+			"breakthroughs" = length(scientific_discoveries_list),
 			"funding" = "$[round(research_manager.research_budget / 1000000)].[round((research_manager.research_budget % 1000000) / 100000)]M"
 		)
 	else
@@ -703,7 +703,7 @@
 				))
 
 	// Research notifications based on actual completed projects
-	if(SSresearch_persistence?.manager?.research_projects?.len > 0)
+	if(length(SSresearch_persistence?.manager?.research_projects) > 0)
 		var/datum/research_persistence_manager/research_manager = SSresearch_persistence.manager
 		for(var/project_id in research_manager.research_projects)
 			var/datum/research_persistence_project/project = research_manager.research_projects[project_id]
@@ -907,9 +907,9 @@
 				message += "<b>Security Level:</b> [manager.security_level]<br>"
 				message += "<b>Power Efficiency:</b> [manager.power_efficiency * 100]%<br>"
 				message += "<b>Containment Stability:</b> [manager.containment_stability]%<br>"
-				message += "<b>Room States:</b> [manager.room_states.len]<br>"
-				message += "<b>Equipment Status:</b> [manager.equipment_status.len]<br>"
-				message += "<b>Security Systems:</b> [manager.security_systems.len]<br>"
+				message += "<b>Room States:</b> [length(manager.room_states)]<br>"
+				message += "<b>Equipment Status:</b> [length(manager.equipment_status)]<br>"
+				message += "<b>Security Systems:</b> [length(manager.security_systems)]<br>"
 				to_chat(admin_client, span_notice("[message]"))
 				world.log << "PersistenceMasterPanel: Sent facility status message to [admin_client.ckey]"
 			else
@@ -993,8 +993,8 @@
 				message += "<b>Innovation Score:</b> [manager.innovation_score]<br>"
 				message += "<b>Research Budget:</b> $[manager.research_budget]<br>"
 				message += "<b>Research Efficiency:</b> [manager.research_efficiency * 100]%<br>"
-				message += "<b>Research Projects:</b> [manager.research_projects.len]<br>"
-				message += "<b>Technology Tree:</b> [manager.technology_tree.len]<br>"
+				message += "<b>Research Projects:</b> [length(manager.research_projects)]<br>"
+				message += "<b>Technology Tree:</b> [length(manager.technology_tree)]<br>"
 				to_chat(admin_client, span_notice("[message]"))
 				world.log << "PersistenceMasterPanel: Sent technology status message to [admin_client.ckey]"
 			else
@@ -1032,10 +1032,10 @@
 			if(SSmedical_persistence && SSmedical_persistence.manager)
 				var/datum/medical_persistence_manager/manager = SSmedical_persistence.manager
 				var/message = "<h2>Medical Persistence Status</h2>"
-				message += "<b>Total Patients:</b> [manager.medical_records.len]<br>"
-				message += "<b>Total Treatments:</b> [manager.treatment_logs.len]<br>"
+				message += "<b>Total Patients:</b> [length(manager.medical_records)]<br>"
+				message += "<b>Total Treatments:</b> [length(manager.treatment_logs)]<br>"
 				message += "<b>Active Outbreaks:</b> [manager.active_outbreaks]<br>"
-				message += "<b>Research Projects:</b> [manager.research_projects.len]<br>"
+				message += "<b>Research Projects:</b> [length(manager.research_projects)]<br>"
 				message += "<b>Medical Budget:</b> $[manager.medical_budget]<br>"
 				message += "<b>Containment Effectiveness:</b> [manager.containment_effectiveness * 100]%<br>"
 				to_chat(admin_client, span_notice("[message]"))
@@ -1183,7 +1183,7 @@
 			if(SSsecurity_persistence && SSsecurity_persistence.manager)
 				var/datum/security_persistence_manager/manager = SSsecurity_persistence.manager
 				var/message = "<h2>Security Persistence Status</h2>"
-				message += "<b>Total Personnel:</b> [manager.security_records.len]<br>"
+				message += "<b>Total Personnel:</b> [length(manager.security_records)]<br>"
 				message += "<b>Total Incidents:</b> [manager.total_security_incidents]<br>"
 				message += "<b>Active Threats:</b> [manager.active_threats]<br>"
 				message += "<b>Containment Breaches:</b> [manager.containment_breaches]<br>"
@@ -1269,8 +1269,8 @@
 				var/message = "<h2>Research Persistence Status</h2>"
 				message += "<b>Total Projects:</b> [manager.total_research_projects]<br>"
 				message += "<b>Completed Projects:</b> [manager.completed_projects]<br>"
-				message += "<b>Active Projects:</b> [manager.research_projects.len]<br>"
-				message += "<b>Scientific Discoveries:</b> [manager.scientific_discoveries.len]<br>"
+				message += "<b>Active Projects:</b> [length(manager.research_projects)]<br>"
+				message += "<b>Scientific Discoveries:</b> [length(manager.scientific_discoveries)]<br>"
 				message += "<b>Publications:</b> [manager.publication_count]<br>"
 				message += "<b>Research Budget:</b> $[manager.research_budget]<br>"
 				message += "<b>Research Efficiency:</b> [manager.research_efficiency * 100]%<br>"
@@ -1501,7 +1501,7 @@
 				message += "<b>Total Experience:</b> [total_experience]<br>"
 				message += "<b>Average Rank:</b> [player_count > 0 ? total_rank / player_count : 0]<br>"
 				message += "<b>Achievements Unlocked:</b> [achievements_unlocked]<br>"
-				message += "<b>Total Player Records:</b> [SSpersistent_progression.player_data.len]<br>"
+				message += "<b>Total Player Records:</b> [length(SSpersistent_progression.player_data)]<br>"
 				to_chat(admin_client, span_notice("[message]"))
 				world.log << "PersistenceMasterPanel: Sent player status message to [admin_client.ckey]"
 			else
@@ -1804,7 +1804,7 @@
 
 				SSsecurity_persistence.manager.add_security_incident(log_type, log_description, severity, "Security Console", list(admin_client.ckey))
 
-				to_chat(admin_client, span_notice("Security logs retrieved successfully. Found [SSsecurity_persistence.manager.access_logs.len] access logs and [SSsecurity_persistence.manager.security_incidents.len] incidents."))
+				to_chat(admin_client, span_notice("Security logs retrieved successfully. Found [length(SSsecurity_persistence.manager.access_logs)] access logs and [length(SSsecurity_persistence.manager.security_incidents)] incidents."))
 				world.log << "PersistenceMasterPanel: Security logs retrieved by [admin_client.ckey] with parameters: [json_encode(logs_data)]"
 			else
 				to_chat(admin_client, span_warning("No logs data provided or security persistence system unavailable."))
@@ -1855,21 +1855,21 @@
 				scan_message += "<b>Overall Severity:</b> [scan_results["overall_severity"]]<br><br>"
 
 				var/list/threats_found = scan_results["threats_found"]
-				if(threats_found.len > 0)
+				if(length(threats_found) > 0)
 					scan_message += "<b>Threats Detected:</b><br>"
 					for(var/threat in threats_found)
 						scan_message += "• [threat]<br>"
 					scan_message += "<br>"
 
 				var/list/vulnerabilities = scan_results["vulnerabilities"]
-				if(vulnerabilities.len > 0)
+				if(length(vulnerabilities) > 0)
 					scan_message += "<b>Vulnerabilities Found:</b><br>"
 					for(var/vulnerability in vulnerabilities)
 						scan_message += "• [vulnerability]<br>"
 					scan_message += "<br>"
 
 				var/list/recommendations = scan_results["recommendations"]
-				if(recommendations.len > 0)
+				if(length(recommendations) > 0)
 					scan_message += "<b>Recommendations:</b><br>"
 					for(var/recommendation in recommendations)
 						scan_message += "• [recommendation]<br>"
@@ -2226,7 +2226,7 @@
 				test_message += "<b>Budget System:</b> ✅ OPERATIONAL<br>"
 				test_message += "<b>Total Budget:</b> [SSbudget_system.manager.total_budget] credits<br>"
 				test_message += "<b>Current Balance:</b> [SSbudget_system.manager.current_balance] credits<br>"
-				test_message += "<b>Departments:</b> [SSbudget_system.manager.department_budgets.len] departments<br>"
+				test_message += "<b>Departments:</b> [length(SSbudget_system.manager.department_budgets)] departments<br>"
 				world.log << "PersistenceMasterPanel: Budget system operational"
 			else
 				test_message += "<b>Budget System:</b> ❌ NOT AVAILABLE<br>"
@@ -2240,7 +2240,7 @@
 			var/message = "<h2>Persistent Progression System Status</h2>"
 
 			if(SSpersistent_progression)
-				var/total_players = SSpersistent_progression.player_data.len
+				var/total_players = length(SSpersistent_progression.player_data)
 				var/total_exp = SSpersistent_progression.get_total_experience()
 				var/total_achievements = SSpersistent_progression.get_total_achievements()
 				var/scp_count = SSpersistent_progression.get_scp_progression_count()
@@ -2281,7 +2281,7 @@
 
 			if(SSscp_progression_integration && SSscp_progression_integration.manager)
 				var/datum/scp_progression_manager/manager = SSscp_progression_integration.manager
-				message += "<b>Total SCP Records:</b> [manager.scp_progression_data.len]<br>"
+				message += "<b>Total SCP Records:</b> [length(manager.scp_progression_data)]<br>"
 				message += "<b>Total Rounds Played:</b> [manager.total_scp_rounds_played]<br>"
 				message += "<b>Total Achievements:</b> [manager.total_scp_achievements_unlocked]<br>"
 				message += "<b>Average Performance:</b> [manager.average_scp_performance]<br>"
@@ -2300,7 +2300,7 @@
 
 			if(SSpersistent_progression && SSpersistent_progression.achievement_manager)
 				var/datum/achievement_manager/am = SSpersistent_progression.achievement_manager
-				message += "<b>Total Achievements:</b> [am.achievements.len]<br>"
+				message += "<b>Total Achievements:</b> [length(am.achievements)]<br>"
 				message += "<b>System Status:</b> ✅ OPERATIONAL<br>"
 			else
 				message += "<b>System Status:</b> ❌ NOT AVAILABLE<br>"

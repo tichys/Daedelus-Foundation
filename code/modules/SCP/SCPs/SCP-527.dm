@@ -13,7 +13,7 @@
 	var/datum/scp527_research_system/research_system
 
 	var/swim_time = 0
-	var	conversations_held = 0
+	var/conversations_held = 0
 
 /mob/living/carbon/human/scp527/Initialize(mapload)
 	. = ..()
@@ -135,14 +135,14 @@
 		if(findtext(lowertext(A.name), "fish"))
 			nearby_fish += A
 
-	if(nearby_fish.len > 0)
-		to_chat(parent, "<span class='notice'>You sense [nearby_fish.len] fish nearby.</span>")
+	if(length(nearby_fish) > 0)
+		to_chat(parent, "<span class='notice'>You sense [length(nearby_fish)] fish nearby.</span>")
 		return nearby_fish
 
 /datum/scp527_research_system
 	var/mob/living/carbon/human/parent
 	var/list/research_data = list()
-	var	water_time = 0
+	var/water_time = 0
 
 /datum/scp527_research_system/New(mob/living/carbon/human/P)
 	parent = P

@@ -193,7 +193,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 	world.log << "Loading existing psychological data..."
 	manager.load_existing_psychological_data()
 
-	world.log << "Mental health records count at initialization: [manager.mental_health_records.len]"
+	world.log << "Mental health records count at initialization: [length(manager.mental_health_records)]"
 	return ..()
 
 /datum/controller/subsystem/psychological_persistence/fire()
@@ -232,7 +232,7 @@ SUBSYSTEM_DEF(psychological_persistence)
 					mental_health_records[ckey] = record
 					total_staff_assessed++
 
-	world.log << "Psychological: Loaded [mental_health_records.len] mental health records"
+	world.log << "Psychological: Loaded [length(mental_health_records)] mental health records"
 
 // Add mental health record
 /datum/psychological_persistence_manager/proc/add_mental_health_record(var/ckey, var/real_name)
@@ -353,12 +353,12 @@ SUBSYSTEM_DEF(psychological_persistence)
 		base_score -= record.scp_exposure_count * 5
 
 	// Score decreases based on stress events
-	if(record.stress_events.len > 0)
-		base_score -= record.stress_events.len * 3
+	if(length(record.stress_events) > 0)
+		base_score -= length(record.stress_events) * 3
 
 	// Score increases based on therapy sessions
-	if(record.therapy_sessions.len > 0)
-		base_score += record.therapy_sessions.len * 2
+	if(length(record.therapy_sessions) > 0)
+		base_score += length(record.therapy_sessions) * 2
 
 	// Score decreases based on time since last assessment
 	var/time_since_assessment = world.time - record.last_assessment

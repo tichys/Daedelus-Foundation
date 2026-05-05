@@ -62,7 +62,7 @@
 	for(var/mob/living/carbon/human/H in view(6, owner))
 		if(H != owner && H.stat != DEAD)
 			candidates += H
-	if(candidates.len)
+	if(length(candidates))
 		var/mob/living/carbon/human/choice = pick(candidates)
 		if(!(choice in stalked))
 			stalked += choice
@@ -87,7 +87,7 @@
 		for(var/mob/living/carbon/human/H in view(4, owner))
 			if(H != owner && H.stat != DEAD)
 				victims += H
-		if(victims.len)
+		if(length(victims))
 			var/mob/living/carbon/human/v = pick(victims)
 			to_chat(v, "<span class='danger'>A waking nightmare grips you with dread.</span>")
 			v.sanity?.adjust_sanity(-2)

@@ -738,7 +738,7 @@ var/global/list/ADV_PERSIST_STORE = list()
 	auto_save()
 
 /datum/scp_advanced_component/advanced_persistence_system/get_status_info()
-	return "Persisted keys: [persisted_data?.len || 0]"
+	return "Persisted keys: [length(persisted_data) || 0]"
 
 // Compute a stable owner id for namespacing persistence. Prefer the SCP datum
 // if present on the mob, otherwise fall back to mob ckey/name.

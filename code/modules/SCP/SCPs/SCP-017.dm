@@ -1,11 +1,13 @@
-// SCP-017: Shadow Person
-// A humanoid shadow that can phase through walls and drain life from those it touches
+// SCP-017 - Shadow Person
+// A shadowy humanoid that attacks anything which casts a shadow upon it, engulfing the shadow-caster entirely
 
 /mob/living/carbon/scp/scp017
 	name = "shadow person"
-	desc = "A humanoid figure made entirely of shadow. It seems to absorb light around it."
+	desc = "A 1.8-metre-tall shadowy humanoid figure. It seems to absorb the light around it."
 	icon = 'icons/scp/scp-017.dmi'
 	icon_state = "shadow"
+	real_name = "SCP-017"
+	use_custom_sprite = TRUE
 	status_flags = 0
 	maxHealth = 150
 	health = 150
@@ -14,13 +16,10 @@
 	max_scp_armor = 50
 	scp_armor = 50
 
-	// Shadow abilities
-	var/phase_cooldown = 0
-	var/phase_cooldown_time = 15 SECONDS
-	var/life_drain_cooldown = 0
-	var/life_drain_cooldown_time = 10 SECONDS
-	var/drain_amount = 15
-	var/phase_range = 7
+	var/engulf_cooldown = 0
+	var/engulf_cooldown_time = 3 SECONDS
+	var/shadow_detection_range = 7
+	var/victims_engulfed = 0
 
 /mob/living/carbon/scp/scp017/Initialize(mapload, new_species = "SCP-017")
 	. = ..()
@@ -28,139 +27,133 @@
 	SCP.min_playercount = 20
 	SCP.min_time = 5 MINUTES
 
-	// Add abilities
-	add_ability("phase_through_walls", "phase_through_walls_ability")
-	add_ability("drain_life", "drain_life_ability")
-	add_passive_effect("shadow_form", "shadow_form_effect")
-
-	// Auto-registered via datum/scp
-
 /mob/living/carbon/scp/scp017/process_scp_effects()
 	. = ..()
 
 	if(stat == DEAD)
 		return
 
-	// Shadow form effects
-	if(prob(5))
-		visible_message("<span class='notice'>[src] flickers like a shadow.</span>")
+	if(engulf_cooldown > world.time)
+		return
+
+	var/turf/my_turf = get_turf(src)
+	if(!my_turf)
+		return
+
+	var/my_lumcount = my_turf.get_lumcount()
+	if(my_lumcount < 0.15)
+		return
+
+	var/mob/living/shadow_caster = find_shadow_caster(my_turf, my_lumcount)
+	if(shadow_caster)
+		engulf_target(shadow_caster)
+
+/mob/living/carbon/scp/scp017/proc/find_shadow_caster(turf/my_turf, my_lumcount)
+	for(var/mob/living/L in range(shadow_detection_range, src))
+		if(L == src || L.stat == DEAD)
+			continue
+
+		var/turf/their_turf = get_turf(L)
+		if(!their_turf)
+			continue
+
+		var/their_lumcount = their_turf.get_lumcount()
+		if(their_lumcount < 0.15)
+			continue
+
+		var/list/line_turfs = get_line(L, src)
+		var/caster_index = 0
+		var/my_index = 0
+		for(var/i in 1 to length(line_turfs))
+			var/turf/T = line_turfs[i]
+			if(T == their_turf)
+				caster_index = i
+			if(T == my_turf)
+				my_index = i
+
+		if(caster_index <= 0 || my_index <= 0 || my_index <= caster_index)
+			continue
+
+		var/casts_shadow = FALSE
+		if(L.opacity || L.density)
+			casts_shadow = TRUE
+		else
+			for(var/obj/structure/S in their_turf)
+				if(S.opacity || S.density)
+					casts_shadow = TRUE
+					break
+
+		if(casts_shadow)
+			return L
+
+	return null
+
+/mob/living/carbon/scp/scp017/proc/engulf_target(mob/living/target)
+	if(!target || engulf_cooldown > world.time)
+		return
+
+	engulf_cooldown = world.time + engulf_cooldown_time
+
+	src.visible_message(
+		"<span class='danger'>[src] lunges at [target], engulfing [target.p_them()] in shadow!</span>",
+		"<span class='danger'>You engulf [target] in shadow!</span>"
+	)
+
+	if(target in view(1, src))
+		target.visible_message(
+			"<span class='userdanger'>[target] is swallowed whole by [src]!</span>",
+			"<span class='userdanger'>The shadow consumes you utterly!</span>"
+		)
+
+		target.death()
+		victims_engulfed++
+
+		var/obj/effect/decal/cleanable/ash/A = new /obj/effect/decal/cleanable/ash(get_turf(target))
+		A.visible_message("<span class='danger'>Only a small pile of ash remains where [target] once stood.</span>")
+
+		if(ismob(target))
+			var/mob/M = target
+			M.ghostize(TRUE)
+			qdel(target)
+
+		hook_scp_combat(target, "SCP-017", 100, 0)
+		hook_player_death_near_scp(target, "SCP-017")
+		hook_scp_breach("SCP-017", src)
+		SCP.log_interaction(target, "engulf")
+		SCP.award_research(target, "combat", 25)
+	else
+		step_to(src, target)
+		if(target in view(1, src))
+			engulf_cooldown = 0
+			engulf_target(target)
 
 /mob/living/carbon/scp/scp017/UnarmedAttack(atom/A)
-	if(!A || !istype(A, /mob/living))
+	if(!istype(A, /mob/living))
 		return ..()
 
 	var/mob/living/L = A
 	if(L.stat == DEAD)
 		return ..()
 
-	// Life drain on touch
-	if(life_drain_cooldown <= world.time)
-		to_chat(src, "<span class='notice'>You drain life from [L].</span>")
-		to_chat(L, "<span class='danger'>You feel your life force being drained by [src]!</span>")
-
-		L.adjustBruteLoss(drain_amount)
-		adjust_scp_health(drain_amount * 0.5) // Heal from draining
-
-		playsound(src, 'sound/effects/explosion1.ogg', 50)
-		life_drain_cooldown = world.time + life_drain_cooldown_time
-
-		// Log interaction
-		SCP.log_interaction(L, "life_drain")
-		SCP.award_research(L, "combat", 10)
-
-	return ..()
+	engulf_target(L)
 
 /mob/living/carbon/scp/scp017/get_status_tab_items()
 	. = ..()
-	. += "Phase Cooldown: [max(0, round((phase_cooldown - world.time) / 10))] seconds"
-	. += "Life Drain Cooldown: [max(0, round((life_drain_cooldown - world.time) / 10))] seconds"
+	. += "Victims Engulfed: [victims_engulfed]"
+	. += "Engulf Cooldown: [max(0, round((engulf_cooldown - world.time) / 10))] seconds"
+
+	var/turf/T = get_turf(src)
+	if(T)
+		var/lum = round(T.get_lumcount() * 100, 1)
+		. += "Local Light Level: [lum]%"
 
 /mob/living/carbon/scp/scp017/examine(mob/user)
 	. = ..()
-	. += "<span class='notice'>This shadow person can phase through walls and drain life from living beings.</span>"
-	if(health < maxHealth * 0.5)
-		. += "<span class='warning'>The shadow appears weakened.</span>"
+	. += "<span class='warning'>A shadowy figure that attacks anything which casts a shadow upon it. Keep it in the dark.</span>"
+	if(victims_engulfed > 0)
+		. += "<span class='danger'>It has consumed [victims_engulfed] victim\s.</span>"
 
 /mob/living/carbon/scp/scp017/scp_death()
 	visible_message("<span class='danger'>[src] dissolves into darkness!</span>")
 	playsound(src, 'sound/effects/explosion2.ogg', 50)
 	..()
-
-// Shadow abilities
-/mob/living/carbon/scp/scp017/proc/phase_through_walls_ability()
-	set name = "Phase Through Walls"
-	set desc = "Phase through walls to escape or ambush"
-	set category = "SCP"
-
-	if(phase_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Phasing is still recharging...</span>")
-		return
-
-	var/list/valid_turfs = list()
-	for(var/turf/T in range(phase_range, src))
-		if(T.density)
-			continue
-		if(get_dist(src, T) <= 1)
-			continue
-		valid_turfs += T
-
-	if(!valid_turfs.len)
-		to_chat(src, "<span class='warning'>No valid locations to phase to.</span>")
-		return
-
-	var/turf/target = pick(valid_turfs)
-
-	to_chat(src, "<span class='notice'>You phase through the shadows to [target].</span>")
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	forceMove(target)
-
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	phase_cooldown = world.time + phase_cooldown_time
-
-/mob/living/carbon/scp/scp017/proc/drain_life_ability()
-	set name = "Drain Life"
-	set desc = "Drain life from nearby living beings"
-	set category = "SCP"
-
-	if(life_drain_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Life drain is still recharging...</span>")
-		return
-
-	var/list/targets = list()
-	for(var/mob/living/L in view(3, src))
-		if(L != src && L.stat != DEAD)
-			targets += L
-
-	if(!targets.len)
-		to_chat(src, "<span class='warning'>No living targets nearby.</span>")
-		return
-
-	var/mob/living/target = pick(targets)
-
-	to_chat(src, "<span class='notice'>You drain life from [target].</span>")
-	to_chat(target, "<span class='danger'>You feel your life force being drained by [src]!</span>")
-
-	target.adjustBruteLoss(drain_amount * 2)
-	adjust_scp_health(drain_amount)
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-	life_drain_cooldown = world.time + life_drain_cooldown_time
-
-	SCP.log_interaction(target, "life_drain_ability")
-	SCP.award_research(target, "combat", 15)
-
-/mob/living/carbon/scp/scp017/proc/shadow_form_effect()
-	// Passive shadow form effects
-	if(prob(1))
-		visible_message("<span class='notice'>[src] seems to absorb the light around it.</span>")
-
-/mob/living/carbon/scp/scp017/proc/on_life_drain(mob/living/carbon/human/victim)
-	if(!victim)
-		return
-	hook_scp_combat(victim, "SCP-017", drain_amount, 0)
-
-/mob/living/carbon/scp/scp017/proc/on_phase(location)
-	return
-
-

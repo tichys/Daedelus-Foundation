@@ -156,7 +156,7 @@
 	manager_data["metadata"] = list(
 		"timestamp" = world.time,
 		"mob_type" = manager.parent_mob?.type,
-		"component_count" = manager.components.len
+		"component_count" = length(manager.components)
 	)
 
 	// Serialize all components
@@ -200,7 +200,7 @@
 	last_auto_save = world.time
 
 	// Save all active SCP component managers
-	for(var/mob/M in world)
+	for(var/mob/M in GLOB.mob_list)
 		if(M.SCP && M.SCP.uses_advanced_components)
 			var/key = "autosave_[M.SCP.designation]_[world.time]"
 			store_manager_state(M.SCP.advanced_components, key)
@@ -209,8 +209,8 @@
 
 /datum/scp_component_database/proc/get_storage_stats()
 	var/list/stats = list()
-	stats["total_entries"] = stored_components.len
-	stats["history_entries"] = component_history.len
+	stats["total_entries"] = length(stored_components)
+	stats["history_entries"] = length(component_history)
 	stats["last_auto_save"] = last_auto_save
 	stats["auto_save_enabled"] = auto_save_enabled
 	return stats
@@ -226,8 +226,8 @@
 	component_history += list(log_entry)
 
 	// Maintain history size
-	if(component_history.len > max_history_entries)
-		component_history.Cut(1, component_history.len - max_history_entries + 1)
+	if(length(component_history) > max_history_entries)
+		component_history.Cut(1, length(component_history) - max_history_entries + 1)
 
 // Enhanced Component with Persistence Support
 /datum/scp_advanced_component

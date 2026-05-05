@@ -9,7 +9,7 @@
 	var/last_observation_check = 0
 	var/observation_check_interval = 1 SECONDS
 	var/list/observers = list()
-	var/observation_threshold = 0.5
+	var/observation_threshold = SCP173_OBSERVATION_THRESHOLD
 
 /datum/scp173_observation_system/New(mob/living/carbon/human/scp173/new_owner)
 	owner = new_owner
@@ -81,8 +81,8 @@
 /datum/scp173_movement_system
 	var/mob/living/carbon/human/scp173/owner
 	var/movement_cooldown = 0
-	var/movement_cooldown_time = 2 SECONDS
-	var/movement_range = 3
+	var/movement_cooldown_time = SCP173_MOVEMENT_COOLDOWN
+	var/movement_range = SCP173_MOVEMENT_RANGE
 	var/last_movement = 0
 	var/target_location = null
 
@@ -141,8 +141,8 @@
 // Containment System
 /datum/scp173_containment_system
 	var/mob/living/carbon/human/scp173/owner
-	var/containment_integrity = 100
-	var/breach_threshold = 25
+	var/containment_integrity = SCP173_DEFAULT_CONTAINMENT_INTEGRITY
+	var/breach_threshold = SCP173_BREACH_THRESHOLD
 	var/containment_area = null
 	var/is_contained = TRUE
 	var/breach_events = 0
@@ -159,7 +159,7 @@
 
 	// Reduce containment integrity when not observed
 	if(owner.observation_system && !owner.observation_system.is_being_observed())
-		reduce_containment_integrity(0.1)
+		reduce_containment_integrity(SCP173_UNOBSERVED_INTEGRITY_DECAY)
 
 /datum/scp173_containment_system/proc/check_containment_status()
 	var/area/current_area = get_area(owner)
@@ -202,8 +202,8 @@
 /datum/scp173_combat_system
 	var/mob/living/carbon/human/scp173/owner
 	var/attack_cooldown = 0
-	var/attack_cooldown_time = 1 SECONDS
-	var/attack_damage = 25
+	var/attack_cooldown_time = SCP173_ATTACK_COOLDOWN
+	var/attack_damage = SCP173_ATTACK_DAMAGE
 	var/kills_count = 0
 
 /datum/scp173_combat_system/New(mob/living/carbon/human/scp173/new_owner)

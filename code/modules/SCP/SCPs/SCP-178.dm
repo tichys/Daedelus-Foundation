@@ -106,7 +106,7 @@
 		visible_entities += entity
 		viewer.visible_message("<span class='warning'>[viewer] stares at something you can't see.</span>", "<span class='danger'>A shadowy figure manifests nearby!</span>")
 
-	if(visible_entities.len > 0 && prob(entity_aggression / 10))
+	if(length(visible_entities) > 0 && prob(entity_aggression / 10))
 		var/obj/effect/dimension_entity/E = pick(visible_entities)
 		if(E && get_dist(E, viewer) <= 2)
 			viewer.adjustBruteLoss(5)

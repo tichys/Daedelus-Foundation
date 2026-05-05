@@ -96,16 +96,16 @@
 
 	// Event & Story Management Status
 	to_chat(src, "<span class='notice'>Event & Story Management:</span>")
-	to_chat(src, "<span class='notice'>  Active Events: [SSevent_story_management.manager.active_events.len]</span>")
-	to_chat(src, "<span class='notice'>  Story Arcs: [SSevent_story_management.manager.story_arcs.len]</span>")
-	to_chat(src, "<span class='notice'>  Player Events: [SSevent_story_management.manager.player_initiated_events.len]</span>")
+	to_chat(src, "<span class='notice'>  Active Events: [length(SSevent_story_management.manager.active_events)]</span>")
+	to_chat(src, "<span class='notice'>  Story Arcs: [length(SSevent_story_management.manager.story_arcs)]</span>")
+	to_chat(src, "<span class='notice'>  Player Events: [length(SSevent_story_management.manager.player_initiated_events)]</span>")
 	to_chat(src, "<span class='notice'>  Total Events Created: [SSevent_story_management.manager.total_events_created]</span>")
 
 	// Foundation Politics Status
 	to_chat(src, "<span class='notice'>Foundation Politics:</span>")
-	to_chat(src, "<span class='notice'>  Departments: [SSfoundation_politics.manager.departments.len]</span>")
-	to_chat(src, "<span class='notice'>  Factions: [SSfoundation_politics.manager.factions.len]</span>")
-	to_chat(src, "<span class='notice'>  Power Structures: [SSfoundation_politics.manager.power_structures.len]</span>")
+	to_chat(src, "<span class='notice'>  Departments: [length(SSfoundation_politics.manager.departments)]</span>")
+	to_chat(src, "<span class='notice'>  Factions: [length(SSfoundation_politics.manager.factions)]</span>")
+	to_chat(src, "<span class='notice'>  Power Structures: [length(SSfoundation_politics.manager.power_structures)]</span>")
 	to_chat(src, "<span class='notice'>  Political Tensions: [SSfoundation_politics.manager.political_tensions]</span>")
 
 	// Clean up test data
@@ -132,8 +132,8 @@
 		to_chat(src, "<span class='notice'>✅ Event & Story Management: ACTIVE</span>")
 		if(SSevent_story_management.manager)
 			to_chat(src, "<span class='notice'>  Manager: Initialized</span>")
-			to_chat(src, "<span class='notice'>  Active Events: [SSevent_story_management.manager.active_events.len]</span>")
-			to_chat(src, "<span class='notice'>  Story Arcs: [SSevent_story_management.manager.story_arcs.len]</span>")
+			to_chat(src, "<span class='notice'>  Active Events: [length(SSevent_story_management.manager.active_events)]</span>")
+			to_chat(src, "<span class='notice'>  Story Arcs: [length(SSevent_story_management.manager.story_arcs)]</span>")
 		else
 			to_chat(src, "<span class='warning'>  Manager: Not initialized</span>")
 	else
@@ -144,8 +144,8 @@
 		to_chat(src, "<span class='notice'>✅ Foundation Politics: ACTIVE</span>")
 		if(SSfoundation_politics.manager)
 			to_chat(src, "<span class='notice'>  Manager: Initialized</span>")
-			to_chat(src, "<span class='notice'>  Departments: [SSfoundation_politics.manager.departments.len]</span>")
-			to_chat(src, "<span class='notice'>  Factions: [SSfoundation_politics.manager.factions.len]</span>")
+			to_chat(src, "<span class='notice'>  Departments: [length(SSfoundation_politics.manager.departments)]</span>")
+			to_chat(src, "<span class='notice'>  Factions: [length(SSfoundation_politics.manager.factions)]</span>")
 		else
 			to_chat(src, "<span class='warning'>  Manager: Not initialized</span>")
 	else

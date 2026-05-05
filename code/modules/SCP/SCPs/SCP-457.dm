@@ -49,13 +49,13 @@
 	SCP.min_time = 30 MINUTES
 
 	// Set up human-specific properties for SCP-457
-	maxHealth = 150
+	maxHealth = SCP457_MAX_HEALTH
 	health = maxHealth
 	// Set up physiology for fire resistance
 	if(!physiology)
 		physiology = new /datum/physiology(src)
-	physiology.burn_mod = 0.1 // Highly resistant to fire
-	physiology.brute_mod = 0.8 // Slightly resistant to brute damage
+	physiology.burn_mod = SCP457_BURN_MOD
+	physiology.brute_mod = SCP457_BRUTE_MOD
 
 	// Initialize core systems
 	heat_system = new /datum/scp457_heat_system(src)
@@ -182,7 +182,7 @@
 	total_targets_consumed++
 
 /mob/living/carbon/human/scp457/proc/is_spreading_fires()
-	return fire_system.active_fires.len > 0
+	return length(fire_system.active_fires) > 0
 
 /mob/living/carbon/human/scp457/proc/add_evolution_record(stage)
 	total_evolution_stages = max(total_evolution_stages, stage)
@@ -239,11 +239,11 @@
 	. = ..()
 	. += "Heat Level: [heat_system.current_heat]/[heat_system.max_heat]"
 	. += "Fire Type: [heat_system.get_fire_type()]"
-	. += "Active Fires: [fire_system.active_fires.len]"
+	. += "Active Fires: [length(fire_system.active_fires)]"
 	. += "Evolution Stage: [evolution_system.current_stage]/[evolution_system.max_stage]"
 	. += "Containment Level: [containment_system.containment_level]"
 	. += "Targets Consumed: [total_targets_consumed]"
-	. += "Environmental Control: [environmental_system.controlled_room_types.len]"
+	. += "Environmental Control: [length(environmental_system.controlled_room_types)]"
 
 // Examine behavior
 /mob/living/carbon/human/scp457/examine(mob/user)
@@ -328,6 +328,7 @@
 		return
 	fires_created++
 	total_fires_created++
+	hook_scp_breach("SCP-457", src)
 	hook_facility_damage_near_scp("SCP-457", 1)
 
 /mob/living/carbon/human/scp457/proc/on_target_consumption(mob/living/carbon/human/victim)

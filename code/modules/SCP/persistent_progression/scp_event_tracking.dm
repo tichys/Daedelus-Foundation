@@ -390,11 +390,7 @@
 
 	track_scp_event(scp, "teleportation", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp2020))
-		var/mob/living/carbon/human/scp2020/scp2020 = scp
-		scp2020.teleportations++
-
+	// Update progression tracking (SCP-2020 is harmless — no teleportation tracking)
 /proc/track_scp2020_stealth_action(mob/living/carbon/human/scp, action_type = "phasing", success = TRUE)
 	if(!scp || !istype(scp, /mob/living/carbon/human/scp2020))
 		return
@@ -412,10 +408,7 @@
 
 	track_scp_event(scp, "stealth_action", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp2020))
-		var/mob/living/carbon/human/scp2020/scp2020 = scp
-		scp2020.stealth_actions++
+	// SCP-2020 is harmless — no stealth_action tracking
 
 /proc/track_scp2020_victim_elimination(mob/living/carbon/human/scp, mob/living/victim, elimination_method = "stealth")
 	if(!scp || !istype(scp, /mob/living/carbon/human/scp2020))
@@ -438,10 +431,7 @@
 
 	track_scp_event(scp, "victim_elimination", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp2020))
-		var/mob/living/carbon/human/scp2020/scp2020 = scp
-		scp2020.victims_eliminated++
+	// SCP-2020 is harmless — no victims_eliminated tracking
 
 // Event tracking manager extension
 /datum/scp_progression_manager/proc/track_scp_event(mob/living/carbon/human/scp, event_type, list/event_data)

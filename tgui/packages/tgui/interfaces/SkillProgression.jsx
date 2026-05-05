@@ -1,571 +1,154 @@
 import { useBackend, useLocalState } from '../backend';
-import { Box, Button, Section, Table, Tabs, ProgressBar, LabeledList, NoticeBox, Icon } from '../components';
+import { Box, Button, Input, NoticeBox, ProgressBar } from '../components';
 import { Window } from '../layouts';
 
-export const SkillProgression = (props, context) => {
-  const { act, data } = useBackend(context);
-  const [activeTab, setActiveTab] = useLocalState(context, 'activeTab', 'overview');
+const C = {
+  bg: '#08080a',
+  panel: '#0c0c10',
+  border: '#1e1e24',
+  borderRed: '#6b0000',
+  accent: '#c2960e',
+  red: '#8b0000',
+  redBright: '#cc2222',
+  green: '#1a7a1a',
+  greenDim: '#0d4a0d',
+  text: '#b0b0b0',
+  textBright: '#e0e0e0',
+  textDim: '#555560',
+  amber: '#d4a017',
+  mono: '"Consolas", "Courier New", "Lucida Console", monospace',
+};
 
-  const {
-    has_data,
-    player_name,
-    player_key,
-    current_class,
-    current_faction,
-    current_rank,
-    current_rank_level,
-    total_experience,
-    rounds_played,
-    progress_to_next,
-    exp_needed,
-    skill_summary,
-    skill_milestones,
-    performance_metrics,
-    skill_boosts,
-  } = data;
+const term = (overrides = {}) => ({
+  fontFamily: C.mono,
+  fontSize: '12px',
+  color: C.text,
+  ...overrides,
+});
 
-  if (!has_data) {
-    return (
-      <Window width={800} height={600}>
-        <Window.Content>
-          <NoticeBox>
-            No progression data available. Please ensure you have persistent progression enabled.
-          </NoticeBox>
-        </Window.Content>
-      </Window>
-    );
-  }
+const TermHeader = (props) => (
+  <Box style={term({
+    fontSize: '10px',
+    color: C.textDim,
+    letterSpacing: '0.18em',
+    textTransform: 'uppercase',
+    borderBottom: `1px solid ${C.border}`,
+    paddingBottom: '4px',
+    marginBottom: '8px',
+    ...props.style,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermLabel = (props) => (
+  <Box as="span" style={term({
+    color: C.textDim,
+    fontSize: '10px',
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    marginRight: '8px',
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermValue = (props) => (
+  <Box as="span" style={term({
+    color: props.color || C.textBright,
+    fontWeight: props.bold ? 'bold' : undefined,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermRow = (props) => (
+  <Box style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+    {props.children}
+  </Box>
+);
+
+const TermDivider = () => (
+  <Box style={{
+    color: C.borderRed,
+    fontSize: '10px',
+    letterSpacing: '0.3em',
+    margin: '10px 0',
+    userSelect: 'none',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  }}>
+    {'─'.repeat(80)}
+  </Box>
+);
+
+const TermButton = (props) => {
+  const selected = props.selected;
+  const color = props.color;
+  const bg = selected
+    ? (color === 'red' ? 'rgba(139,0,0,0.35)' : color === 'green' ? 'rgba(26,122,26,0.35)' : color === 'yellow' ? 'rgba(180,160,20,0.25)' : 'rgba(255,255,255,0.08)')
+    : 'transparent';
+  const borderColor = selected
+    ? (color === 'red' ? C.red : color === 'green' ? C.green : color === 'yellow' ? '#b0a020' : C.border)
+    : C.border;
 
   return (
-    <Window width={1000} height={700}>
-      <Window.Content>
-        <Tabs>
-          <Tabs.Tab
-            selected={activeTab === 'overview'}
-            onClick={() => setActiveTab('overview')}>
-            Overview
-          </Tabs.Tab>
-          <Tabs.Tab
-            selected={activeTab === 'skills'}
-            onClick={() => setActiveTab('skills')}>
-            Skills
-          </Tabs.Tab>
-          <Tabs.Tab
-            selected={activeTab === 'progression'}
-            onClick={() => setActiveTab('progression')}>
-            Progression
-          </Tabs.Tab>
-          <Tabs.Tab
-            selected={activeTab === 'milestones'}
-            onClick={() => setActiveTab('milestones')}>
-            Milestones
-          </Tabs.Tab>
-          <Tabs.Tab
-            selected={activeTab === 'analytics'}
-            onClick={() => setActiveTab('analytics')}>
-            Analytics
-          </Tabs.Tab>
-        </Tabs>
-
-        {activeTab === 'overview' && (
-          <SkillOverview
-            player_name={player_name}
-            current_class={current_class}
-            current_faction={current_faction}
-            current_rank={current_rank}
-            current_rank_level={current_rank_level}
-            total_experience={total_experience}
-            rounds_played={rounds_played}
-            progress_to_next={progress_to_next}
-            exp_needed={exp_needed}
-            skill_summary={skill_summary}
-            performance_metrics={performance_metrics}
-          />
-        )}
-
-        {activeTab === 'skills' && (
-          <SkillDetails
-            skill_summary={skill_summary}
-            skill_boosts={skill_boosts}
-            current_class={current_class}
-            act={act}
-          />
-        )}
-
-        {activeTab === 'progression' && (
-          <ProgressionDetails
-            current_class={current_class}
-            current_rank={current_rank}
-            current_rank_level={current_rank_level}
-            total_experience={total_experience}
-            progress_to_next={progress_to_next}
-            exp_needed={exp_needed}
-            skill_summary={skill_summary}
-            act={act}
-          />
-        )}
-
-        {activeTab === 'milestones' && (
-          <MilestoneTracker
-            skill_milestones={skill_milestones}
-            skill_summary={skill_summary}
-            act={act}
-          />
-        )}
-
-        {activeTab === 'analytics' && (
-          <SkillAnalytics
-            skill_summary={skill_summary}
-            performance_metrics={performance_metrics}
-            rounds_played={rounds_played}
-            act={act}
-          />
-        )}
-      </Window.Content>
-    </Window>
+    <Button
+      {...props}
+      style={{
+        fontFamily: C.mono,
+        fontSize: '10px',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        background: bg,
+        border: `1px solid ${borderColor}`,
+        borderRadius: 0,
+        color: selected ? C.textBright : C.textDim,
+        padding: '3px 8px',
+        boxShadow: selected ? `0 0 6px ${borderColor}44` : 'none',
+      }}
+    >
+      {props.children}
+    </Button>
   );
 };
 
-const SkillOverview = (props, context) => {
-  const {
-    player_name,
-    current_class,
-    current_faction,
-    current_rank,
-    current_rank_level,
-    total_experience,
-    rounds_played,
-    progress_to_next,
-    exp_needed,
-    skill_summary,
-    performance_metrics,
-  } = props;
-
-  // Calculate skill statistics
-  const total_skill_levels = performance_metrics?.total_skill_levels || 0;
-  const highest_skill_level = performance_metrics?.highest_skill_level || 0;
-  const skill_count = performance_metrics?.skill_count || 0;
-  const average_skill_level = performance_metrics?.average_skill_level || 0;
-
-  // Count skills by level
-  const skill_counts = {
-    novice: 0,
-    apprentice: 0,
-    journeyman: 0,
-    expert: 0,
-    master: 0,
-    legendary: 0,
-  };
-
-  Object.values(skill_summary || {}).forEach(skill => {
-    const level = skill.level;
-    if (level >= 2) skill_counts.novice++;
-    if (level >= 3) skill_counts.apprentice++;
-    if (level >= 4) skill_counts.journeyman++;
-    if (level >= 5) skill_counts.expert++;
-    if (level >= 6) skill_counts.master++;
-    if (level >= 7) skill_counts.legendary++;
-  });
-
-  return (
-    <Box>
-      <Section title="Player Information">
-        <LabeledList>
-          <LabeledList.Item label="Name">{player_name}</LabeledList.Item>
-          <LabeledList.Item label="Class">{current_class}</LabeledList.Item>
-          <LabeledList.Item label="Faction">{current_faction}</LabeledList.Item>
-          <LabeledList.Item label="Rank">{current_rank} (Level {current_rank_level})</LabeledList.Item>
-          <LabeledList.Item label="Total Experience">{total_experience.toLocaleString()}</LabeledList.Item>
-          <LabeledList.Item label="Rounds Played">{rounds_played}</LabeledList.Item>
-        </LabeledList>
-      </Section>
-
-      <Section title="Rank Progress">
-        <ProgressBar
-          value={progress_to_next}
-          maxValue={100}
-          color={progress_to_next >= 100 ? 'good' : 'average'}>
-          {progress_to_next}% to next rank
-        </ProgressBar>
-        {exp_needed > 0 && (
-          <Box mt={1}>
-            <NoticeBox info>
-              {exp_needed.toLocaleString()} experience needed for next rank
-            </NoticeBox>
-          </Box>
-        )}
-      </Section>
-
-      <Section title="Skill Statistics">
-        <LabeledList>
-          <LabeledList.Item label="Total Skill Levels">{total_skill_levels}</LabeledList.Item>
-          <LabeledList.Item label="Highest Skill Level">{highest_skill_level}</LabeledList.Item>
-          <LabeledList.Item label="Active Skills">{skill_count}</LabeledList.Item>
-          <LabeledList.Item label="Average Skill Level">{average_skill_level.toFixed(1)}</LabeledList.Item>
-        </LabeledList>
-
-        <Box mt={2}>
-          <h3>Skill Distribution</h3>
-          <Table>
-            <Table.Row header>
-              <Table.Cell>Level</Table.Cell>
-              <Table.Cell>Count</Table.Cell>
-              <Table.Cell>Progress</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Novice</Table.Cell>
-              <Table.Cell>{skill_counts.novice}</Table.Cell>
-              <Table.Cell>
-                <ProgressBar value={skill_counts.novice} maxValue={Object.keys(skill_summary || {}).length} />
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Apprentice</Table.Cell>
-              <Table.Cell>{skill_counts.apprentice}</Table.Cell>
-              <Table.Cell>
-                <ProgressBar value={skill_counts.apprentice} maxValue={Object.keys(skill_summary || {}).length} />
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Journeyman</Table.Cell>
-              <Table.Cell>{skill_counts.journeyman}</Table.Cell>
-              <Table.Cell>
-                <ProgressBar value={skill_counts.journeyman} maxValue={Object.keys(skill_summary || {}).length} />
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Expert</Table.Cell>
-              <Table.Cell>{skill_counts.expert}</Table.Cell>
-              <Table.Cell>
-                <ProgressBar value={skill_counts.expert} maxValue={Object.keys(skill_summary || {}).length} />
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Master</Table.Cell>
-              <Table.Cell>{skill_counts.master}</Table.Cell>
-              <Table.Cell>
-                <ProgressBar value={skill_counts.master} maxValue={Object.keys(skill_summary || {}).length} />
-              </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Legendary</Table.Cell>
-              <Table.Cell>{skill_counts.legendary}</Table.Cell>
-              <Table.Cell>
-                <ProgressBar value={skill_counts.legendary} maxValue={Object.keys(skill_summary || {}).length} />
-              </Table.Cell>
-            </Table.Row>
-          </Table>
-        </Box>
-      </Section>
+const TermProgressBar = (props) => (
+  <Box style={{ marginBottom: '6px' }}>
+    <Box style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+      <TermLabel>{props.label}</TermLabel>
+      <TermValue color={props.color || C.amber}>{props.value}{props.suffix || ''}</TermValue>
     </Box>
-  );
-};
-
-const SkillDetails = (props, context) => {
-  const { skill_summary, skill_boosts, current_class, act } = props;
-
-  const [skillFilter, setSkillFilter] = useLocalState(context, 'skillFilter', 'all');
-
-  const skillCategories = {
-    all: 'All Skills',
-    security: 'Security',
-    engineering: 'Engineering',
-    medical: 'Medical',
-    research: 'Research',
-    service: 'Service',
-    supply: 'Supply',
-    administrative: 'Administrative',
-    containment: 'Containment',
-  };
-
-  const filteredSkills = Object.entries(skill_summary || {}).filter(([skillType, skillData]) => {
-    if (skillFilter === 'all') return true;
-    return skillData.progression_class === skillFilter;
-  });
-
-  return (
-    <Box>
-      <Section title="Skill Details">
-        <Box mb={2}>
-          <Button
-            selected={skillFilter === 'all'}
-            onClick={() => setSkillFilter('all')}>
-            All Skills
-          </Button>
-          {Object.entries(skillCategories).filter(([key]) => key !== 'all').map(([key, name]) => (
-            <Button
-              key={key}
-              selected={skillFilter === key}
-              onClick={() => setSkillFilter(key)}>
-              {name}
-            </Button>
-          ))}
-        </Box>
-
-        <Table>
-          <Table.Row header>
-            <Table.Cell>Skill</Table.Cell>
-            <Table.Cell>Level</Table.Cell>
-            <Table.Cell>Experience</Table.Cell>
-            <Table.Cell>Class</Table.Cell>
-            <Table.Cell>Boost</Table.Cell>
-            <Table.Cell>Progress</Table.Cell>
-          </Table.Row>
-          {filteredSkills.map(([skillType, skillData]) => (
-            <Table.Row key={skillType}>
-              <Table.Cell>
-                <Box>
-                  <strong>{skillType.split('/').pop()}</strong>
-                  <Box textColor="gray" fontSize="0.8em">
-                    {skillData.progression_class}
-                  </Box>
-                </Box>
-              </Table.Cell>
-              <Table.Cell>
-                <Box>
-                  <strong>{skillData.level_name}</strong>
-                  <Box textColor="gray" fontSize="0.8em">
-                    Level {skillData.level}
-                  </Box>
-                </Box>
-              </Table.Cell>
-              <Table.Cell>{skillData.experience.toLocaleString()}</Table.Cell>
-              <Table.Cell>
-                <Box textColor={skillData.progression_class === current_class ? 'green' : 'gray'}>
-                  {skillData.progression_class}
-                </Box>
-              </Table.Cell>
-              <Table.Cell>
-                {skillData.boost_multiplier > 1.0 ? (
-                  <Box textColor="green">
-                    +{((skillData.boost_multiplier - 1) * 100).toFixed(0)}%
-                  </Box>
-                ) : (
-                  <Box textColor="gray">None</Box>
-                )}
-              </Table.Cell>
-              <Table.Cell>
-                <ProgressBar
-                  value={skillData.experience}
-                  maxValue={getSkillExpForLevel(skillData.level + 1)}
-                  color={getSkillLevelColor(skillData.level)}>
-                  {skillData.experience.toLocaleString()}
-                </ProgressBar>
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table>
-      </Section>
+    <Box style={{
+      height: '6px',
+      background: C.panel,
+      border: `1px solid ${C.border}`,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <Box style={{
+        height: '100%',
+        width: `${Math.min(100, Math.max(0, (props.value / props.maxValue) * 100))}%`,
+        background: props.color || C.amber,
+        transition: 'width 0.3s',
+      }} />
     </Box>
-  );
-};
+  </Box>
+);
 
-const ProgressionDetails = (props, context) => {
-  const {
-    current_class,
-    current_rank,
-    current_rank_level,
-    total_experience,
-    progress_to_next,
-    exp_needed,
-    skill_summary,
-    act,
-  } = props;
-
-  // Calculate skill-based rank requirements
-  const skillRequirements = getSkillBasedRankRequirements();
-  const currentRequirements = skillRequirements[current_rank_level + 1] || {};
-  const playerStats = calculatePlayerSkillStats(skill_summary);
-
-  return (
-    <Box>
-      <Section title="Current Status">
-        <LabeledList>
-          <LabeledList.Item label="Class">{current_class}</LabeledList.Item>
-          <LabeledList.Item label="Current Rank">{current_rank} (Level {current_rank_level})</LabeledList.Item>
-          <LabeledList.Item label="Total Experience">{total_experience.toLocaleString()}</LabeledList.Item>
-          <LabeledList.Item label="Progress to Next Rank">{progress_to_next}%</LabeledList.Item>
-        </LabeledList>
-      </Section>
-
-      <Section title="Skill-Based Rank Requirements">
-        <NoticeBox info>
-          Your progression class provides skill experience boosts for relevant skills.
-        </NoticeBox>
-
-        <Box mt={2}>
-          <h3>Next Rank Requirements (Rank {current_rank_level + 1})</h3>
-          {Object.entries(currentRequirements).map(([requirement, value]) => (
-            <Box key={requirement} mb={1}>
-              <LabeledList>
-                <LabeledList.Item label={formatRequirementName(requirement)}>
-                  {playerStats[requirement] || 0} / {value}
-                  <ProgressBar
-                    value={playerStats[requirement] || 0}
-                    maxValue={value}
-                    color={(playerStats[requirement] || 0) >= value ? 'good' : 'average'}
-                    mt={0.5}
-                  />
-                </LabeledList.Item>
-              </LabeledList>
-            </Box>
-          ))}
-        </Box>
-      </Section>
-
-      <Section title="Class Skill Boosts">
-        <Table>
-          <Table.Row header>
-            <Table.Cell>Skill Category</Table.Cell>
-            <Table.Cell>Boost Multiplier</Table.Cell>
-            <Table.Cell>Description</Table.Cell>
-          </Table.Row>
-          {getClassSkillBoosts(current_class).map(([skill, boost]) => (
-            <Table.Row key={skill}>
-              <Table.Cell>{skill}</Table.Cell>
-              <Table.Cell>
-                <Box textColor="green">+{((boost - 1) * 100).toFixed(0)}%</Box>
-              </Table.Cell>
-              <Table.Cell>Primary skill for {current_class} class</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table>
-      </Section>
-    </Box>
-  );
-};
-
-const MilestoneTracker = (props, context) => {
-  const { skill_milestones, skill_summary, act } = props;
-
-  const milestoneLevels = [
-    { level: 2, name: 'Novice', color: 'blue' },
-    { level: 3, name: 'Apprentice', color: 'green' },
-    { level: 4, name: 'Journeyman', color: 'yellow' },
-    { level: 5, name: 'Expert', color: 'orange' },
-    { level: 6, name: 'Master', color: 'red' },
-    { level: 7, name: 'Legendary', color: 'purple' },
-  ];
-
-  return (
-    <Box>
-      <Section title="Skill Milestones">
-        <NoticeBox info>
-          Track your progress through skill milestones and unlock progression rewards.
-        </NoticeBox>
-
-        {milestoneLevels.map(({ level, name, color }) => (
-          <Section key={level} title={`${name} Milestones`} level={2}>
-            <Table>
-              <Table.Row header>
-                <Table.Cell>Skill</Table.Cell>
-                <Table.Cell>Current Level</Table.Cell>
-                <Table.Cell>Milestone Status</Table.Cell>
-                <Table.Cell>Rewards</Table.Cell>
-              </Table.Row>
-              {Object.entries(skill_summary || {}).map(([skillType, skillData]) => {
-                const hasMilestone = skill_milestones?.[skillType]?.includes(level);
-                const canReach = skillData.level >= level;
-
-                return (
-                  <Table.Row key={skillType}>
-                    <Table.Cell>{skillType.split('/').pop()}</Table.Cell>
-                    <Table.Cell>
-                      <Box textColor={getSkillLevelColor(skillData.level)}>
-                        {skillData.level_name} ({skillData.level})
-                      </Box>
-                    </Table.Cell>
-                    <Table.Cell>
-                      {hasMilestone ? (
-                        <Box textColor="green">
-                          <Icon name="check" /> Achieved
-                        </Box>
-                      ) : canReach ? (
-                        <Box textColor="orange">
-                          <Icon name="times" /> Not Claimed
-                        </Box>
-                      ) : (
-                        <Box textColor="gray">
-                          <Icon name="minus" /> Not Reached
-                        </Box>
-                      )}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {hasMilestone ? (
-                        <Box textColor="green">
-                          +{getMilestoneReward(level)} XP
-                        </Box>
-                      ) : (
-                        <Box textColor="gray">-</Box>
-                      )}
-                    </Table.Cell>
-                  </Table.Row>
-                );
-              })}
-            </Table>
-          </Section>
-        ))}
-      </Section>
-    </Box>
-  );
-};
-
-const SkillAnalytics = (props, context) => {
-  const { skill_summary, performance_metrics, rounds_played, act } = props;
-
-  const skillData = Object.values(skill_summary || {});
-  const totalSkills = skillData.length;
-  const activeSkills = skillData.filter(skill => skill.level > 1).length;
-  const averageLevel = skillData.reduce((sum, skill) => sum + skill.level, 0) / totalSkills;
-
-  return (
-    <Box>
-      <Section title="Skill Analytics">
-        <LabeledList>
-          <LabeledList.Item label="Total Skills">{totalSkills}</LabeledList.Item>
-          <LabeledList.Item label="Active Skills">{activeSkills}</LabeledList.Item>
-          <LabeledList.Item label="Average Skill Level">{averageLevel.toFixed(1)}</LabeledList.Item>
-          <LabeledList.Item label="Highest Skill Level">{performance_metrics?.highest_skill_level || 0}</LabeledList.Item>
-          <LabeledList.Item label="Total Skill Levels">{performance_metrics?.total_skill_levels || 0}</LabeledList.Item>
-        </LabeledList>
-      </Section>
-
-      <Section title="Skill Distribution by Class">
-        <Table>
-          <Table.Row header>
-            <Table.Cell>Class</Table.Cell>
-            <Table.Cell>Skills</Table.Cell>
-            <Table.Cell>Average Level</Table.Cell>
-            <Table.Cell>Highest Level</Table.Cell>
-          </Table.Row>
-          {getClassSkillStats(skillData).map(([className, stats]) => (
-            <Table.Row key={className}>
-              <Table.Cell>{className}</Table.Cell>
-              <Table.Cell>{stats.count}</Table.Cell>
-              <Table.Cell>{stats.average.toFixed(1)}</Table.Cell>
-              <Table.Cell>{stats.highest}</Table.Cell>
-            </Table.Row>
-          ))}
-        </Table>
-      </Section>
-    </Box>
-  );
-};
-
-// Helper functions
 const getSkillExpForLevel = (level) => {
   const expList = [0, 100, 250, 500, 900, 1500, 2500];
   return expList[level] || 2500;
 };
 
 const getSkillLevelColor = (level) => {
-  if (level >= 7) return 'purple';
-  if (level >= 6) return 'red';
-  if (level >= 5) return 'orange';
-  if (level >= 4) return 'yellow';
-  if (level >= 3) return 'green';
-  if (level >= 2) return 'blue';
-  return 'gray';
+  if (level >= 7) return '#aa44ff';
+  if (level >= 6) return C.redBright;
+  if (level >= 5) return '#ff8800';
+  if (level >= 4) return C.amber;
+  if (level >= 3) return C.green;
+  if (level >= 2) return '#4488ff';
+  return C.textDim;
 };
 
 const getSkillBasedRankRequirements = () => ({
@@ -577,20 +160,13 @@ const getSkillBasedRankRequirements = () => ({
 });
 
 const calculatePlayerSkillStats = (skillSummary) => {
-  const stats = {
-    total_skill_levels: 0,
-    expert_skills: 0,
-    master_skills: 0,
-    legendary_skills: 0,
-  };
-
+  const stats = { total_skill_levels: 0, expert_skills: 0, master_skills: 0, legendary_skills: 0 };
   Object.values(skillSummary || {}).forEach(skill => {
     stats.total_skill_levels += skill.level;
     if (skill.level >= 5) stats.expert_skills++;
     if (skill.level >= 6) stats.master_skills++;
     if (skill.level >= 7) stats.legendary_skills++;
   });
-
   return stats;
 };
 
@@ -622,25 +198,376 @@ const getMilestoneReward = (level) => {
 
 const getClassSkillStats = (skillData) => {
   const classStats = {};
-
   skillData.forEach(skill => {
     const className = skill.progression_class;
-    if (!classStats[className]) {
-      classStats[className] = { count: 0, total: 0, highest: 0 };
-    }
+    if (!classStats[className]) classStats[className] = { count: 0, total: 0, highest: 0 };
     classStats[className].count++;
     classStats[className].total += skill.level;
     classStats[className].highest = Math.max(classStats[className].highest, skill.level);
   });
-
-  return Object.entries(classStats).map(([className, stats]) => [
-    className,
-    {
-      count: stats.count,
-      average: stats.total / stats.count,
-      highest: stats.highest,
-    }
-  ]);
+  return Object.entries(classStats).map(([className, stats]) => [className, { count: stats.count, average: stats.total / stats.count, highest: stats.highest }]);
 };
 
+const SkillOverview = (props) => {
+  const { player_name, current_class, current_faction, current_rank, current_rank_level, total_experience, rounds_played, progress_to_next, exp_needed, skill_summary, performance_metrics } = props;
 
+  const total_skill_levels = performance_metrics?.total_skill_levels || 0;
+  const highest_skill_level = performance_metrics?.highest_skill_level || 0;
+  const skill_count = performance_metrics?.skill_count || 0;
+  const average_skill_level = performance_metrics?.average_skill_level || 0;
+
+  return (
+    <Box>
+      <TermHeader>PERSONNEL IDENTIFICATION</TermHeader>
+      <TermRow><TermLabel>DESIGNATION</TermLabel><TermValue color={C.amber} bold>{player_name}</TermValue></TermRow>
+      <TermRow><TermLabel>CLASS</TermLabel><TermValue>{current_class}</TermValue></TermRow>
+      <TermRow><TermLabel>FACTION</TermLabel><TermValue>{current_faction}</TermValue></TermRow>
+      <TermRow><TermLabel>RANK</TermLabel><TermValue color={C.green}>{current_rank} (LEVEL {current_rank_level})</TermValue></TermRow>
+      <TermRow><TermLabel>TOTAL XP</TermLabel><TermValue color={C.amber}>{total_experience?.toLocaleString() || 0}</TermValue></TermRow>
+      <TermRow><TermLabel>ROUNDS</TermLabel><TermValue>{rounds_played}</TermValue></TermRow>
+
+      <TermDivider />
+
+      <TermHeader>RANK PROGRESSION</TermHeader>
+      <TermProgressBar label="PROGRESS" value={progress_to_next} maxValue={100} color={progress_to_next >= 100 ? C.green : C.amber} suffix="%" />
+      {exp_needed > 0 && (
+        <Box style={term({ color: C.textDim, fontSize: '10px' })}>{exp_needed.toLocaleString()} XP REQUIRED</Box>
+      )}
+
+      <TermDivider />
+
+      <TermHeader>SKILL STATISTICS</TermHeader>
+      <TermRow><TermLabel>TOTAL SKILL LEVELS</TermLabel><TermValue>{total_skill_levels}</TermValue></TermRow>
+      <TermRow><TermLabel>HIGHEST SKILL</TermLabel><TermValue color={getSkillLevelColor(highest_skill_level)}>{highest_skill_level}</TermValue></TermRow>
+      <TermRow><TermLabel>ACTIVE SKILLS</TermLabel><TermValue>{skill_count}</TermValue></TermRow>
+      <TermRow><TermLabel>AVERAGE LEVEL</TermLabel><TermValue>{average_skill_level.toFixed(1)}</TermValue></TermRow>
+    </Box>
+  );
+};
+
+const SkillDetails = (props, context) => {
+  const { skill_summary, skill_boosts, current_class, act } = props;
+  const [skillFilter, setSkillFilter] = useLocalState(context, 'skillFilter', 'all');
+
+  const skillCategories = {
+    all: 'All', security: 'Security', engineering: 'Engineering', medical: 'Medical',
+    research: 'Research', service: 'Service', supply: 'Supply', administrative: 'Admin', containment: 'Containment',
+  };
+
+  const filteredSkills = Object.entries(skill_summary || {}).filter(([_, skillData]) => {
+    if (skillFilter === 'all') return true;
+    return skillData.progression_class === skillFilter;
+  });
+
+  return (
+    <Box>
+      <TermHeader>SKILL FILTER</TermHeader>
+      <Box style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', marginBottom: '12px' }}>
+        {Object.entries(skillCategories).map(([key, name]) => (
+          <TermButton key={key} selected={skillFilter === key} onClick={() => setSkillFilter(key)}>{name}</TermButton>
+        ))}
+      </Box>
+
+      <TermDivider />
+
+      {filteredSkills.length === 0 ? (
+        <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO SKILLS MATCH FILTER</Box>
+      ) : (
+        filteredSkills.map(([skillType, skillData]) => {
+          const levelColor = getSkillLevelColor(skillData.level);
+          return (
+            <Box key={skillType} style={{
+              marginBottom: '6px',
+              padding: '8px',
+              borderLeft: `2px solid ${levelColor}`,
+              background: C.panel,
+            }}>
+              <TermRow>
+                <TermValue bold color={levelColor}>{skillType.split('/').pop()}</TermValue>
+                <TermLabel style={{ marginLeft: '8px' }}>{skillData.progression_class}</TermLabel>
+              </TermRow>
+              <TermRow>
+                <TermLabel>LEVEL</TermLabel>
+                <TermValue color={levelColor}>{skillData.level_name} ({skillData.level})</TermValue>
+                <TermLabel style={{ marginLeft: '12px' }}>XP</TermLabel>
+                <TermValue>{skillData.experience.toLocaleString()}</TermValue>
+                {skillData.boost_multiplier > 1.0 && (
+                  <><TermLabel style={{ marginLeft: '12px' }}>BOOST</TermLabel><TermValue color={C.green}>+{((skillData.boost_multiplier - 1) * 100).toFixed(0)}%</TermValue></>
+                )}
+              </TermRow>
+              <TermProgressBar label="PROGRESS" value={skillData.experience} maxValue={getSkillExpForLevel(skillData.level + 1)} color={levelColor} />
+            </Box>
+          );
+        })
+      )}
+    </Box>
+  );
+};
+
+const ProgressionDetails = (props) => {
+  const { current_class, current_rank, current_rank_level, total_experience, progress_to_next, exp_needed, skill_summary, act } = props;
+  const skillRequirements = getSkillBasedRankRequirements();
+  const currentRequirements = skillRequirements[current_rank_level + 1] || {};
+  const playerStats = calculatePlayerSkillStats(skill_summary);
+
+  return (
+    <Box>
+      <TermHeader>CURRENT STATUS</TermHeader>
+      <TermRow><TermLabel>CLASS</TermLabel><TermValue>{current_class}</TermValue></TermRow>
+      <TermRow><TermLabel>RANK</TermLabel><TermValue color={C.green}>{current_rank} (LEVEL {current_rank_level})</TermValue></TermRow>
+      <TermRow><TermLabel>TOTAL XP</TermLabel><TermValue color={C.amber}>{total_experience?.toLocaleString() || 0}</TermValue></TermRow>
+      <TermRow><TermLabel>PROGRESS</TermLabel><TermValue color={progress_to_next >= 100 ? C.green : C.amber}>{progress_to_next}%</TermValue></TermRow>
+
+      <TermDivider />
+
+      {Object.keys(currentRequirements).length > 0 && (
+        <Box>
+          <TermHeader>NEXT RANK REQUIREMENTS (RANK {current_rank_level + 1})</TermHeader>
+          {Object.entries(currentRequirements).map(([requirement, value]) => {
+            const current = playerStats[requirement] || 0;
+            const met = current >= value;
+            return (
+              <Box key={requirement} style={{ marginBottom: '8px' }}>
+                <TermRow>
+                  <TermLabel>{formatRequirementName(requirement)}</TermLabel>
+                  <TermValue color={met ? C.green : C.redBright}>{current} / {value}</TermValue>
+                  {met && <TermValue color={C.green} style={{ marginLeft: '8px' }}>[MET]</TermValue>}
+                </TermRow>
+                <TermProgressBar value={current} maxValue={value} color={met ? C.green : C.amber} />
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+
+      <TermDivider />
+
+      <TermHeader>CLASS SKILL BOOSTS — {current_class?.toUpperCase()}</TermHeader>
+      {getClassSkillBoosts(current_class).map(([skill, boost]) => (
+        <TermRow key={skill}>
+          <TermLabel>{skill}</TermLabel>
+          <TermValue color={C.green}>+{((boost - 1) * 100).toFixed(0)}%</TermValue>
+        </TermRow>
+      ))}
+    </Box>
+  );
+};
+
+const MilestoneTracker = (props) => {
+  const { skill_milestones, skill_summary, act } = props;
+  const milestoneLevels = [
+    { level: 2, name: 'Novice' },
+    { level: 3, name: 'Apprentice' },
+    { level: 4, name: 'Journeyman' },
+    { level: 5, name: 'Expert' },
+    { level: 6, name: 'Master' },
+    { level: 7, name: 'Legendary' },
+  ];
+
+  return (
+    <Box>
+      <TermHeader>SKILL MILESTONES</TermHeader>
+      {milestoneLevels.map(({ level, name }) => {
+        const levelColor = getSkillLevelColor(level);
+        return (
+          <Box key={level} style={{ marginBottom: '12px' }}>
+            <TermHeader style={{ color: levelColor, borderBottomColor: levelColor }}>{name} MILESTONES</TermHeader>
+            {Object.entries(skill_summary || {}).map(([skillType, skillData]) => {
+              const hasMilestone = skill_milestones?.[skillType]?.includes(level);
+              const canReach = skillData.level >= level;
+              return (
+                <Box key={skillType} style={{
+                  marginBottom: '4px',
+                  padding: '6px 8px',
+                  borderLeft: `2px solid ${hasMilestone ? C.green : canReach ? C.amber : C.border}`,
+                  background: C.panel,
+                }}>
+                  <TermRow>
+                    <TermValue bold>{skillType.split('/').pop()}</TermValue>
+                    <TermLabel style={{ marginLeft: '8px' }}>LEVEL</TermLabel>
+                    <TermValue color={getSkillLevelColor(skillData.level)}>{skillData.level}</TermValue>
+                    <TermLabel style={{ marginLeft: '8px' }}>STATUS</TermLabel>
+                    <TermValue color={hasMilestone ? C.green : canReach ? C.amber : C.textDim}>
+                      {hasMilestone ? 'ACHIEVED' : canReach ? 'UNCLAIMED' : 'LOCKED'}
+                    </TermValue>
+                    {hasMilestone && <TermLabel style={{ marginLeft: '8px' }}>REWARD</TermLabel>}
+                    {hasMilestone && <TermValue color={C.amber}>+{getMilestoneReward(level)} XP</TermValue>}
+                  </TermRow>
+                </Box>
+              );
+            })}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
+
+const SkillAnalytics = (props) => {
+  const { skill_summary, performance_metrics, rounds_played, act } = props;
+  const skillData = Object.values(skill_summary || {});
+  const totalSkills = skillData.length;
+  const activeSkills = skillData.filter(skill => skill.level > 1).length;
+  const averageLevel = totalSkills > 0 ? skillData.reduce((sum, skill) => sum + skill.level, 0) / totalSkills : 0;
+
+  return (
+    <Box>
+      <TermHeader>SKILL ANALYTICS</TermHeader>
+      <TermRow><TermLabel>TOTAL SKILLS</TermLabel><TermValue>{totalSkills}</TermValue></TermRow>
+      <TermRow><TermLabel>ACTIVE SKILLS</TermLabel><TermValue color={C.green}>{activeSkills}</TermValue></TermRow>
+      <TermRow><TermLabel>AVERAGE LEVEL</TermLabel><TermValue>{averageLevel.toFixed(1)}</TermValue></TermRow>
+      <TermRow><TermLabel>HIGHEST LEVEL</TermLabel><TermValue>{performance_metrics?.highest_skill_level || 0}</TermValue></TermRow>
+      <TermRow><TermLabel>TOTAL LEVELS</TermLabel><TermValue>{performance_metrics?.total_skill_levels || 0}</TermValue></TermRow>
+
+      <TermDivider />
+
+      <TermHeader>SKILL DISTRIBUTION BY CLASS</TermHeader>
+      {getClassSkillStats(skillData).map(([className, stats]) => (
+        <Box key={className} style={{
+          marginBottom: '6px',
+          padding: '8px',
+          borderLeft: `2px solid ${C.borderRed}`,
+          background: C.panel,
+        }}>
+          <TermRow>
+            <TermValue bold color={C.amber}>{className}</TermValue>
+          </TermRow>
+          <TermRow>
+            <TermLabel>SKILLS</TermLabel><TermValue>{stats.count}</TermValue>
+            <TermLabel style={{ marginLeft: '12px' }}>AVG</TermLabel><TermValue>{stats.average.toFixed(1)}</TermValue>
+            <TermLabel style={{ marginLeft: '12px' }}>HIGHEST</TermLabel><TermValue>{stats.highest}</TermValue>
+          </TermRow>
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
+export const SkillProgression = (props, context) => {
+  const { act, data } = useBackend(context);
+  const [activeTab, setActiveTab] = useLocalState(context, 'activeTab', 'overview');
+
+  const {
+    has_data, player_name, player_key, current_class, current_faction,
+    current_rank, current_rank_level, total_experience, rounds_played,
+    progress_to_next, exp_needed, skill_summary, skill_milestones,
+    performance_metrics, skill_boosts,
+  } = data;
+
+  if (!has_data) {
+    return (
+      <Window title="SCP FOUNDATION — SKILL PROGRESSION" width={1100} height={750} theme="scp_terminal">
+        <Window.Content scrollable>
+          <Box style={{ background: C.bg, border: `1px solid ${C.borderRed}`, fontFamily: C.mono, fontSize: '12px', color: C.text, minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <NoticeBox>NO PROGRESSION DATA AVAILABLE</NoticeBox>
+          </Box>
+        </Window.Content>
+      </Window>
+    );
+  }
+
+  const TABS = [
+    { key: 'overview', label: 'OVERVIEW' },
+    { key: 'skills', label: 'SKILLS' },
+    { key: 'progression', label: 'PROGRESSION' },
+    { key: 'milestones', label: 'MILESTONES' },
+    { key: 'analytics', label: 'ANALYTICS' },
+  ];
+
+  return (
+    <Window title="SCP FOUNDATION — SKILL PROGRESSION TERMINAL" width={1100} height={750} theme="scp_terminal">
+      <Window.Content scrollable>
+        <Box style={{
+          background: C.bg,
+          border: `1px solid ${C.borderRed}`,
+          fontFamily: C.mono,
+          fontSize: '12px',
+          color: C.text,
+          minHeight: '100%',
+        }}>
+          <Box style={{
+            borderBottom: `2px solid ${C.borderRed}`,
+            padding: '10px 14px 8px',
+            background: 'linear-gradient(180deg, #0e0000 0%, #08080a 100%)',
+          }}>
+            <Box style={{ fontSize: '15px', fontWeight: 'bold', color: C.amber, letterSpacing: '0.18em' }}>
+              SCP FOUNDATION — SKILL PROGRESSION TERMINAL
+            </Box>
+            <Box style={{ fontSize: '9px', color: C.textDim, letterSpacing: '0.12em', marginTop: '2px' }}>
+              CLEARANCE LEVEL 2 | PERSONNEL DEVELOPMENT TRACKING | v2.1.0
+            </Box>
+          </Box>
+
+          <Box style={{
+            display: 'flex',
+            borderBottom: `1px solid ${C.borderRed}`,
+            overflowX: 'auto',
+            background: C.panel,
+          }}>
+            {TABS.map((t) => {
+              const isActive = activeTab === t.key;
+              return (
+                <Box
+                  key={t.key}
+                  style={{
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    background: isActive ? 'rgba(139,0,0,0.25)' : 'transparent',
+                    borderRight: `1px solid ${C.border}`,
+                    borderBottom: isActive ? `2px solid ${C.amber}` : '2px solid transparent',
+                    color: isActive ? C.textBright : C.textDim,
+                    fontSize: '10px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    fontFamily: C.mono,
+                    whiteSpace: 'nowrap',
+                  }}
+                  onClick={() => setActiveTab(t.key)}
+                >
+                  {isActive && '▸ '}{t.label}
+                </Box>
+              );
+            })}
+          </Box>
+
+          <Box style={{ padding: '16px' }}>
+            {activeTab === 'overview' && (
+              <SkillOverview
+                player_name={player_name} current_class={current_class} current_faction={current_faction}
+                current_rank={current_rank} current_rank_level={current_rank_level} total_experience={total_experience}
+                rounds_played={rounds_played} progress_to_next={progress_to_next} exp_needed={exp_needed}
+                skill_summary={skill_summary} performance_metrics={performance_metrics}
+              />
+            )}
+            {activeTab === 'skills' && (
+              <SkillDetails skill_summary={skill_summary} skill_boosts={skill_boosts} current_class={current_class} act={act} />
+            )}
+            {activeTab === 'progression' && (
+              <ProgressionDetails
+                current_class={current_class} current_rank={current_rank} current_rank_level={current_rank_level}
+                total_experience={total_experience} progress_to_next={progress_to_next} exp_needed={exp_needed}
+                skill_summary={skill_summary} act={act}
+              />
+            )}
+            {activeTab === 'milestones' && (
+              <MilestoneTracker skill_milestones={skill_milestones} skill_summary={skill_summary} act={act} />
+            )}
+            {activeTab === 'analytics' && (
+              <SkillAnalytics skill_summary={skill_summary} performance_metrics={performance_metrics} rounds_played={rounds_played} act={act} />
+            )}
+          </Box>
+
+          <Box style={{
+            borderTop: `1px solid ${C.border}`,
+            padding: '4px 14px',
+            background: C.panel,
+          }}>
+            <Box style={term({ color: C.textDim, fontSize: '9px', letterSpacing: '0.1em' })}>
+              SCP FOUNDATION | SKILL PROGRESSION | ALL DATA CLASSIFIED | UNAUTHORIZED ACCESS IS A CLASS-B INFRACTION
+            </Box>
+          </Box>
+        </Box>
+      </Window.Content>
+    </Window>
+  );
+};

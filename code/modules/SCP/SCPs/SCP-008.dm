@@ -240,7 +240,7 @@
 	qdel(target)
 
 /obj/item/reagent_containers/glass/bottle/scp008/proc/is_spreading_infection()
-	return infected_targets.len > 0 || zombified_targets.len > 0
+	return length(infected_targets) > 0 || length(zombified_targets) > 0
 
 /obj/item/reagent_containers/glass/bottle/scp008/proc/add_evolution_record(stage)
 	total_evolution_stages = max(total_evolution_stages, stage)
@@ -276,13 +276,13 @@
 	var/list/status = list()
 	status += "Infection Strength: [infection_system.current_strength]/[infection_system.max_strength]"
 	status += "Infection Type: [infection_system.get_infection_type()]"
-	status += "Infected Targets: [infected_targets.len]"
-	status += "Zombified Targets: [zombified_targets.len]"
-	status += "Horde Size: [horde_system.horde_members.len]"
+	status += "Infected Targets: [length(infected_targets)]"
+	status += "Zombified Targets: [length(zombified_targets)]"
+	status += "Horde Size: [length(horde_system.horde_members)]"
 	status += "Evolution Stage: [evolution_system.current_stage]/[evolution_system.max_stage]"
 	status += "Containment Level: [containment_system.containment_level]"
 	status += "Total Infections: [total_infections_caused]"
-	status += "Environmental Control: [environmental_system.controlled_room_types.len]"
+	status += "Environmental Control: [length(environmental_system.controlled_room_types)]"
 	return status
 
 // Examine behavior

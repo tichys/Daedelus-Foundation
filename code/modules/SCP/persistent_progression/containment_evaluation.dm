@@ -191,7 +191,7 @@ SUBSYSTEM_DEF(containment_evaluation)
 			xp_base = -50
 			reward_multiplier = 0.25
 	
-	var/final_xp = round(xp_base * evaluation_xp_multiplier)
+	var/final_xp = round(xp_base * reward_multiplier * evaluation_xp_multiplier)
 	
 	if(SSpersistent_progression)
 		SSpersistent_progression.award_experience(player.ckey, "containment_breach_response", final_xp, "containment_rating")
@@ -447,7 +447,7 @@ SUBSYSTEM_DEF(containment_evaluation)
 	message += "- D: [summary["ratings"]["D"]]<br>"
 	message += "- F: [summary["ratings"]["F"]]<br><br>"
 	
-	if(summary["by_scp"].len > 0)
+	if(length(summary["by_scp"]) > 0)
 		message += "<b>Containments by SCP:</b><br>"
 		for(var/scp_id in summary["by_scp"])
 			message += "- [scp_id]: [summary["by_scp"][scp_id]]<br>"
@@ -467,7 +467,7 @@ SUBSYSTEM_DEF(containment_evaluation)
 	
 	var/message = "<h2>Active Breaches</h2>"
 	
-	if(!manager.active_evaluations.len)
+	if(!length(manager.active_evaluations))
 		message += "<i>No active breaches.</i>"
 	else
 		for(var/eval_id in manager.active_evaluations)
@@ -477,7 +477,7 @@ SUBSYSTEM_DEF(containment_evaluation)
 			message += "<b>[eval.scp_id]</b><br>"
 			message += "- Duration: [duration] minutes<br>"
 			message += "- Type: [eval.breach_type]<br>"
-			message += "- Participants: [eval.participants.len]<br><br>"
+			message += "- Participants: [length(eval.participants)]<br><br>"
 	
 	to_chat(src, "<span class='notice'>[message]</span>")
 
@@ -512,3 +512,28 @@ SUBSYSTEM_DEF(containment_evaluation)
 	if(!SScontainment_evaluation || !SScontainment_evaluation.manager)
 		return FALSE
 	return SScontainment_evaluation.manager.update_metric(eval_id, METRIC_SCP_CONDITION, damage_percent)
+
+/proc/report_first_responder(mob/living/carbon/human/responder, scp_id)
+	if(!SScontainment_evaluation || !SScontainment_evaluation.manager)
+		return FALSE
+
+	for(var/eval_id in SScontainment_evaluation.manager.active_evaluations)
+		var/datum/containment_evaluation/eval = SScontainment_evaluation.manager.active_evaluations[eval_id]
+		if(eval.scp_id == scp_id)
+			eval.add_participant(responder)
+			if(!eval.first_responder)
+				SScontainment_evaluation.manager.update_metric(eval_id, METRIC_RESPONSE_TIME, 0)
+				eval.first_responder = responder.ckey
+
+			var/adherence_score = 80
+			var/area/A = get_area(responder)
+			var/zone = get_containment_zone(A)
+			if(zone == "hcz" || zone == "lcz")
+				adherence_score += 10
+			if(responder.wear_id)
+				var/obj/item/card/id/id_card = responder.get_idcard(TRUE)
+				if(id_card && (ACCESS_SECURITY in id_card.access))
+					adherence_score += 10
+			SScontainment_evaluation.manager.update_metric(eval_id, METRIC_PROTOCOL_ADHERENCE, min(adherence_score, 100))
+			return TRUE
+	return FALSE

@@ -248,6 +248,8 @@ GLOBAL_LIST_INIT(job_display_order, list(
 		for(var/i in roundstart_experience)
 			experiencer.mind.adjust_experience(i, roundstart_experience[i], TRUE)
 
+	on_job_assigned(spawned)
+
 /datum/job/proc/announce_job(mob/living/joining_mob)
 	if(head_announce)
 		announce_head(joining_mob, head_announce)

@@ -109,7 +109,7 @@ SUBSYSTEM_DEF(event_story_management)
 
 /datum/event/proc/check_stage_progression()
 	// Check if event should progress to next stage
-	if(current_stage < event_stages.len)
+	if(current_stage < length(event_stages))
 		var/datum/event_stage/current_stage_data = event_stages[current_stage]
 		if(current_stage_data && current_stage_data.check_completion_conditions())
 			progress_to_next_stage()
@@ -148,7 +148,7 @@ SUBSYSTEM_DEF(event_story_management)
 
 /datum/event/proc/check_event_completion()
 	// Check if event meets completion criteria
-	if(current_stage >= event_stages.len)
+	if(current_stage >= length(event_stages))
 		complete_event()
 
 /datum/event/proc/complete_event()
@@ -307,15 +307,15 @@ SUBSYSTEM_DEF(event_story_management)
 	var/completion_score = 0
 
 	// Score based on arc elements
-	if(arc.arc_events.len >= 3)
+	if(length(arc.arc_events) >= 3)
 		completion_score += 25
-	if(arc.arc_objectives.len >= 2)
+	if(length(arc.arc_objectives) >= 2)
 		completion_score += 20
-	if(arc.arc_milestones.len >= 5)
+	if(length(arc.arc_milestones) >= 5)
 		completion_score += 25
-	if(arc.arc_characters.len >= 3)
+	if(length(arc.arc_characters) >= 3)
 		completion_score += 15
-	if(arc.arc_conflicts.len >= 2)
+	if(length(arc.arc_conflicts) >= 2)
 		completion_score += 15
 
 	if(completion_score >= 80)

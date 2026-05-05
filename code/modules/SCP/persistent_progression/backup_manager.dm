@@ -254,12 +254,12 @@
 		if(copytext(file, -1) == "/")
 			backups += copytext(file, 1, -1)
 
-	if(backups.len <= max_backups)
+	if(length(backups) <= max_backups)
 		return
 
 	sortTim(backups, /proc/cmp_text_asc)
 
-	while(backups.len > max_backups)
+	while(length(backups) > max_backups)
 		var/old_backup = backups[1]
 		var/backup_path = "[backup_directory][old_backup]"
 

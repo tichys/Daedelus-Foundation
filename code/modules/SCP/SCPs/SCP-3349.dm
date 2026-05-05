@@ -1,162 +1,188 @@
-// SCP-3349: Reality-Bending Entity
-// An entity that can manipulate reality and create environmental anomalies
+// SCP-3349 - Cardiac Arrhythmia
+// A communicable cardiac arrhythmia that produces EKG waveforms resembling human vocalizations
+// The heart's electrical activity produces sounds resembling laughter, wailing, or speech
+// Keter because it is communicable and hard to contain
 
-/mob/living/carbon/human/scp3349
-	name = "reality bender"
-	desc = "A mysterious entity that seems to distort reality around it. The air around it shimmers unnaturally."
-	icon = 'icons/scp/scp-3349.dmi'
-	icon_state = "reality_bender"
-	status_flags = 0
-	maxHealth = 200
-	health = 200
+/obj/item/reagent_containers/glass/bottle/scp3349
+	name = "SCP-3349"
+	desc = "A sealed medical container holding a strange amber fluid. The liquid seems to pulse faintly, as if in rhythm with a heartbeat."
+	icon = 'icons/scp/scpstructures(32x32).dmi'
+	icon_state = "bottle"
+	var/containment_breached = FALSE
+	var/infection_strength = 30
+	var/list/infected_targets = list()
+	var/list/vocalization_log = list()
+	var/total_infections = 0
+	var/total_vocalizations = 0
+	var/session_start_time = 0
 
-	// Modular systems
-	var/datum/scp3349_distortion_system/distortion_system
-	var/datum/scp3349_anomaly_system/anomaly_system
-	var/datum/scp3349_evolution_system/evolution_system
-	var/datum/scp3349_environment_system/environment_system
-	var/datum/scp3349_research_system/research_system
-
-/mob/living/carbon/human/scp3349/Initialize(mapload)
+/obj/item/reagent_containers/glass/bottle/scp3349/Initialize()
 	. = ..()
-	set_species(/datum/species/scp3349)
-	SCP = new /datum/scp(src, "reality bender", SCP_KETER, "3349", SCP_PLAYABLE)
-	SCP.min_playercount = 30
-	SCP.min_time = 15 MINUTES
-		// Initialize systems after a short delay
-	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
 
-	// Remove bodypart overlays to prevent covering the SCP icon
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
+	SCP = new /datum/scp(
+		src,
+		"SCP-3349",
+		SCP_KETER,
+		"3349"
+	)
 
-/mob/living/carbon/human/scp3349/proc/initialize_systems()
-	distortion_system = new /datum/scp3349_distortion_system(src)
-	anomaly_system = new /datum/scp3349_anomaly_system(src)
-	evolution_system = new /datum/scp3349_evolution_system(src)
-	environment_system = new /datum/scp3349_environment_system(src)
-	research_system = new /datum/scp3349_research_system(src)
+	session_start_time = world.time
 
-/mob/living/carbon/human/scp3349/Life(datum/controller/process/mobs/parent)
-	. = ..()
-	if(stat == DEAD)
+	START_PROCESSING(SSobj, src)
+
+/obj/item/reagent_containers/glass/bottle/scp3349/Destroy()
+	infected_targets = list()
+	vocalization_log = list()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/obj/item/reagent_containers/glass/bottle/scp3349/process()
+	if(!containment_breached)
 		return
-	// Update modular systems
-	distortion_system?.process_distortion()
-	anomaly_system?.process_anomalies()
-	evolution_system?.process_evolution()
-	environment_system?.process_environment()
-	research_system?.process_research()
 
-/mob/living/carbon/human/scp3349/UnarmedAttack(atom/A)
-	if(!A || !istype(A, /mob/living))
-		return ..()
+	process_infection_spread()
+	process_vocalizations()
 
-	var/mob/living/L = A
-	if(L.stat == DEAD)
-		return ..()
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/process_infection_spread()
+	for(var/mob/living/carbon/human/H in range(3, src))
+		if(H.stat == DEAD || H.SCP)
+			continue
 
-	// Reality distortion attack
-	to_chat(src, "<span class='notice'>You distort reality around [L].</span>")
-	to_chat(L, "<span class='danger'>Reality seems to bend and distort around you!</span>")
-	hook_scp_interaction(L, "SCP-3349", "reality_distortion_attack")
+		if(!(H in infected_targets))
+			attempt_infection(H)
 
-	L.adjustBruteLoss(15)
-	// Reality distortion causes confusion
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/attempt_infection(mob/living/carbon/human/target)
+	if(!target || target.stat == DEAD)
+		return
 
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
+	if(target in infected_targets)
+		return
 
-	hook_scp_combat(L, "SCP-3349", 0, 15)
-	// Log interaction
-	SCP?.log_interaction(L, "reality_distortion_attack")
-	SCP?.award_research(L, "anomaly", 20)
+	if(prob(infection_strength / 3))
+		infect_target(target)
+
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/infect_target(mob/living/carbon/human/target)
+	if(!target || target.stat == DEAD)
+		return
+
+	infected_targets += target
+	total_infections++
+	containment_breached = TRUE
+
+	to_chat(target, "<span class='warning'>You feel an odd flutter in your chest... Your heartbeat seems irregular.</span>")
+
+	visible_message("<span class='notice'>[target] clutches their chest briefly.</span>")
+
+	addtimer(CALLBACK(src, PROC_REF(begin_arrhythmia), target), 30 SECONDS)
+
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/begin_arrhythmia(mob/living/carbon/human/target)
+	if(!target || target.stat == DEAD || QDELETED(target))
+		infected_targets -= target
+		return
+
+	to_chat(target, "<span class='warning'>Your heart is beating strangely... You can hear something in its rhythm.</span>")
+
+	process_affected_target(target)
+
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/process_affected_target(mob/living/carbon/human/target)
+	if(!target || target.stat == DEAD || QDELETED(target))
+		infected_targets -= target
+		return
+
+	if(!target in infected_targets)
+		return
+
+	var/vocalization_type = pick("laughter", "wailing", "whispering", "murmuring", "speech")
+
+	var/vocalization = ""
+	switch(vocalization_type)
+		if("laughter")
+			vocalization = pick(list(
+				"A faint chuckling seems to emanate from [target]'s chest.",
+				"Soft laughter pulses from [target]'s heartbeat.",
+				"[target]'s heart produces a rhythm that sounds disturbingly like giggling."
+			))
+		if("wailing")
+			vocalization = pick(list(
+				"A mournful wailing rises from [target]'s chest.",
+				"[target]'s heartbeat produces a sound like distant crying.",
+				"The rhythm of [target]'s heart forms a low, keening wail."
+			))
+		if("whispering")
+			vocalization = pick(list(
+				"Whispers seem to pulse from [target]'s heartbeat.",
+				"[target]'s heart murmurs something unintelligible.",
+				"A faint whispering rhythm emanates from [target]'s chest."
+			))
+		if("murmuring")
+			vocalization = pick(list(
+				"[target]'s heartbeat produces a murmuring cadence, like someone speaking softly.",
+				"A low murmuring seems to come from [target]'s chest in time with their pulse.",
+				"The electrical pattern of [target]'s heart forms quiet, murmuring sounds."
+			))
+		if("speech")
+			var/phrases = list(
+				"help me",
+				"it beats",
+				"can you hear",
+				"listen",
+				"it speaks",
+				"don't stop",
+				"the rhythm",
+				"it knows"
+			)
+			var/phrase = pick(phrases)
+			vocalization = "[target]'s heartbeat distinctly forms words: '[phrase]'."
+
+	visible_message("<span class='warning'>[vocalization]</span>")
+	total_vocalizations++
+
+	vocalization_log += list(list("time" = world.time, "type" = vocalization_type, "target" = target.ckey))
+
+	if(prob(40))
+		target.adjustBruteLoss(3)
+		to_chat(target, "<span class='warning'>The irregular heartbeat causes you chest pain!</span>")
+
+	if(prob(20))
+		target.stamina.adjust(-15)
+		to_chat(target, "<span class='warning'>The arrhythmia leaves you feeling weak and lightheaded!</span>")
+
+	if(target.stat != DEAD && (target in infected_targets))
+		addtimer(CALLBACK(src, PROC_REF(process_affected_target), target), rand(20 SECONDS, 45 SECONDS))
+
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/process_vocalizations()
+	for(var/mob/living/carbon/human/H in infected_targets)
+		if(H.stat == DEAD)
+			infected_targets -= H
+			continue
+
+		if(prob(10))
+			audible_message("<span class='notice'>A faint, rhythmic sound emanates from [H]...</span>")
+
+/obj/item/reagent_containers/glass/bottle/scp3349/attack(mob/living/target, mob/living/user)
+	if(ishuman(target))
+		var/mob/living/carbon/human/H = target
+
+		containment_breached = TRUE
+		infect_target(H)
+
+		visible_message("<span class='danger'>[user] exposes [H] to SCP-3349!</span>")
+
+		hook_scp_combat(H, "SCP-3349", 0, infection_strength)
+		return
 
 	return ..()
 
-/mob/living/carbon/human/scp3349/get_status_tab_items()
+/obj/item/reagent_containers/glass/bottle/scp3349/examine(mob/user)
 	. = ..()
-	. += "Reality bends subtly in your presence."
 
-/mob/living/carbon/human/scp3349/examine(mob/user)
-	. = ..()
-	. += "<span class='notice'>This entity can manipulate reality and create environmental anomalies.</span>"
-	. += "<span class='warning'>Localized anomalies may form spontaneously.</span>"
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.SCP)
+			to_chat(user, "<span class='warning'>This is SCP-3349, a communicable cardiac arrhythmia that produces vocalizations from the heart's electrical activity.</span>")
+			to_chat(user, "<span class='warning'>Infected targets: [length(infected_targets)]</span>")
+		else
+			to_chat(user, "<span class='notice'>A sealed medical container. The fluid inside pulses faintly.</span>")
 
-/mob/living/carbon/human/scp3349/death(gibbed)
-	visible_message("<span class='danger'>[src] dissolves into reality distortion!</span>")
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	return ..()
-
-// Reality Anomaly Object
-/obj/effect/reality_anomaly
-	name = "reality anomaly"
-	desc = "A distortion in reality. It seems to affect the environment around it."
-	icon = 'icons/effects/effects.dmi'
-	icon_state = "electricity"
-	density = FALSE
-	anchored = TRUE
-	var/anomaly_type = "Unknown"
-	var/duration = 60 SECONDS
-	var/creation_time = 0
-	var/effect_radius = 3
-
-/obj/effect/reality_anomaly/New(loc, type, dur)
-	..()
-	anomaly_type = type
-	duration = dur
-	creation_time = world.time
-
-	// Set up the anomaly effect
-	setup_anomaly_effect()
-
-	// Auto-destruct after duration
-	addtimer(CALLBACK(src, PROC_REF(qdel), src), duration)
-
-/obj/effect/reality_anomaly/proc/setup_anomaly_effect()
-	switch(anomaly_type)
-		if("Gravity Well")
-			name = "gravity well"
-			desc = "A localized gravity well that pulls objects toward it."
-			icon_state = "gravwell"
-		if("Time Distortion")
-			name = "time distortion"
-			desc = "A field where time flows differently."
-			icon_state = "timedist"
-		if("Spatial Rift")
-			name = "spatial rift"
-			desc = "A tear in space that can transport objects."
-			icon_state = "spatialrift"
-		if("Reality Bubble")
-			name = "reality bubble"
-			desc = "A bubble where reality is altered."
-			icon_state = "realitybubble"
-
-/obj/effect/reality_anomaly/Crossed(atom/movable/AM)
-	if(!AM || !istype(AM, /mob/living))
-		return
-
-	var/mob/living/L = AM
-	to_chat(L, "<span class='danger'>You pass through a [anomaly_type] anomaly!</span>")
-
-	switch(anomaly_type)
-		if("Gravity Well")
-			L.adjustBruteLoss(5)
-			to_chat(L, "<span class='warning'>The gravity well pulls at your body!</span>")
-		if("Time Distortion")
-			to_chat(L, "<span class='warning'>Time seems to flow differently here!</span>")
-		if("Spatial Rift")
-			var/turf/random_turf = pick(range(5, src))
-			L.forceMove(random_turf)
-			to_chat(L, "<span class='warning'>You are transported through the spatial rift!</span>")
-		if("Reality Bubble")
-			L.adjustBruteLoss(10)
-			to_chat(L, "<span class='warning'>Reality seems altered within this bubble!</span>")
-
-/obj/effect/reality_anomaly/Destroy()
-	visible_message("<span class='notice'>The [anomaly_type] anomaly fades away.</span>")
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	..()
+/obj/item/reagent_containers/glass/bottle/scp3349/proc/is_spreading()
+	return length(infected_targets) > 0

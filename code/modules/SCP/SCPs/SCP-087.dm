@@ -86,11 +86,11 @@
 			nearby_people += H
 
 	// Escalate if multiple people have been present for a while
-	if(nearby_people.len > 2 && activation_events > 100)
+	if(length(nearby_people) > 2 && activation_events > 100)
 		escalate_all_systems()
 
 	// Special escalation if someone stays too long
-	if(nearby_people.len > 0 && activation_events > 200)
+	if(length(nearby_people) > 0 && activation_events > 200)
 		trigger_deep_horror_event(nearby_people)
 
 /obj/structure/scp087/proc/escalate_all_systems()
@@ -112,7 +112,7 @@
 /obj/structure/scp087/proc/trigger_deep_horror_event(list/targets)
 	// Major event that affects all nearby people
 	total_encounters++
-	people_affected += targets.len
+	people_affected += length(targets)
 
 	for(var/mob/living/carbon/human/H in targets)
 		to_chat(H, "<span class='danger'>You feel yourself being pulled into the infinite darkness of the stairwell...</span>")
@@ -227,7 +227,7 @@
 
 /obj/structure/scp087/proc/load_persistence_data()
 	// Load data from research system if available
-	if(research_system && research_system.research_data && research_system.research_data.len > 0)
+	if(research_system && research_system.research_data && length(research_system.research_data) > 0)
 		var/list/data = research_system.research_data
 		total_encounters = data["total_encounters"] || 0
 		people_affected = data["people_affected"] || 0
@@ -255,7 +255,9 @@
 /obj/structure/scp087/proc/on_descent(mob/living/carbon/human/descender)
 	if(!descender)
 		return
+	var/depth = descent_system ? descent_system.descent_level : 0
 	hook_scp_interaction(descender, "SCP-087", INTERACTION_TYPE_EXPLORATION)
+	hook_scp_exploration(descender, "SCP-087", depth)
 
 /obj/structure/scp087/proc/on_horror_event(mob/living/carbon/human/victim)
 	if(!victim)

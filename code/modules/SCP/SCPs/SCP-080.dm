@@ -149,7 +149,7 @@
 /datum/scp080_research_system
 	var/obj/structure/parent
 	var/list/absorption_log = list()
-	var	total_darkness_events = 0
+	var/total_darkness_events = 0
 
 /datum/scp080_research_system/New(obj/structure/P)
 	parent = P

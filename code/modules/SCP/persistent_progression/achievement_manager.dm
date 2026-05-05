@@ -422,7 +422,7 @@
 	if(!achievement)
 		return FALSE
 
-	if(!achievement.achievement_prerequisites.len)
+	if(!length(achievement.achievement_prerequisites))
 		return TRUE
 
 	var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(ckey)
@@ -470,16 +470,16 @@
 	if(!player_data)
 		return 0
 
-	var/total_achievements_count = achievements.len
+	var/total_achievements_count = length(achievements)
 	if(total_achievements_count == 0)
 		return 0
 
-	var/unlocked = player_data.achievements.len
+	var/unlocked = length(player_data.achievements)
 	return round((unlocked / total_achievements_count) * 100)
 
 /datum/achievement_manager/proc/export_achievements()
 	var/list/data = list()
-	data["total_achievements"] = achievements.len
+	data["total_achievements"] = length(achievements)
 	data["secret_achievements"] = secret_achievements_count
 	data["categories"] = achievement_categories
 	data["tiers"] = achievement_tiers

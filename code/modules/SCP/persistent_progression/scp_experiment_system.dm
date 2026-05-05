@@ -70,12 +70,10 @@ SUBSYSTEM_DEF(scp_experiments)
 /datum/scp_experiment_manager/proc/initialize_experiments()
 	load_experiment_templates()
 	initialize_certifications()
-	world.log << "SCP Experiment Manager: Loaded [experiment_templates.len] experiment templates"
+	world.log << "SCP Experiment Manager: Loaded [length(experiment_templates)] experiment templates"
 
 /datum/scp_experiment_manager/proc/load_experiment_templates()
-	var/list/template_files = list(
-		"scp_experiment_definitions.dm"
-	)
+	initialize_all_scp_experiments()
 	world.log << "SCP Experiment Manager: Template loading initialized"
 
 /datum/scp_experiment_manager/proc/initialize_certifications()
@@ -584,7 +582,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	
 	for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
 		var/list/experiments = manager.get_available_experiments(H, scp_id)
-		if(experiments.len > 0)
+		if(length(experiments) > 0)
 			message += "<h3>[scp_id]</h3>"
 			for(var/list/exp in experiments)
 				var/access_text = ""
@@ -628,7 +626,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
 		scp_options += scp_id
 	
-	if(!scp_options.len)
+	if(!length(scp_options))
 		to_chat(H, "<span class='warning'>No SCPs available for experimentation.</span>")
 		return
 	
@@ -637,7 +635,7 @@ SUBSYSTEM_DEF(scp_experiments)
 		return
 	
 	var/list/available_experiments = manager.get_available_experiments(H, selected_scp)
-	if(!available_experiments.len)
+	if(!length(available_experiments))
 		to_chat(H, "<span class='warning'>No experiments available for [selected_scp] at your clearance level.</span>")
 		return
 	
@@ -679,7 +677,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	
 	var/message = "<h2>Active Experiments</h2>"
 	
-	if(!manager.active_experiments.len)
+	if(!length(manager.active_experiments))
 		message += "<i>No active experiments.</i>"
 	else
 		for(var/exp_id in manager.active_experiments)
@@ -699,7 +697,7 @@ SUBSYSTEM_DEF(scp_experiments)
 			message += "<b>[exp.name]</b> ([exp.scp_id])<br>"
 			message += "- Phase: [phase_name] ([progress]%)<br>"
 			message += "- Researcher: [exp.primary_researcher?.name || "Unknown"]<br>"
-			message += "- Assistants: [exp.assistants.len]<br><br>"
+			message += "- Assistants: [length(exp.assistants)]<br><br>"
 	
 	to_chat(src, "<span class='notice'>[message]</span>")
 

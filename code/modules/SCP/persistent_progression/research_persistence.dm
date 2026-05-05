@@ -221,14 +221,14 @@ SUBSYSTEM_DEF(research_persistence)
 /datum/research_persistence_manager/proc/update_research_statistics()
 	research_statistics["total_projects"] = total_research_projects
 	research_statistics["completed_projects"] = completed_projects
-	research_statistics["active_projects"] = research_projects.len
-	research_statistics["scientific_discoveries"] = scientific_discoveries.len
+	research_statistics["active_projects"] = length(research_projects)
+	research_statistics["scientific_discoveries"] = length(scientific_discoveries)
 	research_statistics["publications"] = publication_count
 	research_statistics["research_budget"] = research_budget
 	research_statistics["research_efficiency"] = research_efficiency
 	research_statistics["research_staff"] = research_staff_count
-	research_statistics["facilities"] = research_facilities.len
-	research_statistics["grants"] = research_grants.len
+	research_statistics["facilities"] = length(research_facilities)
+	research_statistics["grants"] = length(research_grants)
 
 /datum/research_persistence_manager/proc/process_projects()
 	for(var/project_id in research_projects)
@@ -244,7 +244,7 @@ SUBSYSTEM_DEF(research_persistence)
 				completed_projects++
 
 				// Generate discovery based on actual research data
-				if(project.research_notes.len > 5) // Real discovery based on research notes
+				if(length(project.research_notes) > 5) // Real discovery based on research notes
 					var/discovery_name = "Discovery from [project.project_name]"
 					var/discovery_description = "A significant discovery made during the completion of [project.project_name]"
 					add_scientific_discovery(discovery_name, discovery_description, "EXPERIMENTAL", project.research_field, project.lead_researcher)
@@ -254,8 +254,8 @@ SUBSYSTEM_DEF(research_persistence)
 	var/base_progress = project.progress
 
 	// Progress based on number of researchers
-	if(project.researchers.len > 0)
-		base_progress += project.researchers.len * 3
+	if(length(project.researchers) > 0)
+		base_progress += length(project.researchers) * 3
 
 	// Progress based on budget utilization
 	if(project.budget_allocated > 0)
@@ -263,7 +263,7 @@ SUBSYSTEM_DEF(research_persistence)
 		base_progress += budget_utilization * 0.3
 
 	// Progress based on research notes (actual research activity)
-	base_progress += project.research_notes.len * 1.5
+	base_progress += length(project.research_notes) * 1.5
 
 	// Progress based on experiments completed
 	base_progress += project.experiments_completed * 4
@@ -335,7 +335,7 @@ SUBSYSTEM_DEF(research_persistence)
 	var/energy_decay = facility.energy_consumption * 0.05
 
 	// Maintenance decreases based on number of active projects
-	var/project_decay = facility.active_projects.len * 2
+	var/project_decay = length(facility.active_projects) * 2
 
 	base_maintenance -= maintenance_decay + usage_decay + incident_decay + failure_decay + energy_decay + project_decay
 
@@ -621,7 +621,7 @@ SUBSYSTEM_DEF(research_persistence)
 			world.log << "Research Persistence: Failed to save research grant [grant_id]"
 		qdel(query_save_grant)
 
-	world.log << "Research Persistence: Saved [research_projects.len] research projects, [scientific_discoveries.len] discoveries, [publications.len] publications, [research_facilities.len] facilities, and [research_grants.len] grants to database"
+	world.log << "Research Persistence: Saved [length(research_projects)] research projects, [length(scientific_discoveries)] discoveries, [length(publications)] publications, [length(research_facilities)] facilities, and [length(research_grants)] grants to database"
 
 /datum/research_persistence_manager/proc/load_research_data()
 	var/savefile/S = new /savefile("data/research_persistence.json")
@@ -758,7 +758,7 @@ SUBSYSTEM_DEF(research_persistence)
 	check_persistent_research_breakthrough(project, lead_researcher)
 
 /datum/research_persistence_manager/proc/get_researcher_by_name(researcher_name)
-	for(var/mob/living/carbon/human/H in world)
+	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.real_name == researcher_name)
 			return H
 	return null
@@ -794,7 +794,7 @@ SUBSYSTEM_DEF(research_persistence)
 	announce_persistent_research_completion(project, enhanced_reward)
 
 /datum/research_persistence_manager/proc/award_team_experience(datum/research_persistence_project/project, total_reward)
-	var/points_per_member = total_reward * 0.05 / max(project.researchers.len, 1)
+	var/points_per_member = total_reward * 0.05 / max(length(project.researchers), 1)
 
 	for(var/researcher_name in project.researchers)
 		var/mob/living/carbon/human/researcher = get_researcher_by_name(researcher_name)

@@ -93,63 +93,67 @@
 	register_accessories()
 
 /datum/reward_manager/proc/register_equipment_items()
-	register_item("security_vest_tactical", "Tactical Security Vest", "An advanced tactical vest for security personnel", "equipment", "uncommon")
-	register_item("security_helmet_advanced", "Advanced Security Helmet", "A reinforced security helmet with enhanced protection", "equipment", "rare")
-	register_item("medical_suit_advanced", "Advanced Medical Suit", "A state-of-the-art medical suit with built-in sensors", "equipment", "rare")
-	register_item("research_labcoat_enhanced", "Enhanced Research Labcoat", "A labcoat with integrated protection systems", "equipment", "uncommon")
-	register_item("engineering_hardsuit_light", "Light Engineering Hardsuit", "A lightweight hardsuit for engineering work", "equipment", "rare")
-	register_item("containment_suit_heavy", "Heavy Containment Suit", "A heavily armored suit for SCP containment", "equipment", "epic")
-	register_item("mtf_armor_elite", "Elite MTF Armor", "Elite armor for Mobile Task Force members", "equipment", "legendary")
-	register_item("foundation_coat_formal", "Formal Foundation Coat", "A formal coat for Foundation personnel", "equipment", "common")
+	register_item("security_vest_tactical", "Tactical Security Vest", "An advanced tactical vest for security personnel", "equipment", "uncommon", list("experience" = 5000, "class" = "security"))
+	register_item("security_helmet_advanced", "Advanced Security Helmet", "A reinforced security helmet with enhanced protection", "equipment", "rare", list("experience" = 15000, "class" = "security"))
+	register_item("medical_suit_advanced", "Advanced Medical Suit", "A state-of-the-art medical suit with built-in sensors", "equipment", "rare", list("experience" = 15000, "class" = "medical"))
+	register_item("research_labcoat_enhanced", "Enhanced Research Labcoat", "A labcoat with integrated protection systems", "equipment", "uncommon", list("experience" = 5000, "class" = "research"))
+	register_item("engineering_hardsuit_light", "Light Engineering Hardsuit", "A lightweight hardsuit for engineering work", "equipment", "rare", list("experience" = 15000, "class" = "engineering"))
+	register_item("containment_suit_heavy", "Heavy Containment Suit", "A heavily armored suit for SCP containment", "equipment", "epic", list("experience" = 50000, "rank" = 5))
+	register_item("mtf_armor_elite", "Elite MTF Armor", "Elite armor for Mobile Task Force members", "equipment", "legendary", list("experience" = 100000, "rank" = 8))
+	register_item("foundation_coat_formal", "Formal Foundation Coat", "A formal coat for Foundation personnel", "equipment", "common", list("experience" = 500))
 
 /datum/reward_manager/proc/register_weapons()
-	register_item("security_baton_advanced", "Advanced Stun Baton", "An improved stun baton with extended range", "equipment", "uncommon")
-	register_item("security_pistol_enhanced", "Enhanced Sidearm", "An enhanced sidearm with improved accuracy", "equipment", "rare")
-	register_item("security_rifle_tactical", "Tactical Rifle", "A tactical rifle for security operations", "equipment", "rare")
-	register_item("mtf_rifle_specialized", "Specialized MTF Rifle", "A specialized rifle for MTF operations", "equipment", "epic")
-	register_item("containment_tool_advanced", "Advanced Containment Tool", "A multi-purpose containment tool", "equipment", "rare")
+	register_item("security_baton_advanced", "Advanced Stun Baton", "An improved stun baton with extended range", "equipment", "uncommon", list("experience" = 5000, "class" = "security"))
+	register_item("security_pistol_enhanced", "Enhanced Sidearm", "An enhanced sidearm with improved accuracy", "equipment", "rare", list("experience" = 15000, "class" = "security"))
+	register_item("security_rifle_tactical", "Tactical Rifle", "A tactical rifle for security operations", "equipment", "rare", list("experience" = 25000, "rank" = 3))
+	register_item("mtf_rifle_specialized", "Specialized MTF Rifle", "A specialized rifle for MTF operations", "equipment", "epic", list("experience" = 75000, "rank" = 6))
+	register_item("containment_tool_advanced", "Advanced Containment Tool", "A multi-purpose containment tool", "equipment", "rare", list("experience" = 20000, "class" = "containment"))
 
 /datum/reward_manager/proc/register_tools()
-	register_item("engineering_toolkit_advanced", "Advanced Engineering Toolkit", "A comprehensive toolkit for engineers", "equipment", "uncommon")
-	register_item("medical_scanner_enhanced", "Enhanced Medical Scanner", "An advanced medical scanner with detailed analysis", "equipment", "rare")
-	register_item("research_scanner_portable", "Portable Research Scanner", "A portable scanner for field research", "equipment", "uncommon")
-	register_item("containment_scanner_handheld", "Handheld Containment Scanner", "A scanner for detecting containment breaches", "equipment", "rare")
+	register_item("engineering_toolkit_advanced", "Advanced Engineering Toolkit", "A comprehensive toolkit for engineers", "equipment", "uncommon", list("experience" = 5000, "class" = "engineering"))
+	register_item("medical_scanner_enhanced", "Enhanced Medical Scanner", "An advanced medical scanner with detailed analysis", "equipment", "rare", list("experience" = 15000, "class" = "medical"))
+	register_item("research_scanner_portable", "Portable Research Scanner", "A portable scanner for field research", "equipment", "uncommon", list("experience" = 5000, "class" = "research"))
+	register_item("containment_scanner_handheld", "Handheld Containment Scanner", "A scanner for detecting containment breaches", "equipment", "rare", list("experience" = 20000, "class" = "containment"))
 
 /datum/reward_manager/proc/register_consumables()
-	register_item("medical_kit_advanced", "Advanced Medical Kit", "An advanced first aid kit", "equipment", "common")
-	register_item("stimulant_injector", "Stimulant Injector", "A combat stimulant injector", "equipment", "uncommon")
-	register_item("ration_pack_enhanced", "Enhanced Ration Pack", "A nutritious ration pack", "equipment", "common")
+	register_item("medical_kit_advanced", "Advanced Medical Kit", "An advanced first aid kit", "equipment", "common", list("experience" = 1000))
+	register_item("stimulant_injector", "Stimulant Injector", "A combat stimulant injector", "equipment", "uncommon", list("experience" = 5000, "class" = "security"))
+	register_item("ration_pack_enhanced", "Enhanced Ration Pack", "A nutritious ration pack", "equipment", "common", list("experience" = 500))
 
 /datum/reward_manager/proc/register_accessories()
-	register_item("badge_golden", "Golden Security Badge", "A prestigious golden badge", "equipment", "rare")
-	register_item("pin_foundation", "Foundation Pin", "A lapel pin showing Foundation membership", "equipment", "common")
-	register_item("watch_tactical", "Tactical Watch", "A tactical watch with multiple functions", "equipment", "uncommon")
+	register_item("badge_golden", "Golden Security Badge", "A prestigious golden badge", "equipment", "rare", list("experience" = 25000, "rank" = 5))
+	register_item("pin_foundation", "Foundation Pin", "A lapel pin showing Foundation membership", "equipment", "common", list("experience" = 500))
+	register_item("watch_tactical", "Tactical Watch", "A tactical watch with multiple functions", "equipment", "uncommon", list("experience" = 5000))
 
-/datum/reward_manager/proc/register_item(id, name, description, category, rarity)
+/datum/reward_manager/proc/register_item(id, name, description, category, rarity, list/requirements = list())
 	var/datum/reward/reward = new /datum/reward(id, name, description, category, "item")
 	reward.reward_rarity = rarity
+	if(length(requirements))
+		reward.reward_requirements = requirements
 	rewards[id] = reward
 	unlockable_items[id] = reward
 
 /datum/reward_manager/proc/initialize_unlockable_titles()
-	register_title("rookie", "Rookie", "A new recruit", "common")
-	register_title("veteran", "Veteran", "An experienced operative", "uncommon")
-	register_title("expert", "Expert", "A highly skilled professional", "rare")
-	register_title("master", "Master", "A master of their craft", "epic")
-	register_title("legend", "Legend", "A legendary figure", "legendary")
-	register_title("foundation_loyalist", "Foundation Loyalist", "Dedicated to the Foundation", "rare")
-	register_title("scp_hunter", "SCP Hunter", "Specialist in SCP containment", "rare")
-	register_title("research_pioneer", "Research Pioneer", "A leader in SCP research", "rare")
-	register_title("medical_savior", "Medical Savior", "A lifesaver in the field", "rare")
-	register_title("engineering_genius", "Engineering Genius", "A master engineer", "rare")
-	register_title("containment_specialist", "Containment Specialist", "Expert in containment procedures", "rare")
-	register_title("mtf_operator", "MTF Operator", "Mobile Task Force member", "epic")
-	register_title("site_director", "Site Director", "A site leadership title", "legendary")
-	register_title("o5_observer", "O5 Observer", "An extremely rare title", "legendary")
+	register_title("rookie", "Rookie", "A new recruit", "common", list("experience" = 500))
+	register_title("veteran", "Veteran", "An experienced operative", "uncommon", list("experience" = 5000))
+	register_title("expert", "Expert", "A highly skilled professional", "rare", list("experience" = 15000))
+	register_title("master", "Master", "A master of their craft", "epic", list("experience" = 50000))
+	register_title("legend", "Legend", "A legendary figure", "legendary", list("experience" = 100000))
+	register_title("foundation_loyalist", "Foundation Loyalist", "Dedicated to the Foundation", "rare", list("faction" = "foundation", "experience" = 10000))
+	register_title("scp_hunter", "SCP Hunter", "Specialist in SCP containment", "rare", list("experience" = 15000, "class" = "containment"))
+	register_title("research_pioneer", "Research Pioneer", "A leader in SCP research", "rare", list("experience" = 15000, "class" = "research"))
+	register_title("medical_savior", "Medical Savior", "A lifesaver in the field", "rare", list("experience" = 15000, "class" = "medical"))
+	register_title("engineering_genius", "Engineering Genius", "A master engineer", "rare", list("experience" = 15000, "class" = "engineering"))
+	register_title("containment_specialist", "Containment Specialist", "Expert in containment procedures", "rare", list("experience" = 20000, "class" = "containment"))
+	register_title("mtf_operator", "MTF Operator", "Mobile Task Force member", "epic", list("experience" = 50000, "rank" = 5))
+	register_title("site_director", "Site Director", "A site leadership title", "legendary", list("experience" = 100000, "rank" = 8))
+	register_title("o5_observer", "O5 Observer", "An extremely rare title", "legendary", list("experience" = 200000, "rank" = 10))
 
-/datum/reward_manager/proc/register_title(id, name, description, rarity)
+/datum/reward_manager/proc/register_title(id, name, description, rarity, list/requirements = list())
 	var/datum/reward/reward = new /datum/reward(id, name, description, "title", "title")
 	reward.reward_rarity = rarity
+	if(length(requirements))
+		reward.reward_requirements = requirements
 	rewards[id] = reward
 	unlockable_titles[id] = reward
 
@@ -322,7 +326,7 @@
 
 /datum/reward_manager/proc/export_rewards()
 	var/list/data = list()
-	data["total_rewards"] = rewards.len
+	data["total_rewards"] = length(rewards)
 	data["categories"] = reward_categories
 	data["rewards"] = list()
 
@@ -353,3 +357,41 @@
 			return "#FF8000"
 		else
 			return "#FFFFFF"
+
+/datum/reward_manager/proc/spawn_unlocked_items_for_player(mob/living/carbon/human/H)
+	if(!H || !H.ckey)
+		return
+	var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(H.ckey)
+	if(!player_data)
+		return
+	for(var/item_id in player_data.unlocked_items)
+		var/datum/reward/reward = rewards[item_id]
+		if(!reward)
+			continue
+		var/obj/item/spawned = spawn_reward_item(item_id)
+		if(spawned && H.put_in_hands(spawned) || spawned && H.equip_to_appropriate_slot(spawned))
+			continue
+		else if(spawned)
+			spawned.forceMove(H.loc)
+
+/datum/reward_manager/proc/spawn_reward_item(item_id)
+	switch(item_id)
+		if("security_vest_tactical")
+			return new /obj/item/clothing/suit/armor/vest()
+		if("security_helmet_advanced")
+			return new /obj/item/clothing/head/helmet()
+		if("medical_suit_advanced")
+			return new /obj/item/clothing/suit/toggle/labcoat()
+		if("research_labcoat_enhanced")
+			return new /obj/item/clothing/suit/toggle/labcoat()
+		if("foundation_coat_formal")
+			return new /obj/item/clothing/suit/toggle/labcoat()
+		if("security_baton_advanced")
+			return new /obj/item/melee/baton()
+		if("medical_kit_advanced")
+			return new /obj/item/storage/firstaid/
+		if("badge_golden")
+			return new /obj/item/clothing/accessory/medal/gold()
+		if("pin_foundation")
+			return new /obj/item/clothing/accessory/
+	return null

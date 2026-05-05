@@ -1,463 +1,299 @@
-/mob/living/simple_animal/hostile/scp1048
+// SCP-1048 - Builder Bear
+// A small teddy bear that is friendly and docile around staff, but secretly collects body parts to build hostile copies of itself
+
+/mob/living/simple_animal/scp1048
 	name = "SCP-1048"
-	desc = "A small teddy bear that appears to be constructing something. It seems harmless but persistent."
+	desc = "A small, soft teddy bear with button eyes. It looks adorable and harmless."
 	icon = 'icons/scp/scp-1048.dmi'
 	icon_state = "bear"
 	icon_living = "bear"
 	icon_dead = "bear_dead"
 	maxHealth = 50
 	health = 50
-	melee_damage_lower = 5
-	melee_damage_upper = 10
-	attack_sound = 'sound/weapons/punch1.ogg'
+	density = FALSE
+	melee_damage_lower = 0
+	melee_damage_upper = 0
+	attack_sound = null
 	environment_smash = ENVIRONMENT_SMASH_NONE
 	del_on_death = FALSE
-	stat_attack = UNCONSCIOUS
-	robust_searching = TRUE
-	see_in_dark = 8
-	see_invisible = SEE_INVISIBLE_LIVING
-	status_flags = 0
+	response_help_continuous = "hugs"
+	response_help_simple = "hug"
+	response_disarm_continuous = "gently pushes aside"
+	response_disarm_simple = "gently push aside"
+	response_harm_continuous = "hits"
+	response_harm_simple = "hit"
+	speak = list("...", "..?", "!!")
+	speak_emote = list("squeaks softly", "wiggles", "looks up innocently")
+	emote_hear = list("squeaks", "makes a soft sound")
+	emote_see = list("waves its tiny arms", "hugs itself", "looks around curiously", "waddles in a circle")
+	turns_per_move = 3
+	faction = list("SCP")
 
-	var/construction_mode = TRUE
-	var/list/construction_materials = list()
-	var/list/completed_structures = list()
-	var/list/construction_history = list()
-	var/construction_cooldown = 0
-	var/construction_cooldown_time = 60 SECONDS
-	var/construction_radius = 5
-	var/list/available_materials = list()
-	var/construction_skill = 1
-	var/max_construction_skill = 10
-	var/list/blueprint_knowledge = list()
-	var/construction_progress = 0
-	var/max_construction_progress = 100
-	var/list/construction_targets = list()
-	var/building_obsession = 0
-	var/max_obsession = 100
-
-	// Persistence tracking
-	var/constructions_completed = 0
-	var/structures_built = 0
 	var/materials_collected = 0
-	var/containment_status = "contained"
-	var/total_construction_time = 0
-	var/construction_masterpieces = 0
-	var/construction_failures = 0
+	var/materials_needed = 5
+	var/build_cooldown = 0
+	var/build_cooldown_time = 90 SECONDS
+	var/collection_range = 5
+	var/mob/living/follow_target = null
+	var/list/copies_spawned = list()
+	var/max_copies = 3
+	var/cuddle_cooldown = 0
 
-/mob/living/simple_animal/hostile/scp1048/Initialize()
+	var/datum/scp1048_behavior_system/behavior_system
+	var/datum/scp1048_collection_system/collection_system
+
+	var/body_parts_harvested = 0
+	var/infant_parts = 0
+
+/mob/living/simple_animal/scp1048/Initialize()
 	. = ..()
 
-	// Initialize SCP datum
-	SCP = new /datum/scp(
-		src,
-		"SCP-1048",
-		SCP_EUCLID,
-		"1048",
-
-	)
+	SCP = new /datum/scp(src, "Builder Bear", SCP_EUCLID, "1048")
 
 	SCP.min_playercount = 8
 	SCP.min_time = 15 MINUTES
 
-	// Register with SCP persistence system
+	behavior_system = new /datum/scp1048_behavior_system(src)
+	collection_system = new /datum/scp1048_collection_system(src)
+
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-1048"] = new /datum/scp_instance("SCP-1048", src)
 
-	// Initialize construction materials
-	construction_materials = list(
-		"wood" = 0,
-		"metal" = 0,
-		"plastic" = 0,
-		"glass" = 0,
-		"fabric" = 0
-	)
-
-/mob/living/simple_animal/hostile/scp1048/Destroy()
-	construction_materials = list()
-	completed_structures = list()
-	construction_history = list()
-	available_materials = list()
-	blueprint_knowledge = list()
-	construction_targets = list()
+/mob/living/simple_animal/scp1048/Destroy()
+	copies_spawned = list()
+	QDEL_NULL(behavior_system)
+	QDEL_NULL(collection_system)
 	return ..()
 
-// Core mechanics
-/mob/living/simple_animal/hostile/scp1048/Life()
+/mob/living/simple_animal/scp1048/Life()
 	. = ..()
-
 	if(stat == DEAD)
 		return
 
-	// Construction behavior
-	if(construction_mode)
-		construction_behavior()
-	else
-		// Normal hostile behavior
-		. = ..()
+	if(behavior_system)
+		behavior_system.process_behavior()
 
-// Construction behavior
-/mob/living/simple_animal/hostile/scp1048/proc/construction_behavior()
-	// Increase building obsession
-	building_obsession = min(max_obsession, building_obsession + 1)
+	if(collection_system)
+		collection_system.process_collection()
 
-	// Search for materials
-	search_for_materials()
+	if(materials_collected >= materials_needed && world.time >= build_cooldown && length(copies_spawned) < max_copies)
+		attempt_build_copy()
 
-	// Attempt construction
-	if(world.time > construction_cooldown)
-		attempt_construction()
-
-	// Update construction progress
-	update_construction_progress()
-
-// Search for construction materials
-/mob/living/simple_animal/hostile/scp1048/proc/search_for_materials()
-	for(var/obj/item/I in range(construction_radius, src))
-		if(I.anchored || I.density)
-			continue
-
-		// Check if item is useful for construction
-		var/material_type = get_material_type(I)
-		if(material_type)
-			// Move towards material
-			step_towards(src, I)
-
-			// Collect material
-			if(Adjacent(I))
-				collect_material(I, material_type)
-
-// Get material type from item
-/mob/living/simple_animal/hostile/scp1048/proc/get_material_type(obj/item/I)
-	if(!I)
-		return null
-
-	// Simple material detection based on item type (simplified)
-	if(istype(I, /obj/item/stack/sheet))
-		return "metal"
-	else if(istype(I, /obj/item/paper))
-		return "fabric"
-	else if(istype(I, /obj/item/stack))
-		return "wood"
-
-	return null
-
-// Collect material
-/mob/living/simple_animal/hostile/scp1048/proc/collect_material(obj/item/I, material_type)
-	if(!I || !material_type)
-		return
-
-	construction_materials[material_type] += 1
-	materials_collected++
-	available_materials += I.name
-
-	// Remove the item
-	qdel(I)
-
-	visible_message("<span class='notice'>[src] collects [I.name] for construction.</span>")
-
-// Attempt construction
-/mob/living/simple_animal/hostile/scp1048/proc/attempt_construction()
-	if(construction_progress < max_construction_progress)
-		return
-
-	construction_cooldown = world.time + construction_cooldown_time
-
-	// Choose construction target
-	var/construction_target = choose_construction_target()
-	if(!construction_target)
-		return
-
-	// Start construction
-	start_construction(construction_target)
-
-// Choose construction target
-/mob/living/simple_animal/hostile/scp1048/proc/choose_construction_target()
-	var/list/possible_targets = list(
-		"chair",
-		"table",
-		"bed",
-		"door",
-		"window",
-		"wall",
-		"fence",
-		"bridge"
-	)
-
-	// Filter based on available materials
-	var/list/available_targets = list()
-	for(var/target in possible_targets)
-		if(can_build_target(target))
-			available_targets += target
-
-	if(available_targets.len == 0)
-		return null
-
-	return pick(available_targets)
-
-// Check if can build target
-/mob/living/simple_animal/hostile/scp1048/proc/can_build_target(target)
-	switch(target)
-		if("chair")
-			return construction_materials["wood"] >= 2
-		if("table")
-			return construction_materials["wood"] >= 4
-		if("bed")
-			return construction_materials["wood"] >= 3 && construction_materials["fabric"] >= 2
-		if("door")
-			return construction_materials["wood"] >= 3 && construction_materials["metal"] >= 1
-		if("window")
-			return construction_materials["glass"] >= 2 && construction_materials["metal"] >= 1
-		if("wall")
-			return construction_materials["metal"] >= 4
-		if("fence")
-			return construction_materials["wood"] >= 6
-		if("bridge")
-			return construction_materials["wood"] >= 8 && construction_materials["metal"] >= 2
-
-	return FALSE
-
-// Start construction
-/mob/living/simple_animal/hostile/scp1048/proc/start_construction(target)
-	if(!target)
-		return
-
-	constructions_completed++
-	total_construction_time += construction_cooldown_time
-
-	// Create construction record
-	var/construction_record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [src] started building [target]"
-	construction_history += construction_record
-
-	// Calculate success chance based on skill
-	var/success_chance = construction_skill * 10
-	var/random_roll = rand(1, 100)
-
-	if(random_roll <= success_chance)
-		// Successful construction
-		complete_construction(target)
-	else
-		// Failed construction
-		fail_construction(target)
-
-	// Reset progress
-	construction_progress = 0
-
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
-		if(instance)
-			instance.add_interaction_record(null, "construction_attempt")
-
-// Complete construction
-/mob/living/simple_animal/hostile/scp1048/proc/complete_construction(target)
-	structures_built++
-	completed_structures += target
-
-	// Increase construction skill
-	construction_skill = min(max_construction_skill, construction_skill + 1)
-
-	// Add to blueprint knowledge
-	if(!(target in blueprint_knowledge))
-		blueprint_knowledge += target
-
-	// Create the structure
-	create_structure(target)
-
-	// Check for masterpiece
-	if(construction_skill >= 8 && prob(10))
-		construction_masterpieces++
-		create_masterpiece_effect(target)
-
-	visible_message("<span class='notice'>[src] successfully builds a [target]!</span>")
-
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
-		if(instance)
-			instance.add_interaction_record(null, "construction_completed")
-
-// Fail construction
-/mob/living/simple_animal/hostile/scp1048/proc/fail_construction(target)
-	construction_failures++
-
-	// Lose some materials
-	consume_materials_for_failure(target)
-
-	visible_message("<span class='warning'>[src] fails to build the [target] and looks frustrated.</span>")
-
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
-		if(instance)
-			instance.add_interaction_record(null, "construction_failed")
-
-// Consume materials for failed construction
-/mob/living/simple_animal/hostile/scp1048/proc/consume_materials_for_failure(target)
-	switch(target)
-		if("chair")
-			construction_materials["wood"] = max(0, construction_materials["wood"] - 1)
-		if("table")
-			construction_materials["wood"] = max(0, construction_materials["wood"] - 2)
-		if("bed")
-			construction_materials["wood"] = max(0, construction_materials["wood"] - 1)
-			construction_materials["fabric"] = max(0, construction_materials["fabric"] - 1)
-		if("door")
-			construction_materials["wood"] = max(0, construction_materials["wood"] - 1)
-			construction_materials["metal"] = max(0, construction_materials["metal"] - 1)
-		if("window")
-			construction_materials["glass"] = max(0, construction_materials["glass"] - 1)
-			construction_materials["metal"] = max(0, construction_materials["metal"] - 1)
-		if("wall")
-			construction_materials["metal"] = max(0, construction_materials["metal"] - 2)
-		if("fence")
-			construction_materials["wood"] = max(0, construction_materials["wood"] - 3)
-		if("bridge")
-			construction_materials["wood"] = max(0, construction_materials["wood"] - 4)
-			construction_materials["metal"] = max(0, construction_materials["metal"] - 1)
-
-// Create structure
-/mob/living/simple_animal/hostile/scp1048/proc/create_structure(target)
-	var/turf/T = get_turf(src)
-	if(!T)
-		return
-
-	// Create appropriate structure based on target
-	var/obj/structure/S = null
-
-	switch(target)
-		if("chair")
-			S = new /obj/structure/chair(T)
-		if("table")
-			S = new /obj/structure/table(T)
-		if("bed")
-			S = new /obj/structure/bed(T)
-		if("door")
-			S = new /obj/machinery/door/airlock(T)
-		if("window")
-			S = new /obj/structure/window(T)
-		if("wall")
-			S = new /obj/structure/girder(T)
-		if("fence")
-			S = new /obj/structure/barricade(T)
-		if("bridge")
-			S = new /obj/structure/barricade(T) // Using barricade as bridge substitute
-
-	if(S)
-		S.name = "[S.name] (Built by SCP-1048)"
-
-// Create masterpiece effect
-/mob/living/simple_animal/hostile/scp1048/proc/create_masterpiece_effect(target)
-	visible_message("<span class='notice'>[src] creates a masterpiece [target]!</span>")
-	playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
-
-	// Create special effect
-	for(var/i = 1 to 3)
-		addtimer(CALLBACK(src, PROC_REF(create_masterpiece_effect), i), i * 10)
-
-// Update construction progress
-/mob/living/simple_animal/hostile/scp1048/proc/update_construction_progress()
-	if(construction_progress < max_construction_progress)
-		construction_progress += 2
-
-// Attack behavior - switch between construction and hostile modes
-/mob/living/simple_animal/hostile/scp1048/UnarmedAttack(atom/A)
+/mob/living/simple_animal/scp1048/UnarmedAttack(atom/A)
 	if(ishuman(A))
 		var/mob/living/carbon/human/H = A
+		if(world.time >= cuddle_cooldown)
+			cuddle_person(H)
+		return
+	return ..()
 
-		if(construction_mode)
-			// In construction mode, try to collect materials from humans
-			to_chat(H, "<span class='warning'>[src] tries to take your belongings for construction!</span>")
-			// Could implement material theft here
-		else
-			// Normal hostile attack
-			. = ..()
+/mob/living/simple_animal/scp1048/attack_hand(mob/living/carbon/human/M)
+	. = ..()
+	if(!M.combat_mode)
+		visible_message("<span class='notice'>[src] hugs [M]'s hand affectionately!</span>")
+		to_chat(M, "<span class='notice'>[src] feels warm and soft. You feel a bit calmer.</span>")
+		hook_scp_interaction(M, "SCP-1048", INTERACTION_TYPE_CARE)
+
+/mob/living/simple_animal/scp1048/proc/cuddle_person(mob/living/carbon/human/H)
+	cuddle_cooldown = world.time + 10 SECONDS
+	visible_message("<span class='notice'>[src] hugs [H] affectionately! It seems so innocent and friendly.</span>")
+	to_chat(H, "<span class='notice'>[src] wraps its tiny arms around you. It's surprisingly warm for a stuffed bear.</span>")
+	hook_scp_interaction(H, "SCP-1048", INTERACTION_TYPE_CARE)
+
+/mob/living/simple_animal/scp1048/proc/attempt_build_copy()
+	if(length(copies_spawned) >= max_copies)
+		return
+
+	build_cooldown = world.time + build_cooldown_time
+	materials_collected = 0
+
+	var/copy_type = determine_copy_type()
+	if(!copy_type)
+		return
+
+	var/turf/T = get_turf(src)
+	var/mob/living/simple_animal/hostile/scp1048_copy/copy = new copy_type(T)
+	copies_spawned += copy
+
+	visible_message("<span class='danger'>[src] presents a grotesque copy of itself made from harvested materials!</span>")
+	playsound(src, 'sound/effects/splat.ogg', 50, TRUE)
+
+	hook_scp_breach("SCP-1048", src)
+
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
+		if(instance)
+			instance.add_interaction_record(null, "copy_built_[initial(copy.name)]")
+
+/mob/living/simple_animal/scp1048/proc/determine_copy_type()
+	var/static/list/copy_types = list(
+		/mob/living/simple_animal/hostile/scp1048_copy/scp1048_a,
+		/mob/living/simple_animal/hostile/scp1048_copy/scp1048_b,
+		/mob/living/simple_animal/hostile/scp1048_copy/scp1048_c
+	)
+
+	var/list/available = list()
+	for(var/T in copy_types)
+		var/found = FALSE
+		for(var/mob/living/simple_animal/hostile/scp1048_copy/C in copies_spawned)
+			if(C.type == T && !QDELETED(C))
+				found = TRUE
+				break
+		if(!found)
+			available += T
+
+	if(!length(available))
+		return null
+
+	if(infant_parts > 0)
+		infant_parts--
+		return /mob/living/simple_animal/hostile/scp1048_copy/scp1048_b
+
+	if(body_parts_harvested >= 3)
+		return /mob/living/simple_animal/hostile/scp1048_copy/scp1048_a
+
+	return pick(available)
+
+// Behavior system - friendly docile behavior
+/datum/scp1048_behavior_system
+	var/mob/living/simple_animal/scp1048/parent
+	var/wander_timer = 0
+	var/hug_timer = 0
+
+/datum/scp1048_behavior_system/New(mob/living/simple_animal/scp1048/P)
+	parent = P
+
+/datum/scp1048_behavior_system/proc/process_behavior()
+	if(!parent || parent.stat == DEAD)
+		return
+
+	if(!parent.follow_target || QDELETED(parent.follow_target))
+		find_friend()
 	else
-		// Normal hostile attack
-		. = ..()
+		follow_friend()
 
-// Verb commands
-/mob/living/simple_animal/hostile/scp1048/verb/toggle_construction_mode()
-	set name = "Toggle Construction Mode"
-	set category = "SCP"
-	set desc = "Toggle between construction and hostile modes."
+	if(parent.follow_target && get_dist(parent, parent.follow_target) <= 1)
+		hug_timer++
+		if(hug_timer >= 20 && prob(10))
+			parent.visible_message("<span class='notice'>[parent] hugs [parent.follow_target]'s leg!</span>")
+			hug_timer = 0
 
-	construction_mode = !construction_mode
-	to_chat(usr, "<span class='notice'>Construction mode [construction_mode ? "enabled" : "disabled"].</span>")
+/datum/scp1048_behavior_system/proc/find_friend()
+	if(!parent)
+		return
 
-/mob/living/simple_animal/hostile/scp1048/verb/expand_construction_radius()
-	set name = "Expand Construction Radius"
-	set category = "SCP"
-	set desc = "Expand the radius for material collection."
+	var/closest_dist = 999
+	var/mob/living/carbon/human/closest_friend = null
 
-	construction_radius = min(10, construction_radius + 1)
-	to_chat(usr, "<span class='notice'>Construction radius expanded to [construction_radius] tiles.</span>")
+	for(var/mob/living/carbon/human/H in range(10, parent))
+		if(H.stat == DEAD || H.SCP)
+			continue
+		var/dist = get_dist(parent, H)
+		if(dist < closest_dist)
+			closest_dist = dist
+			closest_friend = H
 
-/mob/living/simple_animal/hostile/scp1048/verb/view_construction_status()
-	set name = "View Construction Status"
-	set category = "SCP"
-	set desc = "View the current construction status."
+	parent.follow_target = closest_friend
 
-	var/message = "<h2>SCP-1048 Construction Status</h2>"
-	message += "<b>Construction Mode:</b> [construction_mode ? "Active" : "Inactive"]<br>"
-	message += "<b>Construction Skill:</b> [construction_skill]/[max_construction_skill]<br>"
-	message += "<b>Construction Radius:</b> [construction_radius] tiles<br>"
-	message += "<b>Building Obsession:</b> [building_obsession]/[max_obsession]<br>"
-	message += "<b>Construction Progress:</b> [construction_progress]/[max_construction_progress]<br>"
-	message += "<b>Constructions Completed:</b> [constructions_completed]<br>"
-	message += "<b>Structures Built:</b> [structures_built]<br>"
-	message += "<b>Materials Collected:</b> [materials_collected]<br>"
-	message += "<b>Total Construction Time:</b> [total_construction_time] seconds<br>"
-	message += "<b>Construction Masterpieces:</b> [construction_masterpieces]<br>"
-	message += "<b>Construction Failures:</b> [construction_failures]<br><br>"
+/datum/scp1048_behavior_system/proc/follow_friend()
+	if(!parent || !parent.follow_target)
+		return
 
-	message += "<h3>Available Materials:</h3>"
-	for(var/material in construction_materials)
-		message += "- [material]: [construction_materials[material]]<br>"
+	var/mob/living/friend = parent.follow_target
+	if(get_dist(parent, friend) > 2)
+		step_towards(parent, friend)
 
-	message += "<h3>Completed Structures:</h3>"
-	if(completed_structures.len)
-		for(var/structure in completed_structures)
-			message += "- [structure]<br>"
-	else
-		message += "<i>No structures completed yet.</i>"
+// Collection system - secretly harvest body parts
+/datum/scp1048_collection_system
+	var/mob/living/simple_animal/scp1048/parent
+	var/collection_cooldown = 0
+	var/collection_delay = 30 SECONDS
 
-	message += "<h3>Blueprint Knowledge:</h3>"
-	if(blueprint_knowledge.len)
-		for(var/blueprint in blueprint_knowledge)
-			message += "- [blueprint]<br>"
-	else
-		message += "<i>No blueprints learned yet.</i>"
+/datum/scp1048_collection_system/New(mob/living/simple_animal/scp1048/P)
+	parent = P
 
-	to_chat(usr, "<span class='notice'>[message]</span>")
+/datum/scp1048_collection_system/proc/process_collection()
+	if(!parent || parent.stat == DEAD)
+		return
 
-/mob/living/simple_animal/hostile/scp1048/verb/view_construction_history()
-	set name = "View Construction History"
-	set category = "SCP"
-	set desc = "View the construction history."
+	if(world.time < collection_cooldown)
+		return
 
-	var/message = "<h2>SCP-1048 Construction History</h2>"
+	if(parent.materials_collected >= parent.materials_needed)
+		return
 
-	if(construction_history.len)
-		message += "<h3>Recent Constructions:</h3>"
-		for(var/i = max(1, construction_history.len - 10) to construction_history.len)
-			message += "[construction_history[i]]<br>"
-	else
-		message += "<i>No construction history yet.</i>"
+	var/mob/living/carbon/human/closest_dead = null
+	var/closest_dist = parent.collection_range + 1
 
-	to_chat(usr, "<span class='notice'>[message]</span>")
+	for(var/mob/living/carbon/human/H in range(parent.collection_range, parent))
+		if(H.stat != DEAD)
+			continue
+		var/dist = get_dist(parent, H)
+		if(dist < closest_dist)
+			closest_dist = dist
+			closest_dead = H
 
-/mob/living/simple_animal/hostile/scp1048/verb/boost_construction_skill()
-	set name = "Boost Construction Skill"
-	set category = "SCP"
-	set desc = "Boost the construction skill temporarily."
+	if(closest_dead)
+		harvest_from_body(closest_dead)
 
-	construction_skill = min(max_construction_skill, construction_skill + 2)
-	to_chat(usr, "<span class='notice'>Construction skill boosted to [construction_skill].</span>")
+/datum/scp1048_collection_system/proc/harvest_from_body(mob/living/carbon/human/body)
+	if(!parent || !body)
+		return
 
-// Admin verb to view SCP-1048 persistence data
-/mob/living/simple_animal/hostile/scp1048/verb/view_persistence_data()
+	collection_cooldown = world.time + collection_delay
+	parent.materials_collected++
+	parent.body_parts_harvested++
+
+	var/list/harvest_messages = list(
+		"[parent] quietly removes something from the corpse.",
+		"[parent] seems to be examining the body closely.",
+		"[parent] reaches into the body with tiny arms."
+	)
+	var/harvest_message = pick(harvest_messages)
+
+	parent.visible_message("<span class='warning'>[harvest_message]</span>")
+
+	if(prob(30))
+		parent.infant_parts++
+
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
+		if(instance)
+			instance.add_interaction_record(null, "material_harvested")
+
+/mob/living/simple_animal/scp1048/examine(mob/user)
+	. = ..()
+	if(ishuman(user))
+		to_chat(user, "<span class='notice'>A small, adorable teddy bear. It looks completely harmless and seems to want a hug.</span>")
+		if(materials_collected > 0)
+			to_chat(user, "<span class='notice'>Its button eyes seem to watch you carefully...</span>")
+
+/mob/living/simple_animal/scp1048/death()
+	visible_message("<span class='danger'>[src] falls over, its stuffing spilling out!</span>")
+	return ..()
+
+/mob/living/simple_animal/scp1048/verb/view_build_status()
+	set name = "View Build Status"
+	set category = "SCP-1048"
+	set desc = "View your material collection and copy status."
+
+	var/message = "<h2>SCP-1048 Builder Bear Status</h2>"
+	message += "<b>Materials Collected:</b> [materials_collected]/[materials_needed]<br>"
+	message += "<b>Body Parts Harvested:</b> [body_parts_harvested]<br>"
+	message += "<b>Infant Parts:</b> [infant_parts]<br>"
+	message += "<b>Copies Built:</b> [length(copies_spawned)]/[max_copies]<br>"
+
+	if(length(copies_spawned) > 0)
+		message += "<h3>Active Copies:</h3>"
+		for(var/mob/living/simple_animal/hostile/scp1048_copy/C in copies_spawned)
+			if(!QDELETED(C))
+				message += "- [C.name] ([C.stat == DEAD ? "Dead" : "Active"])<br>"
+
+	to_chat(src, "<span class='notice'>[message]</span>")
+
+/mob/living/simple_animal/scp1048/verb/view_persistence_data()
 	set name = "View Persistence Data"
-	set category = "SCP"
+	set category = "SCP-1048"
 	set desc = "View SCP-1048 persistence data."
 
 	if(!check_rights(R_ADMIN))
@@ -465,66 +301,176 @@
 		return
 
 	var/message = "<h2>SCP-1048 Persistence Data</h2>"
-	message += "<b>Containment Status:</b> [containment_status]<br>"
-	message += "<b>Construction Mode:</b> [construction_mode ? "Active" : "Inactive"]<br>"
-	message += "<b>Construction Skill:</b> [construction_skill]/[max_construction_skill]<br>"
-	message += "<b>Construction Radius:</b> [construction_radius] tiles<br>"
-	message += "<b>Building Obsession:</b> [building_obsession]/[max_obsession]<br>"
-	message += "<b>Constructions Completed:</b> [constructions_completed]<br>"
-	message += "<b>Structures Built:</b> [structures_built]<br>"
 	message += "<b>Materials Collected:</b> [materials_collected]<br>"
-	message += "<b>Total Construction Time:</b> [total_construction_time] seconds<br>"
-	message += "<b>Construction Masterpieces:</b> [construction_masterpieces]<br>"
-	message += "<b>Construction Failures:</b> [construction_failures]<br>"
-	message += "<b>Completed Structures:</b> [completed_structures.len]<br>"
-	message += "<b>Blueprint Knowledge:</b> [blueprint_knowledge.len]<br>"
-	message += "<b>Available Materials:</b> [available_materials.len]<br>"
+	message += "<b>Body Parts Harvested:</b> [body_parts_harvested]<br>"
+	message += "<b>Copies Built:</b> [length(copies_spawned)]<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
 		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-// Override examine for SCP-1048
-/mob/living/simple_animal/hostile/scp1048/examine(mob/user)
+/mob/living/simple_animal/scp1048/get_status_tab_items()
 	. = ..()
+	. += "Materials: [materials_collected]/[materials_needed]"
+	. += "Copies: [length(copies_spawned)]/[max_copies]"
 
-	if(ishuman(user))
-		var/mob/living/carbon/human/H = user
-		if(H.SCP)
-			to_chat(user, "<span class='warning'>This is SCP-1048, a construction-focused teddy bear that builds structures.</span>")
-			to_chat(user, "<span class='info'>Construction Mode: [construction_mode ? "Active" : "Inactive"], Skill: [construction_skill]/[max_construction_skill]</span>")
-		else
-			to_chat(user, "<span class='danger'>A small teddy bear that seems to be building something...</span>")
-			to_chat(user, "<span class='info'>It appears to be in [construction_mode ? "construction" : "hostile"] mode.</span>")
+// === HOSTILE COPIES ===
 
-// Enhanced status display
-/mob/living/simple_animal/hostile/scp1048/proc/get_scp_status_items()
-	var/list/status_items = list()
+/mob/living/simple_animal/hostile/scp1048_copy
+	name = "SCP-1048 Copy"
+	desc = "A grotesque copy of SCP-1048, made from harvested body parts. It is hostile."
+	icon = 'icons/scp/scp-1048.dmi'
+	icon_state = "bear_copy"
+	icon_living = "bear_copy"
+	icon_dead = "bear_copy_dead"
+	maxHealth = 75
+	health = 75
+	melee_damage_lower = 10
+	melee_damage_upper = 20
+	attack_sound = 'sound/weapons/bite.ogg'
+	environment_smash = ENVIRONMENT_SMASH_NONE
+	del_on_death = FALSE
+	stat_attack = UNCONSCIOUS
+	robust_searching = TRUE
+	see_in_dark = 8
+	see_invisible = SEE_INVISIBLE_LIVING
+	faction = list("SCP")
 
-	status_items += "Containment Status: [containment_status]"
-	status_items += "Construction Mode: [construction_mode ? "Active" : "Inactive"]"
-	status_items += "Construction Skill: [construction_skill]/[max_construction_skill]"
-	status_items += "Construction Radius: [construction_radius] tiles"
-	status_items += "Building Obsession: [building_obsession]/[max_obsession]"
-	status_items += "Construction Progress: [construction_progress]/[max_construction_progress]"
-	status_items += "Constructions Completed: [constructions_completed]"
-	status_items += "Structures Built: [structures_built]"
-	status_items += "Materials Collected: [materials_collected]"
-	status_items += "Total Construction Time: [total_construction_time] seconds"
-	status_items += "Construction Masterpieces: [construction_masterpieces]"
-	status_items += "Construction Failures: [construction_failures]"
-	status_items += "Completed Structures: [completed_structures.len]"
-	status_items += "Blueprint Knowledge: [blueprint_knowledge.len]"
-	status_items += "Available Materials: [available_materials.len]"
+	var/special_ability_cooldown = 0
+	var/special_ability_cooldown_time = 30 SECONDS
 
-	return status_items
+/mob/living/simple_animal/hostile/scp1048_copy/Initialize()
+	. = ..()
+	SCP = new /datum/scp(src, "SCP-1048 Copy", SCP_EUCLID, "1048")
 
-/mob/living/simple_animal/hostile/scp1048/proc/on_construction_completed(structure_type)
-	hook_scp_breach("SCP-1048", src)
-	hook_facility_damage_near_scp("SCP-1048", 1)
+/mob/living/simple_animal/hostile/scp1048_copy/AttackingTarget()
+	. = ..()
+	if(. && ishuman(target))
+		var/mob/living/carbon/human/H = target
+		hook_scp_combat(H, "SCP-1048-Copy", melee_damage_upper, 0)
 
-/mob/living/simple_animal/hostile/scp1048/proc/on_material_collected(material_type)
-	return
+// SCP-1048-A: Made from human ears, emits a high-pitched scream causing fear/stun
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_a
+	name = "SCP-1048-A"
+	desc = "A malformed copy of SCP-1048 constructed entirely from human ears. It writhes and twitches horribly."
+	icon_state = "bear_ears"
+	icon_living = "bear_ears"
+	icon_dead = "bear_ears_dead"
+	melee_damage_lower = 5
+	melee_damage_upper = 10
+	speak_emote = list("screams", "shrieks", "emits a horrifying sound")
+	emote_see = list("twitches its ear-limbs", "writhes disturbingly")
+
+	var/scream_range = 7
+	var/scream_stun_duration = 40
+	var/scream_damage = 5
+
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_a/Life()
+	. = ..()
+	if(stat == DEAD)
+		return
+
+	if(world.time >= special_ability_cooldown && target)
+		if(get_dist(src, target) <= scream_range && prob(15))
+			perform_scream()
+
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_a/proc/perform_scream()
+	special_ability_cooldown = world.time + special_ability_cooldown_time
+
+	visible_message("<span class='danger'>[src] emits an earsplitting, inhuman shriek!</span>")
+	playsound(src, 'sound/effects/screech.ogg', 100, TRUE)
+
+	for(var/mob/living/carbon/human/H in range(scream_range, src))
+		if(H == src || H.SCP)
+			continue
+
+		H.Stun(scream_stun_duration)
+		var/obj/item/organ/ears/ears = H.getorganslot(ORGAN_SLOT_EARS)
+		if(ears)
+			ears.adjustEarDamage(0, 15)
+		H.do_jitter_animation(20)
+		H.adjustBruteLoss(scream_damage)
+
+		to_chat(H, "<span class='userdanger'>A deafening, unnatural scream fills your mind with overwhelming terror!</span>")
+		hook_scp_combat(H, "SCP-1048-A", scream_damage, 0)
+
+// SCP-1048-B: Made from a human infant, aggressively attacks personnel
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_b
+	name = "SCP-1048-B"
+	desc = "A horrifying copy of SCP-1048 made from the body of a human infant. It moves with violent, jerking motions."
+	icon_state = "bear_infant"
+	icon_living = "bear_infant"
+	icon_dead = "bear_infant_dead"
+	maxHealth = 60
+	health = 60
+	melee_damage_lower = 15
+	melee_damage_upper = 30
+	attack_sound = 'sound/weapons/bite.ogg'
+	speak_emote = list("gurgles", "wails", "screams")
+	emote_see = list("convulses violently", "lunges with unnatural speed")
+
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_b/AttackingTarget()
+	. = ..()
+	if(. && ishuman(target))
+		var/mob/living/carbon/human/H = target
+		if(prob(25))
+			H.Knockdown(20)
+			visible_message("<span class='danger'>[src] tackles [H] to the ground with terrifying force!</span>")
+
+// SCP-1048-C: Made from unknown materials, hostile
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_c
+	name = "SCP-1048-C"
+	desc = "A disturbing copy of SCP-1048 made from unidentifiable organic material. Its form seems to shift and pulse."
+	icon_state = "bear_unknown"
+	icon_living = "bear_unknown"
+	icon_dead = "bear_unknown_dead"
+	maxHealth = 100
+	health = 100
+	melee_damage_lower = 12
+	melee_damage_upper = 25
+	speak_emote = list("gurgles", "emits a low moan", "crackles")
+	emote_see = list("shifts unsettlingly", "pulses with unknown energy")
+
+	var/ability_cooldown = 0
+	var/ability_cooldown_time = 45 SECONDS
+
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_c/Life()
+	. = ..()
+	if(stat == DEAD)
+		return
+
+	if(world.time >= ability_cooldown && target)
+		if(prob(8))
+			perform_special_ability()
+
+/mob/living/simple_animal/hostile/scp1048_copy/scp1048_c/proc/perform_special_ability()
+	ability_cooldown = world.time + ability_cooldown_time
+
+	visible_message("<span class='danger'>[src]'s form ripples and distorts, releasing a wave of nauseating energy!</span>")
+
+	for(var/mob/living/carbon/human/H in range(5, src))
+		if(H.SCP || H == src)
+			continue
+
+		H.adjustToxLoss(10)
+		H.Stun(15)
+		H.do_jitter_animation(15)
+
+		to_chat(H, "<span class='userdanger'>A wave of sickening energy washes over you from [src]!</span>")
+		hook_scp_combat(H, "SCP-1048-C", 10, 0)
+
+/mob/living/simple_animal/hostile/scp1048_copy/death()
+	visible_message("<span class='danger'>[src] collapses into a pile of grotesque organic matter!</span>")
+	playsound(src, 'sound/effects/splat.ogg', 50, TRUE)
+	return ..()
+
+/mob/living/simple_animal/hostile/scp1048_copy/examine(mob/user)
+	. = ..()
+	to_chat(user, "<span class='danger'>This is not SCP-1048 itself — it is one of its hostile copies.</span>")
+
+/mob/living/simple_animal/hostile/scp1048_copy/get_status_tab_items()
+	. = ..()
+	. += "Type: [name]"

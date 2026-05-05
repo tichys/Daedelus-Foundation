@@ -40,6 +40,8 @@
 	var/color_mode = PHOTO_COLOR
 	/// Indicates whether the printer is currently busy copying or not.
 	var/busy = FALSE
+	var/department = ""
+	var/list/send_access = list()
 	/// Variable needed to determine the selected category of forms on Photocopier.js
 	var/category
 

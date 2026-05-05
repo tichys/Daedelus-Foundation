@@ -20,7 +20,7 @@
 /obj/machinery/scp294/Initialize()
 	. = ..()
 
-	SCP = new /datum/scp(src, "coffee machine", SCP_EUCLID, "294")
+	SCP = new /datum/scp(src, "The Coffee Machine", SCP_SAFE, "294")
 
 	liquid_system = new /datum/scp294_liquid_system(src)
 	effect_system = new /datum/scp294_effect_system(src)
@@ -87,6 +87,7 @@
 	var/datum/reagents/R = container.reagents
 	if(!R)
 		R = new/datum/reagents(100)
+		R.my_atom = container
 		container.reagents = R
 
 	R.maximum_volume = 100

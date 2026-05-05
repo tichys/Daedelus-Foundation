@@ -190,10 +190,10 @@ SUBSYSTEM_DEF(medical_persistence)
 	return project
 
 /datum/medical_persistence_manager/proc/update_medical_statistics()
-	medical_statistics["total_patients"] = medical_records.len
-	medical_statistics["total_treatments"] = treatment_logs.len
+	medical_statistics["total_patients"] = length(medical_records)
+	medical_statistics["total_treatments"] = length(treatment_logs)
 	medical_statistics["active_outbreaks"] = active_outbreaks
-	medical_statistics["research_projects"] = research_projects.len
+	medical_statistics["research_projects"] = length(research_projects)
 	medical_statistics["medical_budget"] = medical_budget
 	medical_statistics["containment_effectiveness"] = containment_effectiveness
 
@@ -227,8 +227,8 @@ SUBSYSTEM_DEF(medical_persistence)
 	var/base_progress = project.progress
 
 	// Progress based on number of researchers
-	if(project.researchers.len > 0)
-		base_progress += project.researchers.len * 2
+	if(length(project.researchers) > 0)
+		base_progress += length(project.researchers) * 2
 
 	// Progress based on budget utilization
 	if(project.budget_allocated > 0)
@@ -466,7 +466,7 @@ SUBSYSTEM_DEF(medical_persistence)
 			world.log << "Medical Persistence: Failed to save research project [project_id]"
 		qdel(query_save_project)
 
-	world.log << "Medical Persistence: Saved [medical_records.len] medical records, [treatment_logs.len] treatment logs, [outbreak_records.len] outbreak records, and [research_projects.len] research projects to database"
+	world.log << "Medical Persistence: Saved [length(medical_records)] medical records, [length(treatment_logs)] treatment logs, [length(outbreak_records)] outbreak records, and [length(research_projects)] research projects to database"
 
 /datum/medical_persistence_manager/proc/load_medical_data()
 	var/savefile/S = new /savefile("data/medical_persistence.json")
@@ -557,7 +557,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	world.log << "Loading existing medical records from datacore..."
 	manager.load_existing_medical_records()
 
-	world.log << "Medical records count at initialization: [manager.medical_records.len]"
+	world.log << "Medical records count at initialization: [length(manager.medical_records)]"
 	return ..()
 
 /datum/controller/subsystem/medical_persistence/fire()
@@ -658,7 +658,7 @@ SUBSYSTEM_DEF(medical_persistence)
 
 				world.log << "Medical: Created new medical record for [medical_record.fields[DATACORE_NAME]]"
 
-	world.log << "Medical: Loaded [medical_records.len] medical records from datacore"
+	world.log << "Medical: Loaded [length(medical_records)] medical records from datacore"
 
 // Add treatment log
 /datum/medical_persistence_manager/proc/add_treatment_log(var/patient_ckey, var/treatment_type, var/doctor_ckey)

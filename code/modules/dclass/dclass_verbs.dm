@@ -26,7 +26,7 @@
 
 	// Add contraband list
 	info += "<br><h4>Contraband Inventory:</h4>"
-	if(player.contraband.len > 0)
+	if(length(player.contraband) > 0)
 		for(var/item in player.contraband)
 			info += "- [item] (x[player.contraband[item]])<br>"
 	else
@@ -39,7 +39,7 @@
 
 	// Add abilities information
 	info += "<br><h4>Abilities:</h4>"
-	if(player.abilities.len > 0)
+	if(length(player.abilities) > 0)
 		for(var/ability in player.abilities)
 			if(ability != "disguise_effectiveness")
 				info += "- [ability]<br>"
@@ -165,7 +165,7 @@
 
 	// Current contraband
 	info += "<h4>Current Contraband:</h4>"
-	if(player.contraband.len > 0)
+	if(length(player.contraband) > 0)
 		for(var/item in player.contraband)
 			info += "- [item] (x[player.contraband[item]])<br>"
 	else
@@ -173,7 +173,7 @@
 
 	// Hidden items
 	info += "<br><h4>Hidden Items:</h4>"
-	if(player.hidden_items.len > 0)
+	if(length(player.hidden_items) > 0)
 		for(var/item in player.hidden_items)
 			info += "- [item]<br>"
 	else
@@ -181,7 +181,7 @@
 
 	// Crafted items
 	info += "<br><h4>Crafted Items:</h4>"
-	if(player.crafted_items.len > 0)
+	if(length(player.crafted_items) > 0)
 		for(var/item in player.crafted_items)
 			info += "- [item]<br>"
 	else
@@ -194,20 +194,20 @@
 
 	switch(action)
 		if("Drop Item")
-			if(player.contraband.len > 0)
+			if(length(player.contraband) > 0)
 				var/item_choice = input(src, "Which item to drop?", "Drop Contraband") as null|anything in player.contraband
 				if(item_choice)
 					player.remove_contraband(item_choice, 1)
 					to_chat(src, "<span class='notice'>You dropped [item_choice].</span>")
 		if("Hide Item")
-			if(player.contraband.len > 0)
+			if(length(player.contraband) > 0)
 				var/item_choice = input(src, "Which item to hide?", "Hide Contraband") as null|anything in player.contraband
 				if(item_choice)
 					player.hidden_items[item_choice] = player.contraband[item_choice]
 					player.remove_contraband(item_choice, 1)
 					to_chat(src, "<span class='notice'>You hid [item_choice].</span>")
 		if("Use Item")
-			if(player.contraband.len > 0)
+			if(length(player.contraband) > 0)
 				var/item_choice = input(src, "Which item to use?", "Use Contraband") as null|anything in player.contraband
 				if(item_choice)
 					// This would trigger the item's use function
@@ -236,7 +236,7 @@
 			if(other_player)
 				nearby_dclass[H.name] = other_player
 
-	if(nearby_dclass.len == 0)
+	if(length(nearby_dclass) == 0)
 		to_chat(src, "<span class='warning'>No other D-Class players nearby.</span>")
 		return
 
@@ -260,22 +260,22 @@
 
 	switch(action)
 		if("Form Alliance")
-			if(nearby_dclass.len > 0)
+			if(length(nearby_dclass) > 0)
 				var/target_name = input(src, "Who to form alliance with?", "Form Alliance") as null|anything in nearby_dclass
 				if(target_name)
 					player.allies += target_name
 					to_chat(src, "<span class='notice'>You formed an alliance with [target_name].</span>")
 		if("Trade")
-			if(nearby_dclass.len > 0 && player.contraband.len > 0)
+			if(length(nearby_dclass) > 0 && length(player.contraband) > 0)
 				var/target_name = input(src, "Who to trade with?", "Trade") as null|anything in nearby_dclass
 				if(target_name)
 					var/datum/dclass_player/other_player = nearby_dclass[target_name]
-					if(other_player.contraband.len > 0)
+					if(length(other_player.contraband) > 0)
 						var/trade_item = input(src, "What to offer?", "Trade Offer") as null|anything in player.contraband
 						if(trade_item)
 							to_chat(src, "<span class='notice'>You offered [trade_item] to [target_name].</span>")
 		if("Report Player")
-			if(nearby_dclass.len > 0)
+			if(length(nearby_dclass) > 0)
 				var/target_name = input(src, "Who to report?", "Report Player") as null|anything in nearby_dclass
 				if(target_name)
 					player.reported_players += target_name
@@ -309,7 +309,7 @@
 		if(H.job && findtext(H.job, "Guard"))
 			nearby_guards += H
 
-	info += "<b>Nearby Guards:</b> [nearby_guards.len]<br>"
+	info += "<b>Nearby Guards:</b> [length(nearby_guards)]<br>"
 
 	// Nearby D-Class
 	var/list/nearby_dclass = list()
@@ -319,7 +319,7 @@
 			if(other_player)
 				nearby_dclass += H
 
-	info += "<b>Nearby D-Class:</b> [nearby_dclass.len]<br>"
+	info += "<b>Nearby D-Class:</b> [length(nearby_dclass)]<br>"
 
 	// Security level
 	info += "<b>Security Level:</b> [SSdclass.manager.get_security_level()]/4<br>"

@@ -157,7 +157,7 @@
 		if(H.client && H.see_invisible >= parent_mob.invisibility)
 			observed_by += H
 
-	movement_allowed = (observed_by.len == 0)
+	movement_allowed = (length(observed_by) == 0)
 
 	if(!movement_allowed)
 		parent_mob.vars["movement_locked"] = TRUE

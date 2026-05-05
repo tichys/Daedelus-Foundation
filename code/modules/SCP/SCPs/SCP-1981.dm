@@ -85,11 +85,11 @@
 			nearby_viewers += H
 
 	// Escalate if multiple people have been viewing for a while
-	if(nearby_viewers.len > 2 && activation_events > 100)
+	if(length(nearby_viewers) > 2 && activation_events > 100)
 		escalate_all_systems()
 
 	// Special escalation if someone stays too long
-	if(nearby_viewers.len > 0 && activation_events > 200)
+	if(length(nearby_viewers) > 0 && activation_events > 200)
 		trigger_ultimate_video_event(nearby_viewers)
 
 /obj/item/scp1981/proc/escalate_all_systems()
@@ -108,7 +108,7 @@
 
 /obj/item/scp1981/proc/trigger_ultimate_video_event(list/targets)
 	// Major event that affects all nearby people
-	people_affected += targets.len
+	people_affected += length(targets)
 
 	for(var/mob/living/carbon/human/H in targets)
 		to_chat(H, "<span class='danger'>You experience SCP-1981's ultimate video manipulation!</span>")
@@ -218,7 +218,7 @@
 
 /obj/item/scp1981/proc/load_persistence_data()
 	// Load data from research system if available
-	if(research_system && research_system.research_data && research_system.research_data.len > 0)
+	if(research_system && research_system.research_data && length(research_system.research_data) > 0)
 		var/list/data = research_system.research_data
 		total_viewers = data["total_viewers"] || 0
 		people_affected = data["people_affected"] || 0

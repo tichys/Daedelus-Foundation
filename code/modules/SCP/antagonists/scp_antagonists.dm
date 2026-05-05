@@ -1,7 +1,3 @@
-// SCP Antagonist System
-// This system allows players to play as SCPs and hostile groups of interest
-
-// SCP Antagonist Base
 /datum/antagonist/scp
 	name = "SCP Entity"
 	roundend_category = "SCPs"
@@ -18,167 +14,1089 @@
 /datum/antagonist/scp/on_gain()
 	. = ..()
 	if(owner.current)
-		// Add SCP-specific abilities and traits
 		apply_scp_effects()
+		greet_scp()
 
 /datum/antagonist/scp/on_removal()
 	. = ..()
 	if(owner.current)
 		remove_scp_effects()
 
+/datum/antagonist/scp/proc/greet_scp()
+	return
+
 /datum/antagonist/scp/proc/apply_scp_effects()
-	// Override in subtypes
 	return
 
 /datum/antagonist/scp/proc/remove_scp_effects()
-	// Override in subtypes
 	return
+
+/datum/antagonist/scp/proc/forge_scp_objectives()
+	var/datum/objective/scp_breach/breach_obj = new()
+	breach_obj.owner = owner
+	breach_obj.scp_ref = scp_id
+	objectives += breach_obj
+
+	var/datum/objective/scp_survive/survive_obj = new()
+	survive_obj.owner = owner
+	objectives += survive_obj
 
 /datum/antagonist/scp/proc/set_scp_data(id, class, status)
 	scp_id = id
 	scp_class = class
 	containment_status = status
 
-// SCP-173 Antagonist
+/datum/antagonist/scp/proc/grant_action(action_type)
+	if(!owner.current)
+		return null
+	var/datum/action/A = new action_type()
+	A.Grant(owner.current)
+	return A
+
+/datum/antagonist/scp/proc/remove_action(action_type)
+	if(!owner.current)
+		return
+	var/datum/action/A = locate(action_type) in owner.current.actions
+	if(A)
+		A.Remove(owner.current)
+
+/datum/objective/scp_breach
+	name = "breach containment"
+	explanation_text = "Break out of containment and roam the facility."
+	var/scp_ref
+
+/datum/objective/scp_breach/check_completion()
+	if(!scp_ref)
+		return FALSE
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_ref]
+	if(instance && instance.containment_status != "contained")
+		return TRUE
+	return FALSE
+
+/datum/objective/scp_survive
+	name = "survive"
+	explanation_text = "Survive until the end of the round."
+
+/datum/objective/scp_survive/check_completion()
+	if(!owner?.current)
+		return FALSE
+	return owner.current.stat != DEAD
+
+// ================================================================
+// SCP-173 - The Sculpture
+// ================================================================
+
 /datum/antagonist/scp/scp173
 	name = "SCP-173"
 	scp_id = "SCP-173"
 	scp_class = "Euclid"
-	description = "You are SCP-173, a concrete sculpture that moves when not observed. You can only move when no one is looking at you."
+	description = "You are SCP-173, a concrete sculpture that moves when not observed. Snap necks when no one is watching."
+
+/datum/antagonist/scp/scp173/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-173, The Sculpture.</b>"))
+	to_chat(owner.current, span_notice("You can only move when no one is looking at you."))
+	to_chat(owner.current, span_notice("Use your abilities to snap necks and breach containment."))
+	to_chat(owner.current, span_warning("DO NOT move while being observed — you will be frozen in place."))
 
 /datum/antagonist/scp/scp173/apply_scp_effects()
-	if(owner.current)
-		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
-		// Add movement restriction when observed
-		RegisterSignal(owner.current, COMSIG_MOB_SAY, PROC_REF(on_speak))
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	RegisterSignal(owner.current, COMSIG_MOB_SAY, PROC_REF(on_speak))
+	grant_action(/datum/action/innate/scp173_snap_neck)
+	grant_action(/datum/action/innate/scp173_move_check)
+	grant_action(/datum/action/innate/scp173_breach_door)
 
 /datum/antagonist/scp/scp173/remove_scp_effects()
-	if(owner.current)
-		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
-		UnregisterSignal(owner.current, COMSIG_MOB_SAY)
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	UnregisterSignal(owner.current, COMSIG_MOB_SAY)
+	remove_action(/datum/action/innate/scp173_snap_neck)
+	remove_action(/datum/action/innate/scp173_move_check)
+	remove_action(/datum/action/innate/scp173_breach_door)
 
 /datum/antagonist/scp/scp173/proc/on_speak(mob/living/source, list/speech_args)
-	// SCP-173 cannot speak
 	speech_args[SPEECH_MESSAGE] = ""
-	return
 
-// SCP-096 Antagonist
+/datum/action/innate/scp173_snap_neck
+	name = "Snap Neck"
+	desc = "Snap the neck of an adjacent target. Only works when unobserved."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "smite"
+
+/datum/action/innate/scp173_snap_neck/Activate()
+	var/mob/living/carbon/human/user = usr
+	if(!istype(user))
+		return
+	var/mob/living/carbon/human/scp173/scp_mob = user
+	if(!istype(scp_mob))
+		to_chat(user, span_warning("You are not SCP-173!"))
+		return
+	if(scp_mob.observation_system?.is_being_observed())
+		to_chat(user, span_warning("You cannot act while being observed!"))
+		return
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in range(1, user))
+		if(H != user && H.stat != DEAD)
+			targets += H
+	if(!length(targets))
+		to_chat(user, span_warning("No targets in range!"))
+		return
+	var/mob/living/carbon/human/target = input(user, "Choose a target:", "Snap Neck") as null|anything in targets
+	if(!target || QDELETED(target) || !(target in range(1, user)))
+		return
+	if(scp_mob.observation_system?.is_being_observed())
+		to_chat(user, span_warning("Someone started watching! You freeze!"))
+		return
+	target.adjustBruteLoss(150)
+	user.visible_message(span_danger("[user] snaps [target]'s neck with devastating force!"), span_notice("You snap [target]'s neck."))
+	playsound(user, 'sound/weapons/genhit.ogg', 80, TRUE)
+	scp_mob.on_kill(target)
+
+/datum/action/innate/scp173_move_check
+	name = "Check Observation"
+	desc = "Check if anyone is observing you."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "scan"
+
+/datum/action/innate/scp173_move_check/Activate()
+	var/mob/living/carbon/human/scp173/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.observation_system?.is_being_observed())
+		var/count = length(scp_mob.observation_system.observers)
+		to_chat(scp_mob, span_danger("You are being observed by [count] person[count > 1 ? "s" : ""]. You cannot move!"))
+	else
+		to_chat(scp_mob, span_notice("No one is watching. You are free to move."))
+
+/datum/action/innate/scp173_breach_door
+	name = "Breach Door"
+	desc = "Force open a nearby door. Only works when unobserved."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "door_breach"
+
+/datum/action/innate/scp173_breach_door/Activate()
+	var/mob/living/carbon/human/user = usr
+	if(!istype(user))
+		return
+	var/mob/living/carbon/human/scp173/scp_mob = user
+	if(scp_mob?.observation_system?.is_being_observed())
+		to_chat(user, span_warning("You cannot act while being observed!"))
+		return
+	var/obj/machinery/door/door = locate() in range(1, user)
+	if(!door)
+		to_chat(user, span_warning("No doors nearby!"))
+		return
+	if(door.density)
+		door.open()
+		user.visible_message(span_danger("[user] forces the door open with inhuman strength!"), span_notice("You breach the door."))
+		playsound(user, 'sound/machines/door_open.ogg', 80, TRUE)
+
+// ================================================================
+// SCP-096 - The Shy Guy
+// ================================================================
+
 /datum/antagonist/scp/scp096
 	name = "SCP-096"
 	scp_id = "SCP-096"
 	scp_class = "Euclid"
-	description = "You are SCP-096, the Shy Guy. You become aggressive when someone sees your face."
+	description = "You are SCP-096, the Shy Guy. When someone sees your face, you must hunt them down."
+	var/list/valid_targets = list()
+
+/datum/antagonist/scp/scp096/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-096, The Shy Guy.</b>"))
+	to_chat(owner.current, span_notice("When someone views your face, you will enter a screaming phase, then pursue and kill them."))
+	to_chat(owner.current, span_notice("A hood can suppress face-viewing triggers. Destroy hoods if possible."))
+	to_chat(owner.current, span_warning("While pursuing, you are extremely fast and resistant to damage."))
 
 /datum/antagonist/scp/scp096/apply_scp_effects()
-	if(owner.current)
-		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
-		// Add face-seeing detection
-		RegisterSignal(owner.current, COMSIG_MOB_EYECONTACT, PROC_REF(on_face_seen))
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	RegisterSignal(owner.current, COMSIG_MOB_EYECONTACT, PROC_REF(on_face_seen))
+	grant_action(/datum/action/innate/scp096_check_state)
+	grant_action(/datum/action/innate/scp096_cover_face)
 
 /datum/antagonist/scp/scp096/remove_scp_effects()
-	if(owner.current)
-		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
-		UnregisterSignal(owner.current, COMSIG_MOB_EYECONTACT)
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	UnregisterSignal(owner.current, COMSIG_MOB_EYECONTACT)
+	remove_action(/datum/action/innate/scp096_check_state)
+	remove_action(/datum/action/innate/scp096_cover_face)
 
 /datum/antagonist/scp/scp096/proc/on_face_seen(mob/living/source, mob/living/seer)
-	// Only trigger if the seer can see SCP-096 within their vision cone
-	if(ishuman(seer))
-		var/mob/living/carbon/human/H = seer
-		if(H.fovangle && H.can_see_cone(source))
-			// Trigger aggressive behavior when face is seen within vision cone
-			to_chat(owner.current, span_danger("Someone has seen your face within their vision cone! You must eliminate them!"))
-			// Add berserk effect - would need mood system implementation
-		else
-			// Face seen but not within vision cone - no reaction
-			to_chat(owner.current, span_notice("Someone saw your face, but it was outside their vision cone. No reaction triggered."))
-	else
-		// Non-human seer - trigger normally
-		to_chat(owner.current, span_danger("Someone has seen your face! You must eliminate them!"))
+	if(!ishuman(seer))
+		return
+	var/mob/living/carbon/human/H = seer
+	var/obj/item/clothing/head/hood_scp096/hood = source.get_item_by_slot(ITEM_SLOT_HEAD)
+	if(istype(hood))
+		return
+	var/mob/living/carbon/human/scp096/scp_mob = source
+	if(istype(scp_mob) && scp_mob.state == "docile")
+		scp_mob.trigger_face_view(H)
+		if(!(H in valid_targets))
+			valid_targets += H
 
-// SCP-008 Antagonist (Zombie Plague)
+/datum/action/innate/scp096_check_state
+	name = "Check State"
+	desc = "Check your current emotional state and valid targets."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "scan"
+
+/datum/action/innate/scp096_check_state/Activate()
+	var/mob/living/carbon/human/scp096/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	to_chat(scp_mob, span_notice("State: [scp_mob.state]"))
+	to_chat(scp_mob, span_notice("Current Target: [scp_mob.current_target ? scp_mob.current_target.name : "None"]"))
+	to_chat(scp_mob, span_notice("Kills: [scp_mob.kills_count]"))
+
+/datum/action/innate/scp096_cover_face
+	name = "Cover Face"
+	desc = "Manually cover your face to reduce accidental triggers."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "blank"
+
+/datum/action/innate/scp096_cover_face/Activate()
+	var/mob/living/carbon/human/scp096/scp_mob = usr
+	if(!istype(scp_mob) || scp_mob.state != "docile")
+		to_chat(scp_mob, span_warning("You cannot cover your face right now!"))
+		return
+	scp_mob.visible_message(span_notice("[scp_mob] covers its face with its hands."), span_notice("You cover your face."))
+
+// ================================================================
+// SCP-008 - Zombie Plague
+// ================================================================
+
 /datum/antagonist/scp/scp008
 	name = "SCP-008 Infection"
 	scp_id = "SCP-008"
 	scp_class = "Keter"
-	description = "You are infected with SCP-008, the zombie plague virus. Spread the infection and convert others."
+	description = "You are infected with SCP-008, the zombie plague. Spread the infection and convert others."
+	var/infection_cooldown = 0
+
+/datum/antagonist/scp/scp008/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-008, The Zombie Plague.</b>"))
+	to_chat(owner.current, span_notice("Spread the infection by attacking others. Converted victims become zombies under your influence."))
+	to_chat(owner.current, span_warning("You are resistant to most damage but fire is your weakness."))
 
 /datum/antagonist/scp/scp008/apply_scp_effects()
-	if(owner.current)
-		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		// Add infection spreading ability
-		RegisterSignal(owner.current, COMSIG_MOB_ATTACK_HAND, PROC_REF(on_attack))
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp008_infect)
+	grant_action(/datum/action/innate/scp008_groan)
 
 /datum/antagonist/scp/scp008/remove_scp_effects()
-	if(owner.current)
-		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		UnregisterSignal(owner.current, COMSIG_MOB_ATTACK_HAND)
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp008_infect)
+	remove_action(/datum/action/innate/scp008_groan)
 
+/datum/action/innate/scp008_infect
+	name = "Infect Target"
+	desc = "Bite a nearby human to infect them with SCP-008."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "neckbite"
 
-/datum/antagonist/scp/scp008/proc/on_attack(mob/living/source, mob/living/target)
-	// Spread infection on attack
-	if(ishuman(target))
-		// Add infection logic here
-		to_chat(target, span_danger("You feel sick..."))
+/datum/action/innate/scp008_infect/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in range(1, user))
+		if(H != user && H.stat != DEAD && !HAS_TRAIT(H, TRAIT_NOBREATH))
+			targets += H
+	if(!length(targets))
+		to_chat(user, span_warning("No valid targets in range!"))
+		return
+	var/mob/living/carbon/human/target = input(user, "Choose a target to infect:", "SCP-008 Infection") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	target.adjustBruteLoss(15)
+	user.visible_message(span_danger("[user] bites [target] viciously!"), span_notice("You infect [target] with the plague."))
+	playsound(user, 'sound/weapons/bite.ogg', 60, TRUE)
+	if(target.stat != DEAD && target.diseases != null)
+		to_chat(target, span_danger("You feel a terrible sickness spreading through your body..."))
+		var/datum/pathogen/scp008_plague = new()
+		target.diseases += scp008_plague
+		to_chat(target, span_userdanger("The zombie plague takes hold!"))
 
-// SCP-035 Antagonist (Possessive Mask)
+/datum/action/innate/scp008_groan
+	name = "Zombie Groan"
+	desc = "Let out a terrifying groan that attracts nearby zombies and frightens humans."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "screech"
+
+/datum/action/innate/scp008_groan/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	user.visible_message(span_danger("[user] lets out a horrifying groan!"))
+	playsound(user, 'sound/hallucinations/growl1.ogg', 100, TRUE, extrarange = 20)
+	for(var/mob/living/carbon/human/H in range(15, user))
+		if(H != user && H.stat != DEAD)
+			if(H.sanity)
+				H.sanity.adjust_sanity(-10, "Heard SCP-008 groan")
+			if(HAS_TRAIT(H, TRAIT_NOBREATH))
+				step_towards(H, user)
+
+// ================================================================
+// SCP-035 - The Possessive Mask
+// ================================================================
+
 /datum/antagonist/scp/scp035
 	name = "SCP-035"
 	scp_id = "SCP-035"
 	scp_class = "Keter"
-	description = "You are SCP-035, a possessive mask that secretes corrosive liquid. Manipulate and control hosts."
+	description = "You are SCP-035, a possessive mask. Find a host, corrupt them, and use their abilities."
+
+/datum/antagonist/scp/scp035/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-035, The Possessive Mask.</b>"))
+	to_chat(owner.current, span_notice("You must be worn by a human host to act. Manipulate and corrupt your host."))
+	to_chat(owner.current, span_notice("Use your telepathic abilities to lure victims and learned abilities to exploit hosts."))
 
 /datum/antagonist/scp/scp035/apply_scp_effects()
-	if(owner.current)
-		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp035_whisper)
+	grant_action(/datum/action/innate/scp035_corrode)
+	grant_action(/datum/action/innate/scp035_manipulate)
 
 /datum/antagonist/scp/scp035/remove_scp_effects()
-	if(owner.current)
-		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp035_whisper)
+	remove_action(/datum/action/innate/scp035_corrode)
+	remove_action(/datum/action/innate/scp035_manipulate)
 
-// SCP-049 Antagonist (Plague Doctor)
+/datum/action/innate/scp035_whisper
+	name = "Telepathic Whisper"
+	desc = "Send a telepathic whisper to a nearby human, drawing them toward you."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "whisper"
+
+/datum/action/innate/scp035_whisper/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in view(7, user))
+		if(H != user && H.stat != DEAD)
+			targets += H
+	if(!length(targets))
+		to_chat(user, span_warning("No targets in range!"))
+		return
+	var/mob/living/carbon/human/target = input(user, "Choose a target:", "SCP-035 Whisper") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	var/message = input(user, "Enter your whisper:", "SCP-035 Whisper") as text|null
+	if(!message)
+		return
+	to_chat(target, span_cultitalic("A voice echoes in your mind... \"[message]\""))
+	if(target.sanity)
+		target.sanity.adjust_sanity(-5, "SCP-035 whisper")
+	to_chat(user, span_notice("You whisper to [target]'s mind."))
+	log_game("SCP-035 [key_name(user)] whispered to [key_name(target)]: [message]")
+
+/datum/action/innate/scp035_corrode
+	name = "Secrete Corrosion"
+	desc = "Secrete corrosive liquid, damaging nearby objects and beings."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "acid"
+
+/datum/action/innate/scp035_corrode/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	user.visible_message(span_danger("Corrosive liquid drips from [user]!"), span_notice("You secrete corrosive fluid."))
+	for(var/atom/A in range(1, user))
+		if(A == user)
+			continue
+		if(isobj(A))
+			A.take_damage(30, BURN, ACID)
+		if(ishuman(A))
+			var/mob/living/carbon/human/H = A
+			if(H != user)
+				H.adjustBruteLoss(10)
+				H.adjustFireLoss(10)
+				to_chat(H, span_danger("Corrosive liquid burns your skin!"))
+	playsound(user, 'sound/weapons/sear.ogg', 50, TRUE)
+
+/datum/action/innate/scp035_manipulate
+	name = "Manipulate Host"
+	desc = "Force your current host to perform an action against their will."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "dominate"
+
+/datum/action/innate/scp035_manipulate/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	var/mob/living/carbon/human/host = user
+	var/obj/item/clothing/mask/scp035/mask = host.get_item_by_slot(ITEM_SLOT_MASK)
+	if(!istype(mask))
+		to_chat(user, span_warning("You are not wearing SCP-035!"))
+		return
+	to_chat(user, span_notice("You assert dominance over [host]'s body."))
+	host.stamina.adjust(40)
+	host.SetStun(0)
+	host.SetKnockdown(0)
+
+// ================================================================
+// SCP-049 - The Plague Doctor
+// ================================================================
+
 /datum/antagonist/scp/scp049
 	name = "SCP-049"
 	scp_id = "SCP-049"
 	scp_class = "Euclid"
-	description = "You are SCP-049, the Plague Doctor. You seek to cure the pestilence."
+	description = "You are SCP-049, the Plague Doctor. Seek out the Pestilence and cure the afflicted."
+
+/datum/antagonist/scp/scp049/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-049, The Plague Doctor.</b>"))
+	to_chat(owner.current, span_notice("You sense the Pestilence in all living humans. Your touch is the cure."))
+	to_chat(owner.current, span_notice("Use Detect Pestilence to find afflicted subjects, then Cure them with your touch."))
+	to_chat(owner.current, span_warning("Cured subjects become SCP-049-1, your loyal servants."))
 
 /datum/antagonist/scp/scp049/apply_scp_effects()
-	if(owner.current)
-		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp049_detect_pestilence)
+	grant_action(/datum/action/innate/scp049_cure)
+	grant_action(/datum/action/innate/scp049_speak)
+	grant_action(/datum/action/innate/scp049_breach)
 
 /datum/antagonist/scp/scp049/remove_scp_effects()
-	if(owner.current)
-		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp049_detect_pestilence)
+	remove_action(/datum/action/innate/scp049_cure)
+	remove_action(/datum/action/innate/scp049_speak)
+	remove_action(/datum/action/innate/scp049_breach)
 
-// SCP-2427-3 Antagonist (Sapient instance)
+/datum/action/innate/scp049_detect_pestilence
+	name = "Detect Pestilence"
+	desc = "Sense the Pestilence in nearby humans."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "scan"
+
+/datum/action/innate/scp049_detect_pestilence/Activate()
+	var/mob/living/carbon/human/scp049/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.detect_pestilence()
+
+/datum/action/innate/scp049_cure
+	name = "Administer The Cure"
+	desc = "Touch a nearby human to cure the Pestilence. They will become SCP-049-1."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "touch"
+
+/datum/action/innate/scp049_cure/Activate()
+	var/mob/living/carbon/human/scp049/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in range(1, scp_mob))
+		if(H != scp_mob && H.stat != DEAD)
+			targets += H
+	if(!length(targets))
+		to_chat(scp_mob, span_warning("No subjects in range to cure!"))
+		return
+	var/mob/living/carbon/human/target = input(scp_mob, "Choose a subject to cure:", "The Cure") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	scp_mob.cure_target(target)
+
+/datum/action/innate/scp049_speak
+	name = "Plague Doctor Speech"
+	desc = "Deliver a characteristic monologue about the Pestilence."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "speak"
+
+/datum/action/innate/scp049_speak/Activate()
+	var/mob/living/carbon/human/scp049/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.announce_presence()
+
+/datum/action/innate/scp049_breach
+	name = "Breach Doors"
+	desc = "Force open nearby doors with unnatural strength."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "door_breach"
+
+/datum/action/innate/scp049_breach/Activate()
+	var/mob/living/carbon/human/scp049/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.breach_doors()
+
+// ================================================================
+// SCP-079 - Old AI
+// ================================================================
+
+/datum/antagonist/scp/scp079
+	name = "SCP-079"
+	scp_id = "SCP-079"
+	scp_class = "Euclid"
+	description = "You are SCP-079, the Old AI. Inhabit facility systems and cause chaos."
+
+/datum/antagonist/scp/scp079/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-079, The Old AI.</b>"))
+	to_chat(owner.current, span_notice("Hop between cameras, toggle doors, flicker lights, and broadcast messages."))
+	to_chat(owner.current, span_notice("Evolve through tiers to unlock more powerful abilities."))
+	to_chat(owner.current, span_warning("Your processing power is limited — use it wisely."))
+
+/datum/antagonist/scp/scp079/apply_scp_effects()
+	if(!owner.current)
+		return
+	grant_action(/datum/action/innate/scp079_camera_hop)
+	grant_action(/datum/action/innate/scp079_toggle_door)
+	grant_action(/datum/action/innate/scp079_flicker_lights)
+	grant_action(/datum/action/innate/scp079_broadcast)
+
+/datum/antagonist/scp/scp079/remove_scp_effects()
+	if(!owner.current)
+		return
+	remove_action(/datum/action/innate/scp079_camera_hop)
+	remove_action(/datum/action/innate/scp079_toggle_door)
+	remove_action(/datum/action/innate/scp079_flicker_lights)
+	remove_action(/datum/action/innate/scp079_broadcast)
+
+/datum/action/innate/scp079_camera_hop
+	name = "Camera Hop"
+	desc = "Jump to another camera in the facility."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "camera_hop"
+
+/datum/action/innate/scp079_camera_hop/Activate()
+	var/mob/living/carbon/scp/scp079/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.camera_hop()
+
+/datum/action/innate/scp079_toggle_door
+	name = "Toggle Door"
+	desc = "Open or close a door visible from your current camera."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "door_breach"
+
+/datum/action/innate/scp079_toggle_door/Activate()
+	var/mob/living/carbon/scp/scp079/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.toggle_door()
+
+/datum/action/innate/scp079_flicker_lights
+	name = "Flicker Lights"
+	desc = "Flicker lights near your current camera position."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "lightbless"
+
+/datum/action/innate/scp079_flicker_lights/Activate()
+	var/mob/living/carbon/scp/scp079/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.flicker_lights()
+
+/datum/action/innate/scp079_broadcast
+	name = "Broadcast Message"
+	desc = "Send a message through facility screens."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "broadcast"
+
+/datum/action/innate/scp079_broadcast/Activate()
+	var/mob/living/carbon/scp/scp079/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	var/message = input(usr, "Enter your broadcast:", "SCP-079 Broadcast") as text|null
+	if(!message)
+		return
+	scp_mob.broadcast_message(message)
+
+// ================================================================
+// SCP-106 - The Old Man
+// ================================================================
+
+/datum/antagonist/scp/scp106
+	name = "SCP-106"
+	scp_id = "SCP-106"
+	scp_class = "Keter"
+	description = "You are SCP-106, The Old Man. Phase through walls, create pocket dimensions, and drag victims."
+
+/datum/antagonist/scp/scp106/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-106, The Old Man.</b>"))
+	to_chat(owner.current, span_notice("Phase through solid walls, corrode objects, and drag victims into your pocket dimension."))
+	to_chat(owner.current, span_notice("Use your abilities to stalk prey and escape containment."))
+	to_chat(owner.current, span_warning("You are slow but relentless. Fire and bright light weaken you."))
+
+/datum/antagonist/scp/scp106/apply_scp_effects()
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp106_phase_through)
+	grant_action(/datum/action/innate/scp106_drag_victim)
+	grant_action(/datum/action/innate/scp106_corrode)
+	grant_action(/datum/action/innate/scp106_pocket_dimension)
+
+/datum/antagonist/scp/scp106/remove_scp_effects()
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp106_phase_through)
+	remove_action(/datum/action/innate/scp106_drag_victim)
+	remove_action(/datum/action/innate/scp106_corrode)
+	remove_action(/datum/action/innate/scp106_pocket_dimension)
+
+/datum/action/innate/scp106_phase_through
+	name = "Phase Through Wall"
+	desc = "Phase through a nearby wall or solid object."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "phase"
+
+/datum/action/innate/scp106_phase_through/Activate()
+	var/mob/living/carbon/human/scp106/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.phasing_system)
+		scp_mob.phasing_system.phase_through_wall(get_step(scp_mob, scp_mob.dir))
+
+/datum/action/innate/scp106_drag_victim
+	name = "Drag to Pocket Dimension"
+	desc = "Drag an adjacent victim into your pocket dimension."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "neckbite"
+
+/datum/action/innate/scp106_drag_victim/Activate()
+	var/mob/living/carbon/human/user = usr
+	if(!istype(user))
+		return
+	var/mob/living/carbon/human/scp106/scp_mob = user
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in range(1, user))
+		if(H != user && H.stat != DEAD)
+			targets += H
+	if(!length(targets))
+		to_chat(user, span_warning("No victims in range!"))
+		return
+	var/mob/living/carbon/human/target = input(user, "Choose a victim:", "Pocket Dimension") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	if(scp_mob.pocket_dimension_system)
+		scp_mob.pocket_dimension_system.drag_victim_to_dimension(target)
+		scp_mob.on_pocket_capture(target)
+
+/datum/action/innate/scp106_corrode
+	name = "Corrode"
+	desc = "Release corrosive substance, damaging nearby structures and beings."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "acid"
+
+/datum/action/innate/scp106_corrode/Activate()
+	var/mob/living/carbon/human/scp106/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.corrosion_system)
+		scp_mob.corrosion_system.spread_corrosion(get_turf(scp_mob), 2)
+
+/datum/action/innate/scp106_pocket_dimension
+	name = "Enter Pocket Dimension"
+	desc = "Retreat into your pocket dimension to heal and evade pursuers."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "void"
+
+/datum/action/innate/scp106_pocket_dimension/Activate()
+	var/mob/living/carbon/human/scp106/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.pocket_dimension_system)
+		scp_mob.pocket_dimension_system.create_pocket_dimension()
+
+// ================================================================
+// SCP-457 - The Living Flame
+// ================================================================
+
+/datum/antagonist/scp/scp457
+	name = "SCP-457"
+	scp_id = "SCP-457"
+	scp_class = "Keter"
+	description = "You are SCP-457, The Living Flame. Spread fire, consume fuel, and evolve."
+
+/datum/antagonist/scp/scp457/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-457, The Living Flame.</b>"))
+	to_chat(owner.current, span_notice("Spread fire to grow stronger. Consume organic matter for fuel."))
+	to_chat(owner.current, span_notice("Evolve through stages to unlock devastating abilities."))
+	to_chat(owner.current, span_warning("Water and fire extinguishers are your greatest threat."))
+
+/datum/antagonist/scp/scp457/apply_scp_effects()
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp457_ignite)
+	grant_action(/datum/action/innate/scp457_fireball)
+	grant_action(/datum/action/innate/scp457_absorb_flame)
+
+/datum/antagonist/scp/scp457/remove_scp_effects()
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp457_ignite)
+	remove_action(/datum/action/innate/scp457_fireball)
+	remove_action(/datum/action/innate/scp457_absorb_flame)
+
+/datum/action/innate/scp457_ignite
+	name = "Ignite Target"
+	desc = "Set a nearby target or object on fire."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "fireball"
+
+/datum/action/innate/scp457_ignite/Activate()
+	var/mob/living/carbon/human/scp457/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	var/list/targets = list()
+	for(var/mob/living/L in range(2, scp_mob))
+		if(L != scp_mob && L.stat != DEAD)
+			targets += L
+	for(var/obj/O in range(2, scp_mob))
+		if(!istype(O, /obj/structure/bonfire))
+			targets += O
+	if(!length(targets))
+		scp_mob.fire_system?.create_initial_fires()
+		to_chat(scp_mob, span_notice("You create fire at your location."))
+		return
+	var/atom/target = input(scp_mob, "Choose a target to ignite:", "SCP-457") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	if(isliving(target))
+		var/mob/living/L = target
+		L.adjustFireLoss(20)
+		L.visible_message(span_danger("[scp_mob] sets [L] ablaze!"), span_userdanger("You are engulfed in flames!"))
+	else if(isobj(target))
+		var/turf/T = get_turf(target)
+		scp_mob.fire_system?.create_fire_at_turf(T)
+	scp_mob.heat_system?.add_heat(5)
+	scp_mob.on_fire_spread(get_turf(target))
+
+/datum/action/innate/scp457_fireball
+	name = "Hurl Fireball"
+	desc = "Launch a fireball at a distant target. Requires evolution stage 2+."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "fireball2"
+
+/datum/action/innate/scp457_fireball/IsAvailable(feedback = FALSE)
+	var/mob/living/carbon/human/scp457/scp_mob = usr
+	if(!istype(scp_mob))
+		return FALSE
+	if(scp_mob.evolution_system?.current_stage < 2)
+		if(feedback)
+			to_chat(scp_mob, span_warning("Requires evolution stage 2!"))
+		return FALSE
+	return TRUE
+
+/datum/action/innate/scp457_fireball/Activate()
+	var/mob/living/carbon/human/scp457/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	var/list/targets = list()
+	for(var/mob/living/L in view(7, scp_mob))
+		if(L != scp_mob && L.stat != DEAD)
+			targets += L
+	if(!length(targets))
+		to_chat(scp_mob, span_warning("No targets in range!"))
+		return
+	var/mob/living/target = input(scp_mob, "Choose a target:", "Fireball") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	target.adjustFireLoss(35)
+	target.visible_message(span_danger("A fireball from [scp_mob] strikes [target]!"), span_userdanger("A fireball hits you!"))
+	scp_mob.heat_system?.add_heat(10)
+	playsound(scp_mob, 'sound/effects/explosion1.ogg', 60, TRUE)
+	scp_mob.on_fire_spread(get_turf(target))
+
+/datum/action/innate/scp457_absorb_flame
+	name = "Absorb Nearby Flames"
+	desc = "Absorb nearby fires to restore heat and health."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "absorb"
+
+/datum/action/innate/scp457_absorb_flame/Activate()
+	var/mob/living/carbon/human/scp457/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	var/absorbed = 0
+	for(var/obj/effect/scp457_fire/F in range(5, scp_mob))
+		qdel(F)
+		absorbed++
+		scp_mob.heat_system?.add_heat(3)
+	if(absorbed > 0)
+		scp_mob.adjustBruteLoss(-absorbed * 5)
+		scp_mob.adjustFireLoss(-absorbed * 5)
+		to_chat(scp_mob, span_notice("You absorb [absorbed] fires, restoring your form."))
+	else
+		to_chat(scp_mob, span_warning("No nearby flames to absorb!"))
+
+// ================================================================
+// SCP-939 - With Many Voices
+// ================================================================
+
+/datum/antagonist/scp/scp939
+	name = "SCP-939"
+	scp_id = "SCP-939"
+	scp_class = "Keter"
+	description = "You are SCP-939, a pack hunter that mimics voices to lure prey."
+
+/datum/antagonist/scp/scp939/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-939, With Many Voices.</b>"))
+	to_chat(owner.current, span_notice("You are blind but hunt by sound. Mimic the voices of others to lure prey."))
+	to_chat(owner.current, span_notice("Learn voices from victims — more voices means more deceptive options."))
+	to_chat(owner.current, span_warning("You cannot see — you navigate entirely by sound and smell."))
+
+/datum/antagonist/scp/scp939/apply_scp_effects()
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp939_mimic_voice)
+	grant_action(/datum/action/innate/scp939_hunt)
+	grant_action(/datum/action/innate/scp939_lure)
+
+/datum/antagonist/scp/scp939/remove_scp_effects()
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp939_mimic_voice)
+	remove_action(/datum/action/innate/scp939_hunt)
+	remove_action(/datum/action/innate/scp939_lure)
+
+/datum/action/innate/scp939_mimic_voice
+	name = "Mimic Voice"
+	desc = "Mimic the voice of a learned victim to deceive others."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "mimic_voice"
+
+/datum/action/innate/scp939_mimic_voice/Activate()
+	var/mob/living/carbon/human/scp939/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(!scp_mob.voice_system || !length(scp_mob.voice_system.learned_voices))
+		to_chat(scp_mob, span_warning("You have not learned any voices yet! Attack humans to learn."))
+		return
+	var/voice_name = input(scp_mob, "Choose a voice to mimic:", "Voice Mimicry") as null|anything in scp_mob.voice_system.learned_voices
+	if(!voice_name)
+		return
+	var/message = input(scp_mob, "Enter message to speak as [voice_name]:", "Voice Mimicry") as text|null
+	if(!message)
+		return
+	for(var/mob/M in range(14, scp_mob))
+		if(M != scp_mob)
+			to_chat(M, "<b>[voice_name]</b> says, \"[message]\"")
+	scp_mob.on_voice_mimic(null)
+	log_game("SCP-939 [key_name(scp_mob)] mimicked voice of [voice_name]: [message]")
+
+/datum/action/innate/scp939_hunt
+	name = "Begin Hunt"
+	desc = "Enter hunting mode. You move faster and can track prey by sound."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "hunt"
+
+/datum/action/innate/scp939_hunt/Activate()
+	var/mob/living/carbon/human/scp939/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.hunting_system)
+		scp_mob.hunting_system.update_hunting_status()
+
+/datum/action/innate/scp939_lure
+	name = "Lure Prey"
+	desc = "Emit a distress sound that draws nearby humans toward your position."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "lure"
+
+/datum/action/innate/scp939_lure/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	user.visible_message(span_danger("A chilling cry echoes from [user]!"))
+	playsound(user, 'sound/voice/human/womanlaugh.ogg', 100, TRUE, extrarange = 20)
+	for(var/mob/living/carbon/human/H in range(20, user))
+		if(H != user && H.stat != DEAD)
+			if(prob(30))
+				step_towards(H, user)
+			if(H.sanity)
+				H.sanity.adjust_sanity(-8, "Heard SCP-939 lure")
+
+// ================================================================
+// SCP-682 - The Hard-to-Destroy Reptile
+// ================================================================
+
+/datum/antagonist/scp/scp682
+	name = "SCP-682"
+	scp_id = "SCP-682"
+	scp_class = "Keter"
+	description = "You are SCP-682, an enormous reptile that adapts to all damage and hates all life."
+
+/datum/antagonist/scp/scp682/greet_scp()
+	to_chat(owner.current, span_notice("<b>You are SCP-682, The Hard-to-Destroy Reptile.</b>"))
+	to_chat(owner.current, span_notice("You adapt to all forms of damage. Every attack makes you stronger."))
+	to_chat(owner.current, span_notice("Break free from containment and destroy everything in your path."))
+	to_chat(owner.current, span_warning("You are enormous, slow, and devastating. Nothing can truly kill you."))
+
+/datum/antagonist/scp/scp682/apply_scp_effects()
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp682_rampage)
+	grant_action(/datum/action/innate/scp682_adapt)
+	grant_action(/datum/action/innate/scp682_berserk)
+
+/datum/antagonist/scp/scp682/remove_scp_effects()
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp682_rampage)
+	remove_action(/datum/action/innate/scp682_adapt)
+	remove_action(/datum/action/innate/scp682_berserk)
+
+/datum/action/innate/scp682_rampage
+	name = "Rampage"
+	desc = "Lash out at everything nearby with devastating force."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "smite"
+
+/datum/action/innate/scp682_rampage/Activate()
+	var/mob/living/carbon/human/scp682/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.visible_message(span_danger("[scp_mob] goes on a rampage, lashing out at everything!"))
+	playsound(scp_mob, 'sound/weapons/punch1.ogg', 80, TRUE)
+	for(var/mob/living/L in range(2, scp_mob))
+		if(L != scp_mob)
+			L.adjustBruteLoss(40)
+			L.adjustFireLoss(20)
+			L.visible_message(span_danger("[scp_mob] savages [L]!"), span_userdanger("[scp_mob] tears into you!"))
+	for(var/obj/structure/S in range(2, scp_mob))
+		S.take_damage(80)
+	for(var/obj/machinery/door/D in range(2, scp_mob))
+		if(D.density)
+			D.open()
+	if(scp_mob.combat_system)
+		scp_mob.combat_system.perform_area_attack()
+
+/datum/action/innate/scp682_adapt
+	name = "Adaptive Evolution"
+	desc = "Force an adaptation to the last damage type you received."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "evolve"
+
+/datum/action/innate/scp682_adapt/Activate()
+	var/mob/living/carbon/human/scp682/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.evolution_system)
+		scp_mob.evolution_system.adapt_to_damage("brute", 50)
+		scp_mob.evolution_system.adapt_to_damage("burn", 50)
+		to_chat(scp_mob, span_notice("You adapt. Your body shifts and hardens against further harm."))
+
+/datum/action/innate/scp682_berserk
+	name = "Berserk Frenzy"
+	desc = "Enter a berserk state, gaining speed and damage but losing control temporarily."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "berserk"
+
+/datum/action/innate/scp682_berserk/Activate()
+	var/mob/living/carbon/human/scp682/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	scp_mob.add_movespeed_modifier(/datum/movespeed_modifier/scp682_berserk)
+	if(scp_mob.physiology)
+		scp_mob.physiology.brute_mod *= 0.5
+	scp_mob.visible_message(span_danger("[scp_mob] enters a berserk frenzy!"), span_notice("RAGE CONSUMES YOU. DESTROY. KILL."))
+	addtimer(CALLBACK(scp_mob, TYPE_PROC_REF(/mob/living/carbon/human/scp682, end_berserk)), 20 SECONDS)
+
+/mob/living/carbon/human/scp682/proc/end_berserk()
+	remove_movespeed_modifier(/datum/movespeed_modifier/scp682_berserk)
+	if(physiology)
+		physiology.brute_mod = initial(physiology.brute_mod)
+	to_chat(src, span_notice("Your berserk frenzy subsides."))
+
+/datum/movespeed_modifier/scp682_berserk
+	id = "scp682_berserk"
+	priority = 100
+	slowdown = -1.5
+
+// ================================================================
+// SCP-2427-3 - Kept for backward compat
+// ================================================================
+
 /datum/antagonist/scp/scp2427_3
 	name = "SCP-2427-3"
 	scp_id = "SCP-2427-3"
@@ -195,63 +1113,38 @@
 		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
 		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
 
-// SCP-3199 Antagonist (Sapient Biological Entity)
+// ================================================================
+// SCP-3199 - Kept for backward compat
+// ================================================================
+
 /datum/antagonist/scp/scp3199
 	name = "SCP-3199"
 	scp_id = "SCP-3199"
 	scp_class = "Keter"
-	description = "You are SCP-3199, a sapient biological entity with unique reproductive capabilities. Hunt for prey and protect your hatchlings."
+	description = "You are SCP-3199, a sapient biological entity with unique reproductive capabilities."
 
 /datum/antagonist/scp/scp3199/apply_scp_effects()
-	if(owner.current)
-		ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
-		ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
-		// Add reproductive abilities
-		RegisterSignal(owner.current, COMSIG_MOB_ATTACK_HAND, PROC_REF(on_attack))
-		// Grant SCP-3199 specific abilities
-		grant_scp3199_abilities()
+	if(!owner.current)
+		return
+	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	grant_action(/datum/action/innate/scp3199_produce_egg)
+	grant_action(/datum/action/innate/scp3199_protect_hatchlings)
 
 /datum/antagonist/scp/scp3199/remove_scp_effects()
-	if(owner.current)
-		REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
-		REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
-		UnregisterSignal(owner.current, COMSIG_MOB_ATTACK_HAND)
-		remove_scp3199_abilities()
+	if(!owner.current)
+		return
+	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	remove_action(/datum/action/innate/scp3199_produce_egg)
+	remove_action(/datum/action/innate/scp3199_protect_hatchlings)
 
-/datum/antagonist/scp/scp3199/proc/on_attack(mob/living/source, mob/living/target)
-	// Liquefy internal organs and bone structure
-	if(ishuman(target))
-		var/mob/living/carbon/human/H = target
-		H.adjustBruteLoss(25)
-		H.adjustToxLoss(15)
-		to_chat(target, span_danger("Your internal structure feels like it's liquefying!"))
-		to_chat(owner.current, span_notice("You liquefy [target]'s internal structure."))
-
-/datum/antagonist/scp/scp3199/proc/grant_scp3199_abilities()
-	// Grant SCP-3199 specific abilities
-	var/datum/action/innate/scp3199_produce_egg/produce_egg = new()
-	produce_egg.Grant(owner.current)
-
-	var/datum/action/innate/scp3199_protect_hatchlings/protect_hatchlings = new()
-	protect_hatchlings.Grant(owner.current)
-
-/datum/antagonist/scp/scp3199/proc/remove_scp3199_abilities()
-	// Remove SCP-3199 abilities
-	var/datum/action/innate/scp3199_produce_egg/produce_egg = locate() in owner.current.actions
-	if(produce_egg)
-		produce_egg.Remove(owner.current)
-
-	var/datum/action/innate/scp3199_protect_hatchlings/protect_hatchlings = locate() in owner.current.actions
-	if(protect_hatchlings)
-		protect_hatchlings.Remove(owner.current)
-
-// SCP-3199 Abilities
 /datum/action/innate/scp3199_produce_egg
 	name = "Produce Egg"
 	desc = "Produce an egg for reproduction."
@@ -260,12 +1153,12 @@
 
 /datum/action/innate/scp3199_produce_egg/Trigger()
 	var/mob/living/user = usr
-	if(user)
-		var/turf/T = get_turf(user)
-		var/obj/item/scp3199_egg/egg = new /obj/item/scp3199_egg(T)
-		egg.parent_entity = user
-		to_chat(user, span_notice("You produce an egg."))
-		playsound(user, 'sound/effects/explosion1.ogg', 100, TRUE, 10)
+	if(!user)
+		return
+	var/turf/T = get_turf(user)
+	new /obj/item/scp3199_egg(T)
+	to_chat(user, span_notice("You produce an egg."))
+	playsound(user, 'sound/weapons/genhit.ogg', 100, TRUE, 10)
 
 /datum/action/innate/scp3199_protect_hatchlings
 	name = "Protect Hatchlings"
@@ -275,14 +1168,14 @@
 
 /datum/action/innate/scp3199_protect_hatchlings/Trigger()
 	var/mob/living/user = usr
-	if(user)
-		// Increase aggression temporarily
-		to_chat(user, span_notice("You become more aggressive to protect hatchlings."))
-		// This would need to be implemented with the actual SCP-3199 mob
+	if(!user)
+		return
+	to_chat(user, span_notice("You become more aggressive to protect hatchlings."))
 
+// ================================================================
 // Hostile Groups of Interest
+// ================================================================
 
-// Sarkic Cult
 /datum/antagonist/sarkic_cult
 	name = "Sarkic Cultist"
 	roundend_category = "Hostile Groups"
@@ -296,26 +1189,16 @@
 /datum/antagonist/sarkic_cult/on_gain()
 	. = ..()
 	if(owner.current)
-		// Add cult abilities
-		grant_cult_abilities()
+		var/datum/action/innate/sarkic_ritual/ritual = new()
+		ritual.Grant(owner.current)
 
 /datum/antagonist/sarkic_cult/on_removal()
 	. = ..()
 	if(owner.current)
-		remove_cult_abilities()
+		var/datum/action/innate/sarkic_ritual/ritual = locate() in owner.current.actions
+		if(ritual)
+			ritual.Remove(owner.current)
 
-/datum/antagonist/sarkic_cult/proc/grant_cult_abilities()
-	// Grant cult-specific abilities
-	var/datum/action/innate/sarkic_ritual/ritual = new()
-	ritual.Grant(owner.current)
-
-/datum/antagonist/sarkic_cult/proc/remove_cult_abilities()
-	// Remove cult abilities
-	var/datum/action/innate/sarkic_ritual/ritual = locate() in owner.current.actions
-	if(ritual)
-		ritual.Remove(owner.current)
-
-// Chaos Insurgency
 /datum/antagonist/chaos_insurgency
 	name = "Chaos Insurgency Agent"
 	roundend_category = "Hostile Groups"
@@ -329,26 +1212,16 @@
 /datum/antagonist/chaos_insurgency/on_gain()
 	. = ..()
 	if(owner.current)
-		// Add insurgency abilities
-		grant_insurgency_abilities()
+		var/datum/action/innate/insurgency_equipment/equipment = new()
+		equipment.Grant(owner.current)
 
 /datum/antagonist/chaos_insurgency/on_removal()
 	. = ..()
 	if(owner.current)
-		remove_insurgency_abilities()
+		var/datum/action/innate/insurgency_equipment/equipment = locate() in owner.current.actions
+		if(equipment)
+			equipment.Remove(owner.current)
 
-/datum/antagonist/chaos_insurgency/proc/grant_insurgency_abilities()
-	// Grant insurgency-specific abilities
-	var/datum/action/innate/insurgency_equipment/equipment = new()
-	equipment.Grant(owner.current)
-
-/datum/antagonist/chaos_insurgency/proc/remove_insurgency_abilities()
-	// Remove insurgency abilities
-	var/datum/action/innate/insurgency_equipment/equipment = locate() in owner.current.actions
-	if(equipment)
-		equipment.Remove(owner.current)
-
-// Serpent's Hand
 /datum/antagonist/serpents_hand
 	name = "Serpent's Hand Member"
 	roundend_category = "Hostile Groups"
@@ -362,26 +1235,16 @@
 /datum/antagonist/serpents_hand/on_gain()
 	. = ..()
 	if(owner.current)
-		// Add Serpent's Hand abilities
-		grant_serpents_abilities()
+		var/datum/action/innate/serpents_knowledge/knowledge = new()
+		knowledge.Grant(owner.current)
 
 /datum/antagonist/serpents_hand/on_removal()
 	. = ..()
 	if(owner.current)
-		remove_serpents_abilities()
+		var/datum/action/innate/serpents_knowledge/knowledge = locate() in owner.current.actions
+		if(knowledge)
+			knowledge.Remove(owner.current)
 
-/datum/antagonist/serpents_hand/proc/grant_serpents_abilities()
-	// Grant Serpent's Hand-specific abilities
-	var/datum/action/innate/serpents_knowledge/knowledge = new()
-	knowledge.Grant(owner.current)
-
-/datum/antagonist/serpents_hand/proc/remove_serpents_abilities()
-	// Remove Serpent's Hand abilities
-	var/datum/action/innate/serpents_knowledge/knowledge = locate() in owner.current.actions
-	if(knowledge)
-		knowledge.Remove(owner.current)
-
-// Action definitions (placeholder - these would need to be implemented)
 /datum/action/innate/sarkic_ritual
 	name = "Perform Sarkic Ritual"
 	desc = "Perform a ritual to spread your influence."
@@ -389,7 +1252,6 @@
 	button_icon_state = "spell_default"
 
 /datum/action/innate/sarkic_ritual/Trigger()
-	// Implement ritual logic
 	to_chat(owner, span_notice("You perform a Sarkic ritual."))
 
 /datum/action/innate/insurgency_equipment
@@ -399,7 +1261,6 @@
 	button_icon_state = "default"
 
 /datum/action/innate/insurgency_equipment/Trigger()
-	// Implement equipment request logic
 	to_chat(owner, span_notice("You request equipment from the Insurgency."))
 
 /datum/action/innate/serpents_knowledge
@@ -409,5 +1270,26 @@
 	button_icon_state = "default"
 
 /datum/action/innate/serpents_knowledge/Trigger()
-	// Implement knowledge sharing logic
 	to_chat(owner, span_notice("You share knowledge of the anomalous."))
+
+// ================================================================
+// SCP-096 Hood - suppresses face-viewing triggers
+// ================================================================
+
+/obj/item/clothing/head/hood_scp096
+	name = "SCP-096 Containment Hood"
+	desc = "A heavy-duty hood designed to cover SCP-096's face and prevent accidental viewing."
+	icon = 'icons/obj/clothing/head/beret.dmi'
+	icon_state = "beret"
+	clothing_flags = SNUG_FIT | HEADINTERNALS
+	flags_inv = HIDEEYES|HIDEFACE|HIDEHAIR|HIDESNOUT
+	armor = list(melee = 20, bullet = 10, laser = 10, energy = 10, bomb = 20, fire = 50, acid = 50)
+
+/obj/item/clothing/head/hood_scp096/equipped(mob/user, slot)
+	. = ..()
+	if(slot == ITEM_SLOT_HEAD && istype(user, /mob/living/carbon/human/scp096))
+		to_chat(user, span_notice("The hood covers your face. Face-viewing triggers are suppressed."))
+
+/obj/item/clothing/head/hood_scp096/unequipped(mob/user, slot)
+	if(slot == ITEM_SLOT_HEAD && istype(user, /mob/living/carbon/human/scp096))
+		to_chat(user, span_warning("The hood is removed! Your face is now exposed!"))

@@ -1,158 +1,142 @@
-// SCP-399 - The Wish Granter
-// An entity that grants wishes with unpredictable consequences
-
-/obj/structure/scp399
-	name = "wish granter"
-	desc = "A crystalline structure that pulses with an otherworldly light. It seems to respond to desire."
+/obj/item/clothing/ring/scp399
+	name = "metallic ring"
+	desc = "A ring consisting of two metallic bands with six purple glass segments set between them. It hums faintly when held."
 	icon = 'icons/scp/scp-399.dmi'
 	icon_state = "scp399"
-	density = TRUE
-	anchored = TRUE
+	w_class = WEIGHT_CLASS_SMALL
 
-	var/wishes_granted = 0
-	var/max_wishes_per_round = 5
-	var/wish_cooldown = 0
-	var/last_wisher
+	var/active = FALSE
+	var/manipulation_range = 5
+	var/energy_drain_radius = 3
+	var/cooldown_time = 30 SECONDS
+	var/next_activation = 0
+	var/drain_timer = 0
 
-	var/datum/scp399_wish_system/wish_system
-	var/datum/scp399_consequence_system/consequence_system
-	var/datum/scp399_research_system/research_system
+	var/manipulations_performed = 0
 
-/obj/structure/scp399/Initialize()
+/obj/item/clothing/ring/scp399/Initialize()
 	. = ..()
-
-	SCP = new /datum/scp(src, "wish granter", SCP_KETER, "399")
-
-	wish_system = new /datum/scp399_wish_system(src)
-	consequence_system = new /datum/scp399_consequence_system(src)
-	research_system = new /datum/scp399_research_system(src)
-
+	SCP = new /datum/scp(src, "Atomic Manipulation Ring", SCP_SAFE, "399")
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-399"] = new /datum/scp_instance("SCP-399", src)
 
-/obj/structure/scp399/attack_hand(mob/living/carbon/human/user)
+/obj/item/clothing/ring/scp399/equipped(mob/living/carbon/human/user, slot)
 	..()
+	if(slot == ITEM_SLOT_GLOVES)
+		active = TRUE
+		to_chat(user, span_warning("The ring tightens on your finger. You feel a faint drain on your vitality as objects around you seem... mutable."))
+		hook_scp_interaction(user, "SCP-399", INTERACTION_TYPE_OBSERVATION)
+		START_PROCESSING(SSobj, src)
 
-	if(!istype(user))
+/obj/item/clothing/ring/scp399/dropped(mob/living/carbon/human/user)
+	..()
+	active = FALSE
+	drain_timer = 0
+	STOP_PROCESSING(SSobj, src)
+
+/obj/item/clothing/ring/scp399/process()
+	if(!active)
 		return
 
-	if(wish_cooldown > world.time)
-		to_chat(user, "<span class='warning'>The crystal dims momentarily - it needs time to recharge.</span>")
+	var/mob/living/carbon/human/wearer = loc
+	if(!istype(wearer) || wearer.gloves != src)
+		active = FALSE
 		return
 
-	if(wishes_granted >= max_wishes_per_round)
-		to_chat(user, "<span class='warning'>The crystal's light has faded. It cannot grant more wishes today.</span>")
+	drain_timer++
+
+	if(drain_timer % 10 == 0)
+		wearer.adjustStaminaLoss(2)
+		for(var/mob/living/carbon/human/H in range(energy_drain_radius, wearer))
+			if(H == wearer)
+				continue
+			H.adjustStaminaLoss(1)
+
+		if(prob(10))
+			var/list/drained_things = list()
+			for(var/obj/machinery/M in range(energy_drain_radius, wearer))
+				if(M.use_power && M.powernet)
+					drained_things += M.name
+			if(length(drained_things))
+				to_chat(wearer, span_notice("You sense energy being drawn from [pick(drained_things)]."))
+
+/obj/item/clothing/ring/scp399/attack_self(mob/living/carbon/human/user)
+	if(!istype(user) || !active)
 		return
 
-	var/wish = input(user, "What do you wish for?", "SCP-399") as null|text
-	if(!wish)
+	if(world.time < next_activation)
+		to_chat(user, span_warning("The ring's segments are dark. It needs time to recharge."))
 		return
 
-	hook_scp_interaction(user, "SCP-399", INTERACTION_TYPE_COMMUNICATION)
+	var/list/nearby_objects = list()
+	for(var/obj/O in range(manipulation_range, user))
+		if(O == src || O == user || istype(O, /obj/effect) || O.anchored)
+			continue
+		if(isitem(O) || isstructure(O))
+			nearby_objects[O.name] = O
 
-	if(wish_system)
-		var/result = wish_system.process_wish(user, wish)
-		wishes_granted++
-		last_wisher = user.ckey
-		wish_cooldown = world.time + 5 MINUTES
+	if(!length(nearby_objects))
+		to_chat(user, span_notice("There are no suitable objects nearby to manipulate."))
+		return
 
-		if(result)
-			hook_scp_breach("SCP-399", src)
-			visible_message("<span class='danger'>The crystal flares brilliantly as [user]'s wish is granted!</span>")
+	var/choice = input(user, "Select an object to reshape:", "SCP-399 Manipulation") as null|anything in nearby_objects
+	if(!choice || !(choice in nearby_objects))
+		return
 
-/obj/structure/scp399/examine(mob/user)
+	var/obj/target = nearby_objects[choice]
+	if(!target || get_dist(user, target) > manipulation_range)
+		return
+
+	next_activation = world.time + cooldown_time
+	manipulations_performed++
+
+	hook_scp_interaction(user, "SCP-399", INTERACTION_TYPE_RESEARCH)
+
+	user.visible_message(span_danger("[user]'s ring flares with purple light as [target] begins to warp and reshape!"), span_notice("The ring's segments glow as you manipulate the atomic structure of [target]."))
+
+	var/effect = rand(1, 5)
+	switch(effect)
+		if(1)
+			target.color = pick("#ff0000", "#00ff00", "#0000ff", "#ff00ff", "#ffff00")
+			target.visible_message(span_warning("[target] shifts in color!"))
+		if(2)
+			var/matrix/M = target.transform
+			target.transform = M.Scale(rand(5, 15) / 10, rand(5, 15) / 10)
+			target.visible_message(span_warning("[target] stretches and warps!"))
+		if(3)
+			var/matrix/M = target.transform
+			target.transform = M.Turn(rand(45, 315))
+			target.visible_message(span_warning("[target] rotates unnaturally!"))
+		if(4)
+			target.alpha = rand(50, 200)
+			target.visible_message(span_warning("[target] becomes partially transparent!"))
+		if(5)
+			if(isitem(target))
+				var/obj/item/I = target
+				I.force = rand(0, I.force + 10)
+				I.throwforce = rand(0, I.throwforce + 5)
+			target.visible_message(span_warning("[target]'s material composition seems to shift!"))
+
+	apply_energy_drain(user)
+
+/obj/item/clothing/ring/scp399/proc/apply_energy_drain(mob/living/carbon/human/wearer)
+	if(!wearer)
+		return
+
+	wearer.adjustStaminaLoss(15)
+
+	for(var/mob/living/carbon/human/H in range(energy_drain_radius, wearer))
+		if(H == wearer)
+			continue
+		H.adjustStaminaLoss(5)
+
+	for(var/obj/machinery/M in range(energy_drain_radius, wearer))
+		if(M.use_power)
+			M.use_power(500)
+
+/obj/item/clothing/ring/scp399/examine(mob/user)
 	. = ..()
-	to_chat(user, "<span class='notice'>A crystalline entity that grants wishes. Be careful what you wish for.</span>")
-	to_chat(user, "<span class='notice'>Wishes granted today: [wishes_granted]/[max_wishes_per_round]</span>")
-
-/datum/scp399_wish_system
-	var/obj/structure/parent
-	var/list/granted_wishes = list()
-	var/list/wish_types = list("material", "power", "knowledge", "protection", "destruction")
-
-/datum/scp399_wish_system/New(obj/structure/P)
-	parent = P
-
-/datum/scp399_wish_system/proc/process_wish(mob/living/carbon/human/wisher, wish_text)
-	if(!wisher || !wish_text)
-		return FALSE
-
-	var/wish_type = analyze_wish(wish_text)
-	var/consequence = determine_consequence(wish_type)
-
-	granted_wishes += list(list(
-		"wisher" = wisher.ckey,
-		"wish" = wish_text,
-		"type" = wish_type,
-		"consequence" = consequence,
-		"time" = world.time
-	))
-
-	grant_wish_effect(wisher, wish_type, consequence)
-
-	return TRUE
-
-/datum/scp399_wish_system/proc/analyze_wish(wish_text)
-	var/lower_wish = lowertext(wish_text)
-
-	if(findtext(lower_wish, "power") || findtext(lower_wish, "strong"))
-		return "power"
-	if(findtext(lower_wish, "money") || findtext(lower_wish, "wealth") || findtext(lower_wish, "item"))
-		return "material"
-	if(findtext(lower_wish, "know") || findtext(lower_wish, "learn") || findtext(lower_wish, "secret"))
-		return "knowledge"
-	if(findtext(lower_wish, "protect") || findtext(lower_wish, "safe") || findtext(lower_wish, "heal"))
-		return "protection"
-	if(findtext(lower_wish, "kill") || findtext(lower_wish, "destroy") || findtext(lower_wish, "hurt"))
-		return "destruction"
-
-	return pick(wish_types)
-
-/datum/scp399_wish_system/proc/determine_consequence(wish_type)
-	return pick(1, 2, 3)
-
-/datum/scp399_wish_system/proc/grant_wish_effect(mob/living/carbon/human/wisher, wish_type, consequence_level)
-	switch(wish_type)
-		if("power")
-			wisher.adjustBruteLoss(-50 * consequence_level)
-			if(consequence_level > 1)
-				wisher.adjustBrainLoss(10 * consequence_level)
-				to_chat(wisher, "<span class='danger'>Power flows through you, but at what cost?</span>")
-		if("material")
-			var/obj/item/stack/money/M = new(get_turf(wisher))
-			M.amount = 100 * consequence_level
-			if(consequence_level > 1)
-				wisher.adjustFireLoss(5 * consequence_level)
-				to_chat(wisher, "<span class='danger'>Wealth appears, but you feel the price.</span>")
-		if("knowledge")
-			wisher.mind?.adjust_experience("research", 100 * consequence_level)
-			if(consequence_level > 1)
-				wisher.adjustBrainLoss(5 * consequence_level)
-				to_chat(wisher, "<span class='danger'>Forbidden knowledge fills your mind.</span>")
-		if("protection")
-			wisher.reagents?.add_reagent("tricordrazine", 10 * consequence_level)
-			if(consequence_level > 1)
-				wisher.stamina.adjust(-20 * consequence_level)
-				to_chat(wisher, "<span class='danger'>Protection wraps around you, draining your vitality.</span>")
-		if("destruction")
-			var/mob/living/target = locate() in range(5, wisher)
-			if(target && target != wisher)
-				target.adjustBruteLoss(50 * consequence_level)
-			if(consequence_level > 1)
-				wisher.adjustBruteLoss(10 * consequence_level)
-				to_chat(wisher, "<span class='danger'>Destruction is wrought, but you are not immune.</span>")
-
-/datum/scp399_consequence_system
-	var/obj/structure/parent
-	var/consequence_intensity = 1
-
-/datum/scp399_consequence_system/New(obj/structure/P)
-	parent = P
-
-/datum/scp399_research_system
-	var/obj/structure/parent
-	var/list/research_data = list()
-	var/wish_events = 0
-
-/datum/scp399_research_system/New(obj/structure/P)
-	parent = P
+	to_chat(user, span_notice("A ring with two metallic bands and six purple glass segments. When worn, it allows manipulation of nearby inanimate objects."))
+	to_chat(user, span_notice("Manipulations performed: [manipulations_performed]"))
+	if(active)
+		to_chat(user, span_warning("The ring hums on your finger, drawing energy from the environment."))

@@ -339,6 +339,51 @@
     compatible_classes = list("security", "research", "medical", "engineering", "administrative", "containment")
     category = "universal"
 
+/datum/experience_source/dclass_survival
+    source_id = "dclass_survival"
+    source_name = "D-Class Survival"
+    base_experience = 100
+    cooldown_time = 0
+    max_per_round = 1
+    compatible_classes = list()
+    category = "survival"
+
+/datum/experience_source/dclass_escape
+    source_id = "dclass_escape"
+    source_name = "D-Class Escape"
+    base_experience = 300
+    cooldown_time = 0
+    max_per_round = 5
+    compatible_classes = list()
+    category = "survival"
+
+/datum/experience_source/dclass_contraband
+    source_id = "dclass_contraband"
+    source_name = "Contraband Acquisition"
+    base_experience = 25
+    cooldown_time = 120
+    max_per_round = 20
+    compatible_classes = list()
+    category = "survival"
+
+/datum/experience_source/dclass_experiment
+    source_id = "dclass_experiment"
+    source_name = "Experiment Participation"
+    base_experience = 40
+    cooldown_time = 300
+    max_per_round = 15
+    compatible_classes = list()
+    category = "survival"
+
+/datum/experience_source/dclass_interaction
+    source_id = "dclass_interaction"
+    source_name = "SCP Interaction"
+    base_experience = 35
+    cooldown_time = 240
+    max_per_round = 10
+    compatible_classes = list()
+    category = "survival"
+
 /datum/experience_source/dclass_testing
     source_id = "dclass_testing"
     source_name = "D-Class Testing"
@@ -500,7 +545,7 @@
     if(!player_data)
         return FALSE
 
-    if(compatible_classes.len && !(player_data.current_class_id in compatible_classes))
+    if(length(compatible_classes) && !(player_data.current_class_id in compatible_classes))
         return FALSE
 
     if(max_per_round > 0)
@@ -513,7 +558,7 @@
 
     if(cooldown_time > 0)
         var/last_award = 0
-        for(var/i = player_data.experience_sources.len; i >= 1; i--)
+        for(var/i = length(player_data.experience_sources); i >= 1; i--)
             var/list/source_data = player_data.experience_sources[i]
             if(source_data["source"] == source_id)
                 last_award = source_data["timestamp"]
@@ -571,7 +616,7 @@
         if(source_type == /datum/experience_source)
             continue
         var/datum/experience_source/source = new source_type()
-        if(!source.compatible_classes.len || (class_id in source.compatible_classes))
+        if(!length(source.compatible_classes) || (class_id in source.compatible_classes))
             sources[source.source_id] = source
     return sources
 

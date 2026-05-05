@@ -183,7 +183,7 @@
 /datum/scp263_effect_system
 	var/obj/machinery/parent
 	var/static_effect = 0
-	var	effect_radius = 7
+	var/effect_radius = 7
 
 /datum/scp263_effect_system/New(obj/machinery/P)
 	parent = P
@@ -191,7 +191,7 @@
 /datum/scp263_research_system
 	var/obj/machinery/parent
 	var/list/game_log = list()
-	var	total_games = 0
+	var/total_games = 0
 
 /datum/scp263_research_system/New(obj/machinery/P)
 	parent = P

@@ -16,9 +16,77 @@
 #define INTERACTION_RISK_CRITICAL 4
 
 /proc/hook_scp_breach(scp_id, atom/scp_atom)
+	if(!scp_id)
+		return FALSE
+
+	var/breach_zone = "unknown"
+	if(scp_atom)
+		var/area/A = get_area(scp_atom)
+		breach_zone = get_containment_zone(A) || "unknown"
+
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		if(instance)
+			instance.containment_status = "breached"
+			instance.containment_health = 0
+			instance.last_breach = world.time
+			instance.add_breach_record()
+
+		SSscp_persistence.manager.active_breaches++
+		SSscp_persistence.manager.global_containment_stability = max(0, SSscp_persistence.manager.global_containment_stability - 10)
+
+	if(SScontainment_evaluation)
+		trigger_containment_evaluation(scp_id)
+
+	if(SSpersistent_progression && SSpersistent_progression.analytics_manager)
+		SSpersistent_progression.analytics_manager.track_event(null, "scp_breach", list("scp_id" = scp_id, "zone" = breach_zone))
+
+	if(scp_atom && (breach_zone == "lcz" || breach_zone == "hcz"))
+		for(var/mob/living/carbon/human/H in range(7, scp_atom))
+			if(H.stat == DEAD || !H.ckey)
+				continue
+			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+			if(id_card && (ACCESS_SECURITY in id_card.access))
+				report_first_responder(H, scp_id)
+				break
+
+	report_breach_to_round_log(scp_id, breach_zone)
+
 	return TRUE
 
 /proc/hook_scp_recontainment(scp_id, list/participants)
+	if(!scp_id)
+		return FALSE
+
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		if(instance)
+			instance.containment_status = "contained"
+			instance.containment_health = 100
+			instance.add_interaction_record(null, "recontained")
+
+		SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
+		SSscp_persistence.manager.global_containment_stability = min(100, SSscp_persistence.manager.global_containment_stability + 5)
+
+	if(SScontainment_evaluation)
+		complete_containment_evaluation(scp_id, participants)
+
+	report_recontainment_to_round_log(scp_id, participants)
+
+	if(SSpersistent_progression)
+		if(participants)
+			for(var/mob/living/carbon/human/H in participants)
+				if(H.ckey)
+					SSpersistent_progression.award_experience(H.ckey, "scp_containment_assist", 0, "SCP-[scp_id] Recontainment")
+					var/datum/persistent_player_data/pdata = SSpersistent_progression.get_player_data(H.ckey)
+					if(pdata)
+						pdata.total_containment_breaches++
+						if(pdata.current_job)
+							pdata.respond_to_containment_breach(pdata.current_job, scp_id, "recontainment", "successful")
+
+		if(SSpersistent_progression.analytics_manager)
+			SSpersistent_progression.analytics_manager.track_event(null, "scp_recontainment", list("scp_id" = scp_id, "participants" = length(participants || list())))
+
 	return TRUE
 
 /proc/hook_scp_interaction(mob/living/carbon/human/player, scp_id, interaction_type, list/data = null)
@@ -26,6 +94,21 @@
 		return FALSE
 	if(SSscp_interactions)
 		SSscp_interactions.manager?.log_interaction(player, scp_id, interaction_type, data)
+	hook_dclass_scp_interaction(player, scp_id, interaction_type, data)
+
+	if(SSpersistent_progression)
+		var/datum/persistent_player_data/pdata = SSpersistent_progression.get_player_data(player.ckey)
+		if(pdata)
+			pdata.total_scp_interactions++
+			if(pdata.current_job)
+				pdata.interact_with_scp(pdata.current_job, scp_id, "interaction", "completed")
+			if(interaction_type == INTERACTION_TYPE_OBSERVATION)
+				SSpersistent_progression.award_experience(player.ckey, "scp_observation", 0, "SCP-[scp_id] Observation")
+			else if(interaction_type == INTERACTION_TYPE_RESEARCH)
+				SSpersistent_progression.award_experience(player.ckey, "scp_research_contribution", 0, "SCP-[scp_id] Research")
+			else if(interaction_type == INTERACTION_TYPE_CARE)
+				SSpersistent_progression.award_experience(player.ckey, "scp_care_provided", 0, "SCP-[scp_id] Care")
+
 	return TRUE
 
 /proc/hook_scp_observation(mob/living/carbon/human/observer, scp_id)
@@ -39,6 +122,11 @@
 		return FALSE
 	var/list/data = list("damage_dealt" = damage_dealt, "damage_taken" = damage_taken)
 	hook_scp_interaction(fighter, scp_id, INTERACTION_TYPE_COMBAT, data)
+	if(fighter.ckey && SSpersistent_progression)
+		SSpersistent_progression.award_experience(fighter.ckey, "scp_combat", 0, "SCP-[scp_id] Combat")
+		var/datum/persistent_player_data/pdata = SSpersistent_progression.get_player_data(fighter.ckey)
+		if(pdata)
+			pdata.total_damage_dealt += damage_dealt
 	return TRUE
 
 /proc/hook_scp_research(mob/living/carbon/human/researcher, scp_id, research_type = "general")
@@ -51,6 +139,10 @@
 	if(!researcher || !scp_id)
 		return FALSE
 	hook_scp_interaction(researcher, scp_id, INTERACTION_TYPE_EXPERIMENT, list("type" = experiment_type))
+	if(researcher.ckey && SSpersistent_progression)
+		var/datum/persistent_player_data/pdata = SSpersistent_progression.get_player_data(researcher.ckey)
+		if(pdata)
+			pdata.total_research_completed++
 	return TRUE
 
 /proc/hook_scp_care(mob/living/carbon/human/caregiver, scp_id, care_type = "standard")
@@ -69,13 +161,38 @@
 	if(!explorer || !scp_id)
 		return FALSE
 	hook_scp_interaction(explorer, scp_id, INTERACTION_TYPE_EXPLORATION, list("depth" = depth, "duration" = duration))
+	if(explorer.ckey && SSpersistent_progression)
+		SSpersistent_progression.award_experience(explorer.ckey, "scp_exploration_milestone", 0, "SCP-[scp_id] Exploration")
 	return TRUE
 
 /proc/hook_player_death_near_scp(mob/living/carbon/human/victim, scp_id)
-	return
+	if(!victim || !scp_id)
+		return
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		if(instance)
+			instance.add_interaction_record(victim, "player_death")
+	if(SScontainment_evaluation)
+		report_containment_casualty(scp_id, 1)
+	if(victim.ckey && SSpersistent_progression)
+		var/datum/persistent_player_data/pdata = SSpersistent_progression.get_player_data(victim.ckey)
+		if(pdata)
+			pdata.total_deaths++
 
 /proc/hook_scp_damage(scp_id, damage_percent)
-	return
+	if(!scp_id)
+		return
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		if(instance)
+			instance.containment_health = max(0, instance.containment_health - damage_percent)
+			if(instance.containment_health < 50 && instance.containment_status != "breached")
+				hook_scp_breach(scp_id)
+	if(SScontainment_evaluation)
+		report_scp_damage(scp_id, damage_percent)
 
 /proc/hook_facility_damage_near_scp(scp_id, damage_level)
-	return
+	if(!scp_id)
+		return
+	if(SScontainment_evaluation)
+		report_facility_damage(scp_id, damage_level)

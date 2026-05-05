@@ -16,8 +16,8 @@
 	var/datum/scp966_research_system/research_system
 
 	var/victims_sleep_deprived = 0
-	var	stalk_targets = 0
-	var	nightmares_caused = 0
+	var/stalk_targets = 0
+	var/nightmares_caused = 0
 
 /mob/living/carbon/human/scp966/Initialize()
 	. = ..()
@@ -138,7 +138,7 @@
 	var/list/status = list()
 	status += "=== SCP-966 Status ==="
 	status += "Sleep aura active"
-	status += "Stalked: [stalk_system?.stalked?.len || 0]"
+	status += "Stalked: [length(stalk_system?.stalked) || 0]"
 	status += "Victims deprived: [victims_sleep_deprived]"
 	status += "Nightmares caused: [nightmares_caused]"
 	return status

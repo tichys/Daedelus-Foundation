@@ -31,8 +31,8 @@
 	var/datum/scp529_research_system/research_system
 
 	var/pets_received = 0
-	var	food_given = 0
-	var	interactions_logged = 0
+	var/food_given = 0
+	var/interactions_logged = 0
 
 /mob/living/simple_animal/scp529/Initialize()
 	. = ..()
@@ -118,7 +118,7 @@
 /datum/scp529_research_system
 	var/mob/living/simple_animal/parent
 	var/list/interaction_log = list()
-	var	total_interactions = 0
+	var/total_interactions = 0
 
 /datum/scp529_research_system/New(mob/living/simple_animal/P)
 	parent = P

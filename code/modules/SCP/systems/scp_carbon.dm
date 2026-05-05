@@ -432,17 +432,17 @@
 	report += "<b>Resistance:</b> [containment_resistance]/[max_containment_resistance]<br>"
 	report += "<b>Breach Attempts:</b> [containment_breach_attempts]<br>"
 
-	if(containment_protocols.len)
+	if(length(containment_protocols))
 		report += "<b>Active Protocols:</b><br>"
 		for(var/protocol in containment_protocols)
 			report += "- [protocol]: [containment_protocols[protocol]]<br>"
 
-	if(security_measures.len)
+	if(length(security_measures))
 		report += "<b>Security Measures:</b><br>"
 		for(var/measure in security_measures)
 			report += "- [measure]: [security_measures[measure]]<br>"
 
-	if(active_containment_effects.len)
+	if(length(active_containment_effects))
 		report += "<b>Active Effects:</b><br>"
 		for(var/effect in active_containment_effects)
 			report += "- [effect]<br>"
@@ -570,14 +570,14 @@
 	. += "Containment Resistance: [containment_resistance]/[max_containment_resistance]"
 	. += "Breach Attempts: [containment_breach_attempts]"
 	. += "Breach Count: [breach_count]"
-	. += "Active Effects: [active_effects.len]"
-	. += "Skills: [skill_levels.len]"
+	. += "Active Effects: [length(active_effects)]"
+	. += "Skills: [length(skill_levels)]"
 	. += "Level Up Cooldown: [max(0, (level_up_cooldown - world.time) / 10)]s"
-	. += "Passive Effects: [passive_effects.len]"
-	. += "Abilities: [scp_abilities.len]"
+	. += "Passive Effects: [length(passive_effects)]"
+	. += "Abilities: [length(scp_abilities)]"
 	
 	// Add modular feature status
-	. += "Features: [enabled_features.len] enabled"
+	. += "Features: [length(enabled_features)] enabled"
 	for(var/feature_name in enabled_features)
 		if(enabled_features[feature_name])
 			. += "Feature: [feature_name] - Enabled"
@@ -610,16 +610,16 @@
 	message += "<b>SCP Armor:</b> [scp_armor]/[max_scp_armor]<br>"
 	message += "<b>Breach Count:</b> [breach_count]<br>"
 	message += "<b>Last Breach Time:</b> [last_breach_time ? time2text(last_breach_time, "YYYY-MM-DD hh:mm:ss") : "Never"]<br>"
-	message += "<b>Active Effects:</b> [active_effects.len]<br>"
-	message += "<b>Passive Effects:</b> [passive_effects.len]<br>"
-	message += "<b>Abilities:</b> [scp_abilities.len]<br>"
-	message += "<b>Interaction History:</b> [interaction_history.len] records<br>"
-	message += "<b>Affected Targets:</b> [affected_targets.len]<br>"
+	message += "<b>Active Effects:</b> [length(active_effects)]<br>"
+	message += "<b>Passive Effects:</b> [length(passive_effects)]<br>"
+	message += "<b>Abilities:</b> [length(scp_abilities)]<br>"
+	message += "<b>Interaction History:</b> [length(interaction_history)] records<br>"
+	message += "<b>Affected Targets:</b> [length(affected_targets)]<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
 		if(instance)
-			message += "<b>Persistence System Records:</b> [instance.interaction_history.len] records<br>"
+			message += "<b>Persistence System Records:</b> [length(instance.interaction_history)] records<br>"
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
@@ -629,7 +629,7 @@
 	set category = "SCP"
 	set desc = "Toggle an SCP ability."
 
-	if(!scp_abilities.len)
+	if(!length(scp_abilities))
 		to_chat(src, "<span class='warning'>No abilities available.</span>")
 		return
 
@@ -649,7 +649,7 @@
 
 	var/message = "<h2>SCP Abilities</h2>"
 
-	if(scp_abilities.len)
+	if(length(scp_abilities))
 		for(var/ability in scp_abilities)
 			message += "- [ability]<br>"
 	else
@@ -666,14 +666,14 @@
 	var/message = "<h2>SCP Effects</h2>"
 
 	message += "<h3>Active Effects:</h3>"
-	if(active_effects.len)
+	if(length(active_effects))
 		for(var/effect in active_effects)
 			message += "- [effect]<br>"
 	else
 		message += "<i>No active effects.</i>"
 
 	message += "<h3>Passive Effects:</h3>"
-	if(passive_effects.len)
+	if(length(passive_effects))
 		for(var/effect in passive_effects)
 			message += "- [effect]<br>"
 	else

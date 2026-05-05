@@ -111,13 +111,13 @@ SUBSYSTEM_DEF(storytelling)
 	var/completion_score = 0
 
 	// Score based on story elements
-	if(story_chapters.len >= 3)
+	if(length(story_chapters) >= 3)
 		completion_score += 25
-	if(story_characters.len >= 2)
+	if(length(story_characters) >= 2)
 		completion_score += 20
-	if(story_events.len >= 5)
+	if(length(story_events) >= 5)
 		completion_score += 25
-	if(story_contributors.len >= 2)
+	if(length(story_contributors) >= 2)
 		completion_score += 15
 	if(length(story_description) > 500)
 		completion_score += 15

@@ -62,7 +62,7 @@
 	SCP.min_time = 30 MINUTES
 
 	// Set up human-specific properties for SCP-939
-	maxHealth = 200 // Base health as per design
+	maxHealth = SCP939_MAX_HEALTH
 	health = maxHealth
 
 	// Initialize vision cone
@@ -94,23 +94,23 @@
 	if(voice_system)
 		status_items += "Voice Evolution: [voice_system.voice_evolution_stage]/[voice_system.max_voice_evolution]"
 		status_items += "Mimicry Accuracy: [voice_system.mimicry_accuracy]%"
-		status_items += "Learned Voices: [voice_system.learned_voices.len]"
+		status_items += "Learned Voices: [length(voice_system.learned_voices)]"
 
 	// Pack system status
 	if(pack_system)
 		status_items += "Pack Coordination: [pack_system.pack_coordination]/[pack_system.max_pack_coordination]"
-		status_items += "Pack Members: [pack_system.pack_members.len]"
+		status_items += "Pack Members: [length(pack_system.pack_members)]"
 		status_items += "Hierarchy Rank: [pack_system.pack_hierarchy_rank]/[pack_system.max_pack_hierarchy]"
 
 	// Psychology system status
 	if(psychology_system)
 		status_items += "Psychological Manipulation: [psychology_system.psychological_manipulation]/[psychology_system.max_psychological_manipulation]"
-		status_items += "Target Profiles: [psychology_system.target_profiles.len]"
+		status_items += "Target Profiles: [length(psychology_system.target_profiles)]"
 
 	// Territory system status
 	if(territory_system)
 		status_items += "Territory Control: [territory_system.territory_control]/[territory_system.max_territory_control]"
-		status_items += "Controlled Areas: [territory_system.controlled_areas.len]"
+		status_items += "Controlled Areas: [length(territory_system.controlled_areas)]"
 
 	// Hunting system status
 	if(hunting_system)
@@ -133,11 +133,11 @@
 
 	if(voice_system)
 		. += "<span class='notice'>Voice Evolution Stage: [voice_system.voice_evolution_stage]/[voice_system.max_voice_evolution]</span>"
-		. += "<span class='notice'>Learned Voices: [voice_system.learned_voices.len]</span>"
+		. += "<span class='notice'>Learned Voices: [length(voice_system.learned_voices)]</span>"
 
 	if(pack_system)
 		. += "<span class='notice'>Pack Coordination: [pack_system.pack_coordination]/[pack_system.max_pack_coordination]</span>"
-		. += "<span class='notice'>Pack Members: [pack_system.pack_members.len]</span>"
+		. += "<span class='notice'>Pack Members: [length(pack_system.pack_members)]</span>"
 
 	if(hunting_system && hunting_system.hunt_mode)
 		. += "<span class='danger'>This SCP-939 is actively hunting!</span>"
@@ -147,13 +147,13 @@
 	var/research_data = list(
 		"scp_type" = "SCP-939",
 		"voice_evolution_stage" = voice_system?.voice_evolution_stage || 1,
-		"learned_voices_count" = voice_system?.learned_voices.len || 0,
+		"learned_voices_count" = length(voice_system?.learned_voices) || 0,
 		"mimicry_accuracy" = voice_system?.mimicry_accuracy || 0,
 		"pack_coordination" = pack_system?.pack_coordination || 0,
-		"pack_members_count" = pack_system?.pack_members.len || 0,
+		"pack_members_count" = length(pack_system?.pack_members) || 0,
 		"psychological_manipulation" = psychology_system?.psychological_manipulation || 0,
 		"territory_control" = territory_system?.territory_control || 0,
-		"controlled_areas_count" = territory_system?.controlled_areas.len || 0,
+		"controlled_areas_count" = length(territory_system?.controlled_areas) || 0,
 		"hunting_experience" = hunting_system?.hunting_experience || 0,
 		"current_target" = hunting_system?.current_target?.name || "none",
 		"hunt_mode" = hunting_system?.hunt_mode || FALSE,
@@ -180,8 +180,15 @@
 		return
 	victims_hunted++
 	hunts_completed++
+	hook_scp_breach("SCP-939", src)
 	hook_scp_combat(victim, "SCP-939", 100, 0)
 	hook_player_death_near_scp(victim, "SCP-939")
+	stop_scp_survival_tracking(victim, "SCP-939")
+
+/mob/living/carbon/human/scp939/proc/on_hunt_start(mob/living/carbon/human/target)
+	if(!target || !target.ckey)
+		return
+	start_scp_survival_tracking(target, "SCP-939", INTERACTION_RISK_HIGH)
 
 /mob/living/carbon/human/scp939/proc/on_territory_claim(area/claimed_area)
 	if(!claimed_area)
@@ -194,3 +201,6 @@
 		return
 	psychological_manipulations++
 	hook_scp_interaction(target, "SCP-939", INTERACTION_TYPE_COMMUNICATION)
+
+/mob/living/carbon/human/scp939/proc/on_recontainment()
+	hook_scp_recontainment("SCP-939", list("method" = "standard"))

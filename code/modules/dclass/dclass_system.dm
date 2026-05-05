@@ -30,6 +30,7 @@ SUBSYSTEM_DEF(dclass)
 	var/current_time_slot = "morning" // morning, afternoon, evening, night
 	var/last_routine_update = 0
 	var/routine_update_interval = 300 // 5 minutes
+	var/datum/dclass_faction_manager/faction_manager
 
 /datum/dclass_manager/New()
 	. = ..()
@@ -39,6 +40,7 @@ SUBSYSTEM_DEF(dclass)
 	initialize_work_assignments()
 	initialize_contraband_locations()
 	initialize_escape_routes()
+	faction_manager = new /datum/dclass_faction_manager()
 
 /datum/dclass_manager/proc/process_dclass()
 	// Update current time slot
@@ -53,6 +55,11 @@ SUBSYSTEM_DEF(dclass)
 	process_guard_patrols()
 
 	// Process work assignments
+	process_work_assignments()
+
+	// Process factions
+	if(faction_manager)
+		faction_manager.process_factions()
 	process_work_assignments()
 
 	// Process dynamic events
@@ -165,7 +172,7 @@ SUBSYSTEM_DEF(dclass)
 		if(H.job && findtext(H.job, "Guard"))
 			available_guards += H
 
-	if(available_guards.len > 0)
+	if(length(available_guards) > 0)
 		var/mob/living/carbon/human/guard = pick(available_guards)
 		// Send guard on patrol (simplified for now)
 		// Reduced frequency to prevent spam - only send message occasionally
@@ -223,29 +230,29 @@ SUBSYSTEM_DEF(dclass)
 		if(player.level >= work_data["risk"])
 			available_work += work_id
 
-	if(available_work.len > 0)
+	if(length(available_work) > 0)
 		var/selected_work = pick(available_work)
 		player.assign_work(selected_work)
 
 // Initialize contraband locations
 /datum/dclass_manager/proc/initialize_contraband_locations()
-	contraband_locations["cafeteria"] = list(
-		"knife" = 30, // 30% chance
+	contraband_locations["kitchen"] = list(
+		"knife" = 30,
 		"metal_utensils" = 60,
 		"cleaning_supplies" = 40
 	)
-	contraband_locations["maintenance_tunnels"] = list(
+	contraband_locations["maintenance"] = list(
 		"wire" = 70,
 		"screwdriver" = 50,
 		"wrench" = 40,
 		"metal_pipe" = 30
 	)
-	contraband_locations["laundry_room"] = list(
+	contraband_locations["laundry"] = list(
 		"staff_uniform" = 20,
 		"fabric_scraps" = 80,
 		"thread" = 60
 	)
-	contraband_locations["medical_bay"] = list(
+	contraband_locations["medical"] = list(
 		"medicine" = 40,
 		"bandages" = 70,
 		"syringe" = 30,

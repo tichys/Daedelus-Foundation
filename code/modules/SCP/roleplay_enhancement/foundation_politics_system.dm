@@ -433,7 +433,7 @@ SUBSYSTEM_DEF(foundation_politics)
 	admin_dept.department_goals = list("manage_resources", "coordinate_departments", "maintain_records")
 	departments["administrative"] = admin_dept
 
-	total_departments = departments.len
+	total_departments = length(departments)
 
 // Initialize factions
 /datum/foundation_politics_manager/proc/initialize_factions()
@@ -473,7 +473,7 @@ SUBSYSTEM_DEF(foundation_politics)
 	bureaucratic_faction.faction_influence = 50
 	factions["bureaucratic"] = bureaucratic_faction
 
-	active_factions = factions.len
+	active_factions = length(factions)
 
 // Initialize power structures
 /datum/foundation_politics_manager/proc/initialize_power_structures()

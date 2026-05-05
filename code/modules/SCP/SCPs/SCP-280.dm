@@ -24,8 +24,8 @@
 	var/datum/scp280_research_system/research_system
 
 	var/kills = 0
-	var	lights_destroyed = 0
-	var	teleports = 0
+	var/lights_destroyed = 0
+	var/teleports = 0
 
 /mob/living/simple_animal/hostile/scp280/Initialize()
 	. = ..()
@@ -100,7 +100,7 @@
 		if(T.get_lumcount() * 100 < 20)
 			dark_turfs += T
 
-	if(dark_turfs.len > 0)
+	if(length(dark_turfs) > 0)
 		var/turf/target = pick(dark_turfs)
 		parent.visible_message("<span class='warning'>[parent] dissolves into shadows!</span>")
 		parent.forceMove(target)
@@ -139,7 +139,7 @@
 /datum/scp280_research_system
 	var/mob/living/simple_animal/hostile/parent
 	var/list/attack_log = list()
-	var	light_exposure_events = 0
+	var/light_exposure_events = 0
 
 /datum/scp280_research_system/New(mob/living/simple_animal/hostile/P)
 	parent = P

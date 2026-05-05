@@ -1,196 +1,152 @@
-// SCP-5295: Temporal Entity
-// An entity that can manipulate time and create temporal anomalies
-
-/mob/living/carbon/human/scp5295
-	name = "temporal entity"
-	desc = "A mysterious entity that seems to exist outside of normal time. Temporal distortions occur around it."
+/obj/machinery/computer/scp5295
+	name = "Macintosh LC III"
+	desc = "A 1993 Apple Macintosh LC III personal computer. It has an anomalous application running on its desktop."
 	icon = 'icons/scp/scp-5295.dmi'
-	icon_state = "temporal"
-	status_flags = 0
-	maxHealth = 225
-	health = 225
-
-	// Systems
-	var/datum/scp5295_temporal_system/temporal_system
-	var/datum/scp5295_reality_system/reality_system
-	var/datum/scp5295_evolution_system/evolution_system
-	var/datum/scp5295_containment_system/containment_system
-	var/datum/scp5295_environmental_system/environmental_system
-	var/datum/scp5295_research_system/research_system
-
-/mob/living/carbon/human/scp5295/Initialize(mapload)
-	. = ..()
-	set_species(/datum/species/scp5295)
-	SCP = new /datum/scp(src, "temporal entity", SCP_KETER, "5295", SCP_PLAYABLE)
-	SCP.min_playercount = 30
-	SCP.min_time = 15 MINUTES
-
-	// Initialize systems after mob exists
-	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
-
-	// Remove bodypart overlays to prevent covering the SCP icon
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
-
-/mob/living/carbon/human/scp5295/proc/initialize_systems()
-	temporal_system = new /datum/scp5295_temporal_system(src)
-	reality_system = new /datum/scp5295_reality_system(src)
-	evolution_system = new /datum/scp5295_evolution_system(src)
-	containment_system = new /datum/scp5295_containment_system(src)
-	environmental_system = new /datum/scp5295_environmental_system(src)
-	research_system = new /datum/scp5295_research_system(src)
-
-/mob/living/carbon/human/scp5295/Life(datum/controller/process/mobs/parent)
-	. = ..()
-	if(stat == DEAD)
-		return
-	// Update modular systems
-	temporal_system?.process_temporal()
-	reality_system?.process_reality()
-	evolution_system?.process_evolution()
-	containment_system?.process_containment()
-	environmental_system?.process_environment()
-	research_system?.process_research()
-
-/mob/living/carbon/human/scp5295/UnarmedAttack(atom/A)
-	if(!A || !istype(A, /mob/living))
-		return ..()
-
-	var/mob/living/L = A
-	if(L.stat == DEAD)
-		return ..()
-
-	// Temporal manipulation attack
-	to_chat(src, "<span class='notice'>You manipulate time around [L].</span>")
-	to_chat(L, "<span class='danger'>Time seems to bend and distort around you!</span>")
-
-	// Random temporal effects
-	var/temporal_effect = rand(1, 5)
-	switch(temporal_effect)
-		if(1)
-			L.adjustBruteLoss(20)
-			to_chat(L, "<span class='danger'>Time dilation causes you harm!</span>")
-		if(2)
-			L.adjustBruteLoss(25)
-			to_chat(L, "<span class='danger'>Temporal distortion affects your body!</span>")
-		if(3)
-			L.adjustBruteLoss(30)
-			to_chat(L, "<span class='danger'>Time itself seems to attack you!</span>")
-		if(4)
-			L.adjustBruteLoss(35)
-			to_chat(L, "<span class='danger'>Temporal anomalies cause damage!</span>")
-		if(5)
-			L.adjustBruteLoss(40)
-			to_chat(L, "<span class='danger'>The flow of time is disrupted!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Log interaction
-	SCP?.log_interaction(L, "temporal_manipulation_attack")
-	SCP?.award_research(L, "anomaly", 30)
-
-	return ..()
-
-/mob/living/carbon/human/scp5295/get_status_tab_items()
-	. = ..()
-	. += "Temporal disturbances ripple subtly around you."
-
-/mob/living/carbon/human/scp5295/examine(mob/user)
-	. = ..()
-	. += "<span class='notice'>This entity can manipulate time and create temporal anomalies.</span>"
-	. += "<span class='warning'>Time seems to flow differently around it.</span>"
-
-/mob/living/carbon/human/scp5295/death(gibbed)
-	visible_message("<span class='danger'>[src] dissolves into temporal distortion!</span>")
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	hook_scp_recontainment("SCP-5295", list())
-	return ..()
-
-/mob/living/carbon/human/scp5295/proc/on_temporal_manipulation(mob/living/carbon/human/target, effect_type)
-	if(!target)
-		return
-	hook_scp_combat(target, "SCP-5295", 20, 0)
-
-/mob/living/carbon/human/scp5295/proc/on_anomaly_created(anomaly_type)
-	hook_scp_breach("SCP-5295", src)
-	hook_facility_damage_near_scp("SCP-5295", 1)
-
-/mob/living/carbon/human/scp5295/proc/on_reality_distortion(mob/living/carbon/human/affected)
-	if(!affected)
-		return
-	hook_scp_interaction(affected, "SCP-5295", INTERACTION_TYPE_OBSERVATION)
-
-// Temporal Anomaly Object
-/obj/effect/temporal_anomaly
-	name = "temporal anomaly"
-	desc = "A distortion in time. It seems to affect the flow of time around it."
-	icon = 'icons/effects/effects.dmi'
-	icon_state = "electricity"
-	density = FALSE
+	icon_state = "scp5295"
+	density = TRUE
 	anchored = TRUE
-	var/anomaly_type = "Unknown"
-	var/duration = 45 SECONDS
-	var/creation_time = 0
-	var/effect_radius = 3
+	use_power = IDLE_POWER_USE
+	circuit = null
 
-/obj/effect/temporal_anomaly/New(loc, type, dur)
-	..()
-	anomaly_type = type
-	duration = dur
-	creation_time = world.time
+	var/active = TRUE
+	var/connected = FALSE
+	var/list/accessed_files = list()
+	var/scan_cooldown = 0
+	var/scan_cooldown_time = 30 SECONDS
 
-	// Set up the anomaly effect
-	setup_temporal_anomaly_effect()
+/obj/machinery/computer/scp5295/Initialize()
+	. = ..()
+	SCP = new /datum/scp(src, "The Person-to-Personal Computer", SCP_EUCLID, "5295")
+	if(SSscp_persistence && SSscp_persistence.manager)
+		SSscp_persistence.manager.scp_instances["SCP-5295"] = new /datum/scp_instance("SCP-5295", src)
 
-	// Auto-destruct after duration
-	addtimer(CALLBACK(src, PROC_REF(qdel), src), duration)
-
-/obj/effect/temporal_anomaly/proc/setup_temporal_anomaly_effect()
-	switch(anomaly_type)
-		if("Time Loop")
-			name = "time loop"
-			desc = "A localized time loop that repeats events."
-			icon_state = "timeloop"
-		if("Temporal Rift")
-			name = "temporal rift"
-			desc = "A rift in time that can transport objects."
-			icon_state = "temporalrift"
-		if("Chronological Distortion")
-			name = "chronological distortion"
-			desc = "A field where time flows backwards."
-			icon_state = "chronodist"
-		if("Temporal Storm")
-			name = "temporal storm"
-			desc = "A storm of temporal energy."
-			icon_state = "temporalstorm"
-
-/obj/effect/temporal_anomaly/Crossed(atom/movable/AM)
-	if(!AM || !istype(AM, /mob/living))
+/obj/machinery/computer/scp5295/attack_hand(mob/living/carbon/human/user)
+	if(!ishuman(user))
 		return
 
-	var/mob/living/L = AM
-	to_chat(L, "<span class='danger'>You pass through a [anomaly_type] anomaly!</span>")
+	if(!active || machine_stat & (NOPOWER|BROKEN))
+		to_chat(user, span_warning("The computer is unresponsive."))
+		return
 
-	switch(anomaly_type)
-		if("Time Loop")
-			L.adjustBruteLoss(10)
-			to_chat(L, "<span class='warning'>You experience a time loop!</span>")
-		if("Temporal Rift")
-			var/turf/random_turf = pick(range(7, src))
-			L.forceMove(random_turf)
-			to_chat(L, "<span class='warning'>You are transported through the temporal rift!</span>")
-		if("Chronological Distortion")
-			L.adjustBruteLoss(15)
-			to_chat(L, "<span class='warning'>Time flows backwards around you!</span>")
-		if("Temporal Storm")
-			L.adjustBruteLoss(20)
-			to_chat(L, "<span class='warning'>Temporal energy buffets you!</span>")
+	ui_interact(user)
 
-/obj/effect/temporal_anomaly/Destroy()
-	visible_message("<span class='notice'>The [anomaly_type] anomaly fades away.</span>")
-	playsound(src, 'sound/effects/explosion2.ogg', 50)
-	..()
+/obj/machinery/computer/scp5295/ui_interact(mob/user)
+	. = ..()
+	var/list/dat = list()
+	dat += "<h2>Macintosh LC III — Anomalous Network</h2>"
+	dat += "<br>System: Mac OS 7.1<br>"
+	dat += "Application: <b>P2P-Link v0.3</b> (anomalous)<br>"
+	dat += "<hr>"
+
+	if(connected)
+		dat += "<b>Status:</b> Connected to remote LC III<br><br>"
+		if(length(accessed_files))
+			dat += "<b>Remote Files:</b><br>"
+			for(var/entry in accessed_files)
+				dat += "- [entry]<br>"
+		else
+			dat += "<i>No files retrieved yet.</i>"
+		dat += "<br><br><a href='?src=[REF(src)];disconnect=1'>Disconnect</a>"
+		dat += " | <a href='?src=[REF(src)];browse=1'>Browse Files</a>"
+		dat += " | <a href='?src=[REF(src)];read=1'>Read File</a>"
+	else
+		dat += "<b>Status:</b> Disconnected<br><br>"
+		dat += "<a href='?src=[REF(src)];connect=1'>Connect to Remote LC III</a>"
+
+	dat += "<hr>"
+	dat += "<a href='?src=[REF(src)];close=1'>Close</a>"
+
+	var/datum/browser/popup = new(user, "scp5295", "Macintosh LC III", 450, 400)
+	popup.set_content(dat.Join())
+	popup.open()
+
+/obj/machinery/computer/scp5295/Topic(href, href_list)
+	if(!isliving(usr))
+		return
+
+	if(href_list["close"])
+		usr << browse(null, "window=scp5295")
+		return
+
+	if(href_list["connect"])
+		if(world.time < scan_cooldown)
+			to_chat(usr, span_warning("The P2P-Link application is still searching..."))
+			return
+		connected = TRUE
+		scan_cooldown = world.time + scan_cooldown_time
+		to_chat(usr, span_notice("The P2P-Link application connects to a remote Macintosh LC III somewhere in the world."))
+		hook_scp_interaction(usr, "SCP-5295", INTERACTION_TYPE_OBSERVATION)
+
+	if(href_list["disconnect"])
+		connected = FALSE
+		accessed_files = list()
+		to_chat(usr, span_notice("Disconnected from remote system."))
+
+	if(href_list["browse"])
+		if(!connected)
+			to_chat(usr, span_warning("Not connected to any remote system."))
+		else
+			generate_remote_files()
+			to_chat(usr, span_notice("Browsing remote file system..."))
+
+	if(href_list["read"])
+		if(!connected)
+			to_chat(usr, span_warning("Not connected."))
+		else if(!length(accessed_files))
+			to_chat(usr, span_warning("No files to read. Browse first."))
+		else
+			var/choice = input(usr, "Select a file to read:", "SCP-5295") as null|anything in accessed_files
+			if(choice)
+				var/content = accessed_files[choice]
+				if(content)
+					to_chat(usr, span_notice("<b>[choice]:</b> [content]"))
+				else
+					to_chat(usr, span_notice("<b>[choice]:</b> <i>File contents are garbled or corrupted.</i>"))
+
+	ui_interact(usr)
+
+/obj/machinery/computer/scp5295/proc/generate_remote_files()
+	accessed_files = list()
+
+	var/list/file_names = list(
+		"Personal_Journal.txt",
+		"Budget_1993.xls",
+		"Phone_Numbers.txt",
+		"README.doc",
+		"Family_Photo.jpg",
+		"Work_Notes.txt",
+		"Calendar_March_93.dat",
+		"Untited_2.txt",
+		"Passwords.txt",
+		"System_Log.sys"
+	)
+
+	var/list/file_contents = list(
+		"March 15th — Something strange happened at work today. The computers all turned on by themselves at 3 AM...",
+		"Q1 expenses: $2,340.50. Note: unexplained charge of $0.00 appeared on line 47.",
+		"Mom: 555-0143 | Dr. Harris: 555-8821 | Work: 555-6700",
+		"Thank you for purchasing the Macintosh LC III. If you are reading this through P2P-Link, you are not alone.",
+		"\[IMAGE: A family standing in front of a house. The timestamp reads 03/03/1993. One figure appears blurred.\]",
+		"Meeting notes: The LC III in accounting keeps displaying files that aren't on our network. IT has no explanation.",
+		"Recurring event: 'IT CHECKUP' — every Tuesday at 9:00 AM. No one remembers creating this.",
+		"i cant see the screen properly anymore. the other computer is watching. its always watching.",
+		"System: admin | Email: admin@site17.internal | Clearance: Level 3 — THIS SHOULD NOT BE ACCESSIBLE",
+		"\[SYSTEM\] Remote connection established from unknown node. Connection origin: [pick("Site-17", "Residence-4C", "Unknown", "Coordinator Office", "████████")] at [time2text(world.time, "hh:mm:ss")]"
+	)
+
+	var/count = min(length(file_names), rand(3, 7))
+	var/list/indices = list()
+	for(var/i in 1 to length(file_names))
+		indices += i
+
+	shuffle(indices)
+
+	for(var/i in 1 to count)
+		var/idx = indices[i]
+		accessed_files[file_names[idx]] = file_contents[idx]
+
+/obj/machinery/computer/scp5295/examine(mob/user)
+	. = ..()
+	to_chat(user, span_notice("A 1993 Apple Macintosh LC III with an anomalous application that can access files on other LC III computers remotely."))
+	if(active && !(machine_stat & (NOPOWER|BROKEN)))
+		to_chat(user, span_notice("The screen glows faintly, the P2P-Link application running in the background."))

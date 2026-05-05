@@ -1,148 +1,101 @@
-// SCP-5000: Probability Manipulation Suit
-// A suit that grants its wearer the ability to manipulate probability and create chaos
+#ifndef TRAIT_SCP5000_WORN
+#define TRAIT_SCP5000_WORN "scp5000_worn"
+#endif
 
 /obj/item/clothing/suit/scp5000
-	name = "probability manipulation suit"
-	desc = "A mysterious suit that seems to bend probability to its wearer's will. Strange events occur around it."
-	icon = 'icons/obj/clothing/suits.dmi'
+	name = "strange suit"
+	desc = "A suit of unknown origin and composition. It appears to be designed for full-body protection. Something about it feels deeply wrong."
 	icon_state = "scp5000"
-	w_class = 4
-	body_parts_covered = 15
-	flags_inv = 256
-	allowed = list()
-	armor = list(melee = 30, bullet = 20, laser = 20, energy = 10, bomb = 10, bio = 100, rad = 100)
+	w_class = WEIGHT_CLASS_BULKY
+	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
+	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
+	armor = list(melee = 40, bullet = 30, laser = 30, energy = 20, bomb = 20, bio = 100, rad = 100)
 
-	// Probability manipulation abilities
-	var/probability_shift_cooldown = 0
-	var/probability_shift_cooldown_time = 20 SECONDS
-	var/chaos_field_cooldown = 0
-	var/chaos_field_cooldown_time = 45 SECONDS
-	var/chaos_radius = 6
-	var/probability_shift_strength = 0.8
-	var/wearer = null
+	var/active = FALSE
+	var/foundation_hostile = FALSE
+	var/mob/living/carbon/human/wearer
 
 /obj/item/clothing/suit/scp5000/Initialize()
 	. = ..()
-	SCP = new /datum/scp(src, "probability manipulation suit", SCP_KETER, "5000")
-	// Auto-registered via datum/scp
+	SCP = new /datum/scp(src, "Why?", SCP_KETER, "5000")
+	if(SSscp_persistence && SSscp_persistence.manager)
+		SSscp_persistence.manager.scp_instances["SCP-5000"] = new /datum/scp_instance("SCP-5000", src)
 
-/obj/item/clothing/suit/scp5000/equipped(mob/user, slot)
-	. = ..()
-	if(slot == 13) // SLOT_WEAR_SUIT
+/obj/item/clothing/suit/scp5000/equipped(mob/living/carbon/human/user, slot)
+	..()
+	if(slot == ITEM_SLOT_OCLOTHING)
 		wearer = user
-		to_chat(user, "<span class='notice'>You feel the power of probability manipulation flowing through you!</span>")
-		// Add abilities to wearer
-		user.verbs += /mob/living/proc/shift_probability_ability
-		user.verbs += /mob/living/proc/create_chaos_ability
+		active = TRUE
+		foundation_hostile = TRUE
+		to_chat(user, span_warning("As you don the suit, a profound sense of isolation washes over you. The Foundation's memetic safeguards feel distant now, like they were never real."))
+		hook_scp_breach("SCP-5000", src)
+		START_PROCESSING(SSobj, src)
+		apply_foundation_hostility(user)
 
 /obj/item/clothing/suit/scp5000/unequipped(mob/user)
-	. = ..()
+	..()
 	if(wearer == user)
+		remove_foundation_hostility(wearer)
 		wearer = null
-		to_chat(user, "<span class='notice'>The probability manipulation powers fade away.</span>")
-		// Remove abilities from wearer
-		user.verbs -= /mob/living/proc/shift_probability_ability
-		user.verbs -= /mob/living/proc/create_chaos_ability
+		active = FALSE
+		foundation_hostile = FALSE
+		STOP_PROCESSING(SSobj, src)
+
+/obj/item/clothing/suit/scp5000/process()
+	if(!active || !wearer)
+		return
+
+	if(wearer.wear_suit != src)
+		remove_foundation_hostility(wearer)
+		wearer = null
+		active = FALSE
+		foundation_hostile = FALSE
+		return
+
+	if(prob(5))
+		var/list/messages = list(
+			"You remember something that never happened.",
+			"The Foundation's directive echoes in your mind, twisted beyond recognition.",
+			"You feel the weight of a truth that should not exist.",
+			"Something is very wrong with the world. Or maybe with you.",
+			"The suit whispers of a timeline where mercy was the anomaly."
+		)
+		to_chat(wearer, "<i>[pick(messages)]</i>")
+
+	if(prob(3))
+		for(var/mob/living/carbon/human/H in view(7, wearer))
+			if(H == wearer)
+				continue
+			if(is_facility_personnel(H))
+				if(prob(15))
+					H.visible_message(span_warning("[H] looks at [wearer] with sudden hostility!"), span_warning("You feel an inexplicable urge to neutralize [wearer]... Something about them is WRONG."))
+					H.set_combat_mode(TRUE)
+
+/obj/item/clothing/suit/scp5000/proc/apply_foundation_hostility(mob/living/carbon/human/W)
+	if(!W)
+		return
+
+	ADD_TRAIT(W, TRAIT_SCP5000_WORN, "scp5000")
+	W.add_filter("scp5000_distortion", 1, gauss_blur_filter(1))
+
+/obj/item/clothing/suit/scp5000/proc/remove_foundation_hostility(mob/living/carbon/human/W)
+	if(!W)
+		return
+
+	REMOVE_TRAIT(W, TRAIT_SCP5000_WORN, "scp5000")
+	W.remove_filter("scp5000_distortion")
+
+/obj/item/clothing/suit/scp5000/proc/is_facility_personnel(mob/living/carbon/human/H)
+	if(!H || !H.mind)
+		return FALSE
+	var/datum/job/J = SSjob.GetJob(H.job)
+	if(J && J.departments_bitflags & (DEPARTMENT_BITFLAG_SECURITY|DEPARTMENT_BITFLAG_COMPANY_LEADER|DEPARTMENT_BITFLAG_SCIENCE|DEPARTMENT_BITFLAG_MEDICAL|DEPARTMENT_BITFLAG_ENGINEERING))
+		return TRUE
+	return FALSE
 
 /obj/item/clothing/suit/scp5000/examine(mob/user)
 	. = ..()
-	. += "<span class='notice'>This suit grants its wearer the ability to manipulate probability and create chaos.</span>"
-	. += "<span class='warning'>Strange events seem to occur around it.</span>"
-
-// Probability manipulation abilities for wearer
-/mob/living/proc/shift_probability_ability()
-	set name = "Shift Probability"
-	set desc = "Manipulate probability in your favor"
-	set category = "SCP"
-
-	var/obj/item/clothing/suit/scp5000/suit = locate(/obj/item/clothing/suit/scp5000) in src
-	if(!suit)
-		to_chat(src, "<span class='warning'>You need to wear the probability manipulation suit!</span>")
-		return
-
-	if(suit.probability_shift_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Probability shift is still recharging...</span>")
-		return
-
-	to_chat(src, "<span class='notice'>You shift probability in your favor.</span>")
-	visible_message("<span class='danger'>[src] manipulates the fabric of probability!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Random beneficial effects
-	var/effect_roll = rand(1, 4)
-	switch(effect_roll)
-		if(1)
-			adjustBruteLoss(-50)
-			to_chat(src, "<span class='notice'>Probability shifts heal your wounds!</span>")
-		if(2)
-			to_chat(src, "<span class='notice'>Probability shifts enhance your defenses!</span>")
-		if(3)
-			to_chat(src, "<span class='notice'>Probability shifts make you more resilient!</span>")
-		if(4)
-			adjustBruteLoss(-75)
-			to_chat(src, "<span class='notice'>Probability shifts provide incredible healing!</span>")
-
-	suit.probability_shift_cooldown = world.time + suit.probability_shift_cooldown_time
-
-/mob/living/proc/create_chaos_ability()
-	set name = "Create Chaos"
-	set desc = "Create a field of probability chaos"
-	set category = "SCP"
-
-	var/obj/item/clothing/suit/scp5000/suit = locate(/obj/item/clothing/suit/scp5000) in src
-	if(!suit)
-		to_chat(src, "<span class='warning'>You need to wear the probability manipulation suit!</span>")
-		return
-
-	if(suit.chaos_field_cooldown > world.time)
-		to_chat(src, "<span class='warning'>Chaos field is still recharging...</span>")
-		return
-
-	to_chat(src, "<span class='notice'>You create a field of probability chaos.</span>")
-	visible_message("<span class='danger'>[src] creates a field of probability chaos!</span>")
-
-	playsound(src, 'sound/effects/explosion1.ogg', 50)
-
-	// Affect all living beings in range
-	for(var/mob/living/L in range(suit.chaos_radius, src))
-		if(L == src)
-			continue
-		if(L.stat == DEAD)
-			continue
-
-		// Random chaotic effects
-		var/chaos_effect = rand(1, 5)
-		switch(chaos_effect)
-			if(1)
-				L.adjustBruteLoss(15)
-				to_chat(L, "<span class='danger'>Probability chaos causes you harm!</span>")
-			if(2)
-				L.adjustBruteLoss(20)
-				to_chat(L, "<span class='danger'>Reality bends against you!</span>")
-			if(3)
-				L.adjustBruteLoss(25)
-				to_chat(L, "<span class='danger'>Impossible events occur!</span>")
-			if(4)
-				L.adjustBruteLoss(30)
-				to_chat(L, "<span class='danger'>The laws of physics are violated!</span>")
-			if(5)
-				L.adjustBruteLoss(35)
-				to_chat(L, "<span class='danger'>Probability itself attacks you!</span>")
-
-		suit.SCP.log_interaction(L, "probability_chaos_field")
-		suit.SCP.award_research(L, "anomaly", 20)
-
-	suit.chaos_field_cooldown = world.time + suit.chaos_field_cooldown_time
-
-/obj/item/clothing/suit/scp5000/proc/on_probability_shift(mob/living/carbon/human/wearer)
-	if(!wearer)
-		return
-	hook_scp_interaction(wearer, "SCP-5000", INTERACTION_TYPE_CONTAINMENT)
-
-/obj/item/clothing/suit/scp5000/proc/on_chaos_field(mob/living/carbon/human/victim)
-	if(!victim)
-		return
-	hook_scp_combat(victim, "SCP-5000", 25, 0)
-
-
+	to_chat(user, span_notice("A suit of unknown origin. When worn, it shields the wearer from memetic kill agents and antimemes."))
+	to_chat(user, span_warning("Foundation personnel seem to become hostile toward anyone wearing this suit."))
+	if(active)
+		to_chat(user, "<i>The suit hums faintly, as if remembering something terrible.</i>")

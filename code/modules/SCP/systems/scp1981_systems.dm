@@ -26,11 +26,11 @@
 			viewers += H
 
 	// Automatic video manipulation when people are nearby
-	if(viewers.len > 0 && prob(2))
+	if(length(viewers) > 0 && prob(2))
 		increase_video_manipulation()
 
 	// Apply video effects to viewers
-	if(video_manipulation > 10 && viewers.len > 0)
+	if(video_manipulation > 10 && length(viewers) > 0)
 		apply_video_effects(viewers)
 
 	// Check for evolution
@@ -94,11 +94,11 @@
 			targets += H
 
 	// Automatic reality distortion when people are nearby
-	if(targets.len > 0 && prob(1))
+	if(length(targets) > 0 && prob(1))
 		increase_reality_distortion()
 
 	// Apply reality effects
-	if(reality_distortion > 15 && targets.len > 0)
+	if(reality_distortion > 15 && length(targets) > 0)
 		apply_reality_effects(targets)
 
 	// Increase distortion potency over time
@@ -153,11 +153,11 @@
 			targets += H
 
 	// Automatic temporal effects when people are nearby
-	if(targets.len > 0 && prob(1))
+	if(length(targets) > 0 && prob(1))
 		increase_temporal_effects()
 
 	// Apply temporal effects
-	if(temporal_effects > 20 && targets.len > 0)
+	if(temporal_effects > 20 && length(targets) > 0)
 		apply_temporal_effects(targets)
 
 	// Increase temporal mastery over time

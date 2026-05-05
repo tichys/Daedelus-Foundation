@@ -6,7 +6,7 @@
 	RegisterSignal(SSevents, COMSIG_TICKER_ROUND_STARTING, PROC_REF(OnRoundStarting))
 
 /datum/scp216_persistence_manager/proc/OnRoundStarting()
-	if(!SSpersistence.displaced_scp216_items.len)
+	if(!length(SSpersistence.displaced_scp216_items))
 		return
 
 	var/list/items_to_remove = list()
@@ -18,7 +18,7 @@
 
 			if(prob(50)) // 50% chance for random physical appearance
 				var/turf/reappearance_turf = pick(get_area_turfs(/area/station)) // Random station turf
-				if(!reappearance_turf && GLOB.all_scp216s.len) // Fallback if no station turf, try a safe's turf
+				if(!reappearance_turf && length(GLOB.all_scp216s)) // Fallback if no station turf, try a safe's turf
 					reappearance_turf = get_turf(pick(GLOB.all_scp216s))
 				if(!reappearance_turf) // Final fallback if still no turf
 					reappearance_turf = get_safe_random_station_turf() // Fallback to world turf
@@ -32,7 +32,7 @@
 
 			else // 50% chance for reappearance in safe's content list
 				var/obj/structure/scp216/target_safe
-				if(GLOB.all_scp216s.len)
+				if(length(GLOB.all_scp216s))
 					for(var/obj/structure/scp216/S in GLOB.all_scp216s)
 						if(S.current_code == original_code && length(S.all_codes[num2text(original_code, 7)]) < S.max_items)
 							target_safe = S

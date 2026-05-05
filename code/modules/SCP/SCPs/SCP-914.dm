@@ -6,7 +6,6 @@
 	density = TRUE
 	anchored = TRUE
 
-	// Modular system datums
 	var/datum/scp914_refinement_system/refinement_system
 	var/datum/scp914_reality_system/reality_system
 	var/datum/scp914_temporal_system/temporal_system
@@ -15,6 +14,9 @@
 	var/datum/scp914_environmental_system/environmental_system
 	var/datum/scp914_research_integration/research_integration
 
+	var/obj/structure/scp914_booth/input_booth
+	var/obj/structure/scp914_booth/output_booth
+
 /obj/machinery/scp914/Initialize()
 	. = ..()
 
@@ -22,7 +24,7 @@
 	SCP = new /datum/scp(
 		src,
 		"SCP-914",
-		SCP_EUCLID,
+		SCP_SAFE,
 		"914"
 	)
 
@@ -41,6 +43,114 @@
 	// Register with SCP persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-914"] = new /datum/scp_instance("SCP-914", src)
+
+	// Create input and output booths
+	var/turf/input_turf = get_step(src, WEST)
+	if(input_turf)
+		input_booth = new /obj/structure/scp914_booth/input(input_turf)
+		input_booth.linked_machine = src
+
+	var/turf/output_turf = get_step(src, EAST)
+	if(output_turf)
+		output_booth = new /obj/structure/scp914_booth/output(output_turf)
+		output_booth.linked_machine = src
+
+/obj/machinery/scp914/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "SCP914", "SCP-914")
+		ui.open()
+
+/obj/machinery/scp914/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/scp914/ui_data(mob/user)
+	var/list/data = list()
+	if(refinement_system)
+		data["setting"] = refinement_system.refinement_setting
+		data["settings"] = refinement_system.refinement_settings
+		data["active"] = refinement_system.active
+		data["progress"] = refinement_system.refinement_progress
+		data["max_progress"] = refinement_system.max_refinement_progress
+		data["mastery"] = refinement_system.refinement_mastery
+		data["max_mastery"] = refinement_system.max_refinement_mastery
+		data["efficiency"] = refinement_system.refinement_efficiency
+		data["refinements_performed"] = refinement_system.refinements_performed
+		data["objects_destroyed"] = refinement_system.objects_destroyed
+		data["objects_enhanced"] = refinement_system.objects_enhanced
+
+		var/list/input_items = list()
+		for(var/obj/item/I in refinement_system.input_objects)
+			input_items += list(list("name" = I.name, "ref" = REF(I)))
+		data["input_items"] = input_items
+
+		var/list/output_items = list()
+		for(var/obj/item/I in refinement_system.output_objects)
+			output_items += list(list("name" = I.name, "ref" = REF(I)))
+		data["output_items"] = output_items
+
+	data["has_input"] = !!input_booth
+	data["has_output"] = !!output_booth
+	return data
+
+/obj/machinery/scp914/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+
+	switch(action)
+		if("change_setting")
+			if(!refinement_system || refinement_system.active)
+				return
+			var/new_setting = params["setting"]
+			if(new_setting in refinement_system.refinement_settings)
+				refinement_system.refinement_setting = new_setting
+				. = TRUE
+		if("start_refinement")
+			if(!refinement_system || refinement_system.active)
+				return
+			if(!length(refinement_system.input_objects))
+				return
+			refinement_system.active = TRUE
+			refinement_system.refinement_progress = 0
+			visible_message("<span class='notice'>SCP-914 begins refining on [refinement_system.refinement_setting] setting.</span>")
+			if(ishuman(usr))
+				var/mob/living/carbon/human/H = usr
+				hook_scp_experiment(H, "SCP-914", "refinement")
+			. = TRUE
+		if("insert_item")
+			if(!refinement_system || refinement_system.active)
+				return
+			var/obj/item/I = usr.get_active_held_item()
+			if(!I)
+				return
+			if(ismob(I.loc))
+				I.forceMove(src)
+			refinement_system.input_objects += I
+			to_chat(usr, "<span class='notice'>Added [I.name] to SCP-914 input.</span>")
+			. = TRUE
+		if("remove_output")
+			if(!refinement_system)
+				return
+			var/obj/item/I = locate(params["ref"]) in refinement_system.output_objects
+			if(!I)
+				return
+			refinement_system.output_objects -= I
+			I.forceMove(get_turf(usr))
+			usr.put_in_hands(I)
+			to_chat(usr, "<span class='notice'>Removed [I.name] from SCP-914 output.</span>")
+			. = TRUE
+		if("remove_input")
+			if(!refinement_system || refinement_system.active)
+				return
+			var/obj/item/I = locate(params["ref"]) in refinement_system.input_objects
+			if(!I)
+				return
+			refinement_system.input_objects -= I
+			I.forceMove(get_turf(usr))
+			usr.put_in_hands(I)
+			to_chat(usr, "<span class='notice'>Removed [I.name] from SCP-914 input.</span>")
+			. = TRUE
 
 /obj/machinery/scp914/Destroy()
 	// Clean up system datums
@@ -84,8 +194,7 @@
 	for(var/mob/living/carbon/human/H in view(7, src))
 		if(H.SCP) // Skip SCPs
 			continue
-
-			// Award research points for observing SCP-914
+		// Award research points for observing SCP-914
 	// Research data will be collected by the research integration system
 
 // ===== USER INTERFACE VERBS =====
@@ -123,13 +232,13 @@
 		to_chat(usr, "<span class='warning'>SCP-914 is already active.</span>")
 		return
 
-	if(!refinement_system.input_objects.len)
+	if(!length(refinement_system.input_objects))
 		to_chat(usr, "<span class='warning'>No objects in input to refine.</span>")
 		return
 
 	refinement_system.active = TRUE
 	refinement_system.refinement_progress = 0
-	visible_message("<span class='notice'>SCP-914 begins refining [refinement_system.input_objects.len] objects on [refinement_system.refinement_setting] setting.</span>")
+	visible_message("<span class='notice'>SCP-914 begins refining [length(refinement_system.input_objects)] objects on [refinement_system.refinement_setting] setting.</span>")
 
 	// Progression integration - log experiment start
 	if(ishuman(usr))
@@ -364,7 +473,7 @@
 
 	var/message = "<h2>SCP-914 Input Objects</h2>"
 
-	if(refinement_system.input_objects.len)
+	if(length(refinement_system.input_objects))
 		message += "<b>Objects in Input:</b><br>"
 		for(var/obj/item/item in refinement_system.input_objects)
 			if(item)
@@ -388,7 +497,7 @@
 
 	var/message = "<h2>SCP-914 Output Objects</h2>"
 
-	if(refinement_system.output_objects.len)
+	if(length(refinement_system.output_objects))
 		message += "<b>Objects in Output:</b><br>"
 		for(var/obj/item/item in refinement_system.output_objects)
 			if(item)
@@ -456,7 +565,7 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-914"]
 		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
@@ -475,3 +584,44 @@
 		if(refinement_system)
 			to_chat(user, "<span class='notice'>Current setting: [refinement_system.refinement_setting]</span>")
 			to_chat(user, "<span class='notice'>Status: [refinement_system.active ? "Active" : "Inactive"]</span>")
+
+/obj/structure/scp914_booth
+	name = "SCP-914 Booth"
+	desc = "A booth connected to SCP-914."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "dwainer"
+	anchored = TRUE
+	density = TRUE
+	var/obj/machinery/scp914/linked_machine
+	var/booth_type = "input"
+
+/obj/structure/scp914_booth/input
+	name = "SCP-914 Input Booth"
+	desc = "Place items here to be refined by SCP-914."
+	booth_type = "input"
+
+/obj/structure/scp914_booth/input/attackby(obj/item/I, mob/user, params)
+	if(!linked_machine || !linked_machine.refinement_system || linked_machine.refinement_system.active)
+		to_chat(user, "<span class='warning'>Cannot add items right now.</span>")
+		return
+	linked_machine.refinement_system.input_objects += I
+	I.forceMove(linked_machine)
+	to_chat(user, "<span class='notice'>Inserted [I.name] into SCP-914.</span>")
+
+/obj/structure/scp914_booth/output
+	name = "SCP-914 Output Booth"
+	desc = "Refined items will appear here."
+	booth_type = "output"
+
+/obj/structure/scp914_booth/output/attack_hand(mob/user)
+	if(!ishuman(user) || !linked_machine || !linked_machine.refinement_system)
+		return
+	var/datum/scp914_refinement_system/RS = linked_machine.refinement_system
+	if(!length(RS.output_objects))
+		to_chat(user, "<span class='notice'>No items in output.</span>")
+		return
+	var/obj/item/I = pop(RS.output_objects)
+	if(I)
+		I.forceMove(get_turf(user))
+		user.put_in_hands(I)
+		to_chat(user, "<span class='notice'>Retrieved [I.name] from SCP-914 output.</span>")

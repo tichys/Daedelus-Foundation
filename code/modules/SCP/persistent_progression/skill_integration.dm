@@ -83,13 +83,14 @@ SUBSYSTEM_DEF(skill_integration)
 	)
 
 /datum/skill_integration_manager/proc/initialize_skill_rewards()
-	// Define progression rewards for reaching skill milestones
-	skill_progression_rewards[SKILL_LEVEL_EXPERT] = list(
+	skill_progression_rewards["expert"] = list(
+		"min_level" = SKILL_LEVEL_EXPERT,
 		"experience_bonus" = 100,
 		"unlock_item" = "expert_certification",
 		"title_unlock" = "Expert"
 	)
-	skill_progression_rewards[SKILL_LEVEL_MASTER] = list(
+	skill_progression_rewards["master"] = list(
+		"min_level" = SKILL_LEVEL_MASTER,
 		"experience_bonus" = 250,
 		"unlock_item" = "master_certification",
 		"title_unlock" = "Master",
@@ -143,26 +144,27 @@ SUBSYSTEM_DEF(skill_integration)
 		integration_data["skill_levels"][skill_type] = skill_level
 
 /datum/skill_integration_manager/proc/apply_progression_boosts(datum/mind/mind, list/integration_data)
-	// Apply progression-based skill experience boosts
-	for(var/class_id in progression_skill_boosts)
-		var/list/skill_boosts = progression_skill_boosts[class_id]
-		for(var/skill_type in skill_boosts)
-			var/boost_multiplier = skill_boosts[skill_type]
+	if(!mind)
+		return
+	// Clear previous boosts
+	mind.experience_multiplier_reasons -= "progression_boost"
 
-			// Apply boost to the player's skill experience gain
-			if(mind && mind.current)
-				// Store the boost multiplier for future experience calculations
-				// Base experience per activity is typically 10, but will be calculated dynamically
+	if(!mind.persistent_data)
+		return
 
-				// Apply the boost to future experience gains
-				if(!integration_data["progression_boosts"])
-					integration_data["progression_boosts"] = list()
-				integration_data["progression_boosts"][skill_type] = boost_multiplier
+	var/class_id = mind.persistent_data.current_class_id
+	var/list/skill_boosts = progression_skill_boosts[class_id]
+	if(!length(skill_boosts))
+		return
 
-				// Notify player of active boost
-				if(boost_multiplier > 1.0)
-					var/skill_name = get_skill_name(skill_type)
-					to_chat(mind.current, "<span class='notice'>Your [class_id] class provides a [round((boost_multiplier - 1) * 100)]% boost to [skill_name] experience!</span>")
+	for(var/skill_type in skill_boosts)
+		var/boost = skill_boosts[skill_type]
+		if(boost > 1.0)
+			mind.experience_multiplier_reasons["progression_boost"] += (boost - 1.0)
+
+	if(!integration_data["progression_boosts"])
+		integration_data["progression_boosts"] = list()
+	integration_data["progression_boosts"] = skill_boosts
 
 /datum/skill_integration_manager/proc/check_skill_rewards(datum/mind/mind, list/integration_data)
 	// Check for skill-based rewards and achievements

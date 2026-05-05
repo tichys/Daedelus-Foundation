@@ -7,10 +7,10 @@
 
 /datum/scp457_heat_system
 	var/mob/living/carbon/human/scp457/owner
-	var/current_heat = 50
-	var/max_heat = 100
-	var/heat_generation_rate = 1
-	var/heat_decay_rate = 1
+	var/current_heat = SCP457_INITIAL_HEAT
+	var/max_heat = SCP457_MAX_HEAT
+	var/heat_generation_rate = SCP457_HEAT_GENERATION_RATE
+	var/heat_decay_rate = SCP457_HEAT_DECAY_RATE
 	var/last_heat_update = 0
 	var/heat_update_interval = 30 SECONDS
 	var/heat_gain_multiplier = 1.0
@@ -54,11 +54,11 @@
 	return (current_heat / max_heat) * 100
 
 /datum/scp457_heat_system/proc/get_fire_type()
-	if(current_heat <= 25)
+	if(current_heat <= SCP457_HEAT_THRESHOLD_BASIC)
 		return "basic"
-	else if(current_heat <= 50)
+	else if(current_heat <= SCP457_HEAT_THRESHOLD_INTENSE)
 		return "intense"
-	else if(current_heat <= 75)
+	else if(current_heat <= SCP457_HEAT_THRESHOLD_BLUE)
 		return "blue"
 	else
 		return "white"
@@ -131,7 +131,7 @@
 		if(can_spread_to_turf(T))
 			adjacent_turfs += T
 
-	if(adjacent_turfs.len)
+	if(length(adjacent_turfs))
 		var/turf/spread_turf = pick(adjacent_turfs)
 		create_fire_at_turf(spread_turf)
 
@@ -204,13 +204,13 @@
 
 /datum/scp457_fire_system/proc/create_initial_fires()
 	// Create fires around SCP-457 if none exist
-	if(active_fires.len < 3)
+	if(length(active_fires) < 3)
 		var/list/adjacent_turfs = list()
 		for(var/turf/T in range(1, owner))
 			if(can_spread_to_turf(T))
 				adjacent_turfs += T
 
-		if(adjacent_turfs.len)
+		if(length(adjacent_turfs))
 			var/turf/chosen_turf = pick(adjacent_turfs)
 			create_fire_at_turf(chosen_turf)
 
@@ -230,7 +230,7 @@
 /datum/scp457_evolution_system
 	var/mob/living/carbon/human/scp457/owner
 	var/current_stage = 1
-	var/max_stage = 5
+	var/max_stage = SCP457_MAX_EVOLUTION_STAGE
 	var/evolution_progress = 0
 	var/evolution_requirements = list()
 	var/targets_consumed = 0
@@ -350,7 +350,7 @@
 /datum/scp457_containment_system
 	var/mob/living/carbon/human/scp457/owner
 	var/containment_level = 0
-	var/max_containment_level = 4
+	var/max_containment_level = SCP457_MAX_CONTAINMENT_LEVEL
 	var/response_cooldown = 0
 	var/response_interval = 30 SECONDS
 	var/active_personnel = list()
@@ -376,7 +376,7 @@
 		last_containment_check = world.time
 
 /datum/scp457_containment_system/proc/check_containment_response()
-	var/active_fires = owner.fire_system.active_fires.len
+	var/active_fires = length(owner.fire_system.active_fires)
 	var/fire_type = owner.heat_system.get_fire_type()
 	var/new_containment_level = 0
 
@@ -410,6 +410,8 @@
 	else if(new_level < old_level)
 		to_chat(owner, "<span class='notice'>Containment level decreased to [new_level].</span>")
 		containment_successes++
+		if(new_level == 0)
+			hook_scp_recontainment("SCP-457", list("method" = "fire_suppression", "fires_remaining" = length(owner.fire_system.active_fires)))
 
 /datum/scp457_containment_system/proc/apply_containment_effects(level)
 	switch(level)
@@ -579,11 +581,11 @@
 
 /datum/scp457_research_integration/proc/update_research_data()
 	// Update research data based on current state
-	research_data["active_fires"] = owner.fire_system.active_fires.len
+	research_data["active_fires"] = length(owner.fire_system.active_fires)
 	research_data["heat_level"] = owner.heat_system.current_heat
 	research_data["evolution_stage"] = owner.evolution_system.current_stage
 	research_data["containment_level"] = owner.containment_system.containment_level
-	research_data["environmental_control"] = owner.environmental_system.controlled_room_types.len
+	research_data["environmental_control"] = length(owner.environmental_system.controlled_room_types)
 
 	// Add to research persistence if available
 	if(SSresearch_persistence && SSresearch_persistence.manager)

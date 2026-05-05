@@ -1,13 +1,13 @@
-#define SPEC_TRACK_RESEARCH 1
-#define SPEC_TRACK_CONTAINMENT 2
-#define SPEC_TRACK_FIELD 3
-#define SPEC_TRACK_MEDICAL 4
+#define SPEC_TRACK_RESEARCH "research"
+#define SPEC_TRACK_CONTAINMENT "containment"
+#define SPEC_TRACK_FIELD "field"
+#define SPEC_TRACK_MEDICAL "medical"
 
-#define SPEC_TIER_TRAINEE 1
-#define SPEC_TIER_JUNIOR 2
-#define SPEC_TIER_AGENT 3
-#define SPEC_TIER_SENIOR 4
-#define SPEC_TIER_SPECIALIST 5
+#define SPEC_TIER_TRAINEE "trainee"
+#define SPEC_TIER_JUNIOR "junior"
+#define SPEC_TIER_AGENT "agent"
+#define SPEC_TIER_SENIOR "senior"
+#define SPEC_TIER_SPECIALIST "specialist"
 
 SUBSYSTEM_DEF(scp_specializations)
 	name = "SCP Specializations"
@@ -158,7 +158,7 @@ SUBSYSTEM_DEF(scp_specializations)
 				advance_tier(ckey, ps, track_type, tier)
 
 /datum/specialization_manager/proc/check_requirement_conditions(ckey, track_type, datum/tier_requirement/req)
-	if(!req.conditions || !req.conditions.len)
+	if(!req.conditions || !length(req.conditions))
 		return TRUE
 	
 	var/datum/scp_interaction_log/log = SSscp_interactions?.manager?.get_player_log(ckey)
@@ -166,7 +166,7 @@ SUBSYSTEM_DEF(scp_specializations)
 	var/datum/researcher_data/rdata = SSscp_research?.manager?.get_researcher_profile(ckey)
 	
 	if("interactions" in req.conditions)
-		if(!log || log.scps_interacted.len < req.conditions["interactions"])
+		if(!log || length(log.scps_interacted) < req.conditions["interactions"])
 			return FALSE
 	
 	if("experiments" in req.conditions)
@@ -188,7 +188,7 @@ SUBSYSTEM_DEF(scp_specializations)
 	
 	notify_tier_advancement(ckey, track_name, tier_name)
 	
-	apply_tier_bonuses(ckey, track_type, new_tier)
+	apply_tier_bonuses(ckey, track_type, new_tier, old_tier)
 
 /datum/specialization_manager/proc/notify_tier_advancement(ckey, track_name, tier_name)
 	for(var/client/C in GLOB.clients)
@@ -197,10 +197,10 @@ SUBSYSTEM_DEF(scp_specializations)
 			to_chat(C, "<span class='notice'>You have advanced to [tier_name] in [track_name]!</span>")
 			break
 
-/datum/specialization_manager/proc/apply_tier_bonuses(ckey, track_type, tier)
+/datum/specialization_manager/proc/apply_tier_bonuses(ckey, track_type, tier, old_tier)
 	for(var/bonus_id in unlockable_bonuses)
 		var/list/bonus_data = unlockable_bonuses[bonus_id]
-		if(bonus_data["track"] == track_type && bonus_data["tier"] <= tier)
+		if(bonus_data["track"] == track_type && bonus_data["tier"] <= tier && bonus_data["tier"] > old_tier)
 			apply_bonus(ckey, bonus_data)
 
 /datum/specialization_manager/proc/apply_bonus(ckey, list/bonus_data)

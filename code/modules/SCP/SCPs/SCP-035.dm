@@ -598,7 +598,7 @@
 			continue
 		nearby_targets += H
 
-	if(nearby_targets.len)
+	if(length(nearby_targets))
 		var/mob/living/carbon/human/target = input(usr, "Choose a target to possess:", "SCP-035 Possession") as null|anything in nearby_targets
 		if(target)
 			possession_system.transfer_host(target)
@@ -629,7 +629,7 @@
 	message += "<b>Hosts Corrupted:</b> [hosts_corrupted]<br>"
 	message += "<b>Telepathic Communications:</b> [telepathic_communications]<br><br>"
 
-	if(possession_system.host_memories.len)
+	if(length(possession_system.host_memories))
 		message += "<h3>Possession History:</h3>"
 		for(var/record in possession_system.host_memories)
 			message += "[record]<br>"
@@ -645,7 +645,7 @@
 
 	var/message = "<h2>SCP-035 Affected Targets</h2>"
 
-	if(telepathy_system.affected_targets.len)
+	if(length(telepathy_system.affected_targets))
 		message += "<h3>Telepathically Influenced:</h3>"
 		for(var/mob/living/carbon/human/H in telepathy_system.affected_targets)
 			var/influence_level = telepathy_system.affected_targets[H]
@@ -662,7 +662,7 @@
 
 	var/message = "<h2>SCP-035 Learned Abilities</h2>"
 
-	if(possession_system.learned_abilities.len)
+	if(length(possession_system.learned_abilities))
 		message += "<h3>Abilities from Previous Hosts:</h3>"
 		for(var/ability in possession_system.learned_abilities)
 			message += "- [ability]<br>"
@@ -687,7 +687,7 @@
 	set category = "SCP"
 	set desc = "Use an ability learned from a previous host."
 
-	if(!possession_system.learned_abilities.len)
+	if(!length(possession_system.learned_abilities))
 		to_chat(usr, "<span class='warning'>No abilities learned yet.</span>")
 		return
 
@@ -696,27 +696,181 @@
 		use_ability(ability)
 
 /obj/item/clothing/mask/scp035/proc/use_ability(ability)
+	if(!possession_system?.current_host)
+		to_chat(usr, "<span class='warning'>You need a host to use abilities.</span>")
+		return
+
+	var/mob/living/carbon/human/H = possession_system.current_host
+
 	switch(ability)
 		if("Medical Knowledge")
-			to_chat(usr, "<span class='notice'>You use your medical knowledge to assess the situation.</span>")
-			// Could add actual medical effects here
+			var/heal_amount = 15 * min(possession_system.possession_strength, 5)
+			H.adjustBruteLoss(-heal_amount)
+			H.adjustFireLoss(-heal_amount)
+			H.adjustToxLoss(-heal_amount * 0.5)
+			H.adjustOxyLoss(-heal_amount)
+			H.visible_message("<span class='notice'>[H]'s wounds begin to knit closed with unsettling speed.</span>", \
+				"<span class='notice'>You draw upon stolen medical knowledge to accelerate healing.</span>")
+			hook_scp_interaction(H, "SCP-035", INTERACTION_TYPE_RESEARCH)
+
+		if("Healing Abilities")
+			var/list/nearby_hurt = list()
+			for(var/mob/living/carbon/human/patient in view(7, H))
+				if(patient == H)
+					continue
+				if(patient.health < patient.maxHealth)
+					nearby_hurt += patient
+			if(length(nearby_hurt))
+				var/mob/living/carbon/human/patient = input(usr, "Choose a target to heal:", "SCP-035 Healing") as null|anything in nearby_hurt
+				if(patient)
+					var/heal = 20 * min(possession_system.possession_strength, 5)
+					patient.adjustBruteLoss(-heal)
+					patient.adjustFireLoss(-heal)
+					patient.visible_message("<span class='notice'>[H] performs an impossibly precise medical procedure on [patient]!</span>", \
+						"<span class='notice'>You apply stolen medical expertise to heal [patient].</span>")
+			else
+				to_chat(usr, "<span class='warning'>No injured targets nearby to heal.</span>")
+
 		if("Combat Training")
-			to_chat(usr, "<span class='notice'>You adopt a combat stance, ready for battle.</span>")
-			// Could add combat bonuses here
+			H.stamina.adjust(50)
+			H.SetStun(0)
+			H.SetKnockdown(0)
+			H.SetImmobilized(0)
+			H.SetParalyzed(0)
+			H.physiology.brute_mod *= 0.7
+			H.visible_message("<span class='warning'>[H] moves with unnatural combat precision!</span>", \
+				"<span class='notice'>You draw upon stolen combat training, shaking off incapacitation.</span>")
+			addtimer(CALLBACK(H, /mob/living/carbon/human/proc/reset_physiology), 30 SECONDS)
+			hook_scp_combat(H, "SCP-035", 0, possession_system.possession_strength)
+
 		if("Security Clearance")
-			to_chat(usr, "<span class='notice'>You access security systems with your clearance.</span>")
-			// Could add security access here
+			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+			if(id_card)
+				id_card.add_access(list(ACCESS_SECURITY, ACCESS_SECURITY_LVL1, ACCESS_SECURITY_LVL2, ACCESS_SECURITY_LVL3), mode = TRY_ADD_ALL_NO_WILDCARD)
+				to_chat(usr, "<span class='notice'>You grant yourself temporary security access using stolen credentials.</span>")
+				addtimer(CALLBACK(id_card, /obj/item/card/id/proc/remove_access, list(ACCESS_SECURITY, ACCESS_SECURITY_LVL1, ACCESS_SECURITY_LVL2, ACCESS_SECURITY_LVL3)), 60 SECONDS)
+				H.visible_message("<span class='warning'>[H]'s ID card flashes with unauthorized security access!</span>")
+			else
+				to_chat(usr, "<span class='warning'>You need an ID card to grant security access.</span>")
+
 		if("Research Skills")
-			to_chat(usr, "<span class='notice'>You analyze the environment with scientific precision.</span>")
-			// Could add research effects here
+			var/list/nearby_scps = list()
+			for(var/obj/O in view(7, H))
+				if(O.SCP)
+					nearby_scps += O
+			if(length(nearby_scps))
+				var/obj/scp_obj = input(usr, "Choose an SCP to analyze:", "SCP-035 Research") as null|anything in nearby_scps
+				if(scp_obj)
+					var/analysis_quality = min(possession_system.possession_strength * 20, 100)
+					to_chat(usr, "<span class='notice'>You analyze [scp_obj] with stolen scientific expertise (Quality: [analysis_quality]%).</span>")
+					to_chat(usr, "<span class='info'>SCP-[scp_obj.SCP.designation] - Object Class: [scp_obj.SCP.classification]</span>")
+					hook_scp_interaction(H, "SCP-035", INTERACTION_TYPE_RESEARCH)
+			else
+				to_chat(usr, "<span class='notice'>You scan the area with scientific precision but find no SCPs to analyze.</span>")
+
+		if("Analysis Abilities")
+			var/list/nearby_humans = list()
+			for(var/mob/living/carbon/human/target in view(7, H))
+				if(target != H)
+					nearby_humans += target
+			if(length(nearby_humans))
+				var/mob/living/carbon/human/target = input(usr, "Choose a target to analyze:", "SCP-035 Analysis") as null|anything in nearby_humans
+				if(target)
+					to_chat(usr, "<span class='notice'>--- Subject Analysis: [target.name] ---</span>")
+					to_chat(usr, "<span class='info'>Health: [round(target.health / target.maxHealth * 100)]% | Job: [target.job || "Unknown"]</span>")
+					to_chat(usr, "<span class='info'>Brute: [round(target.getBruteLoss())] | Burn: [round(target.getFireLoss())] | Toxin: [round(target.getToxLoss())] | Oxy: [round(target.getOxyLoss())]</span>")
+					if(target.sanity)
+						to_chat(usr, "<span class='info'>Mental State: [round(target.sanity.sanity_level)]% | Traumas: [length(target.sanity.traumas)]</span>")
+					hook_scp_interaction(H, "SCP-035", INTERACTION_TYPE_RESEARCH)
+			else
+				to_chat(usr, "<span class='warning'>No targets nearby to analyze.</span>")
+
 		if("Technical Skills")
-			to_chat(usr, "<span class='notice'>You assess technical systems with engineering expertise.</span>")
-			// Could add technical effects here
+			var/list/nearby_machines = list()
+			for(var/obj/machinery/M in view(7, H))
+				if(!(M.machine_stat & (BROKEN|NOPOWER)) || M.panel_open)
+					nearby_machines += M
+			if(length(nearby_machines))
+				var/obj/machinery/M = input(usr, "Choose a machine to interface with:", "SCP-035 Engineering") as null|anything in nearby_machines
+				if(M)
+					M.panel_open = TRUE
+					if(M.machine_stat & BROKEN)
+						M.set_machine_stat(M.machine_stat & ~BROKEN)
+						M.visible_message("<span class='notice'>[H] performs an impossibly fast repair on [M]!</span>")
+					else
+						M.visible_message("<span class='notice'>[H] interfaces with [M] with uncanny technical skill.</span>")
+					to_chat(usr, "<span class='notice'>You apply stolen engineering knowledge to [M].</span>")
+					hook_scp_interaction(H, "SCP-035", INTERACTION_TYPE_RESEARCH)
+			else
+				to_chat(usr, "<span class='warning'>No machines nearby to interface with.</span>")
+
+		if("Repair Abilities")
+			var/list/nearby_broken = list()
+			for(var/obj/machinery/M in view(7, H))
+				if(M.machine_stat & BROKEN)
+					nearby_broken += M
+			if(length(nearby_broken))
+				var/obj/machinery/M = input(usr, "Choose a broken machine to repair:", "SCP-035 Repair") as null|anything in nearby_broken
+				if(M)
+					M.set_machine_stat(M.machine_stat & ~BROKEN)
+					M.panel_open = FALSE
+					M.visible_message("<span class='notice'>[H] repairs [M] with inhuman speed!</span>", \
+						"<span class='notice'>You draw upon stolen engineering expertise to repair [M].</span>")
+					hook_scp_interaction(H, "SCP-035", INTERACTION_TYPE_RESEARCH)
+			else
+				to_chat(usr, "<span class='notice'>No broken machinery nearby to repair.</span>")
+
 		if("Administrative Access")
-			to_chat(usr, "<span class='notice'>You use your administrative authority.</span>")
-			// Could add admin access here
+			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+			if(id_card)
+				id_card.add_access(list(ACCESS_ADMIN, ACCESS_ADMIN_LVL1, ACCESS_ADMIN_LVL2, ACCESS_ADMIN_LVL3, ACCESS_ADMIN_LVL4), mode = TRY_ADD_ALL_NO_WILDCARD)
+				to_chat(usr, "<span class='notice'>You grant yourself temporary administrative access using stolen authority.</span>")
+				addtimer(CALLBACK(id_card, /obj/item/card/id/proc/remove_access, list(ACCESS_ADMIN, ACCESS_ADMIN_LVL1, ACCESS_ADMIN_LVL2, ACCESS_ADMIN_LVL3, ACCESS_ADMIN_LVL4)), 45 SECONDS)
+				H.visible_message("<span class='warning'>[H]'s ID card flashes with unauthorized administrative access!</span>")
+			else
+				to_chat(usr, "<span class='warning'>You need an ID card to grant administrative access.</span>")
+
+		if("Command Authority")
+			var/list/nearby_humans = list()
+			for(var/mob/living/carbon/human/target in view(7, H))
+				if(target != H && target.sanity)
+					nearby_humans += target
+			if(length(nearby_humans))
+				var/mob/living/carbon/human/target = input(usr, "Choose a target to command:", "SCP-035 Authority") as null|anything in nearby_humans
+				if(target)
+					target.sanity.adjust_sanity(-25, "scp035_command")
+					target.apply_status_effect(/datum/status_effect/incapacitating/stun, 3 SECONDS)
+					target.visible_message("<span class='warning'>[target] freezes under [H]'s commanding presence!</span>", \
+						"<span class='danger'>An overwhelming authority compels you to obey!</span>")
+					hook_scp_interaction(target, "SCP-035", INTERACTION_TYPE_COMMUNICATION)
+			else
+				to_chat(usr, "<span class='warning'>No targets nearby to command.</span>")
+
+		if("Enhanced Speed")
+			H.add_movespeed_modifier(/datum/movespeed_modifier/scp035_speed)
+			to_chat(usr, "<span class='notice'>You move with stolen supernatural speed!</span>")
+			addtimer(CALLBACK(H, /mob/living/carbon/human.proc/remove_movespeed_modifier, /datum/movespeed_modifier/scp035_speed), 30 SECONDS)
+
+		if("Enhanced Durability")
+			H.physiology.brute_mod *= 0.5
+			H.physiology.burn_mod *= 0.5
+			to_chat(usr, "<span class='notice'>You harden your stolen body against damage!</span>")
+			addtimer(CALLBACK(H, /mob/living/carbon/human/proc/reset_physiology), 30 SECONDS)
+
+		if("Heat Resistance")
+			H.physiology.burn_mod *= 0.3
+			to_chat(usr, "<span class='notice'>You suppress your stolen body's heat sensitivity!</span>")
+			addtimer(CALLBACK(H, /mob/living/carbon/human/proc/reset_physiology), 45 SECONDS)
+
 		else
 			to_chat(usr, "<span class='notice'>You use your [ability].</span>")
+
+/mob/living/carbon/human/proc/reset_physiology()
+	physiology.brute_mod = initial(physiology.brute_mod)
+	physiology.burn_mod = initial(physiology.burn_mod)
+
+/datum/movespeed_modifier/scp035_speed
+	slowdown = -1.5
 
 // Attack behavior - attempt possession when used
 /obj/item/clothing/mask/scp035/attack(mob/living/carbon/human/M, mob/living/carbon/human/user)
@@ -760,8 +914,8 @@
 	status_items += "Total Corrosion Caused: [total_corrosion_caused]"
 	status_items += "Personality Changes Induced: [personality_changes_induced]"
 	status_items += "Consciousness Transfers: [consciousness_transfers]"
-	status_items += "Previous Hosts: [possession_system.previous_hosts.len]"
-	status_items += "Affected Targets: [telepathy_system.affected_targets.len]"
+	status_items += "Previous Hosts: [length(possession_system.previous_hosts)]"
+	status_items += "Affected Targets: [length(telepathy_system.affected_targets)]"
 
 	return status_items
 

@@ -165,9 +165,10 @@
 
 /datum/dclass_persistence_manager/proc/check_achievements(datum/dclass_persistence_data/data)
 	for(var/achievement_id in achievements)
-		var/datum/dclass_achievement/achievement = achievements[achievement_id]
-		if(achievement.unlocked)
+		if(achievement_id in data.achievements)
 			continue
+
+		var/datum/dclass_achievement/achievement = achievements[achievement_id]
 
 		var/can_unlock = TRUE
 		for(var/requirement in achievement.requirements)
@@ -200,12 +201,10 @@
 			unlock_achievement(data, achievement)
 
 /datum/dclass_persistence_manager/proc/unlock_achievement(datum/dclass_persistence_data/data, datum/dclass_achievement/achievement)
-	achievement.unlocked = TRUE
-	achievement.unlock_time = world.time
 	data.achievements[achievement.id] = list(
 		"name" = achievement.name,
 		"description" = achievement.description,
-		"unlock_time" = achievement.unlock_time
+		"unlock_time" = world.time
 	)
 
 	// Notify player if they're online
@@ -225,10 +224,10 @@
 		"round_start_time" = player.round_start_time,
 		"escape_attempts" = player.escape_attempts,
 		"successful_escapes" = player.successful_escapes,
-		"contraband_found" = player.contraband.len,
+		"contraband_found" = length(player.contraband),
 		"work_assignments" = player.current_work_assignment,
-		"alliances_formed" = player.allies.len,
-		"players_betrayed" = player.reported_players.len,
+		"alliances_formed" = length(player.allies),
+		"players_betrayed" = length(player.reported_players),
 		"final_level" = player.level,
 		"final_experience" = player.experience,
 		"survival_time" = world.time - player.round_start_time,
@@ -239,10 +238,10 @@
 	// Update persistent statistics
 	update_player_statistics(player, "escape_attempts", player.escape_attempts)
 	update_player_statistics(player, "successful_escapes", player.successful_escapes)
-	update_player_statistics(player, "contraband_found", player.contraband.len)
+	update_player_statistics(player, "contraband_found", length(player.contraband))
 	update_player_statistics(player, "work_completed", 1)
-	update_player_statistics(player, "alliances_formed", player.allies.len)
-	update_player_statistics(player, "players_betrayed", player.reported_players.len)
+	update_player_statistics(player, "alliances_formed", length(player.allies))
+	update_player_statistics(player, "players_betrayed", length(player.reported_players))
 	update_player_statistics(player, "level_achieved", player.level)
 	update_player_statistics(player, "survival_time", world.time - player.round_start_time)
 
@@ -321,7 +320,7 @@
 			"unlocked_at" = SQLtime(achievement_data["unlock_time"])
 		))
 
-	if(achievement_rows.len > 0)
+	if(length(achievement_rows) > 0)
 		SSdbcore.MassInsert(format_table_name("dclass_achievements"), achievement_rows, duplicate_key = TRUE)
 
 /datum/dclass_persistence_manager/proc/load_player_from_database(ckey)
@@ -428,7 +427,7 @@
 	load_persistence_from_database()
 
 	// If database loading failed or was incomplete, load from file
-	if(persistent_data.len == 0)
+	if(length(persistent_data) == 0)
 		load_persistence_from_file()
 
 /datum/dclass_persistence_manager/proc/load_persistence_from_database()
@@ -517,8 +516,8 @@
 		))
 
 	// Sort by successful escapes (descending) - manual sorting
-	for(var/i = 1; i <= leaderboard.len; i++)
-		for(var/j = i + 1; j <= leaderboard.len; j++)
+	for(var/i = 1; i <= length(leaderboard); i++)
+		for(var/j = i + 1; j <= length(leaderboard); j++)
 			if(leaderboard[i]["successful_escapes"] < leaderboard[j]["successful_escapes"])
 				var/list/temp = leaderboard[i]
 				leaderboard[i] = leaderboard[j]
@@ -558,6 +557,7 @@
 	ckey = player_ckey
 	data_file_path = "data/dclass/[ckey].json"
 	round_start_time = world.time
+	generate_dclass_number()
 	initialize_skills()
 	load_data()
 

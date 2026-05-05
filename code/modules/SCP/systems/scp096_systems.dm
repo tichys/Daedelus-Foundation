@@ -1,5 +1,5 @@
 // SCP-096 Modular Systems
-// Rage Management and Face Revelation System
+// Rage Tracking, Face Revelation, and Research Systems
 
 /datum/scp096_rage_system
 	var/mob/living/carbon/human/scp096/owner
@@ -13,6 +13,7 @@
 	var/rage_activations = 0
 	var/rage_escalations = 0
 	var/last_rage_time = 0
+	var/total_damage_dealt = 0
 
 /datum/scp096_rage_system/New(mob/living/carbon/human/scp096/new_owner)
 	owner = new_owner
@@ -21,27 +22,25 @@
 	if(!owner || owner.stat == DEAD)
 		return
 
-	// Gradual rage decay
 	if(rage_level > 0)
 		rage_level = max(0, rage_level - rage_decay_rate)
 
-	// Rage boost effects
 	if(world.time < rage_boost_duration)
 		rage_multiplier = min(3.0, rage_multiplier)
 	else
 		rage_multiplier = max(1.0, rage_multiplier - 0.01)
 
-	// Rage-based damage to nearby targets
 	if(rage_level > 20)
 		for(var/mob/living/carbon/human/H in range(3, owner))
 			if(H.stat != DEAD && H != owner)
 				var/damage = rage_level * 0.1 * rage_multiplier
 				H.adjustBruteLoss(damage)
-				owner.total_damage_dealt += damage
+				total_damage_dealt += damage
 
 /datum/scp096_rage_system/proc/trigger_rage(amount = 10)
 	rage_level = min(max_rage_level, rage_level + amount + rage_escalation_bonus)
 	rage_activations++
+	owner.rage_activations++
 	last_rage_time = world.time
 	rage_escalation_bonus += 5
 
@@ -52,7 +51,6 @@
 	rage_escalation_bonus += 10
 	rage_boost_duration = world.time + rage_boost_duration_time
 
-	// Announce to nearby players
 	for(var/mob/living/carbon/human/H in range(5, owner))
 		if(H != owner)
 			to_chat(H, "<span class='danger'>You feel an overwhelming sense of dread as something nearby becomes enraged...</span>")
@@ -86,7 +84,6 @@
 	if(!owner || owner.stat == DEAD)
 		return
 
-	// Random announcements
 	if(prob(2) && world.time > last_announcement + announcement_cooldown)
 		announce_presence()
 
@@ -97,11 +94,9 @@
 	face_revelation_cooldown = world.time + face_revelation_cooldown_time
 	face_revelations++
 
-	// Enhanced visual and audio effects
 	playsound(owner, 'sound/effects/ghost.ogg', 50, 0)
 	owner.visible_message("<span class='danger'>[owner] reveals their face in a moment of pure terror!</span>")
 
-	// Announce to nearby players
 	for(var/mob/living/carbon/human/H in range(7, owner))
 		if(H != owner)
 			to_chat(H, "<span class='danger'>You catch a glimpse of something that fills you with primal fear...</span>")
@@ -137,17 +132,6 @@
 	if(!owner || owner.stat == DEAD)
 		return
 
-	// Automatic scream when rage is high and targets are nearby
-	if(owner.rage_system.rage_level > 70 && world.time > scream_cooldown)
-		var/list/targets = list()
-		for(var/mob/living/carbon/human/H in range(scream_range, owner))
-			if(H.stat != DEAD && H != owner)
-				targets += H
-
-		if(targets.len > 0)
-			var/mob/living/carbon/human/target = pick(targets)
-			perform_scream_attack(target)
-
 /datum/scp096_scream_system/proc/perform_scream_attack(mob/living/carbon/human/target)
 	if(world.time < scream_cooldown || !target)
 		return FALSE
@@ -155,18 +139,12 @@
 	scream_cooldown = world.time + scream_cooldown_time
 	scream_attacks++
 
-	// Enhanced scream mechanics
-	var/damage = scream_damage * owner.rage_system.rage_multiplier
+	var/damage = scream_damage
 	target.adjustBruteLoss(damage)
-	target.stamina.adjust(-damage * 2)
-	owner.total_damage_dealt += damage
 
-	// Chance to cause fear effects
 	if(prob(30))
-		target.stamina.adjust(-20)
 		to_chat(target, "<span class='danger'>The scream fills you with overwhelming terror!</span>")
 
-	// Audio and visual effects
 	playsound(owner, 'sound/effects/ghost2.ogg', 70, 0)
 	owner.visible_message("<span class='danger'>[owner] lets out a blood-curdling scream at [target]!</span>")
 	to_chat(target, "<span class='danger'>You hear a terrifying scream that shakes your very soul!</span>")
@@ -188,24 +166,16 @@
 	if(!owner || owner.stat == DEAD)
 		return
 
-	// Automatic hysteria when rage is very high
-	if(owner.rage_system.rage_level > 80 && world.time > hysteria_duration)
-		trigger_mass_hysteria()
-
 /datum/scp096_hysteria_system/proc/trigger_mass_hysteria()
 	hysteria_events++
 	hysteria_duration = world.time + hysteria_duration_time
 
-	// Enhanced hysteria effects
 	for(var/mob/living/carbon/human/H in range(hysteria_radius, owner))
 		if(H != owner)
-			H.stamina.adjust(-30)
 			H.adjustBruteLoss(10)
 			to_chat(H, "<span class='danger'>Mass hysteria grips the area! You feel overwhelming fear!</span>")
 
-			// Chance to cause panic
 			if(prob(40))
-				H.stamina.adjust(-20)
 				to_chat(H, "<span class='danger'>You panic and lose control!</span>")
 
 	playsound(owner, 'sound/effects/ghost.ogg', 80, 0)
@@ -223,24 +193,17 @@
 	if(!owner || owner.stat == DEAD)
 		return
 
-	// Collect research data
 	var/list/current_data = list(
-		"rage_level" = owner.rage_system.rage_level,
-		"rage_multiplier" = owner.rage_system.rage_multiplier,
-		"face_revelations" = owner.face_system.face_revelations,
-		"scream_attacks" = owner.scream_system.scream_attacks,
-		"hysteria_events" = owner.hysteria_system.hysteria_events,
-		"total_damage_dealt" = owner.total_damage_dealt,
-		"rage_activations" = owner.rage_system.rage_activations,
-		"rage_escalations" = owner.rage_system.rage_escalations
+		"state" = owner.state,
+		"face_viewers" = length(owner.face_viewers),
+		"kills_count" = owner.kills_count,
+		"rage_activations" = owner.rage_activations,
+		"victims_hunted" = owner.victims_hunted,
+		"containment_escapes" = owner.containment_escapes
 	)
 
-	// Store data for research integration
 	research_data = current_data
 
 /datum/scp096_research_system/proc/contribute_research_data()
 	if(!owner || !owner.SCP)
 		return
-
-	// Store research data for later integration
-	// Note: Research integration will be handled by the main SCP system

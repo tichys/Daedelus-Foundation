@@ -1,9 +1,9 @@
-// SCP-082 Species Definition
+// SCP-082 Species Definition - Fernand the Cannibal
 
 /datum/species/scp082
 	name = "SCP-082"
 	id = "scp082"
-	say_mod = "roars"
+	say_mod = "speaks"
 	sexes = 0
 	species_traits = list()
 	inherent_traits = list(
@@ -47,6 +47,5 @@
 	if(H.stat == DEAD)
 		return
 
-	// SCP-082 specific life mechanics
 	if(prob(1))
-		H.emote("roar")
+		H.emote("smile")

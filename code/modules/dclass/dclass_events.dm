@@ -189,7 +189,7 @@
 
 /datum/dclass_event_manager/proc/process_events()
 	// Check if it's time for a new event
-	if(world.time > last_event_time + event_cooldown && active_events.len < max_concurrent_events)
+	if(world.time > last_event_time + event_cooldown && length(active_events) < max_concurrent_events)
 		trigger_random_event()
 
 	// Process active events
@@ -222,7 +222,7 @@
 		if(!event_already_active)
 			possible_events += event
 
-	if(possible_events.len > 0)
+	if(length(possible_events) > 0)
 		var/datum/dclass_event/selected_event = pick(possible_events)
 		start_event(selected_event)
 

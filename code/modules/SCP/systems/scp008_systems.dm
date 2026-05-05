@@ -138,7 +138,7 @@
 		if(other_zombie != zombie && !(other_zombie in horde_members))
 			nearby_zombies += other_zombie
 
-	if(nearby_zombies.len)
+	if(length(nearby_zombies))
 		var/mob/living/simple_animal/hostile/scp008_zombie/coordinated_zombie = pick(nearby_zombies)
 		form_horde_bond(zombie, coordinated_zombie)
 
@@ -346,7 +346,7 @@
 /datum/scp008_containment_system/proc/check_containment_response()
 	var/active_infections = owner.infection_system.current_strength
 	var/infection_type = owner.infection_system.get_infection_type()
-	var/horde_size = owner.horde_system.horde_members.len
+	var/horde_size = length(owner.horde_system.horde_members)
 	var/new_containment_level = 0
 
 	// Determine containment level based on infections and horde size
@@ -559,8 +559,8 @@
 	research_data["infection_type"] = owner.infection_system.get_infection_type()
 	research_data["evolution_stage"] = owner.evolution_system.current_stage
 	research_data["containment_level"] = owner.containment_system.containment_level
-	research_data["horde_size"] = owner.horde_system.horde_members.len
-	research_data["environmental_control"] = owner.environmental_system.controlled_room_types.len
+	research_data["horde_size"] = length(owner.horde_system.horde_members)
+	research_data["environmental_control"] = length(owner.environmental_system.controlled_room_types)
 
 	// Add to research persistence if available
 	if(SSresearch_persistence && SSresearch_persistence.manager)

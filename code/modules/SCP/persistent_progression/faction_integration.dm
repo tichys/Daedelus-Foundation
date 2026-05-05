@@ -254,12 +254,6 @@
 
 	return stats
 
-// Initialize faction integration in the persistent progression subsystem
-/datum/controller/subsystem/persistent_progression/proc/initialize_faction_integration()
-	if(!faction_integration)
-		faction_integration = new /datum/faction_integration()
-		world.log << "Faction Integration: Initialized faction integration system"
-
 // Global faction integration instance
 GLOBAL_VAR_INIT(faction_integration, null)
 

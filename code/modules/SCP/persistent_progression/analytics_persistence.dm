@@ -153,7 +153,7 @@ SUBSYSTEM_DEF(analytics_persistence)
 	world.log << "Loading existing analytics data..."
 	manager.load_existing_analytics_data()
 
-	world.log << "Performance metrics count at initialization: [manager.performance_metrics.len]"
+	world.log << "Performance metrics count at initialization: [length(manager.performance_metrics)]"
 	return ..()
 
 /datum/controller/subsystem/analytics_persistence/fire()
@@ -436,7 +436,7 @@ SUBSYSTEM_DEF(analytics_persistence)
 		if("research_progress")
 			if(SSresearch_persistence?.manager)
 				var/datum/research_persistence_manager/research = SSresearch_persistence.manager
-				return research.research_projects.len > 0 ? (research.completed_projects / research.research_projects.len) * 100 : 0
+				return length(research.research_projects) > 0 ? (research.completed_projects / length(research.research_projects)) * 100 : 0
 		if("personnel_satisfaction")
 			if(SSpersonnel_persistence?.manager)
 				var/datum/personnel_persistence_manager/personnel = SSpersonnel_persistence.manager
@@ -511,19 +511,19 @@ SUBSYSTEM_DEF(analytics_persistence)
 		if("security_analysis")
 			if(SSsecurity_persistence?.manager)
 				var/datum/security_persistence_manager/security = SSsecurity_persistence.manager
-				return security.security_incidents.len
+				return length(security.security_incidents)
 		if("medical_analysis")
 			if(SSmedical_persistence?.manager)
 				var/datum/medical_persistence_manager/medical = SSmedical_persistence.manager
-				return medical.medical_records.len
+				return length(medical.medical_records)
 		if("research_analysis")
 			if(SSresearch_persistence?.manager)
 				var/datum/research_persistence_manager/research = SSresearch_persistence.manager
-				return research.research_projects.len
+				return length(research.research_projects)
 		if("personnel_analysis")
 			if(SSpersonnel_persistence?.manager)
 				var/datum/personnel_persistence_manager/personnel = SSpersonnel_persistence.manager
-				return personnel.personnel_records.len
+				return length(personnel.personnel_records)
 		else
 			return 10 // Default sample size
 

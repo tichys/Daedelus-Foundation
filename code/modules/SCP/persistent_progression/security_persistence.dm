@@ -185,7 +185,7 @@ SUBSYSTEM_DEF(security_persistence)
 // Old procedure removed - using updated version below
 
 /datum/security_persistence_manager/proc/update_security_statistics()
-	security_statistics["total_personnel"] = security_records.len
+	security_statistics["total_personnel"] = length(security_records)
 	security_statistics["total_incidents"] = total_security_incidents
 	security_statistics["active_threats"] = active_threats
 	security_statistics["containment_breaches"] = containment_breaches
@@ -468,7 +468,7 @@ SUBSYSTEM_DEF(security_persistence)
 			world.log << "Security Persistence: Failed to save access log [log_id]"
 		qdel(query_save_log)
 
-	world.log << "Security Persistence: Saved [security_records.len] security records, [security_incidents.len] incidents, [clearance_requests.len] requests, [security_protocols.len] protocols, and [access_logs.len] access logs to database"
+	world.log << "Security Persistence: Saved [length(security_records)] security records, [length(security_incidents)] incidents, [length(clearance_requests)] requests, [length(security_protocols)] protocols, and [length(access_logs)] access logs to database"
 
 /datum/security_persistence_manager/proc/load_security_data()
 	// Load from database first (takes precedence)
@@ -714,7 +714,7 @@ SUBSYSTEM_DEF(security_persistence)
 		access_logs[log_id] = log
 	qdel(query_load_logs)
 
-	world.log << "Security Persistence: Loaded [security_records.len] security records, [security_incidents.len] incidents, [clearance_requests.len] requests, [security_protocols.len] protocols, and [access_logs.len] access logs from database"
+	world.log << "Security Persistence: Loaded [length(security_records)] security records, [length(security_incidents)] incidents, [length(clearance_requests)] requests, [length(security_protocols)] protocols, and [length(access_logs)] access logs from database"
 */
 
 // Subsystem initialization
@@ -727,7 +727,7 @@ SUBSYSTEM_DEF(security_persistence)
 	world.log << "Loading existing security records from datacore..."
 	manager.load_existing_security_records()
 
-	world.log << "Security records count at initialization: [manager.security_records.len]"
+	world.log << "Security records count at initialization: [length(manager.security_records)]"
 	return ..()
 
 /datum/controller/subsystem/security_persistence/fire()
@@ -803,7 +803,7 @@ SUBSYSTEM_DEF(security_persistence)
 
 				world.log << "Security: Created new security record for [security_record.fields[DATACORE_NAME]]"
 
-	world.log << "Security: Loaded [security_records.len] security records from datacore"
+	world.log << "Security: Loaded [length(security_records)] security records from datacore"
 
 // Add security personnel
 /datum/security_persistence_manager/proc/add_security_personnel(var/ckey, var/real_name, var/clearance_level = 1)
@@ -813,7 +813,7 @@ SUBSYSTEM_DEF(security_persistence)
 	personnel.security_status = "ACTIVE"
 	personnel.last_updated = world.time
 	security_records[ckey] = personnel
-	security_statistics["total_personnel"] = security_records.len
+	security_statistics["total_personnel"] = length(security_records)
 	return personnel
 
 // Add security protocol (updated)
@@ -891,8 +891,8 @@ SUBSYSTEM_DEF(security_persistence)
 	var/list/final_results = list(
 		"scan_type" = scan_type,
 		"timestamp" = world.time,
-		"total_threats" = threats_found.len,
-		"total_vulnerabilities" = vulnerabilities.len,
+		"total_threats" = length(threats_found),
+		"total_vulnerabilities" = length(vulnerabilities),
 		"overall_severity" = scan_severity,
 		"threats_found" = threats_found,
 		"vulnerabilities" = vulnerabilities,
@@ -900,7 +900,7 @@ SUBSYSTEM_DEF(security_persistence)
 		"detailed_results" = scan_results
 	)
 
-	world.log << "Security: Scan completed - [threats_found.len] threats, [vulnerabilities.len] vulnerabilities, severity: [scan_severity]"
+	world.log << "Security: Scan completed - [length(threats_found)] threats, [length(vulnerabilities)] vulnerabilities, severity: [scan_severity]"
 
 	return final_results
 
@@ -910,7 +910,7 @@ SUBSYSTEM_DEF(security_persistence)
 	var/threat_count = 0
 
 	// Check for breached airlocks
-	for(var/obj/machinery/door/airlock/airlock in world)
+	for(var/obj/machinery/door/airlock/airlock as anything in INSTANCES_OF(/obj/machinery/door/airlock))
 		if(airlock.z == 1)
 			if(airlock.obj_flags & EMAGGED)
 				threat_count++
@@ -1086,8 +1086,8 @@ SUBSYSTEM_DEF(security_persistence)
 	// Check for personnel with many incidents
 	for(var/ckey in security_records)
 		var/datum/security_record/record = security_records[ckey]
-		if(record.security_incidents.len > 3)
-			results["vulnerabilities"] += "Multiple incidents for [record.real_name]: [record.security_incidents.len]"
+		if(length(record.security_incidents) > 3)
+			results["vulnerabilities"] += "Multiple incidents for [record.real_name]: [length(record.security_incidents)]"
 			results["severity"] += 2
 
 	// Check for suspended personnel
@@ -1163,10 +1163,10 @@ SUBSYSTEM_DEF(security_persistence)
 		recommendations += "MEDIUM: Conduct personnel security review"
 		recommendations += "MEDIUM: Update security protocols"
 
-	if(threats.len > 5)
+	if(length(threats) > 5)
 		recommendations += "Multiple threats detected - prioritize containment"
 
-	if(vulnerabilities.len > 3)
+	if(length(vulnerabilities) > 3)
 		recommendations += "Multiple vulnerabilities found - implement security patches"
 
 	if(containment_breaches > 0)

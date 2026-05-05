@@ -1,3 +1,21 @@
+#ifndef EXPERIMENT_TYPE_BEHAVIORAL
+#define EXPERIMENT_TYPE_BEHAVIORAL 1
+#define EXPERIMENT_TYPE_CONTAINMENT 2
+#define EXPERIMENT_TYPE_INTERACTION 3
+#define EXPERIMENT_TYPE_HAZARD 4
+#define EXPERIMENT_TYPE_MEDICAL 5
+#define EXPERIMENT_TYPE_TECHNICAL 6
+#define EXPERIMENT_TYPE_COGNITIVE 7
+#define EXPERIMENT_TYPE_EXPLORATION 8
+#define EXPERIMENT_TYPE_CARE 9
+#define EXPERIMENT_TYPE_OBSERVATION 10
+#define EXPERIMENT_RISK_MINIMAL 1
+#define EXPERIMENT_RISK_LOW 2
+#define EXPERIMENT_RISK_MEDIUM 3
+#define EXPERIMENT_RISK_HIGH 4
+#define EXPERIMENT_RISK_CRITICAL 5
+#endif
+
 /proc/initialize_all_scp_experiments()
 	if(!SSscp_experiments || !SSscp_experiments.manager)
 		return
@@ -50,6 +68,13 @@
 	initialize_scp1102_experiments(manager)
 	initialize_scp420j_experiments(manager)
 	initialize_scp5000_experiments(manager)
+	initialize_scp080_experiments(manager)
+	initialize_scp263_experiments(manager)
+	initialize_scp280_experiments(manager)
+	initialize_scp527_experiments(manager)
+	initialize_scp529_experiments(manager)
+	initialize_scp1499_experiments(manager)
+	initialize_scp247_experiments(manager)
 
 /proc/register_experiment(datum/scp_experiment_manager/manager, scp_id, exp_type, name, desc, risk, duration, cooldown)
 	var/template_id = "[scp_id]_[exp_type]"
@@ -64,13 +89,13 @@
 
 /proc/get_scp_class(scp_id)
 	switch(scp_id)
-		if("SCP-173", "SCP-049", "SCP-914", "SCP-012", "SCP-013", "SCP-513", "SCP-066", "SCP-178", "SCP-2020", "SCP-216", "SCP-2398", "SCP-294", "SCP-3349", "SCP-5295", "SCP-999", "SCP-131", "SCP-2343", "SCP-1048", "SCP-427", "SCP-017", "SCP-457", "SCP-895", "SCP-082", "SCP-1507", "SCP-2427-3")
+		if("SCP-173", "SCP-049", "SCP-914", "SCP-012", "SCP-013", "SCP-513", "SCP-066", "SCP-178", "SCP-2020", "SCP-216", "SCP-2398", "SCP-294", "SCP-3349", "SCP-5295", "SCP-999", "SCP-131", "SCP-2343", "SCP-1048", "SCP-427", "SCP-017", "SCP-457", "SCP-895", "SCP-1507", "SCP-2427-3")
 			return "Euclid"
-		if("SCP-096", "SCP-106", "SCP-682", "SCP-939", "SCP-966", "SCP-3199", "SCP-035", "SCP-008", "SCP-1471")
+		if("SCP-096", "SCP-106", "SCP-682", "SCP-939", "SCP-966", "SCP-3199", "SCP-035", "SCP-008", "SCP-1471", "SCP-399")
 			return "Keter"
-		if("SCP-500", "SCP-113", "SCP-714", "SCP-399", "SCP-343")
+		if("SCP-500", "SCP-113", "SCP-714", "SCP-343", "SCP-080", "SCP-263", "SCP-280", "SCP-527", "SCP-529", "SCP-1499", "SCP-247")
 			return "Safe"
-		if("SCP-087", "SCP-3008")
+		if("SCP-082", "SCP-087", "SCP-3008")
 			return "Euclid"
 	return "Euclid"
 
@@ -159,16 +184,21 @@
 		"Mimicry Analysis",
 		"Study SCP-939's ability to mimic human speech.",
 		EXPERIMENT_RISK_HIGH, 600, 18000)
-	
+
 	register_experiment(manager, "SCP-939", EXPERIMENT_TYPE_BEHAVIORAL,
 		"Pack Behavior Study",
 		"Document pack coordination and hunting strategies.",
 		EXPERIMENT_RISK_HIGH, 900, 24000)
-	
+
 	register_experiment(manager, "SCP-939", EXPERIMENT_TYPE_INTERACTION,
 		"Sensory Testing",
 		"Test SCP-939's sensory capabilities and limitations.",
 		EXPERIMENT_RISK_HIGH, 600, 18000)
+
+	register_experiment(manager, "SCP-939", EXPERIMENT_TYPE_CONTAINMENT,
+		"Breach Response Drill",
+		"Document standard containment breach procedures and their effectiveness against SCP-939 packs.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
 
 /proc/initialize_scp966_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-966", EXPERIMENT_TYPE_BEHAVIORAL,
@@ -186,16 +216,21 @@
 		"Fire Propagation Study",
 		"Analyze SCP-457's fire spread patterns and behavior.",
 		EXPERIMENT_RISK_HIGH, 600, 18000)
-	
+
 	register_experiment(manager, "SCP-457", EXPERIMENT_TYPE_CONTAINMENT,
 		"Fuel Consumption Analysis",
 		"Document fuel requirements and consumption rates.",
 		EXPERIMENT_RISK_MEDIUM, 300, 12000)
-	
+
 	register_experiment(manager, "SCP-457", EXPERIMENT_TYPE_CONTAINMENT,
 		"Extinguishing Protocol Testing",
 		"Test various extinguishing methods on SCP-457.",
 		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-457", EXPERIMENT_TYPE_INTERACTION,
+		"Intelligence Assessment",
+		"Test whether SCP-457 can respond to stimuli or communicate intent at higher evolution stages.",
+		EXPERIMENT_RISK_HIGH, 1200, 30000)
 
 /proc/initialize_scp682_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-682", EXPERIMENT_TYPE_BEHAVIORAL,
@@ -262,11 +297,16 @@
 		"Manifestation Study",
 		"Document conditions for SCP-2427-3 manifestations.",
 		EXPERIMENT_RISK_HIGH, 600, 18000)
-	
+
 	register_experiment(manager, "SCP-2427-3", EXPERIMENT_TYPE_BEHAVIORAL,
 		"Behavior Pattern Analysis",
 		"Study SCP-2427-3's behavioral patterns.",
 		EXPERIMENT_RISK_MEDIUM, 300, 12000)
+
+	register_experiment(manager, "SCP-2427-3", EXPERIMENT_TYPE_INTERACTION,
+		"Manifestation Trigger Testing",
+		"Test various stimuli to determine what triggers SCP-2427-3's manifestations.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
 
 /proc/initialize_scp294_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-294", EXPERIMENT_TYPE_TECHNICAL,
@@ -284,11 +324,16 @@
 		"Cure Efficacy Study",
 		"Analyze the effectiveness of SCP-500 on various conditions.",
 		EXPERIMENT_RISK_LOW, 300, 12000)
-	
+
 	register_experiment(manager, "SCP-500", EXPERIMENT_TYPE_MEDICAL,
 		"Replication Attempt",
 		"Attempt to replicate SCP-500's effects synthetically.",
 		EXPERIMENT_RISK_MEDIUM, 1200, 36000)
+
+	register_experiment(manager, "SCP-500", EXPERIMENT_TYPE_TECHNICAL,
+		"Pill Composition Reverse Engineering",
+		"Analyze the chemical structure of SCP-500 pills to understand their universal curative properties.",
+		EXPERIMENT_RISK_LOW, 900, 24000)
 
 /proc/initialize_scp427_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-427", EXPERIMENT_TYPE_MEDICAL,
@@ -489,7 +534,15 @@
 		EXPERIMENT_RISK_MINIMAL, 300, 9000)
 
 /proc/initialize_scp343_experiments(datum/scp_experiment_manager/manager)
-	return
+	register_experiment(manager, "SCP-343", EXPERIMENT_TYPE_INTERACTION,
+		"Divine Request Documentation",
+		"Document SCP-343's responses to verbal requests and their outcomes.",
+		EXPERIMENT_RISK_LOW, 300, 9000)
+
+	register_experiment(manager, "SCP-343", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Environmental Manipulation Observation",
+		"Observe SCP-343's creation and modification of its surroundings.",
+		EXPERIMENT_RISK_LOW, 500, 15000)
 
 /proc/initialize_scp131_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-131", EXPERIMENT_TYPE_INTERACTION,
@@ -574,11 +627,31 @@
 		"Document SCP-151's drowning effect on viewers.",
 		EXPERIMENT_RISK_HIGH, 600, 18000)
 
+	register_experiment(manager, "SCP-151", EXPERIMENT_TYPE_INTERACTION,
+		"Proximity Threshold Analysis",
+		"Determine the minimum exposure distance and duration needed to trigger the drowning effect.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+	register_experiment(manager, "SCP-151", EXPERIMENT_TYPE_CONTAINMENT,
+		"Visual Shielding Effectiveness",
+		"Test various physical barriers and filters to block SCP-151's memetic drowning effect.",
+		EXPERIMENT_RISK_MEDIUM, 900, 24000)
+
 /proc/initialize_scp1102_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-1102", EXPERIMENT_TYPE_BEHAVIORAL,
 		"Behavior Analysis",
 		"Document SCP-1102's behavior and effects.",
 		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+	register_experiment(manager, "SCP-1102", EXPERIMENT_TYPE_EXPLORATION,
+		"Dimensional Depth Mapping",
+		"Conduct systematic exploration of SCP-1102's dimensional interior at various depth levels.",
+		EXPERIMENT_RISK_HIGH, 1800, 36000)
+
+	register_experiment(manager, "SCP-1102", EXPERIMENT_TYPE_TECHNICAL,
+		"Portal Mechanics Analysis",
+		"Study the portal creation mechanics, cooldown periods, and portal stability of SCP-1102.",
+		EXPERIMENT_RISK_MEDIUM, 900, 24000)
 
 /proc/initialize_scp420j_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-420-J", EXPERIMENT_TYPE_INTERACTION,
@@ -586,8 +659,98 @@
 		"Document SCP-420-J's effects on subjects.",
 		EXPERIMENT_RISK_LOW, 300, 9000)
 
+	register_experiment(manager, "SCP-420-J", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Social Contagion Study",
+		"Document the spread of SCP-420-J's verbal compulsion between subjects.",
+		EXPERIMENT_RISK_LOW, 600, 18000)
+
+	register_experiment(manager, "SCP-420-J", EXPERIMENT_TYPE_MEDICAL,
+		"Pharmacological Composition Analysis",
+		"Analyze the chemical composition of SCP-420-J samples and compare to known substances.",
+		EXPERIMENT_RISK_LOW, 300, 12000)
+
 /proc/initialize_scp5000_experiments(datum/scp_experiment_manager/manager)
 	register_experiment(manager, "SCP-5000", EXPERIMENT_TYPE_INTERACTION,
 		"Suit Function Study",
 		"Analyze SCP-5000's suit capabilities.",
 		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-5000", EXPERIMENT_TYPE_COGNITIVE,
+		"Compulsion Pattern Analysis",
+		"Study the psychological compulsion SCP-5000 exerts on its wearer from initial contact to full override.",
+		EXPERIMENT_RISK_CRITICAL, 1200, 36000)
+
+	register_experiment(manager, "SCP-5000", EXPERIMENT_TYPE_CONTAINMENT,
+		"Invisibility Detection Methodology",
+		"Develop and test methods for detecting SCP-5000 wearers rendered imperceptible by the suit.",
+		EXPERIMENT_RISK_HIGH, 900, 30000)
+
+/proc/initialize_scp080_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-080", EXPERIMENT_TYPE_OBSERVATION,
+		"Cabinet Inspection",
+		"Document the contents and behavior of SCP-080.",
+		EXPERIMENT_RISK_LOW, 300, 12000)
+	register_experiment(manager, "SCP-080", EXPERIMENT_TYPE_CONTAINMENT,
+		"Containment Assessment",
+		"Test containment effectiveness for SCP-080.",
+		EXPERIMENT_RISK_LOW, 300, 9000)
+
+/proc/initialize_scp263_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-263", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Game Show Hosting",
+		"Participate in SCP-263's game show format.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+	register_experiment(manager, "SCP-263", EXPERIMENT_TYPE_HAZARD,
+		"Elimination Protocol Study",
+		"Document the effects of SCP-263 elimination games.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+/proc/initialize_scp280_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-280", EXPERIMENT_TYPE_OBSERVATION,
+		"Light Sensitivity Study",
+		"Document SCP-280's reaction to light exposure.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+	register_experiment(manager, "SCP-280", EXPERIMENT_TYPE_HAZARD,
+		"Predation Pattern Analysis",
+		"Study SCP-280's hunting behavior.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+/proc/initialize_scp527_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-527", EXPERIMENT_TYPE_OBSERVATION,
+		"Companion Behavior Study",
+		"Document SCP-527's interactions with personnel.",
+		EXPERIMENT_RISK_MINIMAL, 300, 9000)
+	register_experiment(manager, "SCP-527", EXPERIMENT_TYPE_CARE,
+		"Habitat Optimization",
+		"Develop optimal care protocols for SCP-527.",
+		EXPERIMENT_RISK_MINIMAL, 300, 9000)
+
+/proc/initialize_scp529_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-529", EXPERIMENT_TYPE_OBSERVATION,
+		"Companion Behavior Study",
+		"Document SCP-529's interactions with personnel.",
+		EXPERIMENT_RISK_MINIMAL, 300, 9000)
+	register_experiment(manager, "SCP-529", EXPERIMENT_TYPE_CARE,
+		"Wellness Check",
+		"Assess SCP-529's health and needs.",
+		EXPERIMENT_RISK_MINIMAL, 300, 9000)
+
+/proc/initialize_scp1499_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-1499", EXPERIMENT_TYPE_EXPLORATION,
+		"Dimensional Observation",
+		"Document activity through SCP-1499's dimension.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+	register_experiment(manager, "SCP-1499", EXPERIMENT_TYPE_TECHNICAL,
+		"Air Quality Analysis",
+		"Analyze the atmospheric properties on the other side.",
+		EXPERIMENT_RISK_LOW, 300, 12000)
+
+/proc/initialize_scp247_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-247", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Illusion Interaction Study",
+		"Document reactions to SCP-247's illusionary tiger.",
+		EXPERIMENT_RISK_MINIMAL, 300, 9000)
+	register_experiment(manager, "SCP-247", EXPERIMENT_TYPE_OBSERVATION,
+		"Effect Duration Analysis",
+		"Test how long SCP-247's effects persist.",
+		EXPERIMENT_RISK_LOW, 300, 9000)

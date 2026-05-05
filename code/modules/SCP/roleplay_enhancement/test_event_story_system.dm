@@ -90,9 +90,9 @@
 
 	// Display current system status
 	to_chat(src, "<span class='notice'>=== System Status ===")
-	to_chat(src, "<span class='notice'>Active Events: [SSevent_story_management.manager.active_events.len]</span>")
-	to_chat(src, "<span class='notice'>Story Arcs: [SSevent_story_management.manager.story_arcs.len]</span>")
-	to_chat(src, "<span class='notice'>Player Events: [SSevent_story_management.manager.player_initiated_events.len]</span>")
+	to_chat(src, "<span class='notice'>Active Events: [length(SSevent_story_management.manager.active_events)]</span>")
+	to_chat(src, "<span class='notice'>Story Arcs: [length(SSevent_story_management.manager.story_arcs)]</span>")
+	to_chat(src, "<span class='notice'>Player Events: [length(SSevent_story_management.manager.player_initiated_events)]</span>")
 	to_chat(src, "<span class='notice'>Total Events Created: [SSevent_story_management.manager.total_events_created]</span>")
 	to_chat(src, "<span class='notice'>Player Participation Rate: [SSevent_story_management.manager.player_participation_rate]%</span>")
 	to_chat(src, "<span class='notice'>Event Completion Rate: [SSevent_story_management.manager.event_completion_rate]%</span>")

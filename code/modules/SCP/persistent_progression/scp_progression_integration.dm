@@ -46,7 +46,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 		save_scp_progression_data()
 
 /datum/scp_progression_manager/proc/process_scp_entities()
-	for(var/mob/living/carbon/human/H in world)
+	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.SCP && H.ckey)
 			process_scp_entity(H)
 
@@ -224,70 +224,72 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	// First Cure
 	if(prog_data.metrics["cures_performed"] >= 1 && !("scp049_first_cure" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp049_first_cure", "First Cure", "Perform your first cure as SCP-049")
+		unlock_scp_achievement(ckey, "scp049_first_cure", "First Cure", "Perform your first cure as SCP-049", prog_data)
 
 	// Master Healer
 	if(prog_data.metrics["cures_performed"] >= 10 && !("scp049_master_healer" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp049_master_healer", "Master Healer", "Perform 10 cures as SCP-049")
+		unlock_scp_achievement(ckey, "scp049_master_healer", "Master Healer", "Perform 10 cures as SCP-049", prog_data)
 
 /datum/scp_progression_manager/proc/check_scp096_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Rage
 	if(prog_data.metrics["rage_activations"] >= 1 && !("scp096_first_rage" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp096_first_rage", "First Rage", "Activate your first rage as SCP-096")
+		unlock_scp_achievement(ckey, "scp096_first_rage", "First Rage", "Activate your first rage as SCP-096", prog_data)
 
 	// Efficient Hunter
 	if(prog_data.metrics["victims_hunted"] >= 15 && !("scp096_efficient_hunter" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp096_efficient_hunter", "Efficient Hunter", "Hunt 15 victims as SCP-096")
+		unlock_scp_achievement(ckey, "scp096_efficient_hunter", "Efficient Hunter", "Hunt 15 victims as SCP-096", prog_data)
 
 /datum/scp_progression_manager/proc/check_scp173_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Movement
 	if(prog_data.metrics["successful_movements"] >= 1 && !("scp173_first_movement" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp173_first_movement", "First Movement", "Make your first successful movement as SCP-173")
+		unlock_scp_achievement(ckey, "scp173_first_movement", "First Movement", "Make your first successful movement as SCP-173", prog_data)
 
 	// Silent Killer
 	if(prog_data.metrics["victims_killed"] >= 20 && !("scp173_silent_killer" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp173_silent_killer", "Silent Killer", "Kill 20 victims as SCP-173")
+		unlock_scp_achievement(ckey, "scp173_silent_killer", "Silent Killer", "Kill 20 victims as SCP-173", prog_data)
 
 /datum/scp_progression_manager/proc/check_scp457_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Fire
 	if(prog_data.metrics["fires_created"] >= 1 && !("scp457_first_fire" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp457_first_fire", "First Fire", "Create your first fire as SCP-457")
+		unlock_scp_achievement(ckey, "scp457_first_fire", "First Fire", "Create your first fire as SCP-457", prog_data)
 
 	// Consuming Flame
 	if(prog_data.metrics["victims_consumed"] >= 10 && !("scp457_consuming_flame" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp457_consuming_flame", "Consuming Flame", "Consume 10 victims as SCP-457")
+		unlock_scp_achievement(ckey, "scp457_consuming_flame", "Consuming Flame", "Consume 10 victims as SCP-457", prog_data)
 
 /datum/scp_progression_manager/proc/check_scp939_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Voice
 	if(prog_data.metrics["voices_learned"] >= 1 && !("scp939_first_voice" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp939_first_voice", "First Voice", "Learn your first voice as SCP-939")
+		unlock_scp_achievement(ckey, "scp939_first_voice", "First Voice", "Learn your first voice as SCP-939", prog_data)
 
 	// Voice Master
 	if(prog_data.metrics["voices_learned"] >= 20 && !("scp939_voice_master" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp939_voice_master", "Voice Master", "Learn 20 voices as SCP-939")
+		unlock_scp_achievement(ckey, "scp939_voice_master", "Voice Master", "Learn 20 voices as SCP-939", prog_data)
 
 /datum/scp_progression_manager/proc/check_scp2020_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Teleport
 	if(prog_data.metrics["teleportations"] >= 1 && !("scp2020_first_teleport" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp2020_first_teleport", "First Teleport", "Perform your first teleport as SCP-2020")
+		unlock_scp_achievement(ckey, "scp2020_first_teleport", "First Teleport", "Perform your first teleport as SCP-2020", prog_data)
 
 	// Stealth Operative
 	if(prog_data.metrics["stealth_actions"] >= 30 && !("scp2020_stealth_operative" in prog_data.achievements))
-		unlock_scp_achievement(ckey, "scp2020_stealth_operative", "Stealth Operative", "Perform 30 stealth actions as SCP-2020")
+		unlock_scp_achievement(ckey, "scp2020_stealth_operative", "Stealth Operative", "Perform 30 stealth actions as SCP-2020", prog_data)
 
-/datum/scp_progression_manager/proc/unlock_scp_achievement(ckey, achievement_id, achievement_name, achievement_desc)
+/datum/scp_progression_manager/proc/unlock_scp_achievement(ckey, achievement_id, achievement_name, achievement_desc, datum/scp_progression_data/prog_data)
 	if(!ckey || !achievement_id || !SSpersistent_progression)
 		return
+
+	var/already_unlocked = FALSE
 
 	// Unlock in persistent progression system
 	var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(ckey)
@@ -302,6 +304,15 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 		// Log achievement
 		world.log << "SCP Achievement: [ckey] unlocked [achievement_name] ([achievement_id])"
+	else
+		already_unlocked = TRUE
+
+	// Track in SCP progression data too so check doesn't re-fire
+	if(prog_data && !(achievement_id in prog_data.achievements))
+		prog_data.achievements += achievement_id
+
+	if(already_unlocked)
+		return
 
 /datum/scp_progression_manager/proc/update_scp_performance_metrics()
 	// Update global performance metrics
@@ -429,7 +440,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(istype(scp, /mob/living/carbon/human/scp939))
 		var/mob/living/carbon/human/scp939/scp939 = scp
 		if(scp939.voice_system)
-			metrics["voices_learned"] = scp939.voice_system.learned_voices.len
+			metrics["voices_learned"] = length(scp939.voice_system.learned_voices)
 		if(scp939.pack_system)
 			metrics["pack_coordination"] = scp939.pack_system.pack_coordination
 		metrics["victims_hunted"] = scp939.victims_hunted
@@ -439,6 +450,6 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	// Update SCP-2020 specific metrics
 	if(istype(scp, /mob/living/carbon/human/scp2020))
 		var/mob/living/carbon/human/scp2020/scp2020 = scp
-		metrics["teleportations"] = scp2020.teleportations
-		metrics["stealth_actions"] = scp2020.stealth_actions
-		metrics["victims_eliminated"] = scp2020.victims_eliminated
+		metrics["cliche_count"] = scp2020.cliche_count
+		metrics["plot_developments"] = scp2020.plot_developments
+		metrics["conversations_held"] = scp2020.conversations_held

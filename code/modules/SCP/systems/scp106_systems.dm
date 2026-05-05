@@ -7,20 +7,20 @@
 
 /datum/scp106_phasing_system
     var/mob/living/carbon/human/scp106/owner = null
-    var/dimensional_energy = 100
-    var/max_dimensional_energy = 100
+    var/dimensional_energy = SCP106_INITIAL_DIMENSIONAL_ENERGY
+    var/max_dimensional_energy = SCP106_MAX_DIMENSIONAL_ENERGY
     var/phase_mastery = 1.0
-    var/max_phase_mastery = 5.0
-    var/phase_range = 3
-    var/max_phase_range = 10
+    var/max_phase_mastery = SCP106_MAX_PHASE_MASTERY
+    var/phase_range = SCP106_BASE_PHASE_RANGE
+    var/max_phase_range = SCP106_MAX_PHASE_RANGE
     var/corrosion_trail = FALSE
-    var/dimensional_stability = 100
-    var/max_dimensional_stability = 100
+    var/dimensional_stability = SCP106_INITIAL_DIMENSIONAL_STABILITY
+    var/max_dimensional_stability = SCP106_MAX_DIMENSIONAL_STABILITY
     var/phase_cooldown = 0
-    var/phase_cooldown_time = 10 SECONDS
+    var/phase_cooldown_time = SCP106_PHASE_COOLDOWN
     var/last_phase = 0
-    var/phase_energy_regen = 5
-    var/phase_energy_regen_interval = 30 SECONDS
+    var/phase_energy_regen = SCP106_ENERGY_REGEN_AMOUNT
+    var/phase_energy_regen_interval = SCP106_ENERGY_REGEN_INTERVAL
     var/last_energy_regen = 0
 
 /datum/scp106_phasing_system/New(mob/living/carbon/human/scp106/new_owner)
@@ -125,7 +125,7 @@
         if(T.density && !istype(T, /turf/closed))
             valid_emergence_points += T
 
-    if(valid_emergence_points.len > 0)
+    if(length(valid_emergence_points) > 0)
         var/turf/emergence_point = pick(valid_emergence_points)
         phase_through_wall(emergence_point)
         return TRUE
@@ -161,7 +161,7 @@
         last_maintenance = world.time
 
 /datum/scp106_pocket_dimension_system/proc/create_pocket_dimension(dimension_type = "decay_chamber")
-    if(active_dimensions.len >= dimension_capacity)
+    if(length(active_dimensions) >= dimension_capacity)
         return FALSE
 
     if(owner.dimensional_energy < dimension_energy_cost)
@@ -504,7 +504,7 @@
     // Sort targets by score
     preferred_targets = sort_list(preferred_targets, /proc/cmp_numeric_dsc)
 
-    if(preferred_targets.len > 0)
+    if(length(preferred_targets) > 0)
         current_target = preferred_targets[1]
         hunt_mode = TRUE
         return TRUE
@@ -584,7 +584,7 @@
         owner.corrosion_system.apply_corrosive_touch(current_target)
 
     // Attempt to drag to pocket dimension
-    if(owner.pocket_dimension_system && owner.pocket_dimension_system.active_dimensions.len > 0)
+    if(owner.pocket_dimension_system && length(owner.pocket_dimension_system.active_dimensions) > 0)
         var/dimension_id = pick(owner.pocket_dimension_system.active_dimensions)
         owner.pocket_dimension_system.drag_victim_to_dimension(current_target, dimension_id)
 
@@ -610,18 +610,18 @@
 /datum/scp106_containment_system
     var/mob/living/carbon/human/scp106/owner = null
     var/containment_status = "contained"
-    var/breach_capability = 50
-    var/max_breach_capability = 100
+    var/breach_capability = SCP106_INITIAL_BREACH_CAPABILITY
+    var/max_breach_capability = SCP106_MAX_BREACH_CAPABILITY
     var/escape_motivation = 0
     var/max_escape_motivation = 100
     var/femur_breaker_response = 0
     var/max_femur_breaker_response = 100
-    var/dimensional_anchor = 50
-    var/max_dimensional_anchor = 100
+    var/dimensional_anchor = SCP106_INITIAL_DIMENSIONAL_ANCHOR
+    var/max_dimensional_anchor = SCP106_MAX_DIMENSIONAL_ANCHOR
     var/containment_integrity = 100
     var/max_containment_integrity = 100
     var/last_breach_attempt = 0
-    var/breach_attempt_cooldown = 300 SECONDS
+    var/breach_attempt_cooldown = SCP106_BREACH_ATTEMPT_COOLDOWN
 
 /datum/scp106_containment_system/New(mob/living/carbon/human/scp106/new_owner)
     . = ..()
@@ -681,6 +681,7 @@
     if(containment_turf)
         owner.forceMove(containment_turf)
         containment_status = "contained"
+        hook_scp_recontainment("SCP-106", list("method" = "femur_breaker", "integrity" = containment_integrity))
 
         owner.visible_message("<span class='notice'>SCP-106 has been returned to containment.</span>")
 
@@ -723,7 +724,7 @@
     var/current_data = list(
         "dimensional_energy" = owner.phasing_system?.dimensional_energy || 0,
         "phase_mastery" = owner.phasing_system?.phase_mastery || 1.0,
-        "active_dimensions" = owner.pocket_dimension_system?.active_dimensions?.len || 0,
+        "active_dimensions" = length(owner.pocket_dimension_system?.active_dimensions) || 0,
         "torture_efficiency" = owner.pocket_dimension_system?.torture_efficiency || 0,
         "corrosion_potency" = owner.corrosion_system?.corrosion_potency || 0,
         "hunt_experience" = owner.hunting_system?.hunt_experience || 0,

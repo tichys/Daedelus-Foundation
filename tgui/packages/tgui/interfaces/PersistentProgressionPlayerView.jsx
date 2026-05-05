@@ -1,49 +1,164 @@
-import { useBackend } from '../backend';
-import {
-  Button,
-  LabeledList,
-  Section,
-  Box,
-  Stack,
-  ProgressBar,
-  Grid,
-  Table,
-} from '../components';
-import { Box, LabeledList, ProgressBar, Section, Stack } from '../components';
+import { useBackend, useLocalState } from '../backend';
+import { Box, Button, Input, NoticeBox, ProgressBar } from '../components';
 import { Window } from '../layouts';
+
+const C = {
+  bg: '#08080a',
+  panel: '#0c0c10',
+  border: '#1e1e24',
+  borderRed: '#6b0000',
+  accent: '#c2960e',
+  red: '#8b0000',
+  redBright: '#cc2222',
+  green: '#1a7a1a',
+  greenDim: '#0d4a0d',
+  text: '#b0b0b0',
+  textBright: '#e0e0e0',
+  textDim: '#555560',
+  amber: '#d4a017',
+  mono: '"Consolas", "Courier New", "Lucida Console", monospace',
+};
+
+const term = (overrides = {}) => ({
+  fontFamily: C.mono,
+  fontSize: '12px',
+  color: C.text,
+  ...overrides,
+});
+
+const TermBox = (props) => (
+  <Box style={term({ ...props.style })}>{props.children}</Box>
+);
+
+const TermHeader = (props) => (
+  <Box style={term({
+    fontSize: '10px',
+    color: C.textDim,
+    letterSpacing: '0.18em',
+    textTransform: 'uppercase',
+    borderBottom: `1px solid ${C.border}`,
+    paddingBottom: '4px',
+    marginBottom: '8px',
+    ...props.style,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermLabel = (props) => (
+  <Box as="span" style={term({
+    color: C.textDim,
+    fontSize: '10px',
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    marginRight: '8px',
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermValue = (props) => (
+  <Box as="span" style={term({
+    color: props.color || C.textBright,
+    fontWeight: props.bold ? 'bold' : undefined,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermRow = (props) => (
+  <Box style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+    {props.children}
+  </Box>
+);
+
+const TermDivider = () => (
+  <Box style={{
+    color: C.borderRed,
+    fontSize: '10px',
+    letterSpacing: '0.3em',
+    margin: '10px 0',
+    userSelect: 'none',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  }}>
+    {'─'.repeat(80)}
+  </Box>
+);
+
+const TermButton = (props) => {
+  const selected = props.selected;
+  const color = props.color;
+  const bg = selected
+    ? (color === 'red' ? 'rgba(139,0,0,0.35)' : color === 'green' ? 'rgba(26,122,26,0.35)' : color === 'yellow' ? 'rgba(180,160,20,0.25)' : 'rgba(255,255,255,0.08)')
+    : 'transparent';
+  const borderColor = selected
+    ? (color === 'red' ? C.red : color === 'green' ? C.green : color === 'yellow' ? '#b0a020' : C.border)
+    : C.border;
+
+  return (
+    <Button
+      {...props}
+      style={{
+        fontFamily: C.mono,
+        fontSize: '10px',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        background: bg,
+        border: `1px solid ${borderColor}`,
+        borderRadius: 0,
+        color: selected ? C.textBright : C.textDim,
+        padding: '3px 8px',
+        boxShadow: selected ? `0 0 6px ${borderColor}44` : 'none',
+      }}
+    >
+      {props.children}
+    </Button>
+  );
+};
+
+const TermProgressBar = (props) => (
+  <Box style={{ marginBottom: '6px' }}>
+    <Box style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+      <TermLabel>{props.label}</TermLabel>
+      <TermValue color={props.color || C.amber}>{props.value}%</TermValue>
+    </Box>
+    <Box style={{
+      height: '6px',
+      background: C.panel,
+      border: `1px solid ${C.border}`,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <Box style={{
+        height: '100%',
+        width: `${Math.min(100, Math.max(0, props.value))}%`,
+        background: props.value >= 100 ? C.green : props.value > 50 ? C.amber : C.red,
+        transition: 'width 0.3s',
+      }} />
+    </Box>
+  </Box>
+);
 
 export const PersistentProgressionPlayerView = (props, context) => {
   const { act, data } = useBackend(context);
 
   if (!data.has_data) {
     return (
-      <Window
-        title="SCP Foundation - Player Progress Viewer"
-        width={1000}
-        height={700}
-        theme="scp_terminal"
-      >
-        <Window.Content
-          style={{
-            background: 'rgba(0,0,0,0.7)',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#ffffff',
-            padding: '20px',
-          }}
-        >
-          <Box
-            style={{
-              textAlign: 'center',
-              fontSize: '18px',
-              color: '#ff4444',
-              marginTop: '100px',
-            }}
-          >
-            ╔══════════════════════════════════════════════════════════════╗ ║
-            SCP FOUNDATION ║ ║ PLAYER PROGRESS VIEWER ║ ║ ║ ║ NO PERSISTENT DATA
-            FOUND ║ ║ ║ ║ FOR THIS PLAYER ║
-            ╚══════════════════════════════════════════════════════════════╝
+      <Window title="SCP FOUNDATION — PERSONNEL MONITOR" width={1000} height={700} theme="scp_terminal">
+        <Window.Content scrollable>
+          <Box style={{
+            background: C.bg,
+            border: `1px solid ${C.borderRed}`,
+            fontFamily: C.mono,
+            fontSize: '12px',
+            color: C.text,
+            minHeight: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <NoticeBox>NO PERSISTENT DATA FOUND FOR THIS PERSONNEL RECORD</NoticeBox>
           </Box>
         </Window.Content>
       </Window>
@@ -68,222 +183,110 @@ export const PersistentProgressionPlayerView = (props, context) => {
   } = data;
 
   return (
-    <Window
-      title={`SCP Foundation - Player Progress Viewer - ${ckey}`}
-      width={1000}
-      height={700}
-      theme="scp_terminal"
-    >
-      <Window.Content
-        style={{
-          background: 'rgba(0,0,0,0.7)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '5px',
-          padding: '20px',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          color: '#ffffff',
+    <Window title={`SCP FOUNDATION — PERSONNEL MONITOR — ${ckey}`} width={1000} height={700} theme="scp_terminal">
+      <Window.Content scrollable>
+        <Box style={{
+          background: C.bg,
+          border: `1px solid ${C.borderRed}`,
+          fontFamily: C.mono,
+          fontSize: '12px',
+          color: C.text,
           minHeight: '100%',
-          position: 'relative',
-        }}
-      >
-        <Box style={{ marginBottom: '20px' }}>
-          <Box
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              marginBottom: '5px',
-            }}
-          >
-            PLAYER PROGRESS VIEWER
+        }}>
+          <Box style={{
+            borderBottom: `2px solid ${C.borderRed}`,
+            padding: '10px 14px 8px',
+            background: 'linear-gradient(180deg, #0e0000 0%, #08080a 100%)',
+          }}>
+            <Box style={{ fontSize: '15px', fontWeight: 'bold', color: C.amber, letterSpacing: '0.18em' }}>
+              SCP FOUNDATION — PERSONNEL MONITOR
+            </Box>
+            <Box style={{ fontSize: '9px', color: C.textDim, letterSpacing: '0.12em', marginTop: '2px' }}>
+              CLEARANCE LEVEL 3 | ADMINISTRATIVE | SUBJECT: {ckey}
+            </Box>
           </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            ADMINISTRATIVE PERSONNEL MONITORING
+
+          <Box style={{ padding: '16px' }}>
+            <TermHeader>PERSONNEL IDENTIFICATION</TermHeader>
+            <TermRow><TermLabel>IDENTIFICATION KEY</TermLabel><TermValue color={C.amber}>{ckey}</TermValue></TermRow>
+            <TermRow><TermLabel>CLASS</TermLabel><TermValue>{current_class}</TermValue></TermRow>
+            <TermRow><TermLabel>FACTION</TermLabel><TermValue>{current_faction}</TermValue></TermRow>
+            <TermRow><TermLabel>RANK</TermLabel><TermValue color={C.green}>{current_rank} (LEVEL {current_rank_level})</TermValue></TermRow>
+            <TermRow><TermLabel>TOTAL XP</TermLabel><TermValue color={C.amber}>{total_experience.toLocaleString()}</TermValue></TermRow>
+            <TermRow><TermLabel>ROUNDS PLAYED</TermLabel><TermValue>{rounds_played}</TermValue></TermRow>
+
+            <TermDivider />
+
+            <TermHeader>RANK PROGRESSION</TermHeader>
+            <TermProgressBar label="PROGRESS TO NEXT RANK" value={progress_to_next} />
+            {exp_needed > 0 && (
+              <Box style={term({ color: C.textDim, fontSize: '10px', marginBottom: '8px' })}>
+                {exp_needed.toLocaleString()} XP REQUIRED FOR NEXT RANK
+              </Box>
+            )}
+
+            <TermDivider />
+
+            <TermHeader>UNLOCKED CONTENT</TermHeader>
+            <Box style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
+              <Box style={{ flex: 1 }}>
+                <TermLabel>ITEMS ({unlocked_items ? unlocked_items.length : 0})</TermLabel>
+                {unlocked_items && unlocked_items.length > 0 ? unlocked_items.map((item, i) => (
+                  <Box key={i} style={term({ color: C.text, fontSize: '11px', paddingLeft: '8px' })}>{item}</Box>
+                )) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic', fontSize: '11px' })}>NONE</Box>
+                )}
+              </Box>
+              <Box style={{ flex: 1 }}>
+                <TermLabel>TITLES ({unlocked_titles ? unlocked_titles.length : 0})</TermLabel>
+                {unlocked_titles && unlocked_titles.length > 0 ? unlocked_titles.map((title, i) => (
+                  <Box key={i} style={term({ color: C.text, fontSize: '11px', paddingLeft: '8px' })}>{title}</Box>
+                )) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic', fontSize: '11px' })}>NONE</Box>
+                )}
+              </Box>
+            </Box>
+
+            <TermDivider />
+
+            <TermHeader>RECENT EXPERIENCE ACTIVITY</TermHeader>
+            {recent_experience && recent_experience.length > 0 ? recent_experience.map((exp, i) => (
+              <Box key={i} style={{
+                marginBottom: '4px',
+                padding: '6px 8px',
+                borderLeft: `2px solid ${C.borderRed}`,
+                background: C.panel,
+              }}>
+                <TermRow>
+                  <TermValue color={C.green} bold>+{exp.amount} XP</TermValue>
+                  <TermLabel style={{ marginLeft: '12px' }}>{exp.reason}</TermLabel>
+                  <Box as="span" style={term({ color: C.textDim, fontSize: '10px', marginLeft: 'auto' })}>{exp.timestamp}</Box>
+                </TermRow>
+              </Box>
+            )) : (
+              <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO RECENT ACTIVITY</Box>
+            )}
+
+            <TermDivider />
+
+            <TermHeader>ADMINISTRATIVE ACTIONS</TermHeader>
+            <Box style={{ display: 'flex', gap: '4px' }}>
+              <TermButton color="green" onClick={() => act('export_data')}>EXPORT DATA</TermButton>
+              <TermButton color="red" onClick={() => act('reset_progress')}>RESET PROGRESS</TermButton>
+              <TermButton onClick={() => act('close_viewer')}>CLOSE</TermButton>
+            </Box>
+          </Box>
+
+          <Box style={{
+            borderTop: `1px solid ${C.border}`,
+            padding: '4px 14px',
+            background: C.panel,
+          }}>
+            <Box style={term({ color: C.textDim, fontSize: '9px', letterSpacing: '0.1em' })}>
+              SCP FOUNDATION | PERSONNEL MONITOR | ALL ACCESS LOGGED | UNAUTHORIZED REVIEW IS A CLASS-C INFRACTION
+            </Box>
           </Box>
         </Box>
-
-        <Section title="Target Personnel Identification">
-          <Grid style={{ gap: '20px' }}>
-            <Grid.Column size={6}>
-              <LabeledList>
-                <LabeledList.Item label="IDENTIFICATION KEY">
-                  <Box style={{ color: '#ffff66' }}>{ckey}</Box>
-                </LabeledList.Item>
-                <LabeledList.Item label="CURRENT CLASS">
-                  <Box style={{ color: '#66ffff' }}>{current_class}</Box>
-                </LabeledList.Item>
-                <LabeledList.Item label="CURRENT RANK">
-                  <Box style={{ color: '#66ff66' }}>
-                    {current_rank} (Level {current_rank_level})
-                  </Box>
-                </LabeledList.Item>
-              </LabeledList>
-            </Grid.Column>
-            <Grid.Column size={6}>
-              <LabeledList>
-                <LabeledList.Item label="CURRENT FACTION">
-                  <Box style={{ color: '#66ffff' }}>{current_faction}</Box>
-                </LabeledList.Item>
-                <LabeledList.Item label="TOTAL EXPERIENCE">
-                  <Box style={{ color: '#ffff66' }}>
-                    {total_experience.toLocaleString()} XP
-                  </Box>
-                </LabeledList.Item>
-                <LabeledList.Item label="ROUNDS PLAYED">
-                  <Box style={{ color: '#66ff66' }}>{rounds_played}</Box>
-                </LabeledList.Item>
-              </LabeledList>
-            </Grid.Column>
-          </Grid>
-        </Section>
-
-        <Section title="Progression Status">
-          <Box style={{ marginBottom: '15px' }}>
-            <Box style={{ marginBottom: '5px' }}>
-              PROGRESS TO NEXT RANK: {progress_to_next}% ({exp_needed} XP
-              needed)
-            </Box>
-            <ProgressBar
-              value={progress_to_next}
-              maxValue={100}
-              color={progress_to_next >= 100 ? '#66ff66' : '#ffff66'}
-            />
-          </Box>
-        </Section>
-
-        <Section title="Unlocked Content">
-          <Grid style={{ gap: '20px' }}>
-            <Grid.Column size={6}>
-              <Box style={{ marginBottom: '15px' }}>
-                <Box
-                  style={{
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                    color: '#66ff66',
-                  }}
-                >
-                  UNLOCKED ITEMS ({unlocked_items.length})
-                </Box>
-                {unlocked_items && unlocked_items.length > 0 ? (
-                  unlocked_items.map((item, index) => (
-                    <Box
-                      key={index}
-                      style={{ fontSize: '12px', marginBottom: '5px' }}
-                    >
-                      • {item}
-                    </Box>
-                  ))
-                ) : (
-                  <Box style={{ fontSize: '12px', opacity: 0.6 }}>
-                    NO ITEMS UNLOCKED
-                  </Box>
-                )}
-              </Box>
-            </Grid.Column>
-            <Grid.Column size={6}>
-              <Box style={{ marginBottom: '15px' }}>
-                <Box
-                  style={{
-                    fontWeight: 'bold',
-                    marginBottom: '10px',
-                    color: '#66ff66',
-                  }}
-                >
-                  UNLOCKED TITLES ({unlocked_titles.length})
-                </Box>
-                {unlocked_titles && unlocked_titles.length > 0 ? (
-                  unlocked_titles.map((title, index) => (
-                    <Box
-                      key={index}
-                      style={{ fontSize: '12px', marginBottom: '5px' }}
-                    >
-                      • {title}
-                    </Box>
-                  ))
-                ) : (
-                  <Box style={{ fontSize: '12px', opacity: 0.6 }}>
-                    NO TITLES UNLOCKED
-                  </Box>
-                )}
-              </Box>
-            </Grid.Column>
-          </Grid>
-        </Section>
-
-        <Section title="Recent Experience Activity">
-          {recent_experience && recent_experience.length > 0 ? (
-            <Table>
-              <Table.Row header>
-                <Table.Cell>Experience</Table.Cell>
-                <Table.Cell>Reason</Table.Cell>
-                <Table.Cell>Timestamp</Table.Cell>
-                <Table.Cell>Actions</Table.Cell>
-              </Table.Row>
-              {recent_experience.map((exp, index) => (
-                <Table.Row key={index}>
-                  <Table.Cell>
-                    <Box style={{ fontWeight: 'bold', color: '#ffff66' }}>
-                      +{exp.amount} XP
-                    </Box>
-                  </Table.Cell>
-                  <Table.Cell>{exp.reason}</Table.Cell>
-                  <Table.Cell>{exp.timestamp}</Table.Cell>
-                  <Table.Cell>
-                    <Button size="small">Details</Button>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table>
-          ) : (
-            <Box style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}>
-              NO RECENT ACTIVITY
-            </Box>
-          )}
-        </Section>
-
-        <Section title="Administrative Actions">
-          <Stack style={{ gap: '10px' }}>
-            <Stack.Item>
-              <Button
-                content="EXPORT DATA"
-                onClick={() => act('export_data')}
-                style={{
-                  backgroundColor: 'rgba(0,100,255,0.3)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: '#ffffff',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                }}
-              />
-            </Stack.Item>
-            <Stack.Item>
-              <Button
-                content="RESET PROGRESS"
-                onClick={() => act('reset_progress')}
-                style={{
-                  backgroundColor: 'rgba(255,0,0,0.3)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: '#ffffff',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                }}
-              />
-            </Stack.Item>
-            <Stack.Item>
-              <Button
-                content="CLOSE VIEWER"
-                onClick={() => act('close_viewer')}
-                style={{
-                  backgroundColor: 'rgba(100,100,100,0.3)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: '#ffffff',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                }}
-              />
-            </Stack.Item>
-          </Stack>
-        </Section>
       </Window.Content>
     </Window>
   );

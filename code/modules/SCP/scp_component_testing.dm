@@ -78,7 +78,7 @@
 
 /datum/component_test_suite/proc/run_suite(datum/component_manager_advanced/manager)
 	suite_start_time = world.time
-	total_tests = tests.len
+	total_tests = length(tests)
 	passed_tests = 0
 	failed_tests = 0
 	skipped_tests = 0
@@ -270,7 +270,7 @@
 		skill_system.add_skill("Stress Skill [i]", 10 SECONDS, list())
 
 	// Check that all skills were added
-	if(skill_system.skills.len < 50)
+	if(length(skill_system.skills) < 50)
 		test_error_message = "Not all skills were added during stress test"
 		return FALSE
 
@@ -309,7 +309,7 @@
 
 /datum/component_testing_manager/proc/get_global_summary()
 	var/list/summary = list()
-	summary["total_suites"] = test_suites.len
+	summary["total_suites"] = length(test_suites)
 	summary["total_tests"] = 0
 	summary["total_passed"] = 0
 	summary["total_failed"] = 0

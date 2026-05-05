@@ -335,12 +335,12 @@ SUBSYSTEM_DEF(roleplay_character)
 /datum/roleplay_character_manager/proc/process_character_relationships()
 	// Process relationship updates and conflicts
 	for(var/relationship_id in character_relationships)
-		var/relationship = character_relationships[relationship_id]
-		// Process relationship dynamics, conflicts, etc.
-		// This will be implemented when relationship system is expanded
+		var/datum/relationship = character_relationships[relationship_id]
+		if(relationship)
+			continue
 
 /datum/roleplay_character_manager/proc/update_character_metrics()
-	active_characters = character_sheets.len
+	active_characters = length(character_sheets)
 
 	// Calculate average character depth
 	var/total_depth = 0

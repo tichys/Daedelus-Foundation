@@ -29,7 +29,7 @@
 /mob/living/carbon/human/scp173/Initialize()
 	. = ..()
 	set_species(/datum/species/scp173)
-	SCP = new /datum/scp(src, "the sculpture", SCP_KETER, "173", SCP_PLAYABLE)
+	SCP = new /datum/scp(src, "The Sculpture", SCP_EUCLID, "173", SCP_PLAYABLE)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
 
@@ -121,7 +121,7 @@
 
 /mob/living/carbon/human/scp173/proc/load_persistence_data()
 	// Load data from research system if available
-	if(research_system && research_system.research_data && research_system.research_data.len > 0)
+	if(research_system && research_system.research_data && length(research_system.research_data) > 0)
 		var/list/data = research_system.research_data
 		kills_count = data["kills_count"] || 0
 		breach_events = data["breach_events"] || 0
@@ -144,7 +144,7 @@
 	if(observation_system)
 		status += "Being Observed: [observation_system.is_being_observed() ? "Yes" : "No"]"
 		status += "Observation Quality: [round(observation_system.observation_quality, 0.1)]"
-		status += "Observers: [observation_system.observers ? observation_system.observers.len : 0]"
+		status += "Observers: [observation_system.observers ? length(observation_system.observers) : 0]"
 
 	if(containment_system)
 		status += "Containment Integrity: [containment_system.containment_integrity]%"

@@ -21,7 +21,7 @@
 	for(var/mob/living/carbon/human/H in view(effect_radius, owner))
 		if(H != owner && H.stat != DEAD)
 			targets += H
-	if(!targets.len)
+	if(!length(targets))
 		return
 
 	var/mob/living/carbon/human/target = pick(targets)

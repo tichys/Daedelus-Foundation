@@ -657,6 +657,8 @@ SUBSYSTEM_DEF(ticker)
 
 	to_chat(world, systemtext("Rebooting World in [DisplayTimeText(delay)]. [reason]"))
 
+	generate_scp_round_report()
+
 	var/roll_credits_in = CONFIG_GET(number/eor_credits_delay) * 10
 	if(roll_credits)
 		if(roll_credits_in)

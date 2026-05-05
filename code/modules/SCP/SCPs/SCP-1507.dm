@@ -27,7 +27,7 @@
 
 	var/enrage_potency = 4
 	var/max_damage = 25
-	var	enraged = FALSE
+	var/enraged = FALSE
 	var/enrage_threshold = 50
 
 	var/datum/scp1507_flock_system/flock_system
@@ -35,8 +35,8 @@
 	var/datum/scp1507_behavior_system/behavior_system
 	var/datum/scp1507_research_system/research_system
 
-	var	attacks_made = 0
-	var	flock_calls = 0
+	var/attacks_made = 0
+	var/flock_calls = 0
 
 /mob/living/simple_animal/hostile/retaliate/scp1507/Initialize()
 	. = ..()
@@ -149,7 +149,7 @@
 /datum/scp1507_flock_system
 	var/mob/living/simple_animal/hostile/retaliate/scp1507/parent
 	var/flock_call_range = 15
-	var	alert_range = 20
+	var/alert_range = 20
 	var/coordination_bonus = 1.2
 
 /datum/scp1507_flock_system/New(mob/living/simple_animal/hostile/retaliate/scp1507/P)
@@ -210,9 +210,9 @@
 
 /datum/scp1507_combat_system
 	var/mob/living/simple_animal/hostile/retaliate/scp1507/parent
-	var	peck_combo = 0
-	var	combo_timer = 0
-	var	combo_window = 30
+	var/peck_combo = 0
+	var/combo_timer = 0
+	var/combo_window = 30
 
 /datum/scp1507_combat_system/New(mob/living/simple_animal/hostile/retaliate/scp1507/P)
 	parent = P
@@ -236,7 +236,7 @@
 /datum/scp1507_behavior_system
 	var/mob/living/simple_animal/hostile/retaliate/scp1507/parent
 	var/wander_timer = 0
-	var	wander_delay = 50
+	var/wander_delay = 50
 	var/grazing = FALSE
 
 /datum/scp1507_behavior_system/New(mob/living/simple_animal/hostile/retaliate/scp1507/P)
@@ -258,7 +258,7 @@
 /datum/scp1507_research_system
 	var/mob/living/simple_animal/hostile/retaliate/scp1507/parent
 	var/list/behavior_log = list()
-	var	attack_events = 0
+	var/attack_events = 0
 
 /datum/scp1507_research_system/New(mob/living/simple_animal/hostile/retaliate/scp1507/P)
 	parent = P

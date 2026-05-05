@@ -26,11 +26,11 @@
 			nearby_targets += H
 
 	// Automatic descent progression when people are nearby
-	if(nearby_targets.len > 0 && prob(3))
+	if(length(nearby_targets) > 0 && prob(3))
 		progress_descent()
 
 	// Automatic intensity increase when multiple people are present
-	if(nearby_targets.len > 2 && world.time >= descent_cooldown)
+	if(length(nearby_targets) > 2 && world.time >= descent_cooldown)
 		increase_descent_intensity()
 
 /datum/scp087_descent_system/proc/progress_descent()
@@ -77,11 +77,11 @@
 		if(H.stat != DEAD)
 			targets += H
 
-	if(targets.len > 0 && prob(2))
+	if(length(targets) > 0 && prob(2))
 		increase_psychological_horror()
 
 	// Apply horror effects to nearby targets
-	if(psychological_horror > 10 && targets.len > 0)
+	if(psychological_horror > 10 && length(targets) > 0)
 		apply_horror_effects(targets)
 
 /datum/scp087_horror_system/proc/increase_psychological_horror()
@@ -141,11 +141,11 @@
 			targets += H
 
 	// Automatic entity manifestation when people venture too close
-	if(targets.len > 0 && prob(1))
+	if(length(targets) > 0 && prob(1))
 		manifest_entity_presence()
 
 	// Entity encounters become more likely with more people
-	if(targets.len > 1 && world.time >= entity_cooldown && prob(3))
+	if(length(targets) > 1 && world.time >= entity_cooldown && prob(3))
 		create_entity_encounter(targets)
 
 /datum/scp087_entity_system/proc/manifest_entity_presence()
@@ -210,7 +210,7 @@
 			nearby_people += H
 
 	// Darkness increases with prolonged presence
-	if(nearby_people.len > 0 && prob(1))
+	if(length(nearby_people) > 0 && prob(1))
 		increase_darkness()
 
 	// Apply environmental effects

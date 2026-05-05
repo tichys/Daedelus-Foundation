@@ -139,7 +139,7 @@
 	var/obj/item/parent
 	var/dimension_stability = 100
 	var/max_depth = 10
-	var	current_depth = 1
+	var/current_depth = 1
 
 /datum/scp1102_dimension_system/New(obj/item/P)
 	parent = P
@@ -160,7 +160,7 @@
 	var/obj/item/parent
 	var/portal_stability = 100
 	var/max_stability = 100
-	var	recharge_rate = 1
+	var/recharge_rate = 1
 
 /datum/scp1102_portal_system/New(obj/item/P)
 	parent = P
@@ -172,7 +172,7 @@
 /datum/scp1102_research_system
 	var/obj/item/parent
 	var/list/exploration_log = list()
-	var	total_depth_achieved = 0
+	var/total_depth_achieved = 0
 
 /datum/scp1102_research_system/New(obj/item/P)
 	parent = P
@@ -184,7 +184,7 @@
 /datum/scp1102ladder_depth_system
 	var/obj/structure/parent
 	var/difficulty_multiplier = 1.0
-	var	hazard_chance = 5
+	var/hazard_chance = 5
 
 /datum/scp1102ladder_depth_system/New(obj/structure/P)
 	parent = P

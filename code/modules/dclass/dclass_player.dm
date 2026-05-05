@@ -12,6 +12,11 @@
 #define DCLASS_STATUS_MEDICAL_SUBJECT 2
 #define DCLASS_STATUS_CONTAINMENT_ASSIST 3
 
+#define DCLASS_FACTION_NONE 0
+#define DCLASS_FACTION_REBELS 1
+#define DCLASS_FACTION_COLLABORATORS 2
+#define DCLASS_FACTION_SURVIVORS 3
+
 /datum/dclass_player
 	var/ckey
 	var/name
@@ -58,6 +63,7 @@
 	var/suspicion_level = 0
 	var/last_seen_time = 0
 	var/is_hiding = FALSE
+	var/can_volunteer = FALSE
 
 	// Inventory & Contraband
 	var/list/contraband = list()
@@ -70,6 +76,7 @@
 	var/list/enemies = list()
 	var/list/trade_history = list()
 	var/list/reported_players = list()
+	var/faction = DCLASS_FACTION_NONE
 
 	// Skills & Abilities
 	var/list/skills = list()
@@ -210,18 +217,21 @@
 	if(!A)
 		return FALSE
 
-	// Check if player is in the correct work area
+	// Also check area type hierarchy
+	var/work_area_found = FALSE
 	switch(current_work_assignment)
 		if("kitchen")
-			return findtext(A.name, "kitchen") || findtext(A.name, "cafeteria")
+			work_area_found = (findtext(A.name, "kitchen") || findtext(A.name, "cafeteria") || istype(A, /area/station/service/hydroponics))
 		if("maintenance")
-			return findtext(A.name, "maintenance") || findtext(A.name, "engineering")
+			work_area_found = (findtext(A.name, "maintenance") || findtext(A.name, "engineering") || istype(A, /area/station/engineering))
 		if("laundry")
-			return findtext(A.name, "laundry") || findtext(A.name, "cleaning")
+			work_area_found = (findtext(A.name, "laundry") || findtext(A.name, "cleaning") || findtext(A.name, "custodial"))
 		if("medical")
-			return findtext(A.name, "medical") || findtext(A.name, "clinic")
+			work_area_found = (findtext(A.name, "medical") || findtext(A.name, "clinic") || findtext(A.name, "medbay") || istype(A, /area/station/medical))
+		if("science")
+			work_area_found = (findtext(A.name, "research") || findtext(A.name, "laboratory") || findtext(A.name, "science") || istype(A, /area/station/science) || istype(A, /area/scp/lcz/testing_lab) || istype(A, /area/scp/lcz/observation))
 
-	return FALSE
+	return work_area_found
 
 /datum/dclass_player/proc/find_contraband_at_work()
 	if(!current_work_assignment || !SSdclass || !SSdclass.manager)
@@ -295,7 +305,7 @@
 			nearby_guards += H
 
 	// If guards are nearby and player has contraband, risk detection
-	if(nearby_guards.len > 0 && contraband.len > 0)
+	if(length(nearby_guards) > 0 && length(contraband) > 0)
 		var/detection_chance = suspicion_level / 10 // 0-10% based on suspicion
 		if(prob(detection_chance))
 			detect_contraband(pick(nearby_guards))
@@ -311,9 +321,9 @@
 		to_chat(guard, "<span class='warning'>You found contraband on [mob.name]!</span>")
 
 	// Remove some contraband
-	var/items_to_remove = min(2, contraband.len)
+	var/items_to_remove = min(2, length(contraband))
 	for(var/i = 1 to items_to_remove)
-		if(contraband.len > 0)
+		if(length(contraband) > 0)
 			var/random_item = pick(contraband)
 			remove_contraband(random_item, 1)
 
@@ -647,9 +657,9 @@
 	if(informant)
 		info += "<b>Informant:</b> Yes ([informant_reports] reports)<br>"
 
-	info += "<b>Contraband:</b> [contraband.len] items<br>"
-	info += "<b>Skills:</b> [skills.len] skills<br>"
-	info += "<b>Achievements:</b> [achievements.len]<br>"
+	info += "<b>Contraband:</b> [length(contraband)] items<br>"
+	info += "<b>Skills:</b> [length(skills)] skills<br>"
+	info += "<b>Achievements:</b> [length(achievements)]<br>"
 
 	return info
 

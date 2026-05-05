@@ -18,7 +18,7 @@
 
 /obj/item/clothing/accessory/scp427/Initialize()
 	. = ..()
-	SCP = new /datum/scp(src, "ornate locket", SCP_EUCLID, "427")
+	SCP = new /datum/scp(src, "Ornate Locket", SCP_SAFE, "427")
 	// Auto-registered via datum/scp
 
 /obj/item/clothing/accessory/scp427/process()

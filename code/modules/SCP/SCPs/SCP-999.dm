@@ -329,7 +329,7 @@
 		return
 
 	// Proximity requirement is now handled by the skill system
-	to_chat(src, "<span class='notice'>You heal nearby targets. Healed: [healed_targets.len]</span>")
+	to_chat(src, "<span class='notice'>You heal nearby targets. Healed: [length(healed_targets)]</span>")
 
 	// Heal all nearby targets
 	for(var/mob/living/carbon/human/H in range(comfort_radius + comfort_radius_expansion, src))
@@ -365,8 +365,8 @@
 	message += "<b>Healing Efficiency:</b> [healing_efficiency]/[max_healing_efficiency]<br>"
 	message += "<b>Comfort Radius:</b> [comfort_radius + comfort_radius_expansion]<br>"
 	message += "<b>Emotional Resonance:</b> [emotional_resonance]/[max_emotional_resonance]<br>"
-	message += "<b>Healed Targets:</b> [healed_targets.len]<br>"
-	message += "<b>Mood Improvements:</b> [mood_improved_targets.len]<br>"
+	message += "<b>Healed Targets:</b> [length(healed_targets)]<br>"
+	message += "<b>Mood Improvements:</b> [length(mood_improved_targets)]<br>"
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
@@ -470,7 +470,7 @@
 	. += "Healing Efficiency: [healing_efficiency]/[max_healing_efficiency]"
 	. += "Comfort Radius: [comfort_radius + comfort_radius_expansion]"
 	. += "Emotional Resonance: [emotional_resonance]/[max_emotional_resonance]"
-	. += "Healed Targets: [healed_targets.len]"
+	. += "Healed Targets: [length(healed_targets)]"
 
 // Override examine behavior
 /mob/living/carbon/scp/scp999/examine(mob/user)
@@ -594,8 +594,8 @@
 	message += "<b>Comfort Masteries:</b> [comfort_masteries]<br>"
 	message += "<b>Happiness Evolutions:</b> [happiness_evolutions]<br>"
 	message += "<b>Efficiency Improvements:</b> [efficiency_improvements]<br>"
-	message += "<b>Healed Targets:</b> [healed_targets.len]<br>"
-	message += "<b>Mood Improved Targets:</b> [mood_improved_targets.len]<br>"
+	message += "<b>Healed Targets:</b> [length(healed_targets)]<br>"
+	message += "<b>Mood Improved Targets:</b> [length(mood_improved_targets)]<br>"
 	message += "<b>Healing Power:</b> [healing_power]<br>"
 	message += "<b>Happiness Level:</b> [happiness_level]/[max_happiness]<br>"
 	message += "<b>Healing Mastery:</b> [healing_mastery]/[max_healing_mastery]<br>"
@@ -611,6 +611,6 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
 		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 
 	to_chat(src, "<span class='notice'>[message]</span>")

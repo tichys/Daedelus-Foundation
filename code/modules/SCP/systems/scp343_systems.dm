@@ -584,7 +584,7 @@
 	return ..()
 
 /datum/scp343_environmental/proc/create_divine_zone(turf/T)
-	if(divine_zones.len >= max_zones)
+	if(length(divine_zones) >= max_zones)
 		return
 
 	if(world.time < last_zone_creation + (zone_creation_cooldown * 10))
@@ -762,7 +762,7 @@
 			research_data["divine_activities"] = scp343_owner.containment_system.divine_activities
 
 		if(scp343_owner.environmental_system)
-			research_data["divine_zones"] = scp343_owner.environmental_system.divine_zones.len
+			research_data["divine_zones"] = length(scp343_owner.environmental_system.divine_zones)
 
 	// Create research project if it doesn't exist
 	var/project_name = "SCP-343 Divine Intervention Analysis"

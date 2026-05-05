@@ -11,38 +11,37 @@
 
 	// Core mechanics from Foundation-19
 	var/pestilence_level = 0
-	var/max_pestilence_level = 100
-	var/pestilence_spread_radius = 3
-	var/pestilence_infection_chance = 25
-	var/pestilence_damage = 5
+	var/max_pestilence_level = SCP049_MAX_PESTILENCE_LEVEL
+	var/pestilence_detect_radius = SCP049_PESTILENCE_SPREAD_RADIUS
+	var/pestilence_detect_chance = SCP049_PESTILENCE_INFECTION_CHANCE
 	var/pestilence_cooldown = 0
-	var/pestilence_cooldown_time = 30 SECONDS
+	var/pestilence_cooldown_time = SCP049_PESTILENCE_COOLDOWN
 
 	// Cure mechanics
 	var/cure_potency = 1
-	var/max_cure_potency = 10
+	var/max_cure_potency = SCP049_MAX_CURE_POTENCY
 	var/cure_cooldown = 0
-	var/cure_cooldown_time = 60 SECONDS
-	var/cure_range = 2
-	var/cure_effectiveness = 50
+	var/cure_cooldown_time = SCP049_CURE_COOLDOWN
+	var/cure_range = SCP049_CURE_RANGE
+	var/cure_effectiveness = SCP049_CURE_EFFECTIVENESS
 
 	// Door breaching
 	var/breach_cooldown = 0
-	var/breach_cooldown_time = 120 SECONDS
-	var/breach_range = 5
-	var/breach_power = 50
+	var/breach_cooldown_time = SCP049_BREACH_COOLDOWN
+	var/breach_range = SCP049_BREACH_RANGE
+	var/breach_power = SCP049_BREACH_POWER
 
 	// Research and evolution
 	var/research_progress = 0
-	var/max_research_progress = 1000
+	var/max_research_progress = SCP049_MAX_RESEARCH_PROGRESS
 	var/evolution_stage = 1
-	var/max_evolution_stage = 5
+	var/max_evolution_stage = SCP049_MAX_EVOLUTION_STAGE
 	var/research_cooldown = 0
-	var/research_cooldown_time = 45 SECONDS
+	var/research_cooldown_time = SCP049_RESEARCH_COOLDOWN
 
 	// Audio and announcements (Foundation-19 style)
 	var/last_announcement = 0
-	var/announcement_cooldown = 300 SECONDS
+	var/announcement_cooldown = SCP049_ANNOUNCEMENT_COOLDOWN
 	var/list/announcement_messages = list(
 		"The pestilence must be cured...",
 		"I can see the disease within you...",
@@ -54,14 +53,13 @@
 	)
 
 	// Enhanced persistence tracking
-	var/infections_performed = 0
+	var/detections_performed = 0
 	var/cures_attempted = 0
 	var/cures_successful = 0
 	var/doors_breached = 0
 	var/research_breakthroughs = 0
 	var/evolution_events = 0
-	var/total_pestilence_spread = 0
-	var/total_damage_dealt = 0
+	var/total_cures_performed = 0
 	var/session_start_time = 0
 	var/total_playtime = 0
 
@@ -71,6 +69,8 @@
 
 /mob/living/carbon/human/scp049/Initialize()
 	. = ..()
+
+	faction |= "scp049"
 
 	// Set proper species (Foundation-19 approach)
 	set_species(/datum/species/scp049)
@@ -131,103 +131,66 @@
 
 			// Apply sanity effects for non-Foundation personnel
 			if(H.job != "Site Director" && H.job != "Research Director" && H.job != "Senior Researcher")
-				// Sanity system integration would go here
-				// if(SSsanity)
-				// 	SSsanity.adjustSanityLoss(H, 5, "Heard SCP-049 speak")
+				if(H.sanity)
+					H.sanity.adjust_sanity(-5, "Heard SCP-049 speak")
 				continue
 
-// Enhanced pestilence spreading (Foundation-19 approach)
-/mob/living/carbon/human/scp049/proc/spread_pestilence()
+// Pestilence detection (SCP-049 senses the Pestilence in others — its delusion)
+/mob/living/carbon/human/scp049/proc/detect_pestilence()
 	if(world.time < pestilence_cooldown)
-		to_chat(src, "<span class='warning'>The pestilence needs time to manifest...</span>")
+		to_chat(src, "<span class='warning'>You need a moment to sense the Pestilence again...</span>")
 		return FALSE
 
 	pestilence_cooldown = world.time + pestilence_cooldown_time
 
-	// Increase pestilence level
 	pestilence_level = min(max_pestilence_level, pestilence_level + 10)
 
-	// Find targets in vision cone
 	var/list/nearby_targets = list()
-	for(var/mob/living/carbon/human/H in range(pestilence_spread_radius, src))
-		if(H != src && !HAS_TRAIT(H, TRAIT_PESTILENCE))
-			// Check if in vision cone
-			if(fovangle && can_see_cone(H))
-				nearby_targets += H
+	for(var/mob/living/carbon/human/H in range(pestilence_detect_radius, src))
+		if(H != src && !isscp049_1(H))
+			nearby_targets += H
 
-	var/infected_count = 0
+	var/detected_count = 0
 	for(var/mob/living/carbon/human/H in nearby_targets)
-		if(prob(pestilence_infection_chance + (pestilence_level / 10)))
-			infect_with_pestilence(H)
-			infected_count++
+		if(prob(pestilence_detect_chance + (pestilence_level / 10)))
+			mark_pestilence(H)
+			detected_count++
 
-	// Update persistence
-		infections_performed++
-	total_pestilence_spread += infected_count
+	detections_performed++
 
-	// Enhanced effects (Foundation-19 style)
 	playsound(src, 'sound/scp/scp049/SCP049_2.ogg', 80, 0)
-	visible_message("<span class='danger'>[src] spreads the pestilence with a sweeping gesture!</span>")
+	visible_message("<span class='danger'>[src] senses the Pestilence in those nearby, eyes narrowing behind the mask...</span>")
 
-	// Create visual effect
-	var/obj/effect/temp_visual/pestilence_spread/effect = new(loc)
-	effect.alpha = 150
+	to_chat(src, "<span class='notice'>Pestilence detected in [detected_count] subjects. Level: [pestilence_level]/[max_pestilence_level]</span>")
 
-	to_chat(src, "<span class='notice'>Pestilence spread to [infected_count] targets. Level: [pestilence_level]/[max_pestilence_level]</span>")
-
-	// Save persistence data
 	save_persistence_data()
 	return TRUE
 
-/mob/living/carbon/human/scp049/proc/infect_with_pestilence(mob/living/carbon/human/target)
-	if(!target || HAS_TRAIT(target, TRAIT_PESTILENCE))
+/mob/living/carbon/human/scp049/proc/mark_pestilence(mob/living/carbon/human/target)
+	if(!target)
 		return FALSE
 
-	// Check immunity
 	if(HAS_TRAIT(target, TRAIT_PESTILENCE_IMMUNE))
-		to_chat(src, "<span class='warning'>[target] seems resistant to the pestilence...</span>")
+		to_chat(src, "<span class='warning'>[target] appears... free of the Pestilence. Intriguing.</span>")
+		return FALSE
+
+	if(HAS_TRAIT(target, TRAIT_PESTILENCE))
+		to_chat(src, "<span class='notice'>The Pestilence still festers within [target]...</span>")
 		return FALSE
 
 	ADD_TRAIT(target, TRAIT_PESTILENCE, "scp049")
 	target.update_pestilence_hud()
 
-	to_chat(target, "<span class='danger'>You feel the pestilence taking hold... Something is terribly wrong.</span>")
+	to_chat(src, "<span class='notice'>You sense the Pestilence within [target]... They must be cured.</span>")
 	playsound(target, 'sound/scp/scp049/SCP049_3.ogg', 30, 0)
 
-	// Sanity effects
-	// if(SSsanity)
-	// 	SSsanity.adjustSanityLoss(target, 15, "Infected with pestilence by SCP-049")
+	if(target.sanity)
+		target.sanity.adjust_sanity(-10, "Sensed by SCP-049 as Pestilence carrier")
 
-	// Start pestilence effects with timer
-	addtimer(CALLBACK(src, PROC_REF(apply_pestilence_effects), target), 10 SECONDS)
+/mob/living/carbon/human/scp049/proc/isscp049_1(mob/M)
+	return istype(M, /mob/living/simple_animal/hostile/zombie/scp049_1)
 
-/mob/living/carbon/human/scp049/proc/apply_pestilence_effects(mob/living/carbon/human/target)
-	if(!target || !HAS_TRAIT(target, TRAIT_PESTILENCE))
-		return
 
-	// Apply scaling damage
-	var/damage_multiplier = 1 + (pestilence_level / 100)
-	target.adjustBruteLoss(pestilence_damage * damage_multiplier)
-	target.adjustToxLoss(pestilence_damage * 0.5 * damage_multiplier)
-	total_damage_dealt += pestilence_damage * damage_multiplier
-
-	// Visual effects
-	target.add_atom_colour("#00ff00", FIXED_COLOUR_PRIORITY)
-
-	// Symptoms
-	if(prob(20))
-		target.emote("cough")
-		to_chat(target, "<span class='warning'>You cough violently, the pestilence consuming your essence...</span>")
-
-	// Chance to spread to nearby targets
-	if(prob(10))
-		for(var/mob/living/carbon/human/H in range(2, target))
-			if(H != target && H != src && !HAS_TRAIT(H, TRAIT_PESTILENCE))
-				if(prob(10))
-					infect_with_pestilence(H)
-
-	// Continue effects
-	addtimer(CALLBACK(src, PROC_REF(apply_pestilence_effects), target), 20 SECONDS)
 
 // Enhanced cure mechanics (Foundation-19 approach)
 /mob/living/carbon/human/scp049/proc/cure_target(mob/living/carbon/human/target)
@@ -235,58 +198,37 @@
 		to_chat(src, "<span class='warning'>The cure needs time to prepare...</span>")
 		return FALSE
 
-	if(!target || !HAS_TRAIT(target, TRAIT_PESTILENCE))
-		to_chat(src, "<span class='warning'>This subject is not afflicted with the pestilence.</span>")
+	if(!target)
+		to_chat(src, "<span class='warning'>There is no subject to cure.</span>")
 		return FALSE
 
 	if(get_dist(src, target) > cure_range)
-		to_chat(src, "<span class='warning'>You must be closer to perform the cure.</span>")
+		to_chat(src, "<span class='warning'>You must be closer to administer the cure.</span>")
 		return FALSE
 
 	cure_cooldown = world.time + cure_cooldown_time
 	cures_attempted++
 
-	// Enhanced cure process
 	visible_message("<span class='notice'>[src] begins the great work on [target]...</span>")
 	playsound(src, 'sound/scp/scp049/SCP049_Cure1.ogg', 60, 0)
 
-	// Cure success chance based on potency
-	var/success_chance = cure_effectiveness + (cure_potency * 10)
-	if(prob(success_chance))
-		// Successful cure
-		REMOVE_TRAIT(target, TRAIT_PESTILENCE, "scp049")
-		target.update_pestilence_hud()
-		target.remove_atom_colour(FIXED_COLOUR_PRIORITY, "#00ff00")
-
-		// Heal the target
-		target.adjustBruteLoss(-50)
-		target.adjustFireLoss(-50)
-		target.adjustToxLoss(-50)
-
-		to_chat(src, "<span class='notice'>The cure is successful! The pestilence has been cleansed.</span>")
-		to_chat(target, "<span class='notice'>You feel the pestilence leaving your body... You are cured!</span>")
-
-		playsound(src, 'sound/scp/scp049/SCP049_Cure2.ogg', 50, 0)
-
-		cures_successful++
-		cure_potency = min(max_cure_potency, cure_potency + 1)
-
-		// Track progression event
-		track_scp049_cure(src, target, TRUE)
-
-		// Sanity restoration
-		// if(SSsanity)
-		// 	SSsanity.adjustSanityLoss(target, -20, "Cured by SCP-049")
+	if(!HAS_TRAIT(target, TRAIT_PESTILENCE))
+		to_chat(src, "<span class='notice'>Ah... you are afflicted with the Pestilence. I can sense it. Allow me to cure you.</span>")
 	else
-		// Failed cure - convert to SCP-049-1
-		to_chat(src, "<span class='warning'>The cure has failed... But perhaps this subject can serve the Great Work differently.</span>")
-		to_chat(target, "<span class='danger'>The 'cure' process is agony beyond description...</span>")
+		to_chat(src, "<span class='notice'>Yes... the Pestilence is strong in this one. The cure must be administered.</span>")
 
-		// Track progression event
-		track_scp049_cure(src, target, FALSE)
+	to_chat(target, "<span class='danger'>SCP-049's touch is cold beyond imagination... The 'cure' is agony beyond description...</span>")
 
-		// Create SCP-049-1 instance
-		create_scp049_1(target)
+	if(target.sanity)
+		target.sanity.adjust_sanity(-30, "Touched by SCP-049 — the cure")
+
+	track_scp049_cure(src, target, FALSE)
+
+	create_scp049_1(target)
+
+	cures_successful++
+	cure_potency = min(max_cure_potency, cure_potency + 1)
+	total_cures_performed++
 
 	save_persistence_data()
 	return TRUE
@@ -301,7 +243,9 @@
 	zombie.maxHealth = target.maxHealth * 1.5
 	zombie.health = zombie.maxHealth
 
-	// Transfer some characteristics
+	zombie.melee_damage_lower = SCP049_1_MELEE_DAMAGE_LOWER
+	zombie.melee_damage_upper = SCP049_1_MELEE_DAMAGE_UPPER
+	zombie.move_to_delay = SCP049_1_MOVE_DELAY
 	if(target.client)
 		zombie.key = target.key
 		to_chat(zombie, "<span class='danger'>You have been converted into SCP-049-1! You are now a mindless servant of SCP-049.</span>")
@@ -343,11 +287,11 @@
 	// Enhanced abilities per evolution stage
 	switch(evolution_stage)
 		if(2)
-			pestilence_spread_radius++
+			pestilence_detect_radius++
 			cure_effectiveness += 10
-			to_chat(src, "<span class='notice'>Your understanding deepens. The pestilence spreads further.</span>")
+			to_chat(src, "<span class='notice'>Your understanding deepens. You can sense the Pestilence from farther away.</span>")
 		if(3)
-			pestilence_infection_chance += 10
+			pestilence_detect_chance += 10
 			cure_range++
 			to_chat(src, "<span class='notice'>Your cure becomes more refined and potent.</span>")
 		if(4)
@@ -375,14 +319,13 @@
 		"cure_potency" = cure_potency,
 		"evolution_stage" = evolution_stage,
 		"research_progress" = research_progress,
-		"infections_performed" = infections_performed,
+		"detections_performed" = detections_performed,
 		"cures_attempted" = cures_attempted,
 		"cures_successful" = cures_successful,
 		"doors_breached" = doors_breached,
 		"research_breakthroughs" = research_breakthroughs,
 		"evolution_events" = evolution_events,
-		"total_pestilence_spread" = total_pestilence_spread,
-		"total_damage_dealt" = total_damage_dealt,
+		"total_cures_performed" = total_cures_performed,
 		"total_playtime" = total_playtime + (world.time - session_start_time)
 	)
 
@@ -397,23 +340,22 @@
 			cure_potency = persistence_data["cure_potency"] || 1
 			evolution_stage = persistence_data["evolution_stage"] || 1
 			research_progress = persistence_data["research_progress"] || 0
-			infections_performed = persistence_data["infections_performed"] || 0
+			detections_performed = persistence_data["detections_performed"] || 0
 			cures_attempted = persistence_data["cures_attempted"] || 0
 			cures_successful = persistence_data["cures_successful"] || 0
 			doors_breached = persistence_data["doors_breached"] || 0
 			research_breakthroughs = persistence_data["research_breakthroughs"] || 0
 			evolution_events = persistence_data["evolution_events"] || 0
-			total_pestilence_spread = persistence_data["total_pestilence_spread"] || 0
-			total_damage_dealt = persistence_data["total_damage_dealt"] || 0
+			total_cures_performed = persistence_data["total_cures_performed"] || 0
 			total_playtime = persistence_data["total_playtime"] || 0
 
 // Verbs (Foundation-19 style)
-/mob/living/carbon/human/scp049/verb/spread_pestilence_verb()
-	set name = "Spread Pestilence"
+/mob/living/carbon/human/scp049/verb/detect_pestilence_verb()
+	set name = "Detect Pestilence"
 	set category = "SCP-049"
-	set desc = "Spread the pestilence to nearby targets"
+	set desc = "Sense the Pestilence in nearby subjects"
 
-	spread_pestilence()
+	detect_pestilence()
 
 /mob/living/carbon/human/scp049/verb/breach_doors_verb()
 	set name = "Breach Doors"
@@ -450,7 +392,7 @@
 	status_text += "Evolution Stage: [evolution_stage]/[max_evolution_stage]<br>"
 	status_text += "Research Progress: [research_progress]/[max_research_progress]<br>"
 	status_text += "<br><b>Statistics:</b><br>"
-	status_text += "Infections Performed: [infections_performed]<br>"
+	status_text += "Detections Performed: [detections_performed]<br>"
 	status_text += "Cures Attempted: [cures_attempted] (Successful: [cures_successful])<br>"
 	status_text += "Doors Breached: [doors_breached]<br>"
 	status_text += "Research Breakthroughs: [research_breakthroughs]<br>"
@@ -470,11 +412,11 @@
 	name = "SCP-049-1"
 	desc = "A reanimated corpse, the result of SCP-049's 'cure'. It shambles with unnatural purpose."
 	icon_state = "zombie"
-	maxHealth = 150
-	health = 150
-	melee_damage_lower = 15
-	melee_damage_upper = 25
-	move_to_delay = 3
+	maxHealth = SCP049_1_MAX_HEALTH
+	health = SCP049_1_MAX_HEALTH
+	melee_damage_lower = SCP049_1_MELEE_DAMAGE_LOWER
+	melee_damage_upper = SCP049_1_MELEE_DAMAGE_UPPER
+	move_to_delay = SCP049_1_MOVE_DELAY
 	faction = list("scp049")
 
 /mob/living/simple_animal/hostile/zombie/scp049_1/Initialize()
@@ -483,25 +425,28 @@
 
 
 // Progression Integration Hooks
-/mob/living/carbon/human/scp049/proc/on_cure_attempt(mob/living/carbon/human/target, success)
+/mob/living/carbon/human/scp049/proc/on_cure_attempt(mob/living/carbon/human/target)
 	if(!target || !target.ckey)
 		return
 	
-	var/list/data = list("success" = success)
+	var/list/data = list("success" = FALSE)
 	hook_scp_interaction(target, "SCP-049", INTERACTION_TYPE_MEDICAL, data)
-	
-	if(success)
-		hook_scp_care(target, "SCP-049", "cure")
-	else
-		hook_scp_combat(target, "SCP-049", 50, 0)
+	hook_scp_combat(target, "SCP-049", 50, 0)
 
-/mob/living/carbon/human/scp049/proc/on_pestilence_spread(mob/living/carbon/human/target)
+/mob/living/carbon/human/scp049/proc/on_pestilence_detected(mob/living/carbon/human/target)
 	if(!target || !target.ckey)
 		return
 	
-	hook_scp_combat(target, "SCP-049", pestilence_damage, 0)
+	hook_scp_combat(target, "SCP-049", 0, 0)
 	start_scp_survival_tracking(target, "SCP-049", INTERACTION_RISK_HIGH)
 
 /mob/living/carbon/human/scp049/proc/on_evolution()
 	if(SSscp_specializations && SSscp_specializations.manager && src.ckey)
 		SSscp_specializations.manager.add_specialization_xp(src.ckey, SPEC_TRACK_RESEARCH, 100)
+
+/mob/living/carbon/human/scp049/proc/on_breach()
+	containment_breaches++
+	hook_scp_breach("SCP-049", src)
+
+/mob/living/carbon/human/scp049/proc/on_recontainment()
+	hook_scp_recontainment("SCP-049", list("method" = "standard"))

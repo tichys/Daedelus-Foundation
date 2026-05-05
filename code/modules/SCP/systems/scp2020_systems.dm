@@ -30,11 +30,11 @@
 				threats += H
 
 	// Automatic defensive teleportation when threatened
-	if(threats.len > 0 && world.time >= teleport_cooldown && prob(15))
+	if(length(threats) > 0 && world.time >= teleport_cooldown && prob(15))
 		defensive_teleport(threats)
 
 	// Automatic approach teleportation when hunting/curious
-	if(nearby_people.len > 0 && threats.len == 0 && world.time >= teleport_cooldown && prob(5))
+	if(length(nearby_people) > 0 && length(threats) == 0 && world.time >= teleport_cooldown && prob(5))
 		approach_teleport(nearby_people)
 
 	// Increase mastery over time
@@ -54,7 +54,7 @@
 			if(safe)
 				safe_turfs += T
 
-	if(safe_turfs.len > 0)
+	if(length(safe_turfs) > 0)
 		var/turf/target_turf = pick(safe_turfs)
 		perform_teleport(target_turf, "defensive")
 
@@ -80,6 +80,7 @@
 	playsound(owner, 'sound/effects/phasein.ogg', 50)
 
 	// Announce teleportation
+	
 	switch(teleport_type)
 		if("defensive")
 			owner.visible_message("<span class='danger'>[owner] suddenly vanishes from sight!</span>")
@@ -128,7 +129,7 @@
 			if(H.stat != DEAD && H != owner)
 				nearby_people += H
 
-		if(nearby_people.len > 0 && prob(10))
+		if(length(nearby_people) > 0 && prob(10))
 			attempt_phase_movement()
 
 	// Increase mastery over time
@@ -142,7 +143,7 @@
 		if(H.stat != DEAD && H != owner)
 			nearby_people += H
 
-	if(nearby_people.len == 0)
+	if(length(nearby_people) == 0)
 		return
 
 	var/mob/living/carbon/human/target = pick(nearby_people)
@@ -194,7 +195,7 @@
 				threats += H
 
 	// Automatic stealth activation when threatened
-	if(threats.len > 1 && world.time >= stealth_cooldown && prob(8))
+	if(length(threats) > 1 && world.time >= stealth_cooldown && prob(8))
 		activate_stealth()
 
 	// Apply stealth effects
@@ -241,7 +242,7 @@
 			potential_targets += H
 
 	// Select a target if we don't have one
-	if(!current_target && potential_targets.len > 0)
+	if(!current_target && length(potential_targets) > 0)
 		current_target = pick(potential_targets)
 		hunting_intensity = min(max_hunting_intensity, hunting_intensity + 10)
 
@@ -283,17 +284,11 @@
 	if(!owner)
 		return
 
-	// Collect research data
+	// Collect research data (SCP-2020 is harmless — no active abilities)
 	var/list/current_data = list(
-		"teleport_range" = owner.teleportation_system ? owner.teleportation_system.teleport_range : 7,
-		"teleport_mastery" = owner.teleportation_system ? owner.teleportation_system.teleport_mastery : 0,
-		"phasing_mastery" = owner.phasing_system ? owner.phasing_system.phasing_mastery : 0,
-		"stealth_level" = owner.stealth_system ? owner.stealth_system.stealth_level : 0,
-		"hunting_intensity" = owner.hunting_system ? owner.hunting_system.hunting_intensity : 0,
-		"teleport_events" = owner.teleportation_system ? owner.teleportation_system.teleport_events : 0,
-		"phasing_events" = owner.phasing_system ? owner.phasing_system.phasing_events : 0,
-		"stealth_events" = owner.stealth_system ? owner.stealth_system.stealth_events : 0,
-		"hunting_events" = owner.hunting_system ? owner.hunting_system.hunting_events : 0
+		"cliche_count" = 0,
+		"narrative_count" = 0,
+		"dramatic_gestures" = 0
 	)
 
 	// Store data for research integration

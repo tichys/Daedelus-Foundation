@@ -255,17 +255,17 @@
 	if(!SSpersistent_progression.achievement_manager)
 		return
 
-	// Check milestone achievements
 	check_milestone_achievements()
-
-	// Check class-specific achievements
 	check_class_achievements()
-
-	// Check faction-specific achievements
 	check_faction_achievements()
-
-	// Check hidden achievements
 	check_hidden_achievements()
+	check_job_performance_achievements()
+	check_scp_achievements()
+	check_combat_achievements()
+	check_research_achievements()
+	check_medical_achievements()
+	check_engineering_achievements()
+	check_social_achievements()
 
 /datum/persistent_player_data/proc/check_milestone_achievements()
 
@@ -293,42 +293,204 @@
 		unlock_achievement("survival_master")
 
 /datum/persistent_player_data/proc/check_class_achievements()
-
-	// Class-specific achievements based on performance metrics
-	var/security_arrests = get_performance_metric("security_arrests")
-	var/medical_saves = get_performance_metric("medical_saves")
-	var/engineering_builds = get_performance_metric("engineering_builds")
-	var/science_discoveries = get_performance_metric("science_discoveries")
-
-	if(security_arrests >= 50 && !("security_arrests" in achievements))
-		unlock_achievement("security_arrests")
-	if(medical_saves >= 100 && !("medical_saves" in achievements))
-		unlock_achievement("medical_saves")
-	if(engineering_builds >= 200 && !("engineering_builds" in achievements))
-		unlock_achievement("engineering_builds")
-	if(science_discoveries >= 50 && !("science_discoveries" in achievements))
-		unlock_achievement("science_discoveries")
+	var/list/class_ids = list("security", "research", "medical", "engineering", "containment")
+	for(var/class_id in class_ids)
+		var/class_rank = 0
+		if(class_data[class_id])
+			class_rank = class_data[class_id]["rank"] || current_rank
+		if(class_id == current_class_id)
+			class_rank = current_rank
+		if(class_rank >= 1 && !("class_[class_id]_novice" in achievements))
+			unlock_achievement("class_[class_id]_novice")
+		if(class_rank >= 5 && !("class_[class_id]_expert" in achievements))
+			unlock_achievement("class_[class_id]_expert")
+		if(class_rank >= 10 && !("class_[class_id]_master" in achievements))
+			unlock_achievement("class_[class_id]_master")
 
 /datum/persistent_player_data/proc/check_faction_achievements()
+	var/list/faction_rounds = list(
+		"foundation" = get_performance_metric("foundation_rounds"),
+		"goc" = get_performance_metric("goc_rounds"),
+		"serpents_hand" = get_performance_metric("serpents_hand_rounds"),
+		"chaos_insurgency" = get_performance_metric("chaos_rounds"),
+		"mcd" = get_performance_metric("mcd_rounds"),
+		"uiu" = get_performance_metric("uiu_rounds")
+	)
 
-	// Faction loyalty achievements
-	var/foundation_rounds = get_performance_metric("foundation_rounds")
-	var/chaos_rounds = get_performance_metric("chaos_rounds")
-
-	if(foundation_rounds >= 50 && !("foundation_loyalty" in achievements))
+	if(faction_rounds["foundation"] >= 50 && !("foundation_loyalty" in achievements))
 		unlock_achievement("foundation_loyalty")
-	if(chaos_rounds >= 50 && !("chaos_insurgency" in achievements))
-		unlock_achievement("chaos_insurgency")
+	if(faction_rounds["foundation"] >= 100 && !("foundation_dedication" in achievements))
+		unlock_achievement("foundation_dedication")
+	if(faction_rounds["goc"] >= 50 && !("goc_loyalty" in achievements))
+		unlock_achievement("goc_loyalty")
+	if(faction_rounds["serpents_hand"] >= 50 && !("serpents_hand_loyalty" in achievements))
+		unlock_achievement("serpents_hand_loyalty")
+	if(faction_rounds["chaos_insurgency"] >= 50 && !("chaos_insurgency_loyalty" in achievements))
+		unlock_achievement("chaos_insurgency_loyalty")
+	if(faction_rounds["mcd"] >= 50 && !("mcd_loyalty" in achievements))
+		unlock_achievement("mcd_loyalty")
+	if(faction_rounds["uiu"] >= 50 && !("uiu_loyalty" in achievements))
+		unlock_achievement("uiu_loyalty")
 
 /datum/persistent_player_data/proc/check_hidden_achievements()
-
-	// Explorer achievement
 	if(current_round_map_exploration >= 90 && !("explorer" in achievements))
 		unlock_achievement("explorer")
 
-	// Pacifist achievement
-	if(current_round_pacifist && current_round_survived && !("pacifist" in achievements))
-		unlock_achievement("pacifist")
+	if(current_round_pacifist && current_round_survived && !("pacifist_run" in achievements))
+		unlock_achievement("pacifist_run")
+
+	if(total_containment_breaches >= 1 && !("hidden_containment_breach" in achievements))
+		unlock_achievement("hidden_containment_breach")
+
+	if(total_deaths >= 1 && total_scp_interactions >= 10 && !("hidden_sacrifice" in achievements))
+		unlock_achievement("hidden_sacrifice")
+
+/datum/persistent_player_data/proc/check_job_performance_achievements()
+	if(total_arrests >= 10 && !("job_security_arrests_10" in achievements))
+		unlock_achievement("job_security_arrests_10")
+	if(total_arrests >= 50 && !("job_security_arrests_50" in achievements))
+		unlock_achievement("job_security_arrests_50")
+	if(total_arrests >= 100 && !("job_security_arrests_100" in achievements))
+		unlock_achievement("job_security_arrests_100")
+
+	if(total_treatments >= 50 && !("job_medical_saves_10" in achievements))
+		unlock_achievement("job_medical_saves_10")
+	if(total_treatments >= 200 && !("job_medical_saves_50" in achievements))
+		unlock_achievement("job_medical_saves_50")
+	if(total_treatments >= 500 && !("job_medical_saves_100" in achievements))
+		unlock_achievement("job_medical_saves_100")
+
+	var/total_papers = 0
+	for(var/job in job_research_papers)
+		total_papers += length(job_research_papers[job])
+	if(total_papers >= 5 && !("job_research_papers_5" in achievements))
+		unlock_achievement("job_research_papers_5")
+	if(total_papers >= 25 && !("job_research_papers_25" in achievements))
+		unlock_achievement("job_research_papers_25")
+	if(total_papers >= 50 && !("job_research_papers_50" in achievements))
+		unlock_achievement("job_research_papers_50")
+
+	if(total_constructions >= 50 && !("job_engineering_builds_50" in achievements))
+		unlock_achievement("job_engineering_builds_50")
+	if(total_constructions >= 200 && !("job_engineering_builds_200" in achievements))
+		unlock_achievement("job_engineering_builds_200")
+	if(total_constructions >= 500 && !("job_engineering_builds_500" in achievements))
+		unlock_achievement("job_engineering_builds_500")
+
+/datum/persistent_player_data/proc/check_scp_achievements()
+	if(total_scp_interactions >= 10 && !("scp_interactions_10" in achievements))
+		unlock_achievement("scp_interactions_10")
+	if(total_scp_interactions >= 50 && !("scp_interactions_50" in achievements))
+		unlock_achievement("scp_interactions_50")
+	if(total_scp_interactions >= 100 && !("scp_interactions_100" in achievements))
+		unlock_achievement("scp_interactions_100")
+
+	if(total_containment_breaches >= 10 && !("scp_containment_10" in achievements))
+		unlock_achievement("scp_containment_10")
+	if(total_containment_breaches >= 50 && !("scp_containment_50" in achievements))
+		unlock_achievement("scp_containment_50")
+	if(total_containment_breaches >= 100 && !("scp_containment_100" in achievements))
+		unlock_achievement("scp_containment_100")
+
+	if(total_research_completed >= 25 && !("scp_research_25" in achievements))
+		unlock_achievement("scp_research_25")
+	if(total_research_completed >= 100 && !("scp_research_100" in achievements))
+		unlock_achievement("scp_research_100")
+
+	var/unique_scp_contacts = get_performance_metric("unique_scp_contacts")
+	if(unique_scp_contacts >= 5 && !("scp_first_contact_5" in achievements))
+		unlock_achievement("scp_first_contact_5")
+	if(unique_scp_contacts >= 15 && !("scp_first_contact_15" in achievements))
+		unlock_achievement("scp_first_contact_15")
+	if(unique_scp_contacts >= 30 && !("scp_first_contact_30" in achievements))
+		unlock_achievement("scp_first_contact_30")
+
+/datum/persistent_player_data/proc/check_combat_achievements()
+	if(total_kills >= 10 && !("combat_kills_10" in achievements))
+		unlock_achievement("combat_kills_10")
+	if(total_kills >= 50 && !("combat_kills_50" in achievements))
+		unlock_achievement("combat_kills_50")
+	if(total_kills >= 100 && !("combat_kills_100" in achievements))
+		unlock_achievement("combat_kills_100")
+
+	if(total_damage_dealt >= 10000 && !("combat_damage_taken_10000" in achievements))
+		unlock_achievement("combat_damage_taken_10000")
+	if(total_damage_dealt >= 50000 && !("combat_damage_taken_50000" in achievements))
+		unlock_achievement("combat_damage_taken_50000")
+	if(total_damage_dealt >= 100000 && !("combat_damage_taken_100000" in achievements))
+		unlock_achievement("combat_damage_taken_100000")
+
+	if(current_round_pacifist && current_round_survived && !("combat_perfect_round" in achievements))
+		unlock_achievement("combat_perfect_round")
+
+/datum/persistent_player_data/proc/check_research_achievements()
+	if(total_research_completed >= 5 && !("research_discoveries_5" in achievements))
+		unlock_achievement("research_discoveries_5")
+	if(total_research_completed >= 25 && !("research_discoveries_25" in achievements))
+		unlock_achievement("research_discoveries_25")
+	if(total_research_completed >= 50 && !("research_discoveries_50" in achievements))
+		unlock_achievement("research_discoveries_50")
+
+	var/total_projects = 0
+	for(var/job in job_research_papers)
+		total_projects += length(job_research_papers[job])
+	if(total_projects >= 10 && !("research_projects_10" in achievements))
+		unlock_achievement("research_projects_10")
+	if(total_projects >= 50 && !("research_projects_50" in achievements))
+		unlock_achievement("research_projects_50")
+
+/datum/persistent_player_data/proc/check_medical_achievements()
+	if(total_treatments >= 50 && !("medical_treatments_50" in achievements))
+		unlock_achievement("medical_treatments_50")
+	if(total_treatments >= 200 && !("medical_treatments_200" in achievements))
+		unlock_achievement("medical_treatments_200")
+	if(total_treatments >= 500 && !("medical_treatments_500" in achievements))
+		unlock_achievement("medical_treatments_500")
+
+	var/total_surgeries = 0
+	for(var/job in job_medical_procedures)
+		for(var/list/proc_data in job_medical_procedures[job])
+			if(proc_data["procedure_type"] == "surgery")
+				total_surgeries++
+	if(total_surgeries >= 10 && !("medical_surgeries_10" in achievements))
+		unlock_achievement("medical_surgeries_10")
+	if(total_surgeries >= 50 && !("medical_surgeries_50" in achievements))
+		unlock_achievement("medical_surgeries_50")
+
+/datum/persistent_player_data/proc/check_engineering_achievements()
+	if(total_repairs >= 50 && !("engineering_repairs_50" in achievements))
+		unlock_achievement("engineering_repairs_50")
+	if(total_repairs >= 200 && !("engineering_repairs_200" in achievements))
+		unlock_achievement("engineering_repairs_200")
+	if(total_repairs >= 500 && !("engineering_repairs_500" in achievements))
+		unlock_achievement("engineering_repairs_500")
+
+	if(total_constructions >= 100 && !("engineering_construction_100" in achievements))
+		unlock_achievement("engineering_construction_100")
+	if(total_constructions >= 500 && !("engineering_construction_500" in achievements))
+		unlock_achievement("engineering_construction_500")
+
+/datum/persistent_player_data/proc/check_social_achievements()
+	var/total_commendations = 0
+	for(var/job in job_commendations)
+		total_commendations += length(job_commendations[job])
+	if(total_commendations >= 10 && !("social_commendations_10" in achievements))
+		unlock_achievement("social_commendations_10")
+
+	var/total_mentoring = 0
+	for(var/job in job_mentoring_sessions)
+		total_mentoring += length(job_mentoring_sessions[job])
+	if(total_mentoring >= 10 && !("social_mentoring_10" in achievements))
+		unlock_achievement("social_mentoring_10")
+	if(total_mentoring >= 50 && !("social_mentoring_50" in achievements))
+		unlock_achievement("social_mentoring_50")
+
+	if(rounds_played >= 10 && !("social_team_rounds_10" in achievements))
+		unlock_achievement("social_team_rounds_10")
+	if(rounds_played >= 50 && !("social_team_rounds_50" in achievements))
+		unlock_achievement("social_team_rounds_50")
+	if(rounds_played >= 100 && !("social_team_rounds_100" in achievements))
+		unlock_achievement("social_team_rounds_100")
 
 /datum/persistent_player_data/proc/unlock_achievement(achievement_id)
 	if(!SSpersistent_progression.achievement_manager)

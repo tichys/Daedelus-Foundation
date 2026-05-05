@@ -1,61 +1,155 @@
 import { useBackend, useLocalState } from '../backend';
-import {
-  Box,
-  Button,
-  LabeledList,
-  ProgressBar,
-  Section,
-  Stack,
-  Tabs,
-  Flex,
-  Grid,
-  Table,
-  NoticeBox,
-} from '../components';
+import { Box, Button, Input, NoticeBox } from '../components';
 import { Window } from '../layouts';
+
+const C = {
+  bg: '#08080a',
+  panel: '#0c0c10',
+  border: '#1e1e24',
+  borderRed: '#6b0000',
+  accent: '#c2960e',
+  red: '#8b0000',
+  redBright: '#cc2222',
+  green: '#1a7a1a',
+  greenDim: '#0d4a0d',
+  text: '#b0b0b0',
+  textBright: '#e0e0e0',
+  textDim: '#555560',
+  amber: '#d4a017',
+  mono: '"Consolas", "Courier New", "Lucida Console", monospace',
+};
+
+const term = (overrides = {}) => ({
+  fontFamily: C.mono,
+  fontSize: '12px',
+  color: C.text,
+  ...overrides,
+});
+
+const TermHeader = (props) => (
+  <Box style={term({
+    fontSize: '10px',
+    color: C.textDim,
+    letterSpacing: '0.18em',
+    textTransform: 'uppercase',
+    borderBottom: `1px solid ${C.border}`,
+    paddingBottom: '4px',
+    marginBottom: '8px',
+    ...props.style,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermLabel = (props) => (
+  <Box as="span" style={term({
+    color: C.textDim,
+    fontSize: '10px',
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    marginRight: '8px',
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermValue = (props) => (
+  <Box as="span" style={term({
+    color: props.color || C.textBright,
+    fontWeight: props.bold ? 'bold' : undefined,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermRow = (props) => (
+  <Box style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+    {props.children}
+  </Box>
+);
+
+const TermDivider = () => (
+  <Box style={{
+    color: C.borderRed,
+    fontSize: '10px',
+    letterSpacing: '0.3em',
+    margin: '10px 0',
+    userSelect: 'none',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  }}>
+    {'─'.repeat(80)}
+  </Box>
+);
+
+const TermButton = (props) => {
+  const selected = props.selected;
+  const color = props.color;
+  const bg = selected
+    ? (color === 'red' ? 'rgba(139,0,0,0.35)' : color === 'green' ? 'rgba(26,122,26,0.35)' : color === 'yellow' ? 'rgba(180,160,20,0.25)' : 'rgba(255,255,255,0.08)')
+    : 'transparent';
+  const borderColor = selected
+    ? (color === 'red' ? C.red : color === 'green' ? C.green : color === 'yellow' ? '#b0a020' : C.border)
+    : C.border;
+
+  return (
+    <Button
+      {...props}
+      style={{
+        fontFamily: C.mono,
+        fontSize: '10px',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        background: bg,
+        border: `1px solid ${borderColor}`,
+        borderRadius: 0,
+        color: selected ? C.textBright : C.textDim,
+        padding: '3px 8px',
+        boxShadow: selected ? `0 0 6px ${borderColor}44` : 'none',
+      }}
+    >
+      {props.children}
+    </Button>
+  );
+};
+
+const TermProgressBar = (props) => (
+  <Box style={{ marginBottom: '6px' }}>
+    <Box style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+      <TermLabel>{props.label}</TermLabel>
+      <TermValue color={props.color || C.amber}>{props.value}{props.suffix || ''}</TermValue>
+    </Box>
+    <Box style={{
+      height: '6px',
+      background: C.panel,
+      border: `1px solid ${C.border}`,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <Box style={{
+        height: '100%',
+        width: `${Math.min(100, Math.max(0, (props.value / props.maxValue) * 100))}%`,
+        background: props.color || C.amber,
+        transition: 'width 0.3s',
+      }} />
+    </Box>
+  </Box>
+);
 
 export const SCPProgression = (props) => {
   const { act, data } = useBackend();
   const [tab, setTab] = useLocalState('scpTab', 1);
   const [selectedSCP, setSelectedSCP] = useLocalState('selectedSCP', null);
 
-  // Ensure data exists and has required properties
   const safeData = data || {};
   const hasData = safeData.has_data || false;
 
   if (!hasData) {
     return (
-      <Window
-        title="SCP Foundation - SCP Progression System"
-        width={1200}
-        height={800}
-        theme="scp_terminal"
-      >
-        <Window.Content
-          style={{
-            background: 'rgba(0,0,0,0.7)',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#ffffff',
-            padding: '20px',
-          }}
-        >
-          <Box
-            style={{
-              textAlign: 'center',
-              fontSize: '18px',
-              color: '#ff4444',
-              marginTop: '100px',
-            }}
-          >
-            ╔══════════════════════════════════════════════════════════════╗
-            ║                    SCP FOUNDATION                           ║
-            ║                SCP PROGRESSION SYSTEM                       ║
-            ║                                                             ║
-            ║              NO SCP PROGRESSION DATA FOUND                  ║
-            ║                                                             ║
-            ║              PLEASE CONTACT AN ADMINISTRATOR                ║
-            ╚══════════════════════════════════════════════════════════════╝
+      <Window title="SCP FOUNDATION — SCP PROGRESSION TERMINAL" width={1200} height={800} theme="scp_terminal">
+        <Window.Content scrollable>
+          <Box style={{ background: C.bg, border: `1px solid ${C.borderRed}`, fontFamily: C.mono, fontSize: '12px', color: C.text, minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <NoticeBox>NO SCP PROGRESSION DATA FOUND</NoticeBox>
           </Box>
         </Window.Content>
       </Window>
@@ -73,485 +167,205 @@ export const SCPProgression = (props) => {
     recent_events = [],
   } = safeData;
 
-  // NavButton component matching personnel persistence style
-  const NavButton = ({ children, isActive, onClick, icon }) => (
-    <Button
-      onClick={onClick}
-      selected={isActive}
-      style={{
-        backgroundColor: isActive ? 'rgba(0,255,0,0.2)' : 'rgba(0,0,0,0.5)',
-        border: isActive ? '1px solid #00ff00' : '1px solid rgba(255,255,255,0.3)',
-        color: isActive ? '#00ff00' : '#ffffff',
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        fontWeight: 'bold',
-        padding: '8px 12px',
-        marginRight: '5px',
-        borderRadius: '3px',
-        transition: 'all 0.2s ease',
-      }}
-    >
-      <Box style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-        <span>{icon}</span>
-        <span>{children}</span>
-      </Box>
-    </Button>
-  );
-
-  // EnhancedButton component matching personnel persistence style
-  const EnhancedButton = ({ children, onClick, color = 'default', icon, tooltip }) => {
-    const colorMap = {
-      good: '#00ff00',
-      average: '#ffff00',
-      bad: '#ff0000',
-      blue: '#0088ff',
-      purple: '#8800ff',
-      default: '#ffffff',
-    };
-
-    return (
-      <Button
-        onClick={onClick}
-        style={{
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          border: `1px solid ${colorMap[color]}`,
-          color: colorMap[color],
-          fontFamily: 'monospace',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          padding: '6px 10px',
-          borderRadius: '3px',
-          transition: 'all 0.2s ease',
-        }}
-        tooltip={tooltip}
-      >
-        <Box style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          {icon && <span>{icon}</span>}
-          <span>{children}</span>
-        </Box>
-      </Button>
-    );
-  };
-
-  // SCP Card component
-  const SCPCard = ({ scpData, isSelected, onClick }) => (
-    <Box
-      onClick={onClick}
-      style={{
-        backgroundColor: isSelected ? 'rgba(0,255,0,0.1)' : 'rgba(0,0,0,0.5)',
-        border: isSelected ? '2px solid #00ff00' : '1px solid rgba(255,255,255,0.3)',
-        borderRadius: '5px',
-        padding: '15px',
-        margin: '5px',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-        minWidth: '200px',
-      }}
-    >
-      <Box style={{ fontSize: '16px', fontWeight: 'bold', color: '#00ff00', marginBottom: '5px' }}>
-        SCP-{scpData.scp_id}
-      </Box>
-      <Box style={{ fontSize: '12px', opacity: 0.8, marginBottom: '10px' }}>
-        {scpData.scp_name || 'Unknown SCP'}
-      </Box>
-      <Box style={{ fontSize: '11px', color: '#00ffff' }}>
-        Rounds Played: {scpData.rounds_played || 0}
-      </Box>
-      <Box style={{ fontSize: '11px', color: '#00ffff' }}>
-        Total Experience: {scpData.total_experience || 0}
-      </Box>
-      <Box style={{ fontSize: '11px', color: '#ffff00' }}>
-        Achievements: {scpData.achievements?.length || 0}
-      </Box>
-    </Box>
-  );
+  const TABS = [
+    { key: 1, label: 'OVERVIEW' },
+    { key: 2, label: 'SCP DATA' },
+    { key: 3, label: 'ACHIEVEMENTS' },
+    { key: 4, label: 'EVENTS' },
+    { key: 5, label: 'GLOBAL' },
+  ];
 
   return (
-    <Window
-      title="SCP Foundation - SCP Progression System"
-      width={1200}
-      height={800}
-      theme="scp_terminal"
-    >
-      <Window.Content
-        style={{
-          background: 'rgba(0,0,0,0.7)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '5px',
-          padding: '20px',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          color: '#ffffff',
+    <Window title="SCP FOUNDATION — SCP PROGRESSION TERMINAL" width={1200} height={800} theme="scp_terminal">
+      <Window.Content scrollable>
+        <Box style={{
+          background: C.bg,
+          border: `1px solid ${C.borderRed}`,
+          fontFamily: C.mono,
+          fontSize: '12px',
+          color: C.text,
           minHeight: '100%',
-          position: 'relative',
-        }}
-      >
-        <Box style={{ marginBottom: '20px' }}>
-          <Box
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              marginBottom: '5px',
-            }}
-          >
-            SCP PROGRESSION SYSTEM
-          </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            ANOMALOUS ENTITY PERFORMANCE & ACHIEVEMENT TRACKING
-          </Box>
-          <Box style={{ fontSize: '12px', opacity: 0.6, marginTop: '5px' }}>
-            Player: {player_name} | Key: {player_key} | Current SCP: {current_scp}
-          </Box>
-        </Box>
-
-        {/* Navigation Tabs */}
-        <Flex
-          style={{
-            marginBottom: '20px',
-            borderBottom: '1px solid rgba(255,255,255,0.3)',
-            gap: '5px',
-          }}
-        >
-          <NavButton isActive={tab === 1} onClick={() => setTab(1)} icon="📊">
-            OVERVIEW
-          </NavButton>
-          <NavButton isActive={tab === 2} onClick={() => setTab(2)} icon="👹">
-            SCP PROGRESSION
-          </NavButton>
-          <NavButton isActive={tab === 3} onClick={() => setTab(3)} icon="🏆">
-            ACHIEVEMENTS
-          </NavButton>
-          <NavButton isActive={tab === 4} onClick={() => setTab(4)} icon="📈">
-            RECENT EVENTS
-          </NavButton>
-          <NavButton isActive={tab === 5} onClick={() => setTab(5)} icon="🌐">
-            GLOBAL STATS
-          </NavButton>
-        </Flex>
-
-        {/* Overview Tab */}
-        {tab === 1 && (
-          <Box>
-            <Box
-              style={{
-                fontSize: '12px',
-                opacity: 0.7,
-                textAlign: 'center',
-                marginTop: '20px',
-              }}
-            >
-              SCP progression system overview - all anomalous entities operational.
+        }}>
+          <Box style={{
+            borderBottom: `2px solid ${C.borderRed}`,
+            padding: '10px 14px 8px',
+            background: 'linear-gradient(180deg, #0e0000 0%, #08080a 100%)',
+          }}>
+            <Box style={{ fontSize: '15px', fontWeight: 'bold', color: C.amber, letterSpacing: '0.18em' }}>
+              SCP FOUNDATION — SCP PROGRESSION TERMINAL
             </Box>
-
-            <Section title="Quick Actions">
-              <Flex wrap="wrap" style={{ gap: '10px' }}>
-                <EnhancedButton
-                  icon="📊"
-                  color="good"
-                  onClick={() => act('export_scp_data')}
-                  tooltip="Export SCP progression data"
-                >
-                  Export Data
-                </EnhancedButton>
-                <EnhancedButton
-                  icon="🔄"
-                  color="blue"
-                  onClick={() => act('refresh_scp_data')}
-                  tooltip="Refresh SCP progression data"
-                >
-                  Refresh Data
-                </EnhancedButton>
-                <EnhancedButton
-                  icon="💾"
-                  color="purple"
-                  onClick={() => act('save_scp_data')}
-                  tooltip="Save SCP progression data"
-                >
-                  Save Data
-                </EnhancedButton>
-                <EnhancedButton
-                  icon="📂"
-                  color="average"
-                  onClick={() => act('load_scp_data')}
-                  tooltip="Load SCP progression data"
-                >
-                  Load Data
-                </EnhancedButton>
-              </Flex>
-            </Section>
-
-            <Section title="Current SCP Status">
-              <Grid>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="Current SCP">
-                      <Box style={{ color: '#00ff00', fontWeight: 'bold' }}>
-                        {current_scp !== 'None' ? `SCP-${current_scp}` : 'Not Playing as SCP'}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Total SCPs Played">
-                      <Box style={{ color: '#00ffff' }}>
-                        {Object.keys(scp_progression_data).length}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Total SCP Experience">
-                      <Box style={{ color: '#ffff00' }}>
-                        {Object.values(scp_progression_data).reduce((sum, scp) => sum + (scp.total_experience || 0), 0)}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="Total Achievements">
-                      <Box style={{ color: '#ff8800' }}>
-                        {achievements.length}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Recent Events">
-                      <Box style={{ color: '#ff0088' }}>
-                        {recent_events.length}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="System Status">
-                      <Box style={{ color: '#00ff00' }}>
-                        OPERATIONAL
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-              </Grid>
-            </Section>
+            <Box style={{ fontSize: '9px', color: C.textDim, letterSpacing: '0.12em', marginTop: '2px' }}>
+              ANOMALOUS ENTITY PERFORMANCE TRACKING | SUBJECT: {player_name} | KEY: {player_key} | CURRENT: {current_scp !== 'None' ? `SCP-${current_scp}` : 'NONE'}
+            </Box>
           </Box>
-        )}
 
-        {/* SCP Progression Tab */}
-        {tab === 2 && (
-          <Box>
-            <Section title="Available SCPs">
-              <Flex wrap="wrap" style={{ gap: '10px' }}>
-                {available_scps.map((scp) => (
-                  <SCPCard
-                    key={scp.scp_id}
-                    scpData={scp}
-                    isSelected={selectedSCP === scp.scp_id}
-                    onClick={() => setSelectedSCP(scp.scp_id)}
-                  />
-                ))}
-              </Flex>
-            </Section>
+          <Box style={{
+            display: 'flex',
+            borderBottom: `1px solid ${C.borderRed}`,
+            overflowX: 'auto',
+            background: C.panel,
+          }}>
+            {TABS.map((t) => {
+              const isActive = tab === t.key;
+              return (
+                <Box
+                  key={t.key}
+                  style={{
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    background: isActive ? 'rgba(139,0,0,0.25)' : 'transparent',
+                    borderRight: `1px solid ${C.border}`,
+                    borderBottom: isActive ? `2px solid ${C.amber}` : '2px solid transparent',
+                    color: isActive ? C.textBright : C.textDim,
+                    fontSize: '10px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    fontFamily: C.mono,
+                    whiteSpace: 'nowrap',
+                  }}
+                  onClick={() => setTab(t.key)}
+                >
+                  {isActive && '▸ '}{t.label}
+                </Box>
+              );
+            })}
+          </Box>
 
-            {selectedSCP && scp_progression_data[selectedSCP] && (
-              <Section title={`SCP-${selectedSCP} Progression Details`}>
-                <Grid>
-                  <Grid.Column size={6}>
-                    <LabeledList>
-                      <LabeledList.Item label="SCP ID">
-                        <Box style={{ color: '#00ff00', fontWeight: 'bold' }}>
-                          SCP-{selectedSCP}
-                        </Box>
-                      </LabeledList.Item>
-                      <LabeledList.Item label="Rounds Played">
-                        <Box style={{ color: '#00ffff' }}>
-                          {scp_progression_data[selectedSCP].rounds_played || 0}
-                        </Box>
-                      </LabeledList.Item>
-                      <LabeledList.Item label="Total Experience">
-                        <Box style={{ color: '#ffff00' }}>
-                          {scp_progression_data[selectedSCP].total_experience || 0}
-                        </Box>
-                      </LabeledList.Item>
-                    </LabeledList>
-                  </Grid.Column>
-                  <Grid.Column size={6}>
-                    <LabeledList>
-                      <LabeledList.Item label="Achievements Unlocked">
-                        <Box style={{ color: '#ff8800' }}>
-                          {scp_progression_data[selectedSCP].achievements?.length || 0}
-                        </Box>
-                      </LabeledList.Item>
-                      <LabeledList.Item label="Last Update">
-                        <Box style={{ color: '#ff0088' }}>
-                          {scp_progression_data[selectedSCP].last_update ?
-                            new Date(scp_progression_data[selectedSCP].last_update * 1000).toLocaleString() :
-                            'Never'
-                          }
-                        </Box>
-                      </LabeledList.Item>
-                    </LabeledList>
-                  </Grid.Column>
-                </Grid>
+          <Box style={{ padding: '16px' }}>
+            {tab === 1 && (
+              <Box>
+                <TermHeader>SCP PROGRESSION OVERVIEW</TermHeader>
+                <Box style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+                  <TermButton color="green" onClick={() => act('export_scp_data')}>EXPORT</TermButton>
+                  <TermButton onClick={() => act('refresh_scp_data')}>REFRESH</TermButton>
+                  <TermButton color="yellow" onClick={() => act('save_scp_data')}>SAVE</TermButton>
+                  <TermButton onClick={() => act('load_scp_data')}>LOAD</TermButton>
+                </Box>
 
-                {/* SCP-specific metrics */}
-                <Section title="SCP-Specific Metrics" level={2}>
-                  <Grid>
-                    {Object.entries(scp_progression_data[selectedSCP].metrics || {}).map(([metric, value]) => (
-                      <Grid.Column key={metric} size={4}>
-                        <Box
-                          style={{
-                            backgroundColor: 'rgba(0,0,0,0.3)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            borderRadius: '3px',
-                            padding: '10px',
-                            margin: '5px',
-                          }}
-                        >
-                          <Box style={{ fontSize: '12px', color: '#00ff00', fontWeight: 'bold' }}>
-                            {metric.replace(/_/g, ' ').toUpperCase()}
-                          </Box>
-                          <Box style={{ fontSize: '16px', color: '#00ffff' }}>
-                            {value}
-                          </Box>
-                        </Box>
-                      </Grid.Column>
-                    ))}
-                  </Grid>
-                </Section>
-              </Section>
+                <TermRow><TermLabel>CURRENT SCP</TermLabel><TermValue color={C.amber} bold>{current_scp !== 'None' ? `SCP-${current_scp}` : 'NOT ASSIGNED'}</TermValue></TermRow>
+                <TermRow><TermLabel>SCPs PLAYED</TermLabel><TermValue>{Object.keys(scp_progression_data).length}</TermValue></TermRow>
+                <TermRow><TermLabel>TOTAL SCP XP</TermLabel><TermValue color={C.amber}>{Object.values(scp_progression_data).reduce((sum, scp) => sum + (scp.total_experience || 0), 0)}</TermValue></TermRow>
+                <TermRow><TermLabel>ACHIEVEMENTS</TermLabel><TermValue color={C.green}>{achievements.length}</TermValue></TermRow>
+                <TermRow><TermLabel>RECENT EVENTS</TermLabel><TermValue>{recent_events.length}</TermValue></TermRow>
+                <TermRow><TermLabel>SYSTEM</TermLabel><TermValue color={C.green}>OPERATIONAL</TermValue></TermRow>
+              </Box>
+            )}
+
+            {tab === 2 && (
+              <Box>
+                <TermHeader>AVAILABLE SCPs</TermHeader>
+                <Box style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
+                  {available_scps.map((scp) => (
+                    <TermButton
+                      key={scp.scp_id}
+                      selected={selectedSCP === scp.scp_id}
+                      color={selectedSCP === scp.scp_id ? 'red' : undefined}
+                      onClick={() => setSelectedSCP(scp.scp_id)}
+                    >
+                      SCP-{scp.scp_id}
+                    </TermButton>
+                  ))}
+                </Box>
+
+                {selectedSCP && scp_progression_data[selectedSCP] && (
+                  <Box>
+                    <TermDivider />
+                    <TermHeader>SCP-{selectedSCP} DETAILS</TermHeader>
+                    <TermRow><TermLabel>ROUNDS PLAYED</TermLabel><TermValue>{scp_progression_data[selectedSCP].rounds_played || 0}</TermValue></TermRow>
+                    <TermRow><TermLabel>TOTAL XP</TermLabel><TermValue color={C.amber}>{scp_progression_data[selectedSCP].total_experience || 0}</TermValue></TermRow>
+                    <TermRow><TermLabel>ACHIEVEMENTS</TermLabel><TermValue color={C.green}>{scp_progression_data[selectedSCP].achievements?.length || 0}</TermValue></TermRow>
+                    <TermRow><TermLabel>LAST UPDATE</TermLabel><TermValue>{scp_progression_data[selectedSCP].last_update ? new Date(scp_progression_data[selectedSCP].last_update * 1000).toLocaleString() : 'NEVER'}</TermValue></TermRow>
+
+                    {Object.keys(scp_progression_data[selectedSCP].metrics || {}).length > 0 && (
+                      <Box>
+                        <TermDivider />
+                        <TermHeader>METRICS</TermHeader>
+                        {Object.entries(scp_progression_data[selectedSCP].metrics || {}).map(([metric, value]) => (
+                          <TermRow key={metric}>
+                            <TermLabel>{metric.replace(/_/g, ' ').toUpperCase()}</TermLabel>
+                            <TermValue color={C.amber}>{value}</TermValue>
+                          </TermRow>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {tab === 3 && (
+              <Box>
+                <TermHeader>SCP ACHIEVEMENTS</TermHeader>
+                {achievements && achievements.length > 0 ? achievements.map((achievement, index) => (
+                  <Box key={index} style={{
+                    marginBottom: '6px',
+                    padding: '8px',
+                    borderLeft: `2px solid ${achievement.unlocked ? C.green : C.border}`,
+                    background: C.panel,
+                  }}>
+                    <TermRow>
+                      <TermValue bold color={achievement.unlocked ? C.green : C.textDim}>{achievement.name}</TermValue>
+                      <TermLabel style={{ marginLeft: '8px' }}>STATUS</TermLabel>
+                      <TermValue color={achievement.unlocked ? C.green : C.textDim}>{achievement.unlocked ? 'UNLOCKED' : 'LOCKED'}</TermValue>
+                    </TermRow>
+                    <Box style={term({ color: C.textDim, fontSize: '11px', fontStyle: 'italic', marginTop: '2px' })}>
+                      {achievement.description}
+                    </Box>
+                  </Box>
+                )) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO SCP ACHIEVEMENTS AVAILABLE</Box>
+                )}
+              </Box>
+            )}
+
+            {tab === 4 && (
+              <Box>
+                <TermHeader>RECENT SCP EVENTS</TermHeader>
+                {recent_events && recent_events.length > 0 ? recent_events.map((event, index) => (
+                  <Box key={index} style={{
+                    marginBottom: '4px',
+                    padding: '8px',
+                    borderLeft: `2px solid ${C.borderRed}`,
+                    background: C.panel,
+                  }}>
+                    <TermRow>
+                      <TermValue color={C.amber} bold>+{event.experience} XP</TermValue>
+                      <TermLabel style={{ marginLeft: '8px' }}>SCP-{event.scp_id}</TermLabel>
+                      <TermLabel>{event.event_type}</TermLabel>
+                      <Box as="span" style={term({ color: C.textDim, fontSize: '10px', marginLeft: 'auto' })}>
+                        {new Date(event.timestamp * 1000).toLocaleString()}
+                      </Box>
+                    </TermRow>
+                    <Box style={term({ color: C.textDim, fontSize: '11px' })}>{event.details}</Box>
+                  </Box>
+                )) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO RECENT EVENTS</Box>
+                )}
+              </Box>
+            )}
+
+            {tab === 5 && (
+              <Box>
+                <TermHeader>GLOBAL SCP STATISTICS</TermHeader>
+                <TermRow><TermLabel>TOTAL SCP ROUNDS</TermLabel><TermValue>{global_scp_stats.total_scp_rounds_played || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>TOTAL ACHIEVEMENTS</TermLabel><TermValue color={C.green}>{global_scp_stats.total_scp_achievements_unlocked || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>AVERAGE PERFORMANCE</TermLabel><TermValue color={C.amber}>{global_scp_stats.average_scp_performance || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>RESEARCH POINTS</TermLabel><TermValue>{global_scp_stats.total_scp_research_points || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>CONTAINMENT BREACHES</TermLabel><TermValue color={C.redBright}>{global_scp_stats.scp_containment_breaches || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>RESEARCH BREAKTHROUGHS</TermLabel><TermValue color={C.green}>{global_scp_stats.scp_research_breakthroughs || 0}</TermValue></TermRow>
+              </Box>
             )}
           </Box>
-        )}
 
-        {/* Achievements Tab */}
-        {tab === 3 && (
-          <Box>
-            <Section title="SCP Achievements">
-              <Grid>
-                {achievements.map((achievement, index) => (
-                  <Grid.Column key={index} size={6}>
-                    <Box
-                      style={{
-                        backgroundColor: achievement.unlocked ? 'rgba(0,255,0,0.1)' : 'rgba(0,0,0,0.3)',
-                        border: achievement.unlocked ? '2px solid #00ff00' : '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: '5px',
-                        padding: '15px',
-                        margin: '5px',
-                      }}
-                    >
-                      <Box style={{
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        color: achievement.unlocked ? '#00ff00' : '#888888',
-                        marginBottom: '5px'
-                      }}>
-                        {achievement.name}
-                      </Box>
-                      <Box style={{
-                        fontSize: '12px',
-                        color: achievement.unlocked ? '#ffffff' : '#666666',
-                        marginBottom: '5px'
-                      }}>
-                        {achievement.description}
-                      </Box>
-                      <Box style={{
-                        fontSize: '10px',
-                        color: achievement.unlocked ? '#00ffff' : '#444444'
-                      }}>
-                        Status: {achievement.unlocked ? 'UNLOCKED' : 'LOCKED'}
-                      </Box>
-                    </Box>
-                  </Grid.Column>
-                ))}
-              </Grid>
-            </Section>
+          <Box style={{
+            borderTop: `1px solid ${C.border}`,
+            padding: '4px 14px',
+            background: C.panel,
+          }}>
+            <Box style={term({ color: C.textDim, fontSize: '9px', letterSpacing: '0.1em' })}>
+              SCP FOUNDATION | ANOMALOUS ENTITY PROGRESSION | ALL DATA CLASSIFIED | v1.0
+            </Box>
           </Box>
-        )}
-
-        {/* Recent Events Tab */}
-        {tab === 4 && (
-          <Box>
-            <Section title="Recent SCP Events">
-              <Table>
-                <Table.Row header>
-                  <Table.Cell>Timestamp</Table.Cell>
-                  <Table.Cell>SCP</Table.Cell>
-                  <Table.Cell>Event Type</Table.Cell>
-                  <Table.Cell>Details</Table.Cell>
-                  <Table.Cell>Experience</Table.Cell>
-                </Table.Row>
-                {recent_events.map((event, index) => (
-                  <Table.Row key={index}>
-                    <Table.Cell>
-                      {new Date(event.timestamp * 1000).toLocaleString()}
-                    </Table.Cell>
-                    <Table.Cell style={{ color: '#00ff00' }}>
-                      SCP-{event.scp_id}
-                    </Table.Cell>
-                    <Table.Cell style={{ color: '#00ffff' }}>
-                      {event.event_type}
-                    </Table.Cell>
-                    <Table.Cell style={{ color: '#ffffff' }}>
-                      {event.details}
-                    </Table.Cell>
-                    <Table.Cell style={{ color: '#ffff00' }}>
-                      +{event.experience} XP
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table>
-            </Section>
-          </Box>
-        )}
-
-        {/* Global Stats Tab */}
-        {tab === 5 && (
-          <Box>
-            <Section title="Global SCP Statistics">
-              <Grid>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="Total SCP Rounds">
-                      <Box style={{ color: '#00ff00' }}>
-                        {global_scp_stats.total_scp_rounds_played || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Total Achievements">
-                      <Box style={{ color: '#00ffff' }}>
-                        {global_scp_stats.total_scp_achievements_unlocked || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Average Performance">
-                      <Box style={{ color: '#ffff00' }}>
-                        {global_scp_stats.average_scp_performance || 0}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="Research Points">
-                      <Box style={{ color: '#ff8800' }}>
-                        {global_scp_stats.total_scp_research_points || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Containment Breaches">
-                      <Box style={{ color: '#ff0088' }}>
-                        {global_scp_stats.scp_containment_breaches || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="Research Breakthroughs">
-                      <Box style={{ color: '#8800ff' }}>
-                        {global_scp_stats.scp_research_breakthroughs || 0}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-              </Grid>
-            </Section>
-          </Box>
-        )}
-
-        <Box
-          style={{
-            fontSize: '10px',
-            opacity: 0.5,
-            textAlign: 'center',
-            marginTop: '20px',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            paddingTop: '10px',
-          }}
-        >
-          SCP Foundation - Anomalous Entity Progression System v1.0
         </Box>
       </Window.Content>
     </Window>

@@ -20,14 +20,18 @@
 /datum/player_analytics_manager/proc/initialize_tracked_events()
 	tracked_events = list(
 		"round_completion" = TRUE,
+		"round_end" = TRUE,
 		"player_death" = TRUE,
 		"player_kill" = TRUE,
 		"scp_interaction" = TRUE,
+		"scp_breach" = TRUE,
+		"scp_recontainment" = TRUE,
 		"containment_breach" = TRUE,
 		"research_discovery" = TRUE,
 		"medical_treatment" = TRUE,
 		"engineering_build" = TRUE,
 		"security_arrest" = TRUE,
+		"experience_earned" = TRUE,
 		"experience_gain" = TRUE,
 		"achievement_unlock" = TRUE,
 		"item_unlock" = TRUE,
@@ -105,7 +109,7 @@
 
 	player_data.event_history += list(event_record)
 
-	if(player_data.event_history.len > 1000)
+	if(length(player_data.event_history) > 1000)
 		player_data.event_history.Cut(1, 501)
 
 /datum/player_analytics_manager/proc/update_global_statistics(event_type, event_data)
@@ -181,9 +185,9 @@
 		"current_rank_name" = player_data.current_rank_name,
 		"current_class" = player_data.current_class_id,
 		"current_faction" = player_data.current_faction_id,
-		"achievements_unlocked" = player_data.achievements.len,
-		"items_unlocked" = player_data.unlocked_items.len,
-		"titles_unlocked" = player_data.unlocked_titles.len,
+		"achievements_unlocked" = length(player_data.achievements),
+		"items_unlocked" = length(player_data.unlocked_items),
+		"titles_unlocked" = length(player_data.unlocked_titles),
 		"achievement_points" = player_data.achievement_points
 	)
 
@@ -205,7 +209,7 @@
 	var/list/stats1 = get_player_statistics(ckey1)
 	var/list/stats2 = get_player_statistics(ckey2)
 
-	if(!stats1.len || !stats2.len)
+	if(!length(stats1) || !length(stats2))
 		return list()
 
 	var/list/comparison = list()
@@ -244,7 +248,7 @@
 			if("rounds_played")
 				value = player_data.rounds_played
 			if("achievements")
-				value = player_data.achievements.len
+				value = length(player_data.achievements)
 			if("kills")
 				value = player_data.performance_metrics["player_kills"] || 0
 			if("deaths")
@@ -279,8 +283,8 @@
 /datum/player_analytics_manager/proc/sort_list_by_value(list/input_list, key, descending = FALSE)
 	var/list/sorted = input_list.Copy()
 
-	for(var/i = 1 to sorted.len - 1)
-		for(var/j = i + 1 to sorted.len)
+	for(var/i = 1 to length(sorted) - 1)
+		for(var/j = i + 1 to length(sorted))
 			var/list/item_i = sorted[i]
 			var/list/item_j = sorted[j]
 
@@ -300,7 +304,7 @@
 	if(!board)
 		return list()
 
-	if(board.len > limit)
+	if(length(board) > limit)
 		return board.Copy(1, limit + 1)
 
 	return board
@@ -310,7 +314,7 @@
 	if(!board)
 		return -1
 
-	for(var/i = 1 to board.len)
+	for(var/i = 1 to length(board))
 		var/list/entry = board[i]
 		if(entry["ckey"] == ckey)
 			return i
@@ -323,7 +327,7 @@
 /datum/player_analytics_manager/proc/get_activity_report(days = 7)
 	var/list/report = list()
 	report["period"] = "[days] days"
-	report["total_players"] = SSpersistent_progression.player_data.len
+	report["total_players"] = length(SSpersistent_progression.player_data)
 	report["active_players"] = 0
 	report["new_players"] = 0
 	report["returning_players"] = 0

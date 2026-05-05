@@ -56,7 +56,7 @@
 
 	// SSachievements integration data
 	data["ss_achievements_enabled"] = SSachievements.achievements_enabled || FALSE
-	data["ss_achievements_count"] = SSachievements.achievements.len || 0
+	data["ss_achievements_count"] = length(SSachievements.achievements) || 0
 
 	// SCP Progression Data
 	data["current_scp"] = user.SCP ? user.SCP.designation : "None"
@@ -108,28 +108,6 @@
 	data["job_supply_management"] = player_data.job_supply_management || list()
 	data["job_service_contributions"] = player_data.job_service_contributions || list()
 	data["job_dclass_testing"] = player_data.job_dclass_testing || list()
-
-	// Class information
-	if(current_class)
-		data["class_description"] = current_class.class_description
-		data["class_exp_multiplier"] = current_class.experience_multiplier
-		data["class_max_rank"] = current_class.max_rank
-
-	// SCP Progression Data
-	data["current_scp"] = user.SCP ? user.SCP.designation : "None"
-	data["scp_total_experience"] = get_scp_total_experience(user.key)
-	data["scp_rounds_played"] = get_scp_rounds_played(user.key)
-	data["scp_achievements_unlocked"] = get_scp_achievements_unlocked(user.key)
-	data["scp_performance_score"] = get_scp_performance_score(user.key)
-	data["scp_rank"] = get_scp_rank(user.key)
-	data["scp_metrics"] = get_scp_metrics(user.key)
-	data["scp_achievements"] = get_scp_achievements(user.key)
-	data["total_scp_rounds"] = get_total_scp_rounds()
-	data["average_scp_performance"] = get_average_scp_performance()
-	data["scp_containment_breaches"] = get_scp_containment_breaches()
-	data["scp_research_points"] = get_scp_research_points()
-	data["scp_research_breakthroughs"] = get_scp_research_breakthroughs()
-	data["scp_interaction_events"] = get_scp_interaction_events()
 
 	// Class information
 	if(current_class)
@@ -380,6 +358,23 @@
 			user << browse(data_json, "window=progression_data;size=600x400;can_close=1;can_resize=1")
 			. = TRUE
 
+		if("save_data")
+			if(user_mind && user_mind.key)
+				SSpersistent_progression.save_player_data(usr.ckey)
+				to_chat(usr, span_notice("Progression data saved."))
+				. = TRUE
+
+		if("load_data")
+			if(user_mind && user_mind.key)
+				var/datum/persistent_player_data/loaded = SSpersistent_progression.load_player_data(usr.ckey)
+				if(loaded)
+					SSpersistent_progression.player_data[usr.ckey] = loaded
+					user_mind.persistent_data = loaded
+					to_chat(usr, span_notice("Progression data reloaded."))
+				else
+					to_chat(usr, span_warning("No saved data found."))
+				. = TRUE
+
 		if("test_action")
 			to_chat(user, span_notice("Test action received!"))
 			. = TRUE
@@ -597,6 +592,32 @@
 /datum/persistent_progression_player_view_ui/ui_state(mob/user)
 	return GLOB.always_state
 
+/datum/persistent_progression_player_view_ui/ui_act(action, params)
+	. = ..()
+	if(.)
+		return
+
+	switch(action)
+		if("export_data")
+			var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(ckey)
+			if(player_data)
+				var/data_json = player_data.export_to_json()
+				usr << browse(data_json, "window=progression_data;size=600x400;can_close=1;can_resize=1")
+				. = TRUE
+
+		if("reset_progress")
+			if(alert(usr, "Reset all progress for [ckey]?", "Reset Progress", "Yes", "No") == "Yes")
+				var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(ckey)
+				if(player_data)
+					player_data.initialize_default_data()
+					SSpersistent_progression.save_player_data(ckey)
+					to_chat(usr, span_notice("Reset [ckey]'s progress."))
+					. = TRUE
+
+		if("close_viewer")
+			SStgui.close_uis(src)
+			. = TRUE
+
 /datum/persistent_progression_player_view_ui/ui_data(mob/user)
 	var/list/data = list()
 
@@ -673,7 +694,7 @@
 	for(var/scp_id in list("049", "096", "173", "457", "939", "2020"))
 		var/datum/scp_progression_data/prog_data = SSscp_progression_integration.manager.get_scp_progression_data(scp_id, ckey)
 		if(prog_data)
-			total_achievements += prog_data.achievements.len
+			total_achievements += length(prog_data.achievements)
 	return total_achievements
 
 /datum/persistent_progression_ui/proc/get_scp_performance_score(ckey)
@@ -736,7 +757,7 @@
 	var/list/all_metrics = list()
 	for(var/scp_id in list("049", "096", "173", "457", "939", "2020"))
 		var/datum/scp_progression_data/prog_data = SSscp_progression_integration.manager.get_scp_progression_data(scp_id, ckey)
-		if(prog_data && prog_data.metrics.len > 0)
+		if(prog_data && length(prog_data.metrics) > 0)
 			all_metrics[scp_id] = prog_data.metrics
 	return all_metrics
 
@@ -811,4 +832,4 @@
 /datum/persistent_progression_ui/proc/get_scp_interaction_events()
 	if(!SSscp_progression_integration || !SSscp_progression_integration.manager)
 		return 0
-	return SSscp_progression_integration.manager.scp_interaction_logs.len
+	return length(SSscp_progression_integration.manager.scp_interaction_logs)

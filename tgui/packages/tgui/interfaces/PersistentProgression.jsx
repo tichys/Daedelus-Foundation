@@ -1,54 +1,167 @@
 import { useBackend, useLocalState } from '../backend';
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  LabeledList,
-  ProgressBar,
-  Section,
-  Table,
-} from '../components';
+import { Box, Button, Input, NoticeBox } from '../components';
 import { Window } from '../layouts';
+
+const C = {
+  bg: '#08080a',
+  panel: '#0c0c10',
+  border: '#1e1e24',
+  borderRed: '#6b0000',
+  accent: '#c2960e',
+  red: '#8b0000',
+  redBright: '#cc2222',
+  green: '#1a7a1a',
+  greenDim: '#0d4a0d',
+  text: '#b0b0b0',
+  textBright: '#e0e0e0',
+  textDim: '#555560',
+  amber: '#d4a017',
+  mono: '"Consolas", "Courier New", "Lucida Console", monospace',
+};
+
+const term = (overrides = {}) => ({
+  fontFamily: C.mono,
+  fontSize: '12px',
+  color: C.text,
+  ...overrides,
+});
+
+const TermHeader = (props) => (
+  <Box style={term({
+    fontSize: '10px',
+    color: C.textDim,
+    letterSpacing: '0.18em',
+    textTransform: 'uppercase',
+    borderBottom: `1px solid ${C.border}`,
+    paddingBottom: '4px',
+    marginBottom: '8px',
+    ...props.style,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermLabel = (props) => (
+  <Box as="span" style={term({
+    color: C.textDim,
+    fontSize: '10px',
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    marginRight: '8px',
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermValue = (props) => (
+  <Box as="span" style={term({
+    color: props.color || C.textBright,
+    fontWeight: props.bold ? 'bold' : undefined,
+  })}>
+    {props.children}
+  </Box>
+);
+
+const TermRow = (props) => (
+  <Box style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+    {props.children}
+  </Box>
+);
+
+const TermDivider = () => (
+  <Box style={{
+    color: C.borderRed,
+    fontSize: '10px',
+    letterSpacing: '0.3em',
+    margin: '10px 0',
+    userSelect: 'none',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  }}>
+    {'─'.repeat(80)}
+  </Box>
+);
+
+const TermButton = (props) => {
+  const selected = props.selected;
+  const color = props.color;
+  const bg = selected
+    ? (color === 'red' ? 'rgba(139,0,0,0.35)' : color === 'green' ? 'rgba(26,122,26,0.35)' : color === 'yellow' ? 'rgba(180,160,20,0.25)' : 'rgba(255,255,255,0.08)')
+    : 'transparent';
+  const borderColor = selected
+    ? (color === 'red' ? C.red : color === 'green' ? C.green : color === 'yellow' ? '#b0a020' : C.border)
+    : C.border;
+
+  return (
+    <Button
+      {...props}
+      style={{
+        fontFamily: C.mono,
+        fontSize: '10px',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        background: bg,
+        border: `1px solid ${borderColor}`,
+        borderRadius: 0,
+        color: selected ? C.textBright : C.textDim,
+        padding: '3px 8px',
+        boxShadow: selected ? `0 0 6px ${borderColor}44` : 'none',
+      }}
+    >
+      {props.children}
+    </Button>
+  );
+};
+
+const TermProgressBar = (props) => (
+  <Box style={{ marginBottom: '6px' }}>
+    <Box style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+      <TermLabel>{props.label}</TermLabel>
+      <TermValue color={props.color || C.amber}>{props.value}{props.suffix || ''}</TermValue>
+    </Box>
+    <Box style={{
+      height: '6px',
+      background: C.panel,
+      border: `1px solid ${C.border}`,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <Box style={{
+        height: '100%',
+        width: `${Math.min(100, Math.max(0, (props.value / props.maxValue) * 100))}%`,
+        background: props.color || C.amber,
+        transition: 'width 0.3s',
+      }} />
+    </Box>
+  </Box>
+);
+
+const StatBox = (props) => (
+  <Box style={{
+    flex: 1,
+    padding: '10px',
+    borderLeft: `2px solid ${props.color || C.borderRed}`,
+    background: C.panel,
+    textAlign: 'center',
+  }}>
+    <Box style={term({ color: props.color || C.amber, fontSize: '18px', fontWeight: 'bold' })}>{props.value}</Box>
+    <Box style={term({ color: C.textDim, fontSize: '9px', letterSpacing: '0.12em' })}>{props.label}</Box>
+  </Box>
+);
 
 export const PersistentProgression = (props) => {
   const { act, data } = useBackend();
   const [tab, setTab] = useLocalState('tab', 1);
-  const [viewMode, setViewMode] = useLocalState('viewMode', 'current');
 
-  // Ensure data exists and has required properties
   const safeData = data || {};
   const hasData = safeData.has_data || false;
 
   if (!hasData) {
     return (
-      <Window
-        title="SCP Foundation - Persistent Progression System"
-        width={1200}
-        height={800}
-        theme="scp_terminal"
-      >
-        <Window.Content
-          style={{
-            background: 'rgba(0,0,0,0.7)',
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#ffffff',
-            padding: '20px',
-          }}
-        >
-          <Box
-            style={{
-              textAlign: 'center',
-              fontSize: '18px',
-              color: '#ff4444',
-              marginTop: '100px',
-            }}
-          >
-            ╔══════════════════════════════════════════════════════════════╗ ║
-            SCP FOUNDATION ║ ║ PERSISTENT PROGRESSION SYSTEM ║ ║ ║ ║ NO
-            PERSISTENT DATA FOUND ║ ║ ║ ║ PLEASE CONTACT AN ADMINISTRATOR ║
-            ╚══════════════════════════════════════════════════════════════╝
+      <Window title="SCP FOUNDATION — PERSISTENT PROGRESSION TERMINAL" width={1200} height={800} theme="scp_terminal">
+        <Window.Content scrollable>
+          <Box style={{ background: C.bg, border: `1px solid ${C.borderRed}`, fontFamily: C.mono, fontSize: '12px', color: C.text, minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <NoticeBox>NO PERSISTENT DATA FOUND — CONTACT ADMINISTRATOR</NoticeBox>
           </Box>
         </Window.Content>
       </Window>
@@ -73,711 +186,283 @@ export const PersistentProgression = (props) => {
     class_description = 'No description available',
     class_exp_multiplier = 1.0,
     class_max_rank = 0,
-    ranks = [],
     faction_description = 'No description available',
     faction_exp_multiplier = 1.0,
-    available_classes = [],
-    available_factions = [],
-    all_classes = [],
-    all_factions = [],
     unlocked_items = [],
     unlocked_titles = [],
     achievements = [],
     recent_experience = [],
   } = safeData;
 
+  const TABS = [
+    { key: 1, label: 'OVERVIEW' },
+    { key: 2, label: 'ACHIEVEMENTS' },
+    { key: 3, label: 'UNLOCKED' },
+    { key: 4, label: 'ACTIVITY' },
+    { key: 5, label: 'CLASS' },
+    { key: 6, label: 'SCP' },
+  ];
+
   return (
-    <Window
-      title="SCP Foundation - Persistent Progression System"
-      width={1200}
-      height={800}
-      theme="scp_terminal"
-    >
-      <Window.Content
-        style={{
-          background: 'rgba(0,0,0,0.7)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          borderRadius: '5px',
-          padding: '20px',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          color: '#ffffff',
+    <Window title="SCP FOUNDATION — PERSISTENT PROGRESSION TERMINAL" width={1200} height={800} theme="scp_terminal">
+      <Window.Content scrollable>
+        <Box style={{
+          background: C.bg,
+          border: `1px solid ${C.borderRed}`,
+          fontFamily: C.mono,
+          fontSize: '12px',
+          color: C.text,
           minHeight: '100%',
-          position: 'relative',
-        }}
-      >
-        <Box style={{ marginBottom: '20px' }}>
-          <Box
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              marginBottom: '5px',
-            }}
-          >
-            PERSISTENT PROGRESSION
+        }}>
+          <Box style={{
+            borderBottom: `2px solid ${C.borderRed}`,
+            padding: '10px 14px 8px',
+            background: 'linear-gradient(180deg, #0e0000 0%, #08080a 100%)',
+          }}>
+            <Box style={{ fontSize: '15px', fontWeight: 'bold', color: C.amber, letterSpacing: '0.18em' }}>
+              SCP FOUNDATION — PERSISTENT PROGRESSION TERMINAL
+            </Box>
+            <Box style={{ fontSize: '9px', color: C.textDim, letterSpacing: '0.12em', marginTop: '2px' }}>
+              PERSONNEL DEVELOPMENT & ACHIEVEMENT TRACKING | CLEARANCE LEVEL 2 | v3.2.1
+            </Box>
           </Box>
-          <Box style={{ fontSize: '16px', opacity: 0.8 }}>
-            PERSONNEL DEVELOPMENT & ACHIEVEMENT TRACKING
+
+          <Box style={{
+            display: 'flex',
+            borderBottom: `1px solid ${C.borderRed}`,
+            overflowX: 'auto',
+            background: C.panel,
+          }}>
+            {TABS.map((t) => {
+              const isActive = tab === t.key;
+              return (
+                <Box
+                  key={t.key}
+                  style={{
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    background: isActive ? 'rgba(139,0,0,0.25)' : 'transparent',
+                    borderRight: `1px solid ${C.border}`,
+                    borderBottom: isActive ? `2px solid ${C.amber}` : '2px solid transparent',
+                    color: isActive ? C.textBright : C.textDim,
+                    fontSize: '10px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    fontFamily: C.mono,
+                    whiteSpace: 'nowrap',
+                  }}
+                  onClick={() => setTab(t.key)}
+                >
+                  {isActive && '▸ '}{t.label}
+                </Box>
+              );
+            })}
+          </Box>
+
+          <Box style={{ padding: '16px' }}>
+            {tab === 1 && (
+              <Box>
+                <TermHeader>QUICK ACTIONS</TermHeader>
+                <Box style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+                  <TermButton color="green" onClick={() => act('export_data')}>EXPORT</TermButton>
+                  <TermButton color="red" onClick={() => act('reset_progress')}>RESET</TermButton>
+                  <TermButton color="yellow" onClick={() => act('save_data')}>SAVE</TermButton>
+                  <TermButton onClick={() => act('load_data')}>LOAD</TermButton>
+                </Box>
+
+                <TermDivider />
+
+                <TermHeader>PERSONNEL IDENTIFICATION</TermHeader>
+                <TermRow><TermLabel>DESIGNATION</TermLabel><TermValue color={C.amber} bold>{player_name}</TermValue></TermRow>
+                <TermRow><TermLabel>ID KEY</TermLabel><TermValue color={C.amber}>{player_key}</TermValue></TermRow>
+                <TermRow><TermLabel>CLASS</TermLabel><TermValue>{current_class}</TermValue></TermRow>
+                <TermRow><TermLabel>FACTION</TermLabel><TermValue>{current_faction}</TermValue></TermRow>
+                <TermRow><TermLabel>RANK</TermLabel><TermValue color={C.green}>{current_rank} (LEVEL {current_rank_level})</TermValue></TermRow>
+                <TermRow><TermLabel>TOTAL XP</TermLabel><TermValue color={C.amber}>{total_experience.toLocaleString()}</TermValue></TermRow>
+
+                <TermDivider />
+
+                <TermHeader>PROGRESSION STATUS</TermHeader>
+                <TermProgressBar label="PROGRESS TO NEXT RANK" value={progress_to_next} maxValue={100} color={progress_to_next >= 100 ? C.green : C.amber} suffix="%" />
+                {exp_needed > 0 && (
+                  <Box style={term({ color: C.textDim, fontSize: '10px', marginBottom: '8px' })}>{exp_needed.toLocaleString()} XP REQUIRED</Box>
+                )}
+
+                <Box style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <StatBox label="ROUNDS PLAYED" value={rounds_played} color={C.green} />
+                  <StatBox label="SURVIVAL RATE" value={`${survival_rate}%`} color={C.amber} />
+                  <StatBox label="AVG XP/ROUND" value={average_exp_per_round} color={C.textBright} />
+                </Box>
+              </Box>
+            )}
+
+            {tab === 2 && (
+              <Box>
+                <TermHeader>ACHIEVEMENTS & MILESTONES</TermHeader>
+                {achievements && achievements.length > 0 ? achievements.map((achievement, index) => (
+                  <Box key={index} style={{
+                    marginBottom: '6px',
+                    padding: '8px',
+                    borderLeft: `2px solid ${C.borderRed}`,
+                    background: C.panel,
+                  }}>
+                    <TermRow>
+                      <TermValue bold color={C.amber}>{achievement.name}</TermValue>
+                      <Box as="span" style={term({ color: C.textDim, fontSize: '10px', marginLeft: '12px' })}>{achievement.date}</Box>
+                    </TermRow>
+                    <Box style={term({ color: C.textDim, fontSize: '11px', fontStyle: 'italic', marginTop: '2px' })}>
+                      {achievement.description}
+                    </Box>
+                  </Box>
+                )) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO ACHIEVEMENTS UNLOCKED</Box>
+                )}
+              </Box>
+            )}
+
+            {tab === 3 && (
+              <Box>
+                <TermHeader>UNLOCKED CONTENT</TermHeader>
+                <Box style={{ display: 'flex', gap: '16px' }}>
+                  <Box style={{ flex: 1 }}>
+                    <TermLabel>ITEMS ({unlocked_items.length})</TermLabel>
+                    {unlocked_items.length > 0 ? unlocked_items.map((item, i) => (
+                      <Box key={i} style={{ ...term({ color: C.text, fontSize: '11px', paddingLeft: '8px', marginTop: '4px' }), borderLeft: `1px solid ${C.border}` }}>{item}</Box>
+                    )) : (
+                      <Box style={term({ color: C.textDim, fontStyle: 'italic', fontSize: '11px' })}>NONE</Box>
+                    )}
+                  </Box>
+                  <Box style={{ flex: 1 }}>
+                    <TermLabel>TITLES ({unlocked_titles.length})</TermLabel>
+                    {unlocked_titles.length > 0 ? unlocked_titles.map((title, i) => (
+                      <Box key={i} style={{ ...term({ color: C.text, fontSize: '11px', paddingLeft: '8px', marginTop: '4px' }), borderLeft: `1px solid ${C.border}` }}>{title}</Box>
+                    )) : (
+                      <Box style={term({ color: C.textDim, fontStyle: 'italic', fontSize: '11px' })}>NONE</Box>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {tab === 4 && (
+              <Box>
+                <TermHeader>RECENT EXPERIENCE ACTIVITY</TermHeader>
+                {recent_experience && recent_experience.length > 0 ? recent_experience.map((exp, index) => (
+                  <Box key={index} style={{
+                    marginBottom: '4px',
+                    padding: '8px',
+                    borderLeft: `2px solid ${C.borderRed}`,
+                    background: C.panel,
+                  }}>
+                    <TermRow>
+                      <TermValue color={C.green} bold>+{exp.amount} XP</TermValue>
+                      <TermLabel style={{ marginLeft: '8px' }}>{exp.reason}</TermLabel>
+                      <Box as="span" style={term({ color: C.textDim, fontSize: '10px', marginLeft: 'auto' })}>{exp.timestamp}</Box>
+                    </TermRow>
+                  </Box>
+                )) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO RECENT ACTIVITY</Box>
+                )}
+              </Box>
+            )}
+
+            {tab === 5 && (
+              <Box>
+                <TermHeader>CLASS & FACTION DETAILS</TermHeader>
+                <Box style={{ display: 'flex', gap: '16px' }}>
+                  <Box style={{ flex: 1 }}>
+                    <TermHeader>CLASS — {current_class.toUpperCase()}</TermHeader>
+                    <Box style={term({ color: C.textDim, fontSize: '11px', fontStyle: 'italic', marginBottom: '8px' })}>{class_description}</Box>
+                    <TermRow><TermLabel>EXP MULTIPLIER</TermLabel><TermValue color={C.amber}>{class_exp_multiplier}x</TermValue></TermRow>
+                    <TermRow><TermLabel>MAX RANK</TermLabel><TermValue>{class_max_rank}</TermValue></TermRow>
+                  </Box>
+                  <Box style={{ flex: 1 }}>
+                    <TermHeader>FACTION — {current_faction.toUpperCase()}</TermHeader>
+                    <Box style={term({ color: C.textDim, fontSize: '11px', fontStyle: 'italic', marginBottom: '8px' })}>{faction_description}</Box>
+                    <TermRow><TermLabel>EXP MULTIPLIER</TermLabel><TermValue color={C.amber}>{faction_exp_multiplier}x</TermValue></TermRow>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
+            {tab === 6 && (
+              <Box>
+                <TermHeader>SCP PROGRESSION</TermHeader>
+                <TermRow><TermLabel>CURRENT SCP</TermLabel><TermValue color={C.amber} bold>{safeData.current_scp || 'NONE'}</TermValue></TermRow>
+                <TermRow><TermLabel>SCP TOTAL XP</TermLabel><TermValue color={C.amber}>{safeData.scp_total_experience || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>SCP ROUNDS</TermLabel><TermValue>{safeData.scp_rounds_played || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>SCP ACHIEVEMENTS</TermLabel><TermValue color={C.green}>{safeData.scp_achievements_unlocked || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>PERFORMANCE SCORE</TermLabel><TermValue>{safeData.scp_performance_score || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>SCP RANK</TermLabel><TermValue color={C.green}>{safeData.scp_rank || 'Novice'}</TermValue></TermRow>
+
+                {safeData.scp_metrics && Object.keys(safeData.scp_metrics).length > 0 && (
+                  <Box>
+                    <TermDivider />
+                    <TermHeader>SCP-SPECIFIC METRICS</TermHeader>
+                    {Object.entries(safeData.scp_metrics).map(([scp_id, metrics]) => (
+                      <Box key={scp_id} style={{
+                        marginBottom: '8px',
+                        padding: '8px',
+                        borderLeft: `2px solid ${C.borderRed}`,
+                        background: C.panel,
+                      }}>
+                        <TermValue bold color={C.amber}>SCP-{scp_id}</TermValue>
+                        {Object.entries(metrics).map(([metric, value]) => (
+                          <TermRow key={metric}>
+                            <TermLabel>{metric.toUpperCase()}</TermLabel>
+                            <TermValue>{value}</TermValue>
+                          </TermRow>
+                        ))}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                <TermDivider />
+
+                <TermHeader>SCP PERFORMANCE</TermHeader>
+                <TermRow><TermLabel>TOTAL SCP ROUNDS</TermLabel><TermValue>{safeData.total_scp_rounds || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>AVG SCP PERFORMANCE</TermLabel><TermValue color={C.amber}>{safeData.average_scp_performance || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>CONTAINMENT BREACHES</TermLabel><TermValue color={C.redBright}>{safeData.scp_containment_breaches || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>RESEARCH POINTS</TermLabel><TermValue>{safeData.scp_research_points || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>RESEARCH BREAKTHROUGHS</TermLabel><TermValue color={C.green}>{safeData.scp_research_breakthroughs || 0}</TermValue></TermRow>
+                <TermRow><TermLabel>INTERACTION EVENTS</TermLabel><TermValue>{safeData.scp_interaction_events || 0}</TermValue></TermRow>
+
+                {safeData.scp_achievements && safeData.scp_achievements.length > 0 && (
+                  <Box>
+                    <TermDivider />
+                    <TermHeader>SCP ACHIEVEMENTS</TermHeader>
+                    {safeData.scp_achievements.map((achievement, index) => (
+                      <Box key={index} style={{
+                        marginBottom: '4px',
+                        padding: '6px 8px',
+                        borderLeft: `2px solid ${achievement.unlocked ? C.green : C.border}`,
+                        background: C.panel,
+                      }}>
+                        <TermRow>
+                          <TermValue bold color={achievement.unlocked ? C.green : C.textDim}>{achievement.name}</TermValue>
+                          <TermLabel style={{ marginLeft: '8px' }}>{achievement.unlocked ? 'UNLOCKED' : 'LOCKED'}</TermLabel>
+                        </TermRow>
+                        <Box style={term({ color: C.textDim, fontSize: '11px', fontStyle: 'italic' })}>{achievement.description}</Box>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+
+          <Box style={{
+            borderTop: `1px solid ${C.border}`,
+            padding: '4px 14px',
+            background: C.panel,
+          }}>
+            <Box style={term({ color: C.textDim, fontSize: '9px', letterSpacing: '0.1em' })}>
+              SCP FOUNDATION | PERSISTENT PROGRESSION | ALL DATA CLASSIFIED | UNAUTHORIZED ACCESS IS A CLASS-B INFRACTION
+            </Box>
           </Box>
         </Box>
-
-        {/* Navigation Tabs */}
-        <Flex
-          style={{
-            marginBottom: '20px',
-            borderBottom: '1px solid rgba(255,255,255,0.3)',
-            gap: '5px',
-          }}
-        >
-          <NavButton isActive={tab === 1} onClick={() => setTab(1)} icon="📊">
-            OVERVIEW
-          </NavButton>
-          <NavButton isActive={tab === 2} onClick={() => setTab(2)} icon="🏆">
-            ACHIEVEMENTS
-          </NavButton>
-          <NavButton isActive={tab === 3} onClick={() => setTab(3)} icon="📦">
-            UNLOCKED CONTENT
-          </NavButton>
-          <NavButton isActive={tab === 4} onClick={() => setTab(4)} icon="📈">
-            RECENT ACTIVITY
-          </NavButton>
-          <NavButton isActive={tab === 5} onClick={() => setTab(5)} icon="👥">
-            CLASS MANAGEMENT
-          </NavButton>
-          <NavButton isActive={tab === 6} onClick={() => setTab(6)} icon="👹">
-            SCP PROGRESSION
-          </NavButton>
-        </Flex>
-
-        {/* Overview Tab */}
-        {tab === 1 && (
-          <Box>
-            <Box
-              style={{
-                fontSize: '12px',
-                opacity: 0.7,
-                textAlign: 'center',
-                marginTop: '20px',
-              }}
-            >
-              Persistent progression system overview - all systems operational.
-            </Box>
-
-            <Section title="Quick Actions">
-              <Flex wrap="wrap" style={{ gap: '10px' }}>
-                <EnhancedButton
-                  icon="📊"
-                  color="good"
-                  onClick={() => act('export_data')}
-                  tooltip="Export progression data"
-                >
-                  Export Data
-                </EnhancedButton>
-                <EnhancedButton
-                  icon="🔄"
-                  color="blue"
-                  onClick={() => act('reset_progress')}
-                  tooltip="Reset progression data"
-                >
-                  Reset Progress
-                </EnhancedButton>
-                <EnhancedButton
-                  icon="💾"
-                  color="purple"
-                  onClick={() => act('save_data')}
-                  tooltip="Save progression data"
-                >
-                  Save Data
-                </EnhancedButton>
-                <EnhancedButton
-                  icon="📂"
-                  color="average"
-                  onClick={() => act('load_data')}
-                  tooltip="Load progression data"
-                >
-                  Load Data
-                </EnhancedButton>
-              </Flex>
-            </Section>
-
-            <Section title="Player Information">
-              <Grid style={{ gap: '20px' }}>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="NAME">
-                      <Box style={{ color: '#66ff66' }}>{player_name}</Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="IDENTIFICATION KEY">
-                      <Box style={{ color: '#ffff66' }}>{player_key}</Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="CURRENT CLASS">
-                      <Box style={{ color: '#66ffff' }}>{current_class}</Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="CURRENT FACTION">
-                      <Box style={{ color: '#66ffff' }}>{current_faction}</Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="CURRENT RANK">
-                      <Box style={{ color: '#66ff66' }}>
-                        {current_rank} (Level {current_rank_level})
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="TOTAL EXPERIENCE">
-                      <Box style={{ color: '#ffff66' }}>
-                        {total_experience.toLocaleString()} XP
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-              </Grid>
-            </Section>
-
-            <Section title="Progression Status">
-              <Box style={{ marginBottom: '15px' }}>
-                <Box style={{ marginBottom: '5px' }}>
-                  PROGRESS TO NEXT RANK: {progress_to_next}% ({exp_needed} XP
-                  needed)
-                </Box>
-                <ProgressBar
-                  value={progress_to_next}
-                  maxValue={100}
-                  color={progress_to_next >= 100 ? '#66ff66' : '#ffff66'}
-                />
-              </Box>
-              <Grid style={{ gap: '20px' }}>
-                <Grid.Column size={4}>
-                  <Box style={{ textAlign: 'center' }}>
-                    <Box style={{ fontSize: '16px', color: '#66ff66' }}>
-                      {rounds_played}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      ROUNDS PLAYED
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={4}>
-                  <Box style={{ textAlign: 'center' }}>
-                    <Box style={{ fontSize: '16px', color: '#ffff66' }}>
-                      {survival_rate}%
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      SURVIVAL RATE
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={4}>
-                  <Box style={{ textAlign: 'center' }}>
-                    <Box style={{ fontSize: '16px', color: '#66ffff' }}>
-                      {average_exp_per_round}
-                    </Box>
-                    <Box style={{ fontSize: '12px', opacity: 0.8 }}>
-                      AVG XP/ROUND
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-            </Section>
-          </Box>
-        )}
-
-        {/* Achievements Tab */}
-        {tab === 2 && (
-          <Box>
-            <Section title="Achievements & Milestones">
-              {achievements && achievements.length > 0 ? (
-                <Table>
-                  <Table.Row header>
-                    <Table.Cell>Achievement</Table.Cell>
-                    <Table.Cell>Description</Table.Cell>
-                    <Table.Cell>Date Unlocked</Table.Cell>
-                    <Table.Cell>Actions</Table.Cell>
-                  </Table.Row>
-                  {achievements.map((achievement, index) => (
-                    <Table.Row key={index}>
-                      <Table.Cell>
-                        <Box style={{ fontWeight: 'bold', color: '#66ff66' }}>
-                          {achievement.name}
-                        </Box>
-                      </Table.Cell>
-                      <Table.Cell>{achievement.description}</Table.Cell>
-                      <Table.Cell>{achievement.date}</Table.Cell>
-                      <Table.Cell>
-                        <Button size="small">View</Button>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table>
-              ) : (
-                <Box
-                  style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}
-                >
-                  NO ACHIEVEMENTS UNLOCKED YET
-                </Box>
-              )}
-            </Section>
-          </Box>
-        )}
-
-        {/* Unlocked Content Tab */}
-        {tab === 3 && (
-          <Box>
-            <Section title="Unlocked Content">
-              <Grid style={{ gap: '20px' }}>
-                <Grid.Column size={6}>
-                  <Box style={{ marginBottom: '15px' }}>
-                    <Box
-                      style={{
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
-                        color: '#66ff66',
-                      }}
-                    >
-                      UNLOCKED ITEMS ({unlocked_items.length})
-                    </Box>
-                    {unlocked_items && unlocked_items.length > 0 ? (
-                      unlocked_items.map((item, index) => (
-                        <Box
-                          key={index}
-                          style={{ fontSize: '12px', marginBottom: '5px' }}
-                        >
-                          • {item}
-                        </Box>
-                      ))
-                    ) : (
-                      <Box style={{ fontSize: '12px', opacity: 0.6 }}>
-                        NO ITEMS UNLOCKED
-                      </Box>
-                    )}
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box style={{ marginBottom: '15px' }}>
-                    <Box
-                      style={{
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
-                        color: '#66ff66',
-                      }}
-                    >
-                      UNLOCKED TITLES ({unlocked_titles.length})
-                    </Box>
-                    {unlocked_titles && unlocked_titles.length > 0 ? (
-                      unlocked_titles.map((title, index) => (
-                        <Box
-                          key={index}
-                          style={{ fontSize: '12px', marginBottom: '5px' }}
-                        >
-                          • {title}
-                        </Box>
-                      ))
-                    ) : (
-                      <Box style={{ fontSize: '12px', opacity: 0.6 }}>
-                        NO TITLES UNLOCKED
-                      </Box>
-                    )}
-                  </Box>
-                </Grid.Column>
-              </Grid>
-            </Section>
-          </Box>
-        )}
-
-        {/* Recent Activity Tab */}
-        {tab === 4 && (
-          <Box>
-            <Section title="Recent Experience Activity">
-              {recent_experience && recent_experience.length > 0 ? (
-                <Table>
-                  <Table.Row header>
-                    <Table.Cell>Experience</Table.Cell>
-                    <Table.Cell>Reason</Table.Cell>
-                    <Table.Cell>Timestamp</Table.Cell>
-                    <Table.Cell>Actions</Table.Cell>
-                  </Table.Row>
-                  {recent_experience.map((exp, index) => (
-                    <Table.Row key={index}>
-                      <Table.Cell>
-                        <Box style={{ fontWeight: 'bold', color: '#ffff66' }}>
-                          +{exp.amount} XP
-                        </Box>
-                      </Table.Cell>
-                      <Table.Cell>{exp.reason}</Table.Cell>
-                      <Table.Cell>{exp.timestamp}</Table.Cell>
-                      <Table.Cell>
-                        <Button size="small">Details</Button>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table>
-              ) : (
-                <Box
-                  style={{ textAlign: 'center', padding: '20px', opacity: 0.6 }}
-                >
-                  NO RECENT ACTIVITY
-                </Box>
-              )}
-            </Section>
-          </Box>
-        )}
-
-        {/* Class Management Tab */}
-        {tab === 5 && (
-          <Box>
-            <Section title="Class & Faction Management">
-              <Grid style={{ gap: '20px' }}>
-                <Grid.Column size={6}>
-                  <Box style={{ marginBottom: '15px' }}>
-                    <Box
-                      style={{
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
-                        color: '#66ff66',
-                      }}
-                    >
-                      CURRENT CLASS: {current_class}
-                    </Box>
-                    <Box style={{ fontSize: '12px', marginBottom: '10px' }}>
-                      {class_description}
-                    </Box>
-                    <Box style={{ fontSize: '12px', color: '#ffff66' }}>
-                      EXP MULTIPLIER: {class_exp_multiplier}x
-                    </Box>
-                    <Box style={{ fontSize: '12px', color: '#66ffff' }}>
-                      MAX RANK: {class_max_rank}
-                    </Box>
-                  </Box>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <Box style={{ marginBottom: '15px' }}>
-                    <Box
-                      style={{
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
-                        color: '#66ff66',
-                      }}
-                    >
-                      CURRENT FACTION: {current_faction}
-                    </Box>
-                    <Box style={{ fontSize: '12px', marginBottom: '10px' }}>
-                      {faction_description}
-                    </Box>
-                    <Box style={{ fontSize: '12px', color: '#ffff66' }}>
-                      EXP MULTIPLIER: {faction_exp_multiplier}x
-                    </Box>
-                  </Box>
-                </Grid.Column>
-              </Grid>
-            </Section>
-          </Box>
-        )}
-
-        {/* SCP Progression Tab */}
-        {tab === 6 && (
-          <Box>
-            <Box
-              style={{
-                fontSize: '12px',
-                opacity: 0.7,
-                textAlign: 'center',
-                marginTop: '20px',
-              }}
-            >
-              SCP progression tracking system - monitoring anomalous entity
-              performance.
-            </Box>
-
-            <Section title="SCP Progression Overview">
-              <Grid style={{ gap: '20px' }}>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="CURRENT SCP">
-                      <Box style={{ color: '#66ff66' }}>
-                        {safeData.current_scp || 'None'}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="SCP EXPERIENCE">
-                      <Box style={{ color: '#ffff66' }}>
-                        {safeData.scp_total_experience || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="SCP ROUNDS PLAYED">
-                      <Box style={{ color: '#66ffff' }}>
-                        {safeData.scp_rounds_played || 0}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="SCP ACHIEVEMENTS">
-                      <Box style={{ color: '#ff66ff' }}>
-                        {safeData.scp_achievements_unlocked || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="TOTAL SCP PERFORMANCE">
-                      <Box style={{ color: '#ff9966' }}>
-                        {safeData.scp_performance_score || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="SCP RANK">
-                      <Box style={{ color: '#66ff99' }}>
-                        {safeData.scp_rank || 'Novice'}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-              </Grid>
-            </Section>
-
-            <Section title="SCP-Specific Metrics">
-              <Grid style={{ gap: '15px' }}>
-                {safeData.scp_metrics &&
-                Object.keys(safeData.scp_metrics).length > 0 ? (
-                  Object.entries(safeData.scp_metrics).map(
-                    ([scp_id, metrics]) => (
-                      <Grid.Column size={4} key={scp_id}>
-                        <Box
-                          style={{
-                            border: '1px solid rgba(255,255,255,0.3)',
-                            padding: '15px',
-                            borderRadius: '5px',
-                            background: 'rgba(0,0,0,0.3)',
-                          }}
-                        >
-                          <Box
-                            style={{
-                              fontSize: '16px',
-                              fontWeight: 'bold',
-                              marginBottom: '10px',
-                              color: '#66ff66',
-                            }}
-                          >
-                            SCP-{scp_id}
-                          </Box>
-                          <LabeledList>
-                            {Object.entries(metrics).map(([metric, value]) => (
-                              <LabeledList.Item
-                                key={metric}
-                                label={metric.toUpperCase()}
-                              >
-                                <Box style={{ color: '#ffff66' }}>{value}</Box>
-                              </LabeledList.Item>
-                            ))}
-                          </LabeledList>
-                        </Box>
-                      </Grid.Column>
-                    ),
-                  )
-                ) : (
-                  <Grid.Column size={12}>
-                    <Box
-                      style={{
-                        textAlign: 'center',
-                        padding: '20px',
-                        color: '#ff6666',
-                        fontSize: '14px',
-                      }}
-                    >
-                      No SCP progression data available.
-                      <br />
-                      Play as an SCP to start tracking your progression.
-                    </Box>
-                  </Grid.Column>
-                )}
-              </Grid>
-            </Section>
-
-            <Section title="SCP Achievements">
-              <Grid style={{ gap: '10px' }}>
-                {safeData.scp_achievements &&
-                safeData.scp_achievements.length > 0 ? (
-                  safeData.scp_achievements.map((achievement, index) => (
-                    <Grid.Column size={6} key={index}>
-                      <Box
-                        style={{
-                          border: '1px solid rgba(255,255,255,0.3)',
-                          padding: '10px',
-                          borderRadius: '3px',
-                          background: achievement.unlocked
-                            ? 'rgba(0,255,0,0.1)'
-                            : 'rgba(100,100,100,0.1)',
-                        }}
-                      >
-                        <Box
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            color: achievement.unlocked ? '#66ff66' : '#666666',
-                          }}
-                        >
-                          {achievement.name}
-                        </Box>
-                        <Box
-                          style={{
-                            fontSize: '12px',
-                            color: achievement.unlocked ? '#ffffff' : '#888888',
-                          }}
-                        >
-                          {achievement.description}
-                        </Box>
-                        <Box
-                          style={{
-                            fontSize: '10px',
-                            color: achievement.unlocked ? '#66ff66' : '#666666',
-                            marginTop: '5px',
-                          }}
-                        >
-                          Status: {achievement.unlocked ? 'UNLOCKED' : 'LOCKED'}
-                        </Box>
-                      </Box>
-                    </Grid.Column>
-                  ))
-                ) : (
-                  <Grid.Column size={12}>
-                    <Box
-                      style={{
-                        textAlign: 'center',
-                        padding: '20px',
-                        color: '#ff6666',
-                        fontSize: '14px',
-                      }}
-                    >
-                      No SCP achievements available.
-                    </Box>
-                  </Grid.Column>
-                )}
-              </Grid>
-            </Section>
-
-            <Section title="SCP Performance Statistics">
-              <Grid style={{ gap: '20px' }}>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="TOTAL SCP ROUNDS">
-                      <Box style={{ color: '#66ff66' }}>
-                        {safeData.total_scp_rounds || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="AVERAGE SCP PERFORMANCE">
-                      <Box style={{ color: '#ffff66' }}>
-                        {safeData.average_scp_performance || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="SCP CONTAINMENT BREACHES">
-                      <Box style={{ color: '#ff6666' }}>
-                        {safeData.scp_containment_breaches || 0}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-                <Grid.Column size={6}>
-                  <LabeledList>
-                    <LabeledList.Item label="SCP RESEARCH POINTS">
-                      <Box style={{ color: '#66ffff' }}>
-                        {safeData.scp_research_points || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="SCP RESEARCH BREAKTHROUGHS">
-                      <Box style={{ color: '#ff66ff' }}>
-                        {safeData.scp_research_breakthroughs || 0}
-                      </Box>
-                    </LabeledList.Item>
-                    <LabeledList.Item label="SCP INTERACTION EVENTS">
-                      <Box style={{ color: '#ff9966' }}>
-                        {safeData.scp_interaction_events || 0}
-                      </Box>
-                    </LabeledList.Item>
-                  </LabeledList>
-                </Grid.Column>
-              </Grid>
-            </Section>
-          </Box>
-        )}
       </Window.Content>
     </Window>
-  );
-};
-
-// NavButton component matching personnel persistence style
-const NavButton = ({ children, isActive, onClick, icon }) => (
-  <Box
-    style={{
-      padding: '8px 16px',
-      background: isActive ? 'rgba(255,255,255,0.2)' : 'transparent',
-      border: '1px solid rgba(255,255,255,0.3)',
-      borderRadius: '3px',
-      cursor: 'pointer',
-      fontSize: '12px',
-      fontWeight: isActive ? 'bold' : 'normal',
-      transition: 'all 0.3s ease',
-    }}
-    onClick={onClick}
-    onMouseEnter={(e) => {
-      if (!isActive) {
-        e.target.style.background = 'rgba(255,255,255,0.1)';
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (!isActive) {
-        e.target.style.background = 'transparent';
-      }
-    }}
-  >
-    {icon} {children}
-  </Box>
-);
-
-// EnhancedButton component matching personnel persistence style
-const EnhancedButton = ({ children, icon, color, onClick, tooltip }) => {
-  const getColorStyle = (color) => {
-    switch (color) {
-      case 'good':
-        return { backgroundColor: 'rgba(0,255,0,0.2)', borderColor: '#66ff66' };
-      case 'bad':
-        return { backgroundColor: 'rgba(255,0,0,0.2)', borderColor: '#ff6666' };
-      case 'average':
-        return {
-          backgroundColor: 'rgba(255,255,0,0.2)',
-          borderColor: '#ffff66',
-        };
-      case 'blue':
-        return {
-          backgroundColor: 'rgba(0,100,255,0.2)',
-          borderColor: '#6666ff',
-        };
-      case 'purple':
-        return {
-          backgroundColor: 'rgba(255,0,255,0.2)',
-          borderColor: '#ff66ff',
-        };
-      default:
-        return {
-          backgroundColor: 'rgba(100,100,100,0.2)',
-          borderColor: '#cccccc',
-        };
-    }
-  };
-
-  const colorStyle = getColorStyle(color);
-
-  return (
-    <Button
-      onClick={onClick}
-      style={{
-        ...colorStyle,
-        border: `1px solid ${colorStyle.borderColor}`,
-        color: '#ffffff',
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        padding: '8px 16px',
-        transition: 'all 0.3s ease',
-      }}
-      title={tooltip}
-    >
-      {icon} {children}
-    </Button>
   );
 };

@@ -141,14 +141,16 @@
 	if(SSscp_research && SSscp_research.manager)
 		award_research_points("SCP-3008", "entry", 5, user.ckey)
 
+	hook_scp_exploration(user, "SCP-3008", 0)
+
 /obj/structure/scp3008/proc/get_available_interior()
 	// Find an interior with space
 	for(var/datum/ikea_interior/interior in ikea_interiors)
-		if(interior.occupants.len < interior.max_occupants)
+		if(length(interior.occupants) < interior.max_occupants)
 			return interior
 
 	// Create new interior if needed
-	if(ikea_interiors.len < max_interiors)
+	if(length(ikea_interiors) < max_interiors)
 		return create_ikea_interior()
 
 	return null
@@ -467,7 +469,7 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-3008"]
 		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
@@ -1485,6 +1487,6 @@
 	to_chat(src, "<span class='notice'>Interior ID: [current_interior.id]</span>")
 	to_chat(src, "<span class='notice'>Current Position: [current_turf.x], [current_turf.y], [current_turf.z]</span>")
 	to_chat(src, "<span class='notice'>Entry Point: [current_interior.entry_point ? "[current_interior.entry_point.x], [current_interior.entry_point.y], [current_interior.entry_point.z]" : "NULL"]</span>")
-	to_chat(src, "<span class='notice'>Occupants: [current_interior.occupants.len]</span>")
-	to_chat(src, "<span class='notice'>IKEA Turfs: [current_interior.ikea_turfs.len]</span>")
+	to_chat(src, "<span class='notice'>Occupants: [length(current_interior.occupants)]</span>")
+	to_chat(src, "<span class='notice'>IKEA Turfs: [length(current_interior.ikea_turfs)]</span>")
 

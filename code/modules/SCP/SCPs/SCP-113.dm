@@ -60,7 +60,11 @@
 	SEND_SIGNAL(H, COMSIG_SCP113_EFFECT_STAGE_1, H)
 
 	transformation_count++
-	victims[H.ckey] = list("time" = world.time, "count" = (victims[H.ckey]?.["count"] || 0) + 1)
+	var/list/victim_data = victims[H.ckey]
+	var/current_count = 0
+	if(victim_data)
+		current_count = victim_data["count"] || 0
+	victims[H.ckey] = list("time" = world.time, "count" = current_count + 1)
 
 /obj/item/scp113/proc/handle_item_unequipped(datum/source, mob/living/user)
 	if(!ishuman(user))
@@ -77,7 +81,7 @@
 
 /obj/item/scp113/attack(mob/living/M, mob/living/carbon/human/user, target_zone)
 	. = ..()
-	if(ishuman(M) && user.a_intent == INTENT_HELP)
+	if(ishuman(M) && user.combat_mode == FALSE)
 		var/mob/living/carbon/human/H = M
 		hook_scp_interaction(user, "SCP-113", INTERACTION_TYPE_MEDICAL)
 		to_chat(user, "<span class='notice'>You offer [src] to [H].</span>")
@@ -116,8 +120,8 @@
 /datum/scp113_rejection_system
 	var/obj/item/parent
 	var/rejection_chance_base = 20
-	var	rejection_chance_per_use = 15
-	var	fatality_chance = 5
+	var/rejection_chance_per_use = 15
+	var/fatality_chance = 5
 
 /datum/scp113_rejection_system/New(obj/item/P)
 	parent = P
@@ -154,7 +158,7 @@
 /datum/scp113_research_system
 	var/obj/item/parent
 	var/list/transformation_log = list()
-	var	total_subjects = 0
+	var/total_subjects = 0
 
 /datum/scp113_research_system/New(obj/item/P)
 	parent = P

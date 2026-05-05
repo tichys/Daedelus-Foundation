@@ -1792,9 +1792,9 @@
 	reagents = new /datum/reagents(max_vol, flags)
 	reagents.my_atom = src
 	// Register signals for the new reagent holder with SSreagents
-	reagents.RegisterSignal(reagents, COMSIG_REAGENTS_ADD_REAGENT, TYPE_PROC_REF(/datum/controller/subsystem/processing/reagents, handle_reagent_add))
-	reagents.RegisterSignal(reagents, COMSIG_REAGENTS_REM_REAGENT, TYPE_PROC_REF(/datum/controller/subsystem/processing/reagents, handle_reagent_remove))
-	reagents.RegisterSignal(reagents, COMSIG_REAGENTS_CLEAR_REAGENTS, TYPE_PROC_REF(/datum/controller/subsystem/processing/reagents, handle_reagent_clear))
+	SSreagents.RegisterSignal(reagents, COMSIG_REAGENTS_ADD_REAGENT, TYPE_PROC_REF(/datum/controller/subsystem/processing/reagents, handle_reagent_add))
+	SSreagents.RegisterSignal(reagents, COMSIG_REAGENTS_REM_REAGENT, TYPE_PROC_REF(/datum/controller/subsystem/processing/reagents, handle_reagent_remove))
+	SSreagents.RegisterSignal(reagents, COMSIG_REAGENTS_CLEAR_REAGENTS, TYPE_PROC_REF(/datum/controller/subsystem/processing/reagents, handle_reagent_clear))
 
 	// Ensure initial reagents are registered with the SSreagents's location index
 	for(var/datum/reagent/R in reagents.reagent_list)

@@ -366,7 +366,7 @@
 	message += "<b>Completion Attempts:</b> [completion_attempts]<br>"
 	message += "<b>Sanity Drained:</b> [sanity_drained]<br><br>"
 
-	if(composition_notes.len)
+	if(length(composition_notes))
 		message += "<h3>Composition Notes:</h3>"
 		for(var/note in composition_notes)
 			message += "[note]<br>"
@@ -382,7 +382,7 @@
 
 	var/message = "<h2>SCP-012 Obsession Levels</h2>"
 
-	if(affected_composers.len)
+	if(length(affected_composers))
 		message += "<h3>Affected Composers:</h3>"
 		for(var/mob/living/carbon/human/H in affected_composers)
 			var/obsession_level = affected_composers[H]
@@ -421,7 +421,7 @@
 	message += "<b>Harmony Bonus:</b> [musical_harmony_bonus]<br>"
 	message += "<b>Composition Quality:</b> [composition_quality]/[max_quality]<br>"
 	message += "<b>Composition Difficulty:</b> [composition_difficulty]<br>"
-	message += "<b>Completed Movements:</b> [completed_movements.len]<br>"
+	message += "<b>Completed Movements:</b> [length(completed_movements)]<br>"
 	message += "<b>Total Blood Used:</b> [total_blood_used] units<br>"
 	message += "<b>Musical Masterpieces:</b> [musical_masterpieces_created]<br>"
 	message += "<b>Composer Deaths:</b> [composer_deaths]<br>"
@@ -470,13 +470,13 @@
 	message += "<b>Musical Masterpieces:</b> [musical_masterpieces_created]<br>"
 	message += "<b>Composer Deaths:</b> [composer_deaths]<br>"
 	message += "<b>Harmonic Resonance Events:</b> [harmonic_resonance_events]<br>"
-	message += "<b>Affected Composers:</b> [affected_composers.len]<br>"
+	message += "<b>Affected Composers:</b> [length(affected_composers)]<br>"
 	message += "<b>Sanity Drain Radius:</b> [sanity_drain_radius] tiles<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-012"]
 		if(instance)
-			message += "<b>Interaction History:</b> [instance.interaction_history.len] records<br>"
+			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 

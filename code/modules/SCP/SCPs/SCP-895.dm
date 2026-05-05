@@ -1,177 +1,126 @@
-/obj/machinery/camera/scp895
-	name = "SCP-895"
-	desc = "A security camera that seems to cause illness and discomfort in those who view its feed."
-	icon = 'icons/scp/scpstructures(32x32).dmi'
-	icon_state = "camera"
-	var/active = TRUE
-	var/sickness_radius = 3
-	var/list/affected_targets = list()
-	var/list/sickness_levels = list()
-	var/viewing_cooldown = 0
-	var/viewing_cooldown_time = 10 SECONDS
-	var/max_sickness_level = 100
+/obj/structure/coffin/scp895
+	name = "dark wooden coffin"
+	desc = "A large, dark wooden coffin with ornate brass fittings. Something about it fills you with a deep sense of dread."
+	icon_state = "scp895"
+	density = TRUE
+	anchored = TRUE
+	max_integrity = 200
 
-	// Persistence tracking
-	var/views_caused = 0
-	var/sickness_induced = 0
-	var/vomiting_events = 0
-	var/containment_status = "contained"
+	var/hallucination_range_camera = 15
+	var/hallucination_range_direct = 2
+	var/list/affected_viewers = list()
+	var/hallucination_tick = 0
 
-	var/datum/scp895_sickness_system/sickness_system
-	var/datum/scp895_research_system/research_system
-
-/obj/machinery/camera/scp895/Initialize()
+/obj/structure/coffin/scp895/Initialize()
 	. = ..()
-
-	// Initialize SCP datum
-	SCP = new /datum/scp(
-		src,
-		"SCP-895",
-		SCP_EUCLID,
-		"895",
-	)
-
-	SCP.min_playercount = 15
-	SCP.min_time = 20 MINUTES
-
-	// Register with SCP persistence system
+	SCP = new /datum/scp(src, "The Coffin", SCP_EUCLID, "895")
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-895"] = new /datum/scp_instance("SCP-895", src)
+	START_PROCESSING(SSobj, src)
 
-	// Systems
-	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
-
-/obj/machinery/camera/scp895/proc/initialize_systems()
-	sickness_system = new /datum/scp895_sickness_system(src)
-	research_system = new /datum/scp895_research_system(src)
-
-/obj/machinery/camera/scp895/Destroy()
-	affected_targets = list()
-	sickness_levels = list()
+/obj/structure/coffin/scp895/Destroy()
+	affected_viewers = list()
+	STOP_PROCESSING(SSobj, src)
 	return ..()
 
-// Core mechanics
-/obj/machinery/camera/scp895/process()
-	. = ..()
-	if(!active)
-		return
-	// Systems update
-	sickness_system?.process_sickness()
-	research_system?.process_research()
+/obj/structure/coffin/scp895/process()
+	hallucination_tick++
 
-// Affect nearby targets with sickness
-/obj/machinery/camera/scp895/proc/affect_nearby_targets()
-	for(var/mob/living/carbon/human/H in range(sickness_radius, src))
-		if(H.SCP || H.stat == DEAD)
+	if(hallucination_tick % 5 != 0)
+		return
+
+	for(var/mob/living/carbon/human/H in GLOB.human_list)
+		if(H.stat == DEAD || H.SCP)
 			continue
-		apply_sickness_effect(H)
 
-// Apply sickness effect to target
-/obj/machinery/camera/scp895/proc/apply_sickness_effect(mob/living/carbon/human/target)
-	if(!target)
-		return
-	// Initialize sickness level if not present
-	if(!(target in sickness_levels))
-		sickness_levels[target] = 0
-	// Increase sickness level
-	sickness_levels[target] = min(max_sickness_level, sickness_levels[target] + 5)
-	sickness_induced++
-	// Add to affected targets
-	if(!(target in affected_targets))
-		affected_targets += target
-	// Apply sickness effects based on level
-	var/sickness_level = sickness_levels[target]
-	if(sickness_level >= 20)
-		to_chat(target, "<span class='warning'>You feel slightly nauseous looking at the camera.</span>")
-		target.adjustToxLoss(2)
-	if(sickness_level >= 40)
-		to_chat(target, "<span class='danger'>The camera is making you feel very sick!</span>")
-		target.adjustToxLoss(5)
-		target.stamina.adjust(-10)
-	if(sickness_level >= 60)
-		to_chat(target, "<span class='danger'>You feel extremely ill! The camera feed is unbearable!</span>")
-		target.adjustToxLoss(10)
-		target.stamina.adjust(-20)
-		// Random vomiting
-		if(prob(30))
-			vomiting_events++
-			to_chat(target, "<span class='danger'>You vomit from the sickness!</span>")
-			target.adjustToxLoss(15)
-	if(sickness_level >= 80)
-		to_chat(target, "<span class='danger'>The sickness is overwhelming! You can barely stand!</span>")
-		target.adjustToxLoss(15)
-		target.stamina.adjust(-30)
-		// Force movement away
-		if(prob(50))
-			var/list/directions = list(NORTH, SOUTH, EAST, WEST)
-			target.forceMove(get_step(target, pick(directions)))
-			to_chat(target, "<span class='danger'>You stumble away from the camera!</span>")
-	if(sickness_level >= 100)
-		to_chat(target, "<span class='danger'>The sickness has reached critical levels! You're on the verge of collapse!</span>")
-		target.adjustToxLoss(25)
-		target.stamina.adjust(-50)
-		// Temporary unconsciousness
-		if(prob(20))
-			target.Unconscious(100)
-			to_chat(target, "<span class='danger'>You pass out from the extreme sickness!</span>")
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-895"]
-		if(instance)
-			instance.add_interaction_record(target, "sickness_induced")
+		var/distance = get_dist(H, src)
 
-// When someone views the camera feed
-/obj/machinery/camera/scp895/proc/view_camera_feed(mob/user)
-	if(world.time < viewing_cooldown)
-		return
-	viewing_cooldown = world.time + viewing_cooldown_time
-	views_caused++
-	containment_status = "breached"
-	to_chat(user, "<span class='danger'>You view the SCP-895 camera feed and immediately feel sick!</span>")
-	// Apply immediate sickness effect
-	apply_sickness_effect(user)
-	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-895"]
-		if(instance)
-			instance.add_interaction_record(user, "viewed_feed")
+		var/viewing_through_camera = FALSE
+		if(distance > hallucination_range_direct)
+			for(var/obj/machinery/camera/C in range(hallucination_range_camera, src))
+				if(C.can_use() && get_dist(H, C) <= 1)
+					viewing_through_camera = TRUE
+					break
 
-// Human interaction - when humans view the camera
-/mob/living/carbon/human/proc/view_scp895_camera()
-	if(!src || stat == DEAD)
-		return
-	// Apply immediate sickness effect
-	adjustToxLoss(10)
-	stamina.adjust(-20)
-	to_chat(src, "<span class='danger'>You feel extremely sick after viewing the camera feed!</span>")
-	// Random vomiting
-	if(prob(40))
-		to_chat(src, "<span class='danger'>You vomit from the extreme sickness!</span>")
-		adjustToxLoss(20)
-
-// Override examine for SCP-895
-/obj/machinery/camera/scp895/examine(mob/user)
-	. = ..()
-	if(ishuman(user))
-		var/mob/living/carbon/human/H = user
-		if(H.SCP)
-			to_chat(user, "<span class='warning'>This is SCP-895, a camera that causes illness and sickness in those who view its feed.</span>")
+		if(viewing_through_camera)
+			if(!(H in affected_viewers))
+				affected_viewers[H] = 0
+			affected_viewers[H] = min(100, affected_viewers[H] + rand(3, 8))
+			apply_hallucination_effect(H, affected_viewers[H], TRUE)
+		else if(distance <= hallucination_range_direct)
+			if(!(H in affected_viewers))
+				affected_viewers[H] = 0
+			affected_viewers[H] = min(30, affected_viewers[H] + rand(1, 3))
+			apply_hallucination_effect(H, affected_viewers[H], FALSE)
 		else
-			to_chat(user, "<span class='danger'>A security camera that seems to radiate an aura of sickness. You feel nauseous just looking at it.</span>")
+			if(H in affected_viewers)
+				affected_viewers[H] = max(0, affected_viewers[H] - 2)
+				if(affected_viewers[H] <= 0)
+					affected_viewers -= H
 
-// Override camera functionality (no verbs; interaction via using the camera)
-/obj/machinery/camera/scp895/attack_hand(mob/living/carbon/human/user)
-	if(ishuman(user))
-		view_camera_feed(user)
-		hook_scp_interaction(user, "SCP-895", INTERACTION_TYPE_OBSERVATION)
-		return TRUE
-	return ..()
-
-/obj/machinery/camera/scp895/proc/on_sickness_induced(mob/living/carbon/human/victim, level)
-	if(!victim)
+/obj/structure/coffin/scp895/proc/apply_hallucination_effect(mob/living/carbon/human/target, level, through_camera)
+	if(!target || level <= 0)
 		return
-	hook_scp_interaction(victim, "SCP-895", INTERACTION_TYPE_COMBAT)
-	if(level >= 100)
-		hook_player_death_near_scp(victim, "SCP-895")
 
+	if(through_camera)
+		if(level >= 10 && prob(15))
+			to_chat(target, span_warning("You feel uneasy looking at the camera feed..."))
+		if(level >= 25 && prob(15))
+			to_chat(target, span_danger("You see something wrong in the camera feed — a shape that shouldn't be there."))
+			target.stamina.adjust(-2)
+		if(level >= 40 && prob(15))
+			to_chat(target, span_danger("A corpse stares back at you from the monitor. For a moment, it looks like someone you know."))
+			target.stamina.adjust(-5)
+			target.adjustBruteLoss(2)
+		if(level >= 55 && prob(15))
+			to_chat(target, span_userdanger("DEATH. You see it everywhere in the feed. Every face is a skull. Every shadow holds a body."))
+			target.stamina.adjust(-10)
+			target.adjustBruteLoss(5)
+			target.hallucination += 10
+		if(level >= 70 && prob(20))
+			to_chat(target, span_userdanger("Your heart races as the imagery becomes unbearable. Corpses fill every frame. You cannot look away."))
+			target.adjustBruteLoss(10)
+			target.adjustToxLoss(5)
+			target.hallucination += 20
+		if(level >= 85 && prob(25))
+			to_chat(target, span_userdanger("Your chest tightens with terror. The feed shows YOUR corpse. YOUR death."))
+			target.adjustBruteLoss(15)
+			target.adjustToxLoss(10)
+			target.hallucination += 30
+		if(level >= 100 && prob(30))
+			target.visible_message(span_danger("[target] clutches their chest and collapses!"), span_userdanger("YOUR HEART STOPS. THE COFFIN SHOWS YOU YOUR END."))
+			target.adjustBruteLoss(30)
+			target.adjustToxLoss(20)
+			target.hallucination += 50
+			if(prob(20))
+				target.Unconscious(100)
 
+		if(level >= 50)
+			hook_scp_combat(target, "SCP-895", 5, 0)
+	else
+		if(level >= 5 && prob(10))
+			to_chat(target, span_warning("You feel a faint unease near the coffin."))
+		if(level >= 15 && prob(10))
+			to_chat(target, span_warning("The air around the coffin feels heavy with dread."))
+			target.stamina.adjust(-1)
+		if(level >= 25 && prob(10))
+			to_chat(target, span_danger("Something about the coffin fills you with a sense of impending doom."))
+			target.stamina.adjust(-3)
+
+/obj/structure/coffin/scp895/attack_hand(mob/living/carbon/human/user)
+	. = ..()
+	if(!ishuman(user))
+		return
+
+	if(user.combat_mode)
+		return
+
+	to_chat(user, span_warning("You touch the coffin's surface. A wave of dread passes through you."))
+	hook_scp_interaction(user, "SCP-895", INTERACTION_TYPE_OBSERVATION)
+	if(!(user in affected_viewers))
+		affected_viewers[user] = 10
+
+/obj/structure/coffin/scp895/examine(mob/user)
+	. = ..()
+	to_chat(user, span_notice("A large, dark wooden coffin with ornate brass fittings. Viewing it through camera feeds causes escalating hallucinations."))
+	to_chat(user, span_warning("Do NOT observe through security cameras. Direct proximity is less dangerous but still unsettling."))

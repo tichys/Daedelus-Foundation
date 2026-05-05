@@ -52,7 +52,7 @@ SUBSYSTEM_DEF(facility_persistence)
 		save_facility_data()
 
 /datum/facility_persistence_manager/proc/update_room_states()
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if(A.type in room_states)
 			var/datum/room_state/state = room_states[A.type]
 			state.update_state(A)
@@ -62,7 +62,7 @@ SUBSYSTEM_DEF(facility_persistence)
 			new_state.update_state(A)
 
 /datum/facility_persistence_manager/proc/update_equipment_status()
-	for(var/obj/machinery/M in world)
+	for(var/obj/machinery/M as anything in INSTANCES_OF(/obj/machinery))
 		if(M.type in equipment_status)
 			var/datum/equipment_status/status = equipment_status[M.type]
 			status.update_status(M)
@@ -72,13 +72,13 @@ SUBSYSTEM_DEF(facility_persistence)
 			new_status.update_status(M)
 
 /datum/facility_persistence_manager/proc/update_security_systems()
-	for(var/obj/machinery/camera/C in world)
+	for(var/obj/machinery/camera/C as anything in INSTANCES_OF(/obj/machinery/camera))
 		update_security_component(C, "camera")
 
-	for(var/obj/machinery/door/airlock/A in world)
+	for(var/obj/machinery/door/airlock/A as anything in INSTANCES_OF(/obj/machinery/door/airlock))
 		update_security_component(A, "airlock")
 
-	for(var/obj/machinery/computer/security/S in world)
+	for(var/obj/machinery/computer/security/S as anything in INSTANCES_OF(/obj/machinery/computer/security))
 		update_security_component(S, "security_console")
 
 /datum/facility_persistence_manager/proc/update_security_component(var/obj/component, var/component_type)
@@ -97,7 +97,7 @@ SUBSYSTEM_DEF(facility_persistence)
 	var/active_power = 0
 
 
-	for(var/obj/machinery/power/P in world)
+	for(var/obj/machinery/power/P as anything in INSTANCES_OF(/obj/machinery/power))
 		if(istype(P, /obj/machinery/power/generator))
 			// Calculate real power output based on generator type and condition
 			var/power_output = calculate_real_power_output(P)
@@ -138,7 +138,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/facility_persistence_manager/proc/update_environmental_conditions()
 	// Update environmental conditions for each area
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if(A.type in environmental_conditions)
 			var/datum/environmental_condition/condition = environmental_conditions[A.type]
 			condition.update_condition(A)
@@ -149,7 +149,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/facility_persistence_manager/proc/update_containment_chambers()
 	// Update SCP containment chamber status
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if(findtext(A.name, "containment") || findtext(A.name, "SCP"))
 			if(A.type in containment_chambers)
 				var/datum/containment_chamber/chamber = containment_chambers[A.type]
@@ -161,7 +161,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/facility_persistence_manager/proc/update_research_labs()
 	// Update research laboratory status
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if(findtext(A.name, "research") || findtext(A.name, "lab"))
 			if(A.type in research_labs)
 				var/datum/research_lab/lab = research_labs[A.type]
@@ -173,7 +173,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/facility_persistence_manager/proc/update_medical_facilities()
 	// Update medical facility status
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if(findtext(A.name, "medical") || findtext(A.name, "medbay"))
 			if(A.type in medical_facilities)
 				var/datum/medical_facility/facility = medical_facilities[A.type]
@@ -185,7 +185,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/facility_persistence_manager/proc/update_engineering_systems()
 	// Update engineering system status
-	for(var/area/A in world)
+	for(var/area/A in GLOB.areas)
 		if(findtext(A.name, "engineering") || findtext(A.name, "engine"))
 			if(A.type in engineering_systems)
 				var/datum/engineering_system/system = engineering_systems[A.type]

@@ -8,15 +8,15 @@
 /datum/scp682_evolution_system
 	var/mob/living/carbon/human/scp682/owner = null
 	var/evolution_stage = 1
-	var/max_evolution_stage = 10
+	var/max_evolution_stage = SCP682_MAX_EVOLUTION_STAGE
 	var/adaptation_points = 0
-	var/points_per_damage = 1
-	var/points_per_threat = 5
+	var/points_per_damage = SCP682_POINTS_PER_DAMAGE
+	var/points_per_threat = SCP682_POINTS_PER_THREAT
 	var/list/active_adaptations = list()
 	var/evolution_cooldown = 0
-	var/evolution_cooldown_time = 30 SECONDS
+	var/evolution_cooldown_time = SCP682_EVOLUTION_COOLDOWN
 	var/last_evolution_check = 0
-	var/evolution_check_interval = 60 SECONDS
+	var/evolution_check_interval = SCP682_EVOLUTION_CHECK_INTERVAL
 	var/list/threat_memory = list()
 	var/learning_rate = 1.0
 	var/adaptation_efficiency = 1.0
@@ -49,7 +49,7 @@
 	adaptation_points += (amount * points_per_damage)
 
 	// Check for new adaptation
-	if(prob(25)) // 25% chance to adapt to damage type
+	if(prob(SCP682_DAMAGE_ADAPT_CHANCE))
 		add_adaptation("damage_resistance_[damage_type]")
 
 	// Check for evolution
@@ -69,7 +69,7 @@
 	adaptation_points += points_per_threat
 
 	// Check for threat-specific adaptation
-	if(prob(30)) // 30% chance to adapt to threat
+	if(prob(SCP682_THREAT_ADAPT_CHANCE))
 		add_adaptation("threat_counter_[threat_type]")
 
 /datum/scp682_evolution_system/proc/add_adaptation(adaptation_type)
@@ -134,11 +134,11 @@
 
 /datum/scp682_regeneration_system
 	var/mob/living/carbon/human/scp682/owner = null
-	var/base_health = 1000
-	var/regeneration_rate = 10
+	var/base_health = SCP682_REGEN_BASE_HEALTH
+	var/regeneration_rate = SCP682_BASE_REGENERATION_RATE
 	var/damage_scaling = 0
 	var/adaptation_bonus = 0
-	var/critical_regeneration = 50
+	var/critical_regeneration = SCP682_CRITICAL_REGENERATION_BONUS
 	var/last_damage_time = 0
 	var/damage_memory_duration = 30 SECONDS
 	var/list/recent_damage = list()
@@ -184,7 +184,7 @@
 
 	// Adaptation bonus
 	if(owner.evolution_system)
-		total_rate += (owner.evolution_system.active_adaptations.len * 5)
+		total_rate += (length(owner.evolution_system.active_adaptations) * 5)
 
 	// Evolution stage bonus
 	if(owner.evolution_system)
@@ -300,7 +300,7 @@
 		owner.evolution_system.adapt_to_threat(threat, damage_type)
 
 /datum/scp682_threat_system/proc/get_primary_target()
-	if(threat_priorities.len > 0)
+	if(length(threat_priorities) > 0)
 		return threat_priorities[1]
 	return null
 
@@ -316,13 +316,13 @@
 
 /datum/scp682_containment_system
 	var/mob/living/carbon/human/scp682/owner = null
-	var/containment_integrity = 100
+	var/containment_integrity = SCP682_DEFAULT_CONTAINMENT_INTEGRITY
 	var/breach_phase = "contained"
 	var/list/adaptation_countermeasures = list()
 	var/escalation_timer = 0
 	var/escalation_interval = 60 SECONDS
 	var/last_containment_check = 0
-	var/containment_check_interval = 15 SECONDS
+	var/containment_check_interval = SCP682_CONTAINMENT_CHECK_INTERVAL
 	var/breach_cooldown = 0
 	var/breach_cooldown_time = 30 SECONDS
 
@@ -364,6 +364,8 @@
 /datum/scp682_containment_system/proc/set_breach_phase(new_phase)
 	breach_phase = new_phase
 
+	if(new_phase == "contained" && owner)
+		hook_scp_recontainment("SCP-682", list("method" = "standard", "integrity" = containment_integrity))
 	switch(breach_phase)
 		if("agitated")
 			owner.attack_damage += 10
@@ -394,11 +396,11 @@
 /datum/scp682_combat_system
 	var/mob/living/carbon/human/scp682/owner = null
 	var/attack_cooldown = 0
-	var/attack_cooldown_time = 2 SECONDS
+	var/attack_cooldown_time = SCP682_MELEE_COOLDOWN
 	var/area_attack_cooldown = 0
-	var/area_attack_cooldown_time = 5 SECONDS
+	var/area_attack_cooldown_time = SCP682_AREA_ATTACK_COOLDOWN
 	var/charge_cooldown = 0
-	var/charge_cooldown_time = 8 SECONDS
+	var/charge_cooldown_time = SCP682_CHARGE_COOLDOWN
 	var/last_combat_action = 0
 	var/combat_action_interval = 1 SECONDS
 
@@ -545,8 +547,8 @@
 	// Collect current data
 	var/list/current_data = list()
 	current_data["evolution_stage"] = owner.evolution_system?.evolution_stage || 1
-	current_data["active_adaptations"] = owner.evolution_system?.active_adaptations?.len || 0
-	current_data["threat_memory_size"] = owner.threat_system?.threat_memory?.len || 0
+	current_data["active_adaptations"] = length(owner.evolution_system?.active_adaptations) || 0
+	current_data["threat_memory_size"] = length(owner.threat_system?.threat_memory) || 0
 	current_data["breach_phase"] = owner.containment_system?.breach_phase || "contained"
 	current_data["health_percentage"] = (owner.health / owner.maxHealth) * 100
 	current_data["timestamp"] = world.time

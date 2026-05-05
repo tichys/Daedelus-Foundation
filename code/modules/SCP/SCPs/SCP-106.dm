@@ -59,7 +59,7 @@
 	SCP.min_time = 30 MINUTES
 
 	// Set up human-specific properties for SCP-106
-	maxHealth = 300 // Base health as per design
+	maxHealth = SCP106_MAX_HEALTH
 	health = maxHealth
 
 	// Initialize vision cone
@@ -103,7 +103,7 @@
 
 	// Pocket dimension system status
 	if(pocket_dimension_system)
-		status_items += "Active Dimensions: [pocket_dimension_system.active_dimensions.len]/[pocket_dimension_system.dimension_capacity]"
+		status_items += "Active Dimensions: [length(pocket_dimension_system.active_dimensions)]/[pocket_dimension_system.dimension_capacity]"
 		status_items += "Torture Efficiency: [pocket_dimension_system.torture_efficiency]/[pocket_dimension_system.max_torture_efficiency]"
 		status_items += "Extraction Difficulty: [pocket_dimension_system.extraction_difficulty]/[pocket_dimension_system.max_extraction_difficulty]"
 
@@ -144,7 +144,7 @@
 		. += "<span class='notice'>Phase Mastery: [phasing_system.phase_mastery]/[phasing_system.max_phase_mastery]</span>"
 
 	if(pocket_dimension_system)
-		. += "<span class='notice'>Active Dimensions: [pocket_dimension_system.active_dimensions.len]</span>"
+		. += "<span class='notice'>Active Dimensions: [length(pocket_dimension_system.active_dimensions)]</span>"
 		. += "<span class='notice'>Torture Efficiency: [pocket_dimension_system.torture_efficiency]%</span>"
 
 	if(corrosion_system)
@@ -159,7 +159,7 @@
 		"scp_type" = "SCP-106",
 		"dimensional_energy" = phasing_system?.dimensional_energy || 0,
 		"phase_mastery" = phasing_system?.phase_mastery || 1.0,
-		"active_dimensions" = pocket_dimension_system?.active_dimensions?.len || 0,
+		"active_dimensions" = length(pocket_dimension_system?.active_dimensions) || 0,
 		"torture_efficiency" = pocket_dimension_system?.torture_efficiency || 0,
 		"corrosion_potency" = corrosion_system?.corrosion_potency || 0,
 		"hunt_experience" = hunting_system?.hunt_experience || 0,
