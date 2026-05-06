@@ -1,10 +1,10 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
-source dependencies.sh
+# Install Node.js and npm
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
-if [[ -e ~/.nvm/nvm.sh ]]; then
-	source ~/.nvm/nvm.sh
-	nvm install $NODE_VERSION_LTS
-	nvm use $NODE_VERSION_LTS
-fi
+# Verify installation
+node --version
+npm --version
