@@ -272,11 +272,7 @@
 	visible_message("<span class='danger'>[src] falls over, its stuffing spilling out!</span>")
 	return ..()
 
-/mob/living/simple_animal/scp1048/verb/view_build_status()
-	set name = "View Build Status"
-	set category = "SCP-1048"
-	set desc = "View your material collection and copy status."
-
+/mob/living/simple_animal/scp1048/proc/view_build_status()
 	var/message = "<h2>SCP-1048 Builder Bear Status</h2>"
 	message += "<b>Materials Collected:</b> [materials_collected]/[materials_needed]<br>"
 	message += "<b>Body Parts Harvested:</b> [body_parts_harvested]<br>"
@@ -291,11 +287,7 @@
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
-/mob/living/simple_animal/scp1048/verb/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP-1048"
-	set desc = "View SCP-1048 persistence data."
-
+/mob/living/simple_animal/scp1048/proc/view_persistence_data()
 	if(!check_rights(R_ADMIN))
 		to_chat(usr, "<span class='warning'>You don't have permission to view persistence data.</span>")
 		return

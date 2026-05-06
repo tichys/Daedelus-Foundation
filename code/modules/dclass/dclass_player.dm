@@ -78,9 +78,8 @@
 	var/list/reported_players = list()
 	var/faction = DCLASS_FACTION_NONE
 
-	// Skills & Abilities
+	// Skills & Routes
 	var/list/skills = list()
-	var/list/abilities = list()
 	var/list/known_routes = list()
 	var/list/guard_patterns = list()
 
@@ -105,12 +104,7 @@
 	dclass_number = "D-[rand(1000, 9999)]"
 
 /datum/dclass_player/proc/initialize_skills()
-	skills["stealth"] = 1
-	skills["crafting"] = 1
-	skills["social"] = 1
-	skills["observation"] = 1
 	skills["escape_planning"] = 1
-	skills["contraband_handling"] = 1
 
 /datum/dclass_player/proc/process_player()
 	// Update suspicion level
@@ -154,28 +148,10 @@
 	level++
 	experience = 0
 
-	// Unlock new abilities based on level
-	unlock_level_abilities(level)
-
 	// Notify player
 	if(mob)
 		to_chat(mob, "<span class='notice'>Congratulations! You are now Level [level] D-Class!</span>")
 		to_chat(mob, "<span class='notice'>New abilities and opportunities are now available.</span>")
-
-/datum/dclass_player/proc/unlock_level_abilities(new_level)
-	switch(new_level)
-		if(2)
-			abilities += "basic_alliance"
-			abilities += "work_tools"
-		if(3)
-			abilities += "advanced_crafting"
-			abilities += "leadership"
-		if(4)
-			abilities += "restricted_access"
-			abilities += "coordination"
-		if(5)
-			abilities += "escape_mastery"
-			abilities += "teaching"
 
 // Work Assignment System
 /datum/dclass_player/proc/assign_work(work_id)
@@ -338,18 +314,19 @@
 
 	escape_attempts++
 
-	// Check if player meets requirements
 	if(!check_escape_requirements(escape_data["requirements"]))
 		if(mob)
 			to_chat(mob, "<span class='warning'>You don't have the required items for this escape route.</span>")
 		return FALSE
 
-	// Calculate success chance
-	var/success_chance = escape_data["success_chance"]
-	success_chance += (skills["escape_planning"] - 1) * 10 // Skill bonus
-	success_chance -= (SSdclass.manager.get_security_level() - 1) * 10 // Security penalty
+	for(var/obj/structure/dclass_escape_point/EP in world)
+		if(EP.route_id == escape_type && EP.route && EP.discovered)
+			return EP.route.attempt_escape(mob)
 
-	// Attempt escape
+	var/success_chance = escape_data["success_chance"]
+	success_chance += (skills["escape_planning"] - 1) * 10
+	success_chance -= (SSdclass.manager.get_security_level() - 1) * 10
+
 	if(prob(success_chance))
 		successful_escape(escape_type)
 		return TRUE
@@ -576,7 +553,6 @@
 		"suspicion_level" = suspicion_level,
 		"contraband" = contraband,
 		"skills" = skills,
-		"abilities" = abilities,
 		"allies" = allies,
 		"enemies" = enemies,
 		"achievements" = achievements,
@@ -622,7 +598,6 @@
 	suspicion_level = data["suspicion_level"] || 0
 	contraband = data["contraband"] || list()
 	skills = data["skills"] || skills
-	abilities = data["abilities"] || list()
 	allies = data["allies"] || list()
 	enemies = data["enemies"] || list()
 	achievements = data["achievements"] || list()

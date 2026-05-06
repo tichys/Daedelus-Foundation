@@ -1,8 +1,8 @@
-// SCP-529 - Zeus the Cat
+// SCP-529 - Josie the Cat
 // A cat with its rear half missing, yet appears healthy and mobile
 
 /mob/living/simple_animal/scp529
-	name = "Zeus"
+	name = "Josie"
 	desc = "A domestic cat with an unusual feature - its rear half is completely missing, yet it moves and behaves like a healthy cat."
 	icon = 'icons/scp/scp-529.dmi'
 	icon_state = "scp529"
@@ -37,11 +37,17 @@
 /mob/living/simple_animal/scp529/Initialize()
 	. = ..()
 
-	SCP = new /datum/scp(src, "Zeus", SCP_SAFE, "529")
+	SCP = new /datum/scp(src, "Josie", SCP_SAFE, "529")
 
 	health_system = new /datum/scp529_health_system(src)
 	interaction_system = new /datum/scp529_interaction_system(src)
 	research_system = new /datum/scp529_research_system(src)
+
+/mob/living/simple_animal/scp529/Destroy()
+	QDEL_NULL(health_system)
+	QDEL_NULL(interaction_system)
+	QDEL_NULL(research_system)
+	return ..()
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-529"] = new /datum/scp_instance("SCP-529", src)
@@ -77,7 +83,7 @@
 /mob/living/simple_animal/scp529/examine(mob/user)
 	. = ..()
 	to_chat(user, "<span class='notice'>Despite having no rear half, this cat appears perfectly healthy and content.</span>")
-	to_chat(user, "<span class='notice'>It seems to be named 'Zeus'.</span>")
+	to_chat(user, "<span class='notice'>It seems to be named 'Josie'.</span>")
 
 /datum/scp529_health_system
 	var/mob/living/simple_animal/parent

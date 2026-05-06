@@ -36,8 +36,7 @@
 		src,
 		"SCP-008",
 		SCP_KETER,
-		"008",
-		SCP_SENTIENT
+		"008"
 	)
 
 	// Initialize core systems
@@ -55,6 +54,7 @@
 	START_PROCESSING(SSobj, src)
 
 /obj/item/reagent_containers/glass/bottle/scp008/Destroy()
+	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(infection_system)
 	QDEL_NULL(horde_system)
 	QDEL_NULL(evolution_system)
@@ -162,6 +162,8 @@
 	total_infections_caused++
 	containment_breached = TRUE
 	containment_status = "breached"
+	if(!SSscp_persistence || !SSscp_persistence.manager || !SSscp_persistence.manager.scp_instances["SCP-008"]?.containment_status == "breached")
+		hook_scp_breach("SCP-008", src)
 
 	visible_message("<span class='danger'>[target] has been infected with SCP-008!</span>")
 	to_chat(target, "<span class='danger'>You have been infected with SCP-008! You feel your body beginning to decay...</span>")

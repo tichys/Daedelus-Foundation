@@ -68,6 +68,15 @@
 
 	// Return nothing to continue processing (not PROCESS_KILL)
 
+/mob/living/carbon/human/scp173/Destroy()
+	QDEL_NULL(observation_system)
+	QDEL_NULL(movement_system)
+	QDEL_NULL(containment_system)
+	QDEL_NULL(combat_system)
+	QDEL_NULL(research_system)
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 // Enhanced life cycle integration
 /mob/living/carbon/human/scp173/Life()
 	. = ..()
@@ -89,7 +98,7 @@
 
 // Update SCP-173 state based on current conditions
 /mob/living/carbon/human/scp173/proc/update_state()
-	if(observation_system && observation_system.is_being_observed())
+	if(observation_system && observation_system.is_being_observed)
 		state = "contained"
 	else if(combat_system && combat_system.attack_cooldown > world.time)
 		state = "attacking"
@@ -107,7 +116,7 @@
 		"kills_count" = kills_count,
 		"breach_events" = breach_events,
 		"total_damage_dealt" = total_damage_dealt,
-		"is_observed" = observation_system ? observation_system.is_being_observed() : FALSE,
+		"is_observed" = observation_system ? observation_system.is_being_observed : FALSE,
 		"observation_quality" = observation_system ? observation_system.observation_quality : 0,
 		"containment_integrity" = containment_system ? containment_system.containment_integrity : 100,
 		"is_contained" = containment_system ? containment_system.is_contained : TRUE,
@@ -142,7 +151,7 @@
 	status += "State: [state]"
 
 	if(observation_system)
-		status += "Being Observed: [observation_system.is_being_observed() ? "Yes" : "No"]"
+		status += "Being Observed: [observation_system.is_being_observed ? "Yes" : "No"]"
 		status += "Observation Quality: [round(observation_system.observation_quality, 0.1)]"
 		status += "Observers: [observation_system.observers ? length(observation_system.observers) : 0]"
 
@@ -161,11 +170,7 @@
 
 	return status
 
-/mob/living/carbon/human/scp173/verb/show_status_verb()
-	set name = "Show SCP Status"
-	set category = "SCP-173"
-	set desc = "Display your SCP-173 status"
-
+/mob/living/carbon/human/scp173/proc/show_status_verb()
 	var/list/status = get_scp_status()
 	for(var/line in status)
 		to_chat(src, "<span class='notice'>[line]</span>")

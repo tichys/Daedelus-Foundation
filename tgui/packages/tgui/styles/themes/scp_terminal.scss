@@ -25,7 +25,11 @@ $scp-highlight: #e8e8e8;
   $color-bg: $scp-dark-bg,
   $color-fg: $scp-text,
   $color-bg-grad-spread: 0%,
-  $font-family: ('Consolas', 'Courier New', monospace)
+  $font-family: (
+    'Consolas',
+    'Courier New',
+    monospace,
+  )
 );
 
 .theme-scp_terminal {
@@ -73,48 +77,34 @@ $scp-highlight: #e8e8e8;
     $with: ('background-dimness': 0.7)
   );
 
-  @include meta.load-css(
-    '../components/Modal.scss'
-  );
+  @include meta.load-css('../components/Modal.scss');
 
   @include meta.load-css(
     '../components/NoticeBox.scss',
     $with: ('background-color': $scp-dark-red)
   );
 
-  @include meta.load-css(
-    '../components/NumberInput.scss'
-  );
+  @include meta.load-css('../components/NumberInput.scss');
 
   @include meta.load-css(
     '../components/ProgressBar.scss',
-    $with: (
-      'color-default-fill': $scp-amber,
-      'background-color': #1a1a20
-    )
+    $with: ('color-default-fill': $scp-amber, 'background-color': #1a1a20)
   );
 
-  @include meta.load-css(
-    '../components/LabeledList.scss'
-  );
+  @include meta.load-css('../components/LabeledList.scss');
 
   @include meta.load-css(
     '../components/BlockQuote.scss',
     $with: ('color-default': $scp-border)
   );
 
-  @include meta.load-css(
-    '../components/Dropdown.scss'
-  );
+  @include meta.load-css('../components/Dropdown.scss');
 
   @include meta.load-css('../layouts/Layout.scss');
   @include meta.load-css('../layouts/Window.scss');
   @include meta.load-css(
     '../layouts/TitleBar.scss',
-    $with: (
-      'background-color': $scp-dark-red,
-      'text-color': $scp-highlight
-    )
+    $with: ('background-color': $scp-dark-red, 'text-color': $scp-highlight)
   );
 
   .Layout__content {

@@ -32,6 +32,13 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-178"] = new /datum/scp_instance("SCP-178", src)
 
+/obj/item/clothing/glasses/scp178/Destroy()
+	QDEL_NULL(perception_system)
+	QDEL_NULL(entity_system)
+	QDEL_NULL(research_system)
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 /obj/item/clothing/glasses/scp178/equipped(mob/living/carbon/human/user, slot)
 	..()
 	if(slot == ITEM_SLOT_EYES)
@@ -51,7 +58,7 @@
 		return
 
 	var/mob/living/carbon/human/wearer = loc
-	if(!istype(wearer) || !wearer.is_holding(src))
+	if(!istype(wearer) || wearer.glasses != src)
 		return
 
 	dimension_phase++
@@ -122,11 +129,11 @@
 	icon_state = "shadow"
 	density = FALSE
 	anchored = TRUE
-	invisibility = INVISIBILITY_OBSERVER
+	alpha = 100
 
 /obj/effect/dimension_entity/New(loc)
 	..()
-	addtimer(CALLBACK(src, PROC_REF(qdel), src), 300)
+	QDEL_IN(src, 300)
 
 /datum/scp178_research_system
 	var/obj/item/parent

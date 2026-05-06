@@ -445,6 +445,9 @@
 	if(!(target in affected_targets))
 		affected_targets[target] = 0
 
+	if(!isnum(affected_targets[target]))
+		affected_targets[target] = 0
+
 	var/distance = get_dist(mask, target)
 	var/influence_gain = calculate_influence_gain(distance)
 	var/resistance = calculate_resistance(target)
@@ -586,12 +589,7 @@
 		else
 			personality_traits[trait] = host_personality[trait]
 
-// Verb Commands
-/obj/item/clothing/mask/scp035/verb/attempt_possession_verb()
-	set name = "Attempt Possession"
-	set category = "SCP"
-	set desc = "Attempt to possess a nearby target."
-
+/obj/item/clothing/mask/scp035/proc/attempt_possession_verb()
 	var/list/nearby_targets = list()
 	for(var/mob/living/carbon/human/H in range(3, src))
 		if(H.SCP || H.stat == DEAD)
@@ -605,19 +603,11 @@
 	else
 		to_chat(usr, "<span class='warning'>No suitable targets nearby.</span>")
 
-/obj/item/clothing/mask/scp035/verb/expand_telepathic_range()
-	set name = "Expand Telepathic Range"
-	set category = "SCP"
-	set desc = "Expand the range of telepathic influence."
-
+/obj/item/clothing/mask/scp035/proc/expand_telepathic_range()
 	telepathy_system.range = min(telepathy_system.max_range, telepathy_system.range + 2)
 	to_chat(usr, "<span class='notice'>Telepathic range expanded to [telepathy_system.range] tiles.</span>")
 
-/obj/item/clothing/mask/scp035/verb/view_possession_status()
-	set name = "View Possession Status"
-	set category = "SCP"
-	set desc = "View the current possession status."
-
+/obj/item/clothing/mask/scp035/proc/view_possession_status()
 	var/message = "<h2>SCP-035 Possession Status</h2>"
 	message += "<b>Currently Possessed:</b> [possession_system.current_host ? "Yes" : "No"]<br>"
 	message += "<b>Current Host:</b> [possession_system.current_host ? possession_system.current_host.name : "None"]<br>"
@@ -638,11 +628,7 @@
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-/obj/item/clothing/mask/scp035/verb/view_affected_targets()
-	set name = "View Affected Targets"
-	set category = "SCP"
-	set desc = "View targets affected by telepathic influence."
-
+/obj/item/clothing/mask/scp035/proc/view_affected_targets()
 	var/message = "<h2>SCP-035 Affected Targets</h2>"
 
 	if(length(telepathy_system.affected_targets))
@@ -655,11 +641,7 @@
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-/obj/item/clothing/mask/scp035/verb/view_learned_abilities()
-	set name = "View Learned Abilities"
-	set category = "SCP"
-	set desc = "View abilities learned from previous hosts."
-
+/obj/item/clothing/mask/scp035/proc/view_learned_abilities()
 	var/message = "<h2>SCP-035 Learned Abilities</h2>"
 
 	if(length(possession_system.learned_abilities))
@@ -671,22 +653,15 @@
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-/obj/item/clothing/mask/scp035/verb/remove_mask_verb()
-	set name = "Remove Mask"
-	set category = "SCP"
-	set desc = "Remove the mask from current host."
-
+/obj/item/clothing/mask/scp035/proc/remove_mask_verb()
 	if(possession_system.current_host)
+		var/host_name = possession_system.current_host.name
 		possession_system.remove_from_current_host()
-		to_chat(usr, "<span class='notice'>Mask removed from [possession_system.current_host.name].</span>")
+		to_chat(usr, "<span class='notice'>Mask removed from [host_name].</span>")
 	else
 		to_chat(usr, "<span class='warning'>No current host to remove mask from.</span>")
 
-/obj/item/clothing/mask/scp035/verb/use_learned_ability()
-	set name = "Use Learned Ability"
-	set category = "SCP"
-	set desc = "Use an ability learned from a previous host."
-
+/obj/item/clothing/mask/scp035/proc/use_learned_ability()
 	if(!length(possession_system.learned_abilities))
 		to_chat(usr, "<span class='warning'>No abilities learned yet.</span>")
 		return

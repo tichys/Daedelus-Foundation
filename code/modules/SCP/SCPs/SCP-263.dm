@@ -33,6 +33,13 @@
 
 	START_PROCESSING(SSobj, src)
 
+/obj/machinery/scp263/Destroy()
+	QDEL_NULL(game_system)
+	QDEL_NULL(effect_system)
+	QDEL_NULL(research_system)
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 /obj/machinery/scp263/process()
 	if(machine_stat & (NOPOWER|BROKEN))
 		return

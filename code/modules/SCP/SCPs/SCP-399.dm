@@ -16,7 +16,7 @@
 
 /obj/item/clothing/ring/scp399/Initialize()
 	. = ..()
-	SCP = new /datum/scp(src, "Atomic Manipulation Ring", SCP_SAFE, "399")
+	SCP = new /datum/scp(src, "Atomic Manipulation Ring", SCP_EUCLID, "399")
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-399"] = new /datum/scp_instance("SCP-399", src)
 

@@ -189,3 +189,79 @@
 				if(player)
 					player.adjust_trust(5, "dclass_incident")
 					player.add_contraband("improvised_tool", 1)
+
+// ================================================================
+// CHAOS INSURGENCY RAID EVENT
+// ================================================================
+
+/datum/round_event_control/scp_ci_raid
+	name = "Chaos Insurgency Raid"
+	typepath = /datum/round_event/scp_ci_raid
+	max_occurrences = 2
+	weight = 15
+	earliest_start = 20 MINUTES
+	min_players = 15
+
+/datum/round_event/scp_ci_raid
+	var/list/spawned_mobs = list()
+
+/datum/round_event/scp_ci_raid/setup()
+	startWhen = 1
+	announceWhen = 3
+	endWhen = 600
+
+/datum/round_event/scp_ci_raid/announce(fake)
+	priority_announce("SECURITY BREACH: Unidentified hostiles have breached the facility perimeter. All security personnel engage hostile forces.", sound_type = ANNOUNCER_ALERT)
+
+/datum/round_event/scp_ci_raid/start()
+	var/list/entry_points = GLOB.station_turfs.Copy()
+	if(!length(entry_points))
+		return
+
+	var/raider_count = min(4, max(2, round(length(GLOB.player_list) / 10)))
+
+	for(var/i = 1 to raider_count)
+		var/turf/spawn_loc = pick(entry_points)
+		var/mob/living/carbon/human/raider = new(spawn_loc)
+		raider.set_species(/datum/species/human)
+		raider.real_name = pick("Marcus Webb", "Elena Vasquez", "Dmitri Volkov", "Sarah Chen", "James Okafor")
+		spawned_mobs += raider
+
+		addtimer(CALLBACK(src, .proc/grant_raider_antag, raider), 1 SECOND)
+
+/datum/round_event/scp_ci_raid/proc/grant_raider_antag(mob/living/carbon/human/raider)
+	if(!raider || !raider.mind)
+		return
+
+	var/datum/antagonist/chaos_insurgency/ci_antag = new()
+	raider.mind.add_antag_datum(ci_antag)
+	to_chat(raider, span_danger("You are a member of the Chaos Insurgency. Infiltrate the facility and complete your mission."))
+
+	ci_antag.equip_ci_operative()
+
+/datum/round_event/scp_ci_raid/tick()
+	if(activeFor == 50)
+		priority_announce("INTEL UPDATE: Hostile operatives detected near containment areas. Security status: ORANGE.", sound_type = ANNOUNCER_DEFAULT)
+
+/datum/round_event/scp_ci_raid/end()
+	var/survivors = 0
+	var/objective_completed = FALSE
+	for(var/mob/living/M in spawned_mobs)
+		if(M.stat != DEAD)
+			survivors++
+		if(M.mind)
+			var/datum/antagonist/chaos_insurgency/ci = M.mind.has_antag_datum(/datum/antagonist/chaos_insurgency)
+			if(ci && ci.objectives)
+				for(var/datum/objective/O in ci.objectives)
+					if(O.check_completion() == TRUE)
+						objective_completed = TRUE
+
+	if(objective_completed && survivors > 0)
+		priority_announce("CRITICAL FAILURE: Chaos Insurgency operatives completed primary objective. Containment breach confirmed.", sound_type = ANNOUNCER_ALERT)
+		for(var/mob/living/carbon/human/H in GLOB.player_list)
+			if(H.stat != DEAD && H.client && (ACCESS_SECURITY in H.get_idcard(TRUE)?.access))
+				to_chat(H, span_userdanger("Mission failed. Chaos Insurgency won."))
+	else if(survivors == 0)
+		priority_announce("THREAT NEUTRALIZED: All hostile operatives eliminated. Security forces triumphant.", sound_type = ANNOUNCER_DEFAULT)
+	else
+		priority_announce("ALERT: Hostile operatives withdrew. Containment maintained.", sound_type = ANNOUNCER_DEFAULT)

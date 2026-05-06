@@ -31,6 +31,11 @@
 	benevolence_system = new /datum/scp2343_benevolence_system(src)
 	research_system = new /datum/scp2343_research_system(src)
 
+/mob/living/carbon/human/scp2343/Destroy()
+	QDEL_NULL(benevolence_system)
+	QDEL_NULL(research_system)
+	return ..()
+
 /mob/living/carbon/human/scp2343/Life(datum/controller/process/mobs/parent)
 	. = ..()
 	if(stat == DEAD)

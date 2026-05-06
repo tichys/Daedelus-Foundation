@@ -34,6 +34,7 @@ export const NtosWindow = (props) => {
             <Box inline italic mr={2} opacity={0.33}>
               {PC_device_theme === 'ntos' && 'NtOS'}
               {PC_device_theme === 'syndicate' && 'Syndix'}
+              {PC_device_theme === 'scp_terminal' && 'SCiPNet'}
             </Box>
           </div>
           <div className="NtosHeader__right">

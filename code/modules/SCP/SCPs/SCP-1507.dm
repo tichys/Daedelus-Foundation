@@ -55,6 +55,10 @@
 
 /mob/living/simple_animal/hostile/retaliate/scp1507/Destroy()
 	all_flamingos -= src
+	QDEL_NULL(flock_system)
+	QDEL_NULL(combat_system)
+	QDEL_NULL(behavior_system)
+	QDEL_NULL(research_system)
 	return ..()
 
 /mob/living/simple_animal/hostile/retaliate/scp1507/Life()
@@ -106,21 +110,13 @@
 		flock_system.notify_flock_of_death()
 	return ..()
 
-/mob/living/simple_animal/hostile/retaliate/scp1507/verb/call_flock()
-	set name = "Call Flock"
-	set desc = "Call nearby flamingos to your location"
-	set category = "SCP-1507"
-
+/mob/living/simple_animal/hostile/retaliate/scp1507/proc/call_flock()
 	if(flock_system)
 		flock_system.call_flock_to_location()
 		flock_calls++
 		hook_scp_interaction(src, "SCP-1507", INTERACTION_TYPE_COMMUNICATION)
 
-/mob/living/simple_animal/hostile/retaliate/scp1507/verb/coordinate_attack()
-	set name = "Coordinate Attack"
-	set desc = "Signal the flock to attack your target"
-	set category = "SCP-1507"
-
+/mob/living/simple_animal/hostile/retaliate/scp1507/proc/coordinate_attack()
 	if(!target)
 		to_chat(src, "<span class='warning'>You have no target to coordinate against!</span>")
 		return

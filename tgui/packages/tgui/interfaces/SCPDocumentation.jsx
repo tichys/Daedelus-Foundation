@@ -976,4 +976,3 @@ const SystemDiagnostics = ({ systemStatus, performanceMetrics, act }) => {
     </Box>
   );
 };
-

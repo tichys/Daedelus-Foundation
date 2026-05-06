@@ -161,11 +161,7 @@
 	to_chat(user, "<span class='notice'>A green-skinned humanoid that seems convinced it exists within a science fiction story.</span>")
 	to_chat(user, "<span class='notice'>It appears completely harmless, if rather talkative about narrative conventions.</span>")
 
-/mob/living/carbon/human/scp2020/verb/give_dramatic_speech()
-	set name = "Dramatic Speech"
-	set desc = "Deliver a dramatic speech about the plot"
-	set category = "SCP-2020"
-
+/mob/living/carbon/human/scp2020/proc/give_dramatic_speech()
 	if(stat == DEAD)
 		return
 
@@ -182,11 +178,7 @@
 
 	visible_message("<span class='notice'>[src] gestures dramatically!</span>")
 
-/mob/living/carbon/human/scp2020/verb/narrate_events()
-	set name = "Narrate Events"
-	set desc = "Comment on current events as if narrating a story"
-	set category = "SCP-2020"
-
+/mob/living/carbon/human/scp2020/proc/narrate_events()
 	if(stat == DEAD)
 		return
 
@@ -218,11 +210,7 @@
 	say(narration)
 	cliche_count++
 
-/mob/living/carbon/human/scp2020/verb/identify_cliche()
-	set name = "Identify Cliche"
-	set desc = "Point out a sci-fi cliche in the current situation"
-	set category = "SCP-2020"
-
+/mob/living/carbon/human/scp2020/proc/identify_cliche()
 	if(stat == DEAD)
 		return
 
@@ -246,11 +234,7 @@
 	say(cliche)
 	cliche_count++
 
-/mob/living/carbon/human/scp2020/verb/check_narrative_status()
-	set name = "Narrative Status"
-	set desc = "Check your narrative status"
-	set category = "SCP-2020"
-
+/mob/living/carbon/human/scp2020/proc/check_narrative_status()
 	var/message = "<b>=== SCP-2020 Narrative Status ===</b><br>"
 	message += "<b>Current Phase:</b> [narrative_phase]<br>"
 	message += "<b>Cliches Identified:</b> [cliche_count]<br>"

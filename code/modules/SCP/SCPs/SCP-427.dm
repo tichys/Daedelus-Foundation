@@ -69,6 +69,7 @@
 	SCP.log_interaction(user, "transformation")
 	SCP.award_research(user, "anomaly", 50)
 
+	user.ghostize(TRUE)
 	user.dust()
 	// Create a simple hostile mob instead of the undefined abomination
 	var/mob/living/simple_animal/hostile/monster = new /mob/living/simple_animal/hostile(user_turf)

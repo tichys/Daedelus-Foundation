@@ -47,6 +47,14 @@
 	nightmare_system = new /datum/scp966_nightmare_system(src)
 	research_system = new /datum/scp966_research_system(src)
 
+/mob/living/carbon/human/scp966/Destroy()
+	QDEL_NULL(sleep_system)
+	QDEL_NULL(stealth_system)
+	QDEL_NULL(stalk_system)
+	QDEL_NULL(nightmare_system)
+	QDEL_NULL(research_system)
+	return ..()
+
 /mob/living/carbon/human/scp966/Life()
 	. = ..()
 	if(stat == DEAD)
@@ -66,18 +74,14 @@
 	if(H.stat == DEAD)
 		return ..()
 
-	if(sleep_system && H.drowsyness > 50)
+	if(sleep_system && H.drowsyness < 30)
 		H.adjustBruteLoss(sleep_system.intensity * 3)
 		H.visible_message("<span class='danger'>Something invisible slashes at [H]!</span>", "<span class='danger'>You feel claws tear into you!</span>")
 		return
 
 	to_chat(src, "<span class='warning'>[H] is too alert to attack effectively.</span>")
 
-/mob/living/carbon/human/scp966/verb/toggle_invisibility()
-	set name = "Toggle Invisibility"
-	set desc = "Become visible or invisible"
-	set category = "SCP-966"
-
+/mob/living/carbon/human/scp966/proc/toggle_invisibility()
 	if(stealth_system?.active)
 		stealth_system.active = FALSE
 		to_chat(src, "<span class='notice'>You become more visible.</span>")
@@ -85,11 +89,7 @@
 		stealth_system.active = TRUE
 		to_chat(src, "<span class='notice'>You fade into the shadows.</span>")
 
-/mob/living/carbon/human/scp966/verb/induce_insomnia()
-	set name = "Induce Insomnia"
-	set desc = "Cause sleep deprivation in a nearby target"
-	set category = "SCP-966"
-
+/mob/living/carbon/human/scp966/proc/induce_insomnia()
 	var/list/targets = list()
 	for(var/mob/living/carbon/human/H in range(7, src))
 		if(H.stat != DEAD && H != src)
@@ -110,11 +110,7 @@
 		hook_scp_interaction(target, "SCP-966", INTERACTION_TYPE_COMBAT)
 		to_chat(target, "<span class='danger'>A wave of wakefulness crashes over you!</span>")
 
-/mob/living/carbon/human/scp966/verb/stalk_target()
-	set name = "Stalk Target"
-	set desc = "Begin stalking a target for later attack"
-	set category = "SCP-966"
-
+/mob/living/carbon/human/scp966/proc/stalk_target()
 	var/list/targets = list()
 	for(var/mob/living/carbon/human/H in range(15, src))
 		if(H.stat != DEAD && H != src)

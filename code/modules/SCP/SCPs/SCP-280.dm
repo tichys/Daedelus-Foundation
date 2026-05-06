@@ -39,6 +39,12 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-280"] = new /datum/scp_instance("SCP-280", src)
 
+/mob/living/simple_animal/hostile/scp280/Destroy()
+	QDEL_NULL(shadow_system)
+	QDEL_NULL(combat_system)
+	QDEL_NULL(research_system)
+	return ..()
+
 /mob/living/simple_animal/hostile/scp280/Life()
 	. = ..()
 	if(stat == DEAD)
@@ -57,7 +63,7 @@
 		hook_scp_combat(L, "SCP-280", melee_damage_upper, 0)
 
 /mob/living/simple_animal/hostile/scp280/death()
-	hook_scp_breach("SCP-280", src)
+	hook_scp_recontainment("SCP-280", list())
 	return ..()
 
 /mob/living/simple_animal/hostile/scp280/examine(mob/user)
@@ -116,7 +122,7 @@
 	var/mob/living/simple_animal/hostile/parent
 	var/aggression_level = 50
 	var/max_aggression = 100
-	var/darkness_damage_bonus = 1.5
+	var/light_damage_bonus = 1.5
 
 /datum/scp280_combat_system/New(mob/living/simple_animal/hostile/P)
 	parent = P
@@ -126,9 +132,9 @@
 		return
 
 	var/turf/T = get_turf(parent)
-	if(T.get_lumcount() * 100 < 20)
-		parent.melee_damage_lower = initial(parent.melee_damage_lower) * darkness_damage_bonus
-		parent.melee_damage_upper = initial(parent.melee_damage_upper) * darkness_damage_bonus
+	if(T.get_lumcount() * 100 >= 20)
+		parent.melee_damage_lower = initial(parent.melee_damage_lower) * light_damage_bonus
+		parent.melee_damage_upper = initial(parent.melee_damage_upper) * light_damage_bonus
 	else
 		parent.melee_damage_lower = initial(parent.melee_damage_lower)
 		parent.melee_damage_upper = initial(parent.melee_damage_upper)

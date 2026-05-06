@@ -109,10 +109,6 @@
 		}\
 	} while (0)
 
-// Pestilence System Traits
-#define TRAIT_PESTILENCE "pestilence"
-#define TRAIT_PESTILENCE_IMMUNE "pestilence_immune"
-
 #define HAS_TRAIT(target, trait) (target.status_traits?[trait] ? TRUE : FALSE)
 #define HAS_TRAIT_FROM(target, trait, source) (target.status_traits?[trait] && (source in target.status_traits[trait]))
 #define HAS_TRAIT_FROM_ONLY(target, trait, source) (target.status_traits?[trait] && (source in target.status_traits[trait]) && (length(target.status_traits[trait]) == 1))
@@ -286,7 +282,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_DISSECTED "dissected"
 /// Can hear observers
 #define TRAIT_SIXTHSENSE "sixth_sense"
-#define TRAIT_FEARLESS "fearless"
 /// Ignores darkness for hearing
 #define TRAIT_HEAR_THROUGH_DARKNESS "hear_through_darkness"
 /// Ignores line of sight for the purposes of send_speech()
@@ -644,7 +639,6 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_PHOTOGRAPHER "photographer"
 #define TRAIT_MUSICIAN "musician"
 #define TRAIT_LIGHT_DRINKER "light_drinker"
-#define TRAIT_FRIENDLY "friendly"
 #define TRAIT_GRABWEAKNESS "grab_weakness"
 #define TRAIT_BALD "bald"
 #define TRAIT_BADTOUCH "bad_touch"

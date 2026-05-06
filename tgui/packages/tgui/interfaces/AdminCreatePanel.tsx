@@ -55,7 +55,12 @@ const TermButton = (props) => {
         background: 'transparent',
         border: `1px solid ${borderColor}`,
         borderRadius: 0,
-        color: color === 'red' ? C.redBright : color === 'green' ? '#33cc33' : C.textDim,
+        color:
+          color === 'red'
+            ? C.redBright
+            : color === 'green'
+              ? '#33cc33'
+              : C.textDim,
         padding: '2px 6px',
       }}
     />
@@ -115,13 +120,26 @@ export const AdminCreatePanel = (_props: unknown) => {
                 marginTop: '2px',
               }}
             >
-              CLEARANCE LEVEL 5 | SPAWN CONTROL | TYPE: {panel_type.toUpperCase()}
+              CLEARANCE LEVEL 5 | SPAWN CONTROL | TYPE:{' '}
+              {panel_type.toUpperCase()}
             </Box>
           </Box>
 
-          <Box style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
+          <Box
+            style={{
+              padding: '8px 14px',
+              borderBottom: `1px solid ${C.border}`,
+            }}
+          >
             <Box style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              <Box
+                style={{
+                  fontSize: '10px',
+                  color: C.textDim,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 FILTER:
               </Box>
               <Input
@@ -130,7 +148,13 @@ export const AdminCreatePanel = (_props: unknown) => {
                 placeholder="Path search..."
                 style={{ fontFamily: C.mono, fontSize: '12px', flex: 1 }}
               />
-              <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.1em' }}>
+              <Box
+                style={{
+                  fontSize: '10px',
+                  color: C.textDim,
+                  letterSpacing: '0.1em',
+                }}
+              >
                 AMT:
               </Box>
               <NumberInput
@@ -138,7 +162,7 @@ export const AdminCreatePanel = (_props: unknown) => {
                 minValue={1}
                 maxValue={50}
                 step={1}
-                onChange={(_e, value) => setAmount(value)}
+                onChange={(value) => setAmount(value)}
               />
             </Box>
           </Box>
@@ -151,16 +175,35 @@ export const AdminCreatePanel = (_props: unknown) => {
                 background: C.panel,
               }}
             >
-              <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <Box
+                style={{
+                  fontSize: '10px',
+                  color: C.textDim,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  marginBottom: '4px',
+                }}
+              >
                 SELECTED
               </Box>
-              <Box style={{ fontSize: '11px', color: C.amber, wordBreak: 'break-all' }}>
+              <Box
+                style={{
+                  fontSize: '11px',
+                  color: C.amber,
+                  wordBreak: 'break-all',
+                }}
+              >
                 {selectedPath}
               </Box>
               <Box style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
                 <TermButton
                   color="green"
-                  onClick={() => act('create', { path: selectedPath, amount: String(amount) })}
+                  onClick={() =>
+                    act('create', {
+                      path: selectedPath,
+                      amount: String(amount),
+                    })
+                  }
                 >
                   MANIFEST
                 </TermButton>
@@ -177,7 +220,9 @@ export const AdminCreatePanel = (_props: unknown) => {
             </Box>
           )}
 
-          <Box style={{ padding: '8px', maxHeight: '350px', overflowY: 'auto' }}>
+          <Box
+            style={{ padding: '8px', maxHeight: '350px', overflowY: 'auto' }}
+          >
             {categories.map((cat) => {
               const filteredItems = filter
                 ? cat.items.filter((item) =>
@@ -202,7 +247,13 @@ export const AdminCreatePanel = (_props: unknown) => {
                       setExpandedCat(isExpanded && !filter ? '' : cat.name)
                     }
                   >
-                    <Box style={{ fontSize: '10px', color: C.amber, letterSpacing: '0.08em' }}>
+                    <Box
+                      style={{
+                        fontSize: '10px',
+                        color: C.amber,
+                        letterSpacing: '0.08em',
+                      }}
+                    >
                       {cat.name}
                     </Box>
                     <Box style={{ fontSize: '10px', color: C.textDim }}>
@@ -223,9 +274,7 @@ export const AdminCreatePanel = (_props: unknown) => {
                                 ? 'rgba(139,0,0,0.2)'
                                 : 'transparent',
                             color:
-                              selectedPath === item.path
-                                ? C.amber
-                                : C.textDim,
+                              selectedPath === item.path ? C.amber : C.textDim,
                             borderBottom: `1px solid ${C.border}`,
                           }}
                           onClick={() => setSelectedPath(item.path)}
@@ -242,8 +291,8 @@ export const AdminCreatePanel = (_props: unknown) => {
                             fontStyle: 'italic',
                           }}
                         >
-                          ...and {filteredItems.length - 50} more (use filter
-                          to narrow)
+                          ...and {filteredItems.length - 50} more (use filter to
+                          narrow)
                         </Box>
                       )}
                     </Box>
@@ -260,8 +309,15 @@ export const AdminCreatePanel = (_props: unknown) => {
               background: C.panel,
             }}
           >
-            <Box style={{ color: C.textDim, fontSize: '9px', letterSpacing: '0.1em' }}>
-              SCP FOUNDATION | MANIFESTATION CONTROL | UNAUTHORIZED SPAWN IS A CLASS-A INFRACTION
+            <Box
+              style={{
+                color: C.textDim,
+                fontSize: '9px',
+                letterSpacing: '0.1em',
+              }}
+            >
+              SCP FOUNDATION | MANIFESTATION CONTROL | UNAUTHORIZED SPAWN IS A
+              CLASS-A INFRACTION
             </Box>
           </Box>
         </Box>

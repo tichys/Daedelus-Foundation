@@ -237,11 +237,6 @@
 
 	track_scp_event(scp, "fire_creation", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp457))
-		var/mob/living/carbon/human/scp457/scp457 = scp
-		scp457.fires_created++
-
 /proc/track_scp457_damage_dealt(mob/living/carbon/human/scp, mob/living/target, damage_amount = 0, damage_type = "fire")
 	if(!scp || !istype(scp, /mob/living/carbon/human/scp457))
 		return
@@ -264,11 +259,6 @@
 
 	track_scp_event(scp, "damage_dealt", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp457))
-		var/mob/living/carbon/human/scp457/scp457 = scp
-		scp457.damage_dealt += damage_amount
-
 /proc/track_scp457_victim_consumption(mob/living/carbon/human/scp, mob/living/victim)
 	if(!scp || !istype(scp, /mob/living/carbon/human/scp457))
 		return
@@ -288,11 +278,6 @@
 	)
 
 	track_scp_event(scp, "victim_consumption", event_data)
-
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp457))
-		var/mob/living/carbon/human/scp457/scp457 = scp
-		scp457.victims_consumed++
 
 // SCP-939 Event Tracking
 /proc/track_scp939_voice_learning(mob/living/carbon/human/scp, mob/living/speaker, voice_quality = "good")
@@ -337,11 +322,6 @@
 
 	track_scp_event(scp, "victim_hunt", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp939))
-		var/mob/living/carbon/human/scp939/scp939 = scp
-		scp939.victims_hunted++
-
 /proc/track_scp939_psychological_manipulation(mob/living/carbon/human/scp, mob/living/target, manipulation_type = "voice_confusion")
 	if(!scp || !istype(scp, /mob/living/carbon/human/scp939))
 		return
@@ -363,10 +343,7 @@
 
 	track_scp_event(scp, "psychological_manipulation", event_data)
 
-	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp939))
-		var/mob/living/carbon/human/scp939/scp939 = scp
-		scp939.psychological_manipulations++
+
 
 // SCP-2020 Event Tracking
 /proc/track_scp2020_teleportation(mob/living/carbon/human/scp, turf/destination, teleport_type = "player_controlled")

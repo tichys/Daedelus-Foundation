@@ -32,6 +32,12 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-1471"] = new /datum/scp_instance("SCP-1471", src)
 
+/obj/item/device/scp1471/Destroy()
+	QDEL_NULL(manifestation_system)
+	QDEL_NULL(photo_system)
+	QDEL_NULL(research_system)
+	return ..()
+
 /obj/item/device/scp1471/attack_self(mob/living/carbon/human/user)
 	..()
 
@@ -130,7 +136,7 @@
 	icon_state = "shade"
 	density = FALSE
 	anchored = TRUE
-	invisibility = INVISIBILITY_OBSERVER
+	alpha = 80
 
 	var/mob/living/carbon/human/target
 	var/distance_to_target = 10

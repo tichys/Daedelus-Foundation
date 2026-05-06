@@ -276,6 +276,8 @@
 	bypass_state = TRUE
 	allow_chunky = TRUE
 
+	device_theme = "scp_terminal"
+
 	var/default_disk = 0
 
 /obj/item/modular_computer/tablet/pda/update_overlays()

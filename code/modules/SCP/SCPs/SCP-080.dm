@@ -32,6 +32,13 @@
 
 	START_PROCESSING(SSobj, src)
 
+/obj/structure/closet/scp080/Destroy()
+	QDEL_NULL(darkness_system)
+	QDEL_NULL(absorption_system)
+	QDEL_NULL(research_system)
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 /obj/structure/closet/scp080/process()
 	if(!opened)
 		return

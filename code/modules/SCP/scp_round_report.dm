@@ -134,10 +134,10 @@
 	if(!GLOB_SCP_ROUND_REPORT)
 		GLOB_SCP_ROUND_REPORT = new()
 
-	var/report_text = GLOB_SCP_ROUND_REPORT.generate_report()
 	for(var/mob/M in GLOB.player_list)
 		if(M.client)
-			to_chat(M, report_text)
+			var/datum/scp_round_report_ui/report_ui = new(M)
+			report_ui.ui_interact(M)
 
 // Wire into existing breach/recontainment hooks
 /proc/report_breach_to_round_log(scp_id, zone)

@@ -264,7 +264,7 @@ SUBSYSTEM_DEF(dclass)
 	escape_routes["tunnel"] = list(
 		"name" = "Tunnel Escape",
 		"description" = "Dig through walls or floors",
-		"requirements" = list("digging_tool", "metal_pipe"),
+		"requirements" = list("metal_pipe", "knife"),
 		"difficulty" = 3,
 		"time_required" = 600, // 10 minutes
 		"success_chance" = 40
@@ -280,7 +280,7 @@ SUBSYSTEM_DEF(dclass)
 	escape_routes["vehicle"] = list(
 		"name" = "Vehicle Escape",
 		"description" = "Hijack transport vehicles",
-		"requirements" = list("vehicle_access", "driver_skill"),
+		"requirements" = list("lockpick", "wire"),
 		"difficulty" = 5,
 		"time_required" = 300, // 5 minutes
 		"success_chance" = 30

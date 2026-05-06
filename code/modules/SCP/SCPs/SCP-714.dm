@@ -32,6 +32,13 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-714"] = new /datum/scp_instance("SCP-714", src)
 
+/obj/item/clothing/ring/scp714/Destroy()
+	QDEL_NULL(protection_system)
+	QDEL_NULL(effect_system)
+	QDEL_NULL(research_system)
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 /obj/item/clothing/ring/scp714/equipped(mob/living/carbon/human/user, slot)
 	..()
 	if(slot == ITEM_SLOT_GLOVES)

@@ -167,7 +167,7 @@
 	InsertItem(user, I, current_code)
 
 /obj/structure/scp216/attack_hand(mob/user)
-	if(!user.stat == CONSCIOUS)
+	if(user.stat != CONSCIOUS)
 		to_chat(user, span_warning("You cannot use the safe while unconscious!"))
 		return
 	if(!in_range(src, user))
@@ -315,7 +315,7 @@
 	attack_hand(user)
 
 /obj/structure/scp216/proc/RetrieveItem(mob/living/carbon/human/user, atom/movable/A, code_loc = 0)
-	if(!locate(A) in all_codes[num2text(code_loc, 7)])
+	if(!(locate(A) in all_codes[num2text(code_loc, 7)]))
 		return
 	all_codes[num2text(code_loc, 7)] -= A
 	if(isitem(A))

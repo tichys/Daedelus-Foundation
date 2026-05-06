@@ -173,11 +173,7 @@
 	status_items += "Offers Made: [offers_made]"
 	return status_items
 
-/mob/living/carbon/human/scp082/verb/greet_nearby()
-	set name = "Greet"
-	set desc = "Politely greet nearby personnel"
-	set category = "SCP-082"
-
+/mob/living/carbon/human/scp082/proc/greet_nearby()
 	if(world.time < last_greet_time + SCP082_GREET_COOLDOWN)
 		to_chat(src, "<span class='warning'>You have greeted people too recently.</span>")
 		return
@@ -201,11 +197,7 @@
 		hook_scp_interaction(H, "SCP-082", INTERACTION_TYPE_COMMUNICATION)
 		conversations_held++
 
-/mob/living/carbon/human/scp082/verb/offer_food()
-	set name = "Offer Hospitality"
-	set desc = "Offer food or drink to lure a target closer"
-	set category = "SCP-082"
-
+/mob/living/carbon/human/scp082/proc/offer_food()
 	var/list/nearby = list()
 	for(var/mob/living/carbon/human/H in range(3, src))
 		if(H != src && H.stat != DEAD)
@@ -225,20 +217,12 @@
 
 	hospitality_system?.offer_hospitality(target)
 
-/mob/living/carbon/human/scp082/verb/speak_french()
-	set name = "Speak French"
-	set desc = "Say something in French"
-	set category = "SCP-082"
-
+/mob/living/carbon/human/scp082/proc/speak_french()
 	var/phrase = french_system?.get_random_phrase()
 	if(phrase)
 		say(phrase)
 
-/mob/living/carbon/human/scp082/verb/check_hunger()
-	set name = "Check Hunger"
-	set desc = "Assess your current hunger level"
-	set category = "SCP-082"
-
+/mob/living/carbon/human/scp082/proc/check_hunger()
 	var/status = "well-fed and content"
 	if(is_hungry())
 		status = "hungry - you should eat soon"

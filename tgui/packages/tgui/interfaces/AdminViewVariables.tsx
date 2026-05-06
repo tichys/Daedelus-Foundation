@@ -61,7 +61,12 @@ const TermButton = (props) => {
         background: 'transparent',
         border: `1px solid ${borderColor}`,
         borderRadius: 0,
-        color: color === 'red' ? C.redBright : color === 'green' ? '#33cc33' : C.textDim,
+        color:
+          color === 'red'
+            ? C.redBright
+            : color === 'green'
+              ? '#33cc33'
+              : C.textDim,
         padding: '2px 6px',
       }}
     />
@@ -96,8 +101,7 @@ export const AdminViewVariables = (_props: unknown) => {
     if (!filter) return true;
     const f = filter.toLowerCase();
     return (
-      v.name.toLowerCase().includes(f) ||
-      v.value?.toLowerCase().includes(f)
+      v.name.toLowerCase().includes(f) || v.value?.toLowerCase().includes(f)
     );
   });
 
@@ -121,49 +125,122 @@ export const AdminViewVariables = (_props: unknown) => {
               background: 'linear-gradient(180deg, #0e0000 0%, #08080a 100%)',
             }}
           >
-            <Box style={{ fontSize: '15px', fontWeight: 'bold', color: C.amber, letterSpacing: '0.18em' }}>
+            <Box
+              style={{
+                fontSize: '15px',
+                fontWeight: 'bold',
+                color: C.amber,
+                letterSpacing: '0.18em',
+              }}
+            >
               SCP FOUNDATION — ANOMALY INSPECTOR
             </Box>
-            <Box style={{ fontSize: '9px', color: C.textDim, letterSpacing: '0.12em', marginTop: '2px' }}>
+            <Box
+              style={{
+                fontSize: '9px',
+                color: C.textDim,
+                letterSpacing: '0.12em',
+                marginTop: '2px',
+              }}
+            >
               CLEARANCE LEVEL 5 | DATA FORENSICS | VARIABLE INSPECTION
             </Box>
           </Box>
 
-          <Box style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, background: C.panel }}>
-            <Box style={{ fontSize: '13px', fontWeight: 'bold', color: C.textBright, marginBottom: '4px' }}>
+          <Box
+            style={{
+              padding: '8px 14px',
+              borderBottom: `1px solid ${C.border}`,
+              background: C.panel,
+            }}
+          >
+            <Box
+              style={{
+                fontSize: '13px',
+                fontWeight: 'bold',
+                color: C.textBright,
+                marginBottom: '4px',
+              }}
+            >
               {name}
             </Box>
-            <Box style={{ fontSize: '9px', color: C.textDim, wordBreak: 'break-all', marginBottom: '4px' }}>
+            <Box
+              style={{
+                fontSize: '9px',
+                color: C.textDim,
+                wordBreak: 'break-all',
+                marginBottom: '4px',
+              }}
+            >
               TYPE: {type}
             </Box>
-            <Box style={{ fontSize: '9px', color: C.textDim, marginBottom: '4px' }}>
+            <Box
+              style={{ fontSize: '9px', color: C.textDim, marginBottom: '4px' }}
+            >
               REF: {ref}
             </Box>
             <Box style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
               {is_marked ? (
-                <Box style={{ fontSize: '9px', color: C.amber, border: `1px solid ${C.amber}`, padding: '1px 6px' }}>
+                <Box
+                  style={{
+                    fontSize: '9px',
+                    color: C.amber,
+                    border: `1px solid ${C.amber}`,
+                    padding: '1px 6px',
+                  }}
+                >
                   MARKED
                 </Box>
               ) : null}
               {is_tagged ? (
-                <Box style={{ fontSize: '9px', color: '#44aaff', border: '1px solid #44aaff', padding: '1px 6px' }}>
+                <Box
+                  style={{
+                    fontSize: '9px',
+                    color: '#44aaff',
+                    border: '1px solid #44aaff',
+                    padding: '1px 6px',
+                  }}
+                >
                   TAGGED
                 </Box>
               ) : null}
               {is_var_edited ? (
-                <Box style={{ fontSize: '9px', color: C.redBright, border: `1px solid ${C.redBright}`, padding: '1px 6px' }}>
+                <Box
+                  style={{
+                    fontSize: '9px',
+                    color: C.redBright,
+                    border: `1px solid ${C.redBright}`,
+                    padding: '1px 6px',
+                  }}
+                >
                   VAR EDITED
                 </Box>
               ) : null}
               {is_deleted ? (
-                <Box style={{ fontSize: '9px', color: C.redBright, border: `1px solid ${C.redBright}`, padding: '1px 6px' }}>
+                <Box
+                  style={{
+                    fontSize: '9px',
+                    color: C.redBright,
+                    border: `1px solid ${C.redBright}`,
+                    padding: '1px 6px',
+                  }}
+                >
                   DELETED
                 </Box>
               ) : null}
             </Box>
           </Box>
 
-          <Box style={{ padding: '6px 14px', borderBottom: `1px solid ${C.border}`, display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <Box
+            style={{
+              padding: '6px 14px',
+              borderBottom: `1px solid ${C.border}`,
+              display: 'flex',
+              gap: '4px',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
             <TermButton color="green" onClick={() => act('refresh')}>
               REFRESH
             </TermButton>
@@ -183,19 +260,43 @@ export const AdminViewVariables = (_props: unknown) => {
             </TermButton>
             {is_list ? (
               <>
-                <TermButton onClick={() => act('list_add')}>ADD ITEM</TermButton>
-                <TermButton onClick={() => act('list_set_length')}>SET LENGTH</TermButton>
-                <TermButton onClick={() => act('list_erase_nulls')}>ERASE NULLS</TermButton>
-                <TermButton onClick={() => act('list_erase_dupes')}>ERASE DUPES</TermButton>
-                <TermButton onClick={() => act('list_shuffle')}>SHUFFLE</TermButton>
+                <TermButton onClick={() => act('list_add')}>
+                  ADD ITEM
+                </TermButton>
+                <TermButton onClick={() => act('list_set_length')}>
+                  SET LENGTH
+                </TermButton>
+                <TermButton onClick={() => act('list_erase_nulls')}>
+                  ERASE NULLS
+                </TermButton>
+                <TermButton onClick={() => act('list_erase_dupes')}>
+                  ERASE DUPES
+                </TermButton>
+                <TermButton onClick={() => act('list_shuffle')}>
+                  SHUFFLE
+                </TermButton>
               </>
             ) : null}
-            <TermButton onClick={() => act('expose')}>EXPOSE TO PLAYER</TermButton>
+            <TermButton onClick={() => act('expose')}>
+              EXPOSE TO PLAYER
+            </TermButton>
           </Box>
 
-          <Box style={{ padding: '6px 14px', borderBottom: `1px solid ${C.border}` }}>
+          <Box
+            style={{
+              padding: '6px 14px',
+              borderBottom: `1px solid ${C.border}`,
+            }}
+          >
             <Box style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              <Box
+                style={{
+                  fontSize: '10px',
+                  color: C.textDim,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
                 SEARCH:
               </Box>
               <Input
@@ -277,7 +378,14 @@ export const AdminViewVariables = (_props: unknown) => {
             ))}
 
             {filteredVars.length === 0 && (
-              <Box style={{ textAlign: 'center', color: C.textDim, padding: '20px', fontStyle: 'italic' }}>
+              <Box
+                style={{
+                  textAlign: 'center',
+                  color: C.textDim,
+                  padding: '20px',
+                  fontStyle: 'italic',
+                }}
+              >
                 NO MATCHING VARIABLES
               </Box>
             )}
@@ -290,8 +398,15 @@ export const AdminViewVariables = (_props: unknown) => {
               background: C.panel,
             }}
           >
-            <Box style={{ color: C.textDim, fontSize: '9px', letterSpacing: '0.1em' }}>
-              SCP FOUNDATION | ANOMALY INSPECTOR | DATA FORENSICS | UNAUTHORIZED MODIFICATION IS A CLASS-A INFRACTION
+            <Box
+              style={{
+                color: C.textDim,
+                fontSize: '9px',
+                letterSpacing: '0.1em',
+              }}
+            >
+              SCP FOUNDATION | ANOMALY INSPECTOR | DATA FORENSICS | UNAUTHORIZED
+              MODIFICATION IS A CLASS-A INFRACTION
             </Box>
           </Box>
         </Box>

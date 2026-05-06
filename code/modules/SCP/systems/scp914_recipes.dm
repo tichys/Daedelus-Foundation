@@ -26,49 +26,49 @@ GLOBAL_LIST_INIT(scp914_recipes, init_scp914_recipes())
 	// ===== TOOLS =====
 	recipes += new /datum/scp914_recipe(/obj/item/crowbar, "crowbar",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/wrench, null, null)
+		/obj/item/wrench, /obj/item/wrench, /obj/item/crowbar)
 
 	recipes += new /datum/scp914_recipe(/obj/item/wrench, "wrench",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/crowbar, null, null)
+		/obj/item/crowbar, /obj/item/crowbar, /obj/item/wrench)
 
 	recipes += new /datum/scp914_recipe(/obj/item/screwdriver, "screwdriver",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/wirecutters, null, null)
+		/obj/item/wirecutters, /obj/item/wirecutters, /obj/item/screwdriver)
 
 	recipes += new /datum/scp914_recipe(/obj/item/wirecutters, "wirecutters",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/screwdriver, null, null)
+		/obj/item/screwdriver, /obj/item/screwdriver, /obj/item/wirecutters)
 
 	recipes += new /datum/scp914_recipe(/obj/item/weldingtool, "welding tool",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		null, null, null)
+		/obj/item/weldingtool, /obj/item/weldingtool/experimental, /obj/item/weldingtool/experimental)
 
 	recipes += new /datum/scp914_recipe(/obj/item/multitool, "multitool",\
 		/obj/item/stack/cable_coil, /obj/item/stack/cable_coil,\
-		/obj/item/analyzer, null, null)
+		/obj/item/analyzer, /obj/item/multitool, /obj/item/multitool)
 
 	// ===== FLASHLIGHTS & DEVICES =====
 	recipes += new /datum/scp914_recipe(/obj/item/flashlight, "flashlight",\
 		/obj/item/stack/cable_coil, /obj/item/stack/cable_coil,\
-		null, null, null)
+		/obj/item/flashlight, /obj/item/flashlight, /obj/item/flashlight)
 
 	recipes += new /datum/scp914_recipe(/obj/item/analyzer, "analyzer",\
 		/obj/item/stack/cable_coil, /obj/item/stack/cable_coil,\
-		/obj/item/multitool, null, null)
+		/obj/item/multitool, /obj/item/multitool, /obj/item/multitool)
 
 	recipes += new /datum/scp914_recipe(/obj/item/extinguisher, "fire extinguisher",\
 		/obj/item/stack/sheet/iron, /obj/item/stack/sheet/iron,\
-		null, null, null)
+		/obj/item/extinguisher, /obj/item/extinguisher, /obj/item/extinguisher)
 
 	// ===== MEDICAL =====
 	recipes += new /datum/scp914_recipe(/obj/item/reagent_containers/syringe, "syringe",\
 		null, /obj/item/stack/rods,\
-		/obj/item/reagent_containers/pill, null, null)
+		/obj/item/reagent_containers/pill, /obj/item/reagent_containers/pill, /obj/item/reagent_containers/pill)
 
 	recipes += new /datum/scp914_recipe(/obj/item/reagent_containers/pill, "pill",\
 		null, /obj/item/stack/rods,\
-		/obj/item/reagent_containers/syringe, null, null)
+		/obj/item/reagent_containers/syringe, /obj/item/reagent_containers/syringe, /obj/item/reagent_containers/syringe)
 
 	recipes += new /datum/scp914_recipe(/obj/item/stack/medical/bruise_pack, "bruise pack",\
 		null, null,\
@@ -89,15 +89,15 @@ GLOBAL_LIST_INIT(scp914_recipes, init_scp914_recipes())
 	// ===== MATERIALS / STACKS =====
 	recipes += new /datum/scp914_recipe(/obj/item/stack/sheet/iron, "iron sheet",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/stack/sheet/plasteel, /obj/item/stack/sheet/plasteel, null)
+		/obj/item/stack/sheet/plasteel, /obj/item/stack/sheet/plasteel, /obj/item/stack/sheet/plasteel)
 
 	recipes += new /datum/scp914_recipe(/obj/item/stack/sheet/glass, "glass sheet",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/stack/sheet/rglass, /obj/item/stack/sheet/rglass, null)
+		/obj/item/stack/sheet/rglass, /obj/item/stack/sheet/rglass, /obj/item/stack/sheet/rglass)
 
 	recipes += new /datum/scp914_recipe(/obj/item/stack/sheet/plasteel, "plasteel sheet",\
 		/obj/item/stack/sheet/iron, /obj/item/stack/sheet/iron,\
-		null, null, null)
+		/obj/item/stack/sheet/plasteel, /obj/item/stack/sheet/mineral/diamond, /obj/item/stack/sheet/mineral/diamond)
 
 	recipes += new /datum/scp914_recipe(/obj/item/stack/rods, "metal rods",\
 		null, null,\
@@ -109,90 +109,92 @@ GLOBAL_LIST_INIT(scp914_recipes, init_scp914_recipes())
 
 	recipes += new /datum/scp914_recipe(/obj/item/stack/sheet/rglass, "reinforced glass",\
 		/obj/item/stack/sheet/glass, /obj/item/stack/sheet/glass,\
-		null, null, null)
+		/obj/item/stack/sheet/rglass, /obj/item/stack/sheet/rglass, /obj/item/stack/sheet/rglass)
 
 	// ===== WEAPONS =====
 	recipes += new /datum/scp914_recipe(/obj/item/knife, "knife",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		null, null, null)
+		/obj/item/knife, /obj/item/knife/combat, /obj/item/knife/combat)
 
 	recipes += new /datum/scp914_recipe(/obj/item/spear, "spear",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/knife, null, null)
+		/obj/item/knife, /obj/item/knife/combat, /obj/item/knife/combat)
 
 	// ===== FOOD =====
 	recipes += new /datum/scp914_recipe(/obj/item/food/bread, "bread",\
 		null, null,\
-		null, null, null)
+		/obj/item/food/bread, /obj/item/food/bread, /obj/item/food/bread)
 
 	recipes += new /datum/scp914_recipe(/obj/item/food/meat/slab, "meat slab",\
 		null, null,\
-		null, null, null)
+		/obj/item/food/meat/slab, /obj/item/food/meat/slab, /obj/item/food/meat/slab)
 
 	// ===== CLOTHING =====
 	recipes += new /datum/scp914_recipe(/obj/item/clothing/head/helmet, "helmet",\
 		/obj/item/stack/sheet/iron, /obj/item/stack/sheet/iron,\
-		null, null, null)
+		/obj/item/clothing/head/helmet, /obj/item/clothing/head/helmet, /obj/item/clothing/head/helmet)
 
 	recipes += new /datum/scp914_recipe(/obj/item/clothing/suit/armor/vest, "armor vest",\
 		/obj/item/stack/sheet/iron, /obj/item/stack/sheet/iron,\
-		null, null, null)
+		/obj/item/clothing/suit/armor/vest, /obj/item/clothing/suit/armor/vest, /obj/item/clothing/suit/armor/vest)
 
 	recipes += new /datum/scp914_recipe(/obj/item/clothing/gloves/color/yellow, "insulated gloves",\
 		/obj/item/stack/cable_coil, /obj/item/stack/cable_coil,\
-		null, null, null)
+		/obj/item/clothing/gloves/color/yellow, /obj/item/clothing/gloves/color/yellow, /obj/item/clothing/gloves/color/yellow)
 
 	recipes += new /datum/scp914_recipe(/obj/item/clothing/shoes/sneakers/black, "black shoes",\
 		null, null,\
-		null, null, null)
+		/obj/item/clothing/shoes/sneakers/black, /obj/item/clothing/shoes/sneakers/black, /obj/item/clothing/shoes/sneakers/black)
 
 	recipes += new /datum/scp914_recipe(/obj/item/clothing/under/color/black, "black jumpsuit",\
 		null, null,\
-		null, null, null)
+		/obj/item/clothing/under/color/black, /obj/item/clothing/under/color/black, /obj/item/clothing/under/color/black)
 
 	// ===== STORAGE =====
 	recipes += new /datum/scp914_recipe(/obj/item/storage/backpack, "backpack",\
 		null, null,\
-		null, null, null)
+		/obj/item/storage/backpack, /obj/item/storage/backpack, /obj/item/storage/backpack)
 
 	recipes += new /datum/scp914_recipe(/obj/item/storage/toolbox, "toolbox",\
 		/obj/item/stack/sheet/iron, /obj/item/stack/sheet/iron,\
-		null, null, null)
+		/obj/item/storage/toolbox, /obj/item/storage/toolbox, /obj/item/storage/toolbox)
 
 	recipes += new /datum/scp914_recipe(/obj/item/storage/belt, "belt",\
 		null, null,\
-		null, null, null)
+		/obj/item/storage/belt, /obj/item/storage/belt, /obj/item/storage/belt)
 
 	// ===== MISC =====
 	recipes += new /datum/scp914_recipe(/obj/item/pen, "pen",\
 		null, null,\
-		null, null, null)
+		/obj/item/pen, /obj/item/pen, /obj/item/pen)
 
 	recipes += new /datum/scp914_recipe(/obj/item/paper, "paper",\
 		null, null,\
-		null, null, null)
+		/obj/item/paper, /obj/item/paper, /obj/item/paper)
 
 	recipes += new /datum/scp914_recipe(/obj/item/book, "book",\
 		null, null,\
-		null, null, null)
+		/obj/item/book, /obj/item/book, /obj/item/book)
 
 	recipes += new /datum/scp914_recipe(/obj/item/shovel, "shovel",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/pickaxe, null, null)
+		/obj/item/pickaxe, /obj/item/pickaxe, /obj/item/pickaxe)
 
 	recipes += new /datum/scp914_recipe(/obj/item/pickaxe, "pickaxe",\
 		/obj/item/stack/rods, /obj/item/stack/rods,\
-		/obj/item/shovel, null, null)
+		/obj/item/shovel, /obj/item/shovel, /obj/item/shovel)
 
 	recipes += new /datum/scp914_recipe(/obj/item/coin, "coin",\
 		null, null,\
-		null, null, null)
+		/obj/item/coin, /obj/item/coin, /obj/item/coin)
 
 	// ===== DYNAMIC RECIPES (text2path for types that may not be compiled) =====
+
 	T = text2path("/obj/item/stack/sheet/mineral/diamond")
 	if(T)
-		recipes += new /datum/scp914_recipe(/obj/item/stack/sheet/plasteel, "plasteel to diamond",\
-			null, null, null, T, T)
+		recipes += new /datum/scp914_recipe(T, "diamond sheet",\
+			/obj/item/stack/sheet/iron, /obj/item/stack/sheet/iron,\
+			/obj/item/stack/sheet/plasteel, T, T)
 
 	T = text2path("/obj/item/stack/sheet/mineral/plasma")
 	if(T)
@@ -206,19 +208,19 @@ GLOBAL_LIST_INIT(scp914_recipes, init_scp914_recipes())
 			/obj/item/reagent_containers/syringe, /obj/item/reagent_containers/syringe,\
 			/obj/item/reagent_containers/pill, null, null)
 
-	T = text2path("/obj/item/health_analyzer")
+	T = text2path("/obj/item/healthanalyzer")
 	if(T)
 		recipes += new /datum/scp914_recipe(T, "health analyzer",\
 			/obj/item/stack/cable_coil, /obj/item/stack/cable_coil,\
 			null, null, null)
 
-	T = text2path("/obj/item/handcuffs")
+	T = text2path("/obj/item/restraints/handcuffs")
 	if(T)
 		recipes += new /datum/scp914_recipe(T, "handcuffs",\
 			/obj/item/stack/rods, /obj/item/stack/rods,\
 			null, null, null)
 
-	T = text2path("/obj/item/pda")
+	T = text2path("/obj/item/modular_computer/tablet/pda")
 	if(T)
 		recipes += new /datum/scp914_recipe(T, "PDA",\
 			/obj/item/stack/cable_coil, /obj/item/stack/cable_coil,\
@@ -242,7 +244,7 @@ GLOBAL_LIST_INIT(scp914_recipes, init_scp914_recipes())
 			null, null,\
 			null, null, null)
 
-	T = text2path("/obj/item/storage/firstaid")
+	T = text2path("/obj/item/storage/medkit")
 	if(T)
 		recipes += new /datum/scp914_recipe(T, "first aid kit",\
 			null, null,\

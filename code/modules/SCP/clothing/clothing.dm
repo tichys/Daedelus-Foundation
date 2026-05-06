@@ -459,6 +459,18 @@
 	armor = list(melee = 30, bullet = 25, laser = 20, energy = 15, bomb = 15, bio = 10, rad = 10)
 	siemens_coefficient = 0.8
 
+/obj/item/clothing/suit/armor/director_coat
+	name = "Site Director's Armored Coat"
+	desc = "A formal long coat worn by the Site Director. Reinforced with lightweight armor plating for personal protection."
+	icon_state = "hostrench"
+	worn_icon_state = "hostrench_s"
+	icon = 'icons/obj/clothing/suits.dmi'
+	worn_icon = 'icons/mob/clothing/suit.dmi'
+	body_parts_covered = 15
+	armor = list(melee = 40, bullet = 35, laser = 30, energy = 25, bomb = 20, bio = 15, rad = 10)
+	siemens_coefficient = 0.7
+	allowed = list(/obj/item/gun/energy, /obj/item/restraints/handcuffs, /obj/item/assembly/flash)
+
 // Communications Officer Jacket
 /obj/item/clothing/suit/scp/comms
 	name = "Communications Officer jacket"
@@ -498,6 +510,13 @@
 	body_parts_covered = 0
 	armor = list(melee = 40, bullet = 30, laser = 25, energy = 20, bomb = 20, bio = 15, rad = 15)
 	siemens_coefficient = 0.6
+
+/obj/item/clothing/head/beret/sec/guardcom
+	name = "Guard Commander beret"
+	desc = "A black beret with the Guard Commander's insignia. For those who command with authority and style."
+	icon_state = "beret_badge"
+	worn_icon_state = "beret_badge"
+	armor = list(melee = 10, bullet = 5, laser = 5, energy = 5, bomb = 5, bio = 0, rad = 0)
 
 // Detective Headgear
 /obj/item/clothing/head/scp/det

@@ -250,7 +250,7 @@ SUBSYSTEM_DEF(dclass_experiments)
 	name = "D-Class Assignment Terminal"
 	desc = "A terminal for assigning D-Class personnel to SCP testing."
 	icon = 'icons/obj/machines/research.dmi'
-	icon_state = "research"
+	icon_state = "server"
 	density = TRUE
 	anchored = TRUE
 
@@ -400,10 +400,6 @@ SUBSYSTEM_DEF(dclass_experiments)
 	return "Unknown"
 
 /mob/living/carbon/human/proc/volunteer_for_testing()
-	set name = "Volunteer for Testing"
-	set category = "D-Class"
-	set desc = "Volunteer yourself for SCP testing."
-
 	if(!ckey)
 		return
 
@@ -463,10 +459,6 @@ SUBSYSTEM_DEF(dclass_experiments)
 	return tests
 
 /mob/living/carbon/human/proc/check_test_status()
-	set name = "Check Test Status"
-	set category = "D-Class"
-	set desc = "Check your current testing assignment."
-
 	if(!ckey)
 		return
 

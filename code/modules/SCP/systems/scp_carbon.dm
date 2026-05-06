@@ -594,10 +594,7 @@
 			to_chat(user, "<span class='danger'>A mysterious entity that seems to defy normal physics.</span>")
 
 // Admin verb to view SCP persistence data
-/mob/living/carbon/scp/verb/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP"
-	set desc = "View SCP persistence data."
+/mob/living/carbon/scp/proc/view_persistence_data()
 
 	if(!check_rights(R_ADMIN))
 		to_chat(src, "<span class='warning'>You don't have permission to view persistence data.</span>")

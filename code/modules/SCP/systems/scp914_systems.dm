@@ -5,7 +5,7 @@
 /datum/scp914_refinement_system
 	var/obj/machinery/scp914/owner
 	var/refinement_setting = "ROUGH"
-	var/list/refinement_settings = list("ROUGH", "COARSE", "1:1", "FINE", "VERY_FINE")
+	var/list/refinement_settings = list("ROUGH", "COARSE", "1:1", "FINE", "VERY FINE")
 	var/refinement_cooldown = 0
 	var/refinement_cooldown_time = 60 SECONDS
 	var/list/input_objects = list()

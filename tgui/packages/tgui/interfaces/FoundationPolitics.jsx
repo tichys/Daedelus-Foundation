@@ -5,15 +5,11 @@ import {
   Box,
   Button,
   Flex,
-  Input,
   LabeledList,
   ProgressBar,
   Section,
-  Tabs,
-  TextArea,
   Stack,
-  Divider,
-  Icon,
+  Tabs,
 } from '../components';
 import { Window } from '../layouts';
 

@@ -51,7 +51,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-173"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -65,7 +65,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-049"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -79,7 +79,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-096"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -95,7 +95,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-106"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -109,7 +109,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-939"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -129,7 +129,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-035"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -150,7 +150,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-513"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -165,7 +165,7 @@ SUBSYSTEM_DEF(scp_ambient)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1499"]
-	if(!instance || instance.containment_status != "contained")
+	if(!instance)
 		return
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
@@ -178,10 +178,6 @@ SUBSYSTEM_DEF(scp_ambient)
 					H.sanity.adjust_sanity(-5, "scp1499_dimension_ambient")
 
 /proc/scp_ambient_general_flicker()
-	for(var/obj/machinery/light/L as anything in INSTANCES_OF(/obj/machinery/light))
-		if(prob(15))
-			L.flicker(2)
-
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(H.stat == DEAD || !H.client)
 			continue
@@ -189,3 +185,6 @@ SUBSYSTEM_DEF(scp_ambient)
 		if(istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz))
 			if(prob(10))
 				to_chat(H, "<span class='notice'>The lights flicker momentarily.</span>")
+				for(var/obj/machinery/light/L in range(5, H))
+					if(prob(40))
+						L.flicker(2)

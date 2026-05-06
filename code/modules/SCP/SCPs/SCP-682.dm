@@ -20,24 +20,13 @@
 	var/datum/scp682_combat_system/combat_system
 	var/datum/scp682_research_integration/research_integration
 
-	// Core stats
 	var/evolution_stage = 1
-	var/adaptation_points = 0
-	var/threat_level = 0
 	var/containment_status = "contained"
 
-	// Combat stats
 	var/attack_damage = SCP682_BASE_ATTACK_DAMAGE
 	var/attack_speed = SCP682_BASE_ATTACK_SPEED
 	var/movement_speed = SCP682_BASE_MOVEMENT_SPEED
 	var/area_attack_range = SCP682_BASE_AREA_ATTACK_RANGE
-
-	// Persistence tracking
-	var/total_damage_taken = 0
-	var/total_threats_encountered = 0
-	var/total_evolutions = 0
-	var/total_containment_breaches = 0
-	var/session_start_time = 0
 
 /mob/living/carbon/human/scp682/Initialize(mapload)
 	. = ..()
@@ -81,13 +70,11 @@
 	update_fov_angles()
 	update_cone_show()
 
-	// Set session start time
-	session_start_time = world.time
-
 	// Start processing
 	START_PROCESSING(SSobj, src)
 
 /mob/living/carbon/human/scp682/Destroy()
+	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(evolution_system)
 	QDEL_NULL(regeneration_system)
 	QDEL_NULL(threat_system)
@@ -113,10 +100,6 @@
 	// Return nothing to continue processing (not PROCESS_KILL)
 
 /mob/living/carbon/human/scp682/proc/process_scp682_effects()
-	// Update threat level based on evolution stage
-	threat_level = evolution_stage * 10
-
-	// Apply sanity effects to nearby humans
 	for(var/mob/living/carbon/human/H in range(5, src))
 		if(H == src || H.stat == DEAD)
 			continue
@@ -125,7 +108,6 @@
 			H.sanity.adjust_sanity(-1)
 			H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
 
-	// Update containment status
 	containment_status = containment_system?.breach_phase || "contained"
 
 // ============================================================================
@@ -156,15 +138,10 @@
 	if(evolution_system)
 		evolution_system.adapt_to_damage(damage_type, amount)
 
-	// Track total damage taken
-	total_damage_taken += amount
-
-	// Notify threat system if damage came from a human
 	var/mob/living/carbon/human/attacker = get_attacker()
 	if(attacker && istype(attacker))
 		if(threat_system)
 			threat_system.remember_threat(attacker, damage_type, amount)
-		total_threats_encountered++
 
 /mob/living/carbon/human/scp682/proc/get_attacker()
 	// This is a simplified version - in a full implementation,
@@ -217,11 +194,8 @@
 /mob/living/carbon/human/scp682/get_status_tab_items()
 	. = ..()
 	. += "Evolution Stage: [evolution_stage]/10"
-	. += "Adaptation Points: [adaptation_points]"
-	. += "Threat Level: [threat_level]"
 	. += "Containment Status: [containment_status]"
 	. += "Attack Damage: [attack_damage]"
-	. += "Movement Speed: [movement_speed]"
 	. += "Area Attack Range: [area_attack_range]"
 
 	if(evolution_system)
@@ -259,24 +233,15 @@
 
 /mob/living/carbon/human/scp682/proc/get_persistence_data()
 	var/list/data = list()
-	data["total_damage_taken"] = total_damage_taken
-	data["total_threats_encountered"] = total_threats_encountered
-	data["total_evolutions"] = total_evolutions
-	data["total_containment_breaches"] = total_containment_breaches
-	data["session_start_time"] = session_start_time
 	data["evolution_stage"] = evolution_stage
-	data["adaptation_points"] = adaptation_points
-	data["threat_level"] = threat_level
 	data["containment_status"] = containment_status
 	data["attack_damage"] = attack_damage
 	data["movement_speed"] = movement_speed
 	data["area_attack_range"] = area_attack_range
 
-	// Add system-specific data
 	if(evolution_system)
 		data["evolution_system"] = list(
-			"active_adaptations" = evolution_system.active_adaptations,
-			"threat_memory" = evolution_system.threat_memory
+			"active_adaptations" = evolution_system.active_adaptations
 		)
 
 	if(threat_system)
@@ -297,24 +262,15 @@
 	if(!data)
 		return
 
-	total_damage_taken = data["total_damage_taken"] || 0
-	total_threats_encountered = data["total_threats_encountered"] || 0
-	total_evolutions = data["total_evolutions"] || 0
-	total_containment_breaches = data["total_containment_breaches"] || 0
-	session_start_time = data["session_start_time"] || world.time
 	evolution_stage = data["evolution_stage"] || 1
-	adaptation_points = data["adaptation_points"] || 0
-	threat_level = data["threat_level"] || 0
 	containment_status = data["containment_status"] || "contained"
 	attack_damage = data["attack_damage"] || 50
 	movement_speed = data["movement_speed"] || 1.5
 	area_attack_range = data["area_attack_range"] || 3
 
-	// Load system-specific data
 	if(data["evolution_system"] && evolution_system)
 		var/evo_data = data["evolution_system"]
 		evolution_system.active_adaptations = evo_data["active_adaptations"] || list()
-		evolution_system.threat_memory = evo_data["threat_memory"] || list()
 
 	if(data["threat_system"] && threat_system)
 		var/threat_data = data["threat_system"]
@@ -337,14 +293,7 @@
 	// Collect comprehensive data
 	var/list/research_data = list()
 	research_data["evolution_stage"] = evolution_stage
-	research_data["adaptation_points"] = adaptation_points
-	research_data["threat_level"] = threat_level
 	research_data["containment_status"] = containment_status
-	research_data["total_damage_taken"] = total_damage_taken
-	research_data["total_threats_encountered"] = total_threats_encountered
-	research_data["total_evolutions"] = total_evolutions
-	research_data["total_containment_breaches"] = total_containment_breaches
-	research_data["session_duration"] = world.time - session_start_time
 	research_data["health_percentage"] = (health / maxHealth) * 100
 	research_data["timestamp"] = world.time
 
@@ -355,7 +304,6 @@
 		research_integration.research_data["last_update"] = research_data
 
 /mob/living/carbon/human/scp682/proc/on_evolution(new_stage)
-	total_evolutions++
 	evolution_stage = new_stage
 	hook_scp_breach("SCP-682", src)
 	if(threat_system)
@@ -363,11 +311,9 @@
 			hook_scp_combat(H, "SCP-682", 0, 0)
 
 /mob/living/carbon/human/scp682/proc/on_adaptation(damage_type, amount)
-	adaptation_points += amount / 10
 	hook_scp_damage("SCP-682", (health / maxHealth) * 100)
 
 /mob/living/carbon/human/scp682/proc/on_breach()
-	total_containment_breaches++
 	containment_status = "breached"
 	hook_scp_breach("SCP-682", src)
 

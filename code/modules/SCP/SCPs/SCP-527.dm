@@ -67,11 +67,7 @@
 	to_chat(user, "<span class='notice'>A fish-headed humanoid from Dr. Wondertainment's 'Mr.' series.</span>")
 	to_chat(user, "<span class='notice'>He seems comfortable in and out of water.</span>")
 
-/mob/living/carbon/human/scp527/verb/dive()
-	set name = "Dive"
-	set desc = "Dive into nearby water"
-	set category = "SCP-527"
-
+/mob/living/carbon/human/scp527/proc/dive()
 	var/turf/open/water/W = locate() in range(1, src)
 	if(W)
 		forceMove(W)
@@ -81,11 +77,7 @@
 	else
 		to_chat(src, "<span class='warning'>No water nearby to dive into!</span>")
 
-/mob/living/carbon/human/scp527/verb/breathe_underwater()
-	set name = "Underwater Breathing"
-	set desc = "Toggle underwater breathing mode"
-	set category = "SCP-527"
-
+/mob/living/carbon/human/scp527/proc/breathe_underwater()
 	if(aquatic_system)
 		aquatic_system.toggle_underwater_mode()
 		to_chat(src, "<span class='notice'>You [aquatic_system.underwater_mode ? "begin" : "stop"] breathing underwater.</span>")

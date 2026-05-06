@@ -4,6 +4,7 @@
 // Contraband Item Base Class
 /obj/item/dclass_contraband
 	var/contraband_type = "basic"
+	var/contraband_key = "basic"
 	var/risk_level = 1 // 1-5, higher = more dangerous
 	var/legal_use = FALSE // Can this item be used legally?
 	var/detection_chance = 20 // Base chance of being detected by guards
@@ -13,6 +14,7 @@
 
 // Basic Tools
 /obj/item/dclass_contraband/wire
+	contraband_key = "wire"
 	name = "metal wire"
 	desc = "A length of metal wire. Useful for crafting and electrical work."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -21,6 +23,7 @@
 	uses = 3
 
 /obj/item/dclass_contraband/screwdriver
+	contraband_key = "screwdriver"
 	name = "screwdriver"
 	desc = "A basic screwdriver. Can be used for various tasks."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -29,6 +32,7 @@
 	uses = 5
 
 /obj/item/dclass_contraband/wrench
+	contraband_key = "wrench"
 	name = "wrench"
 	desc = "A sturdy wrench. Useful for mechanical work."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -37,6 +41,7 @@
 	uses = 4
 
 /obj/item/dclass_contraband/knife
+	contraband_key = "knife"
 	name = "kitchen knife"
 	desc = "A sharp kitchen knife. Handle with care."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -47,6 +52,7 @@
 
 // Disguise Items
 /obj/item/dclass_contraband/staff_uniform
+	contraband_key = "staff_uniform"
 	name = "staff uniform"
 	desc = "A clean staff uniform. Could be useful for disguise."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -56,6 +62,7 @@
 	contraband_type = "disguise"
 
 /obj/item/dclass_contraband/fake_id
+	contraband_key = "fake_id"
 	name = "fake ID card"
 	desc = "A poorly made fake ID card. Might fool someone in a hurry."
 	icon = 'icons/obj/card.dmi'
@@ -65,6 +72,7 @@
 	contraband_type = "disguise"
 
 /obj/item/dclass_contraband/mask
+	contraband_key = "mask"
 	name = "disguise mask"
 	desc = "A simple mask to hide your identity."
 	icon = 'icons/obj/clothing/masks.dmi'
@@ -75,6 +83,7 @@
 
 // Materials
 /obj/item/dclass_contraband/metal_pipe
+	contraband_key = "metal_pipe"
 	name = "metal pipe"
 	desc = "A sturdy metal pipe. Could be used for various purposes."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -83,6 +92,7 @@
 	force = 15
 
 /obj/item/dclass_contraband/fabric_scraps
+	contraband_key = "fabric_scraps"
 	name = "fabric scraps"
 	desc = "Various pieces of fabric. Useful for crafting disguises."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -91,6 +101,7 @@
 	var/amount = 3
 
 /obj/item/dclass_contraband/thread
+	contraband_key = "thread"
 	name = "thread"
 	desc = "Strong thread for sewing and crafting."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -100,6 +111,7 @@
 
 // Chemicals and Medical
 /obj/item/dclass_contraband/medicine
+	contraband_key = "medicine"
 	name = "medicine"
 	desc = "Various medical supplies. Could be useful or dangerous."
 	icon = 'icons/obj/chemical.dmi'
@@ -108,6 +120,7 @@
 	var/potency = 50
 
 /obj/item/dclass_contraband/bandages
+	contraband_key = "bandages"
 	name = "bandages"
 	desc = "Clean bandages. Useful for medical purposes or crafting."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -116,6 +129,7 @@
 	var/amount = 4
 
 /obj/item/dclass_contraband/chemicals
+	contraband_key = "chemicals"
 	name = "chemicals"
 	desc = "Various chemical compounds. Handle with extreme care."
 	icon = 'icons/obj/chemical.dmi'
@@ -125,6 +139,7 @@
 
 // Advanced Tools
 /obj/item/dclass_contraband/lockpick
+	contraband_key = "lockpick"
 	name = "lockpick"
 	desc = "A crude but effective lockpick. Use carefully."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -134,6 +149,7 @@
 	uses = 3
 
 /obj/item/dclass_contraband/cutting_tool
+	contraband_key = "cutting_tool"
 	name = "cutting tool"
 	desc = "A sharp cutting implement. Useful for various tasks."
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -143,6 +159,7 @@
 	uses = 4
 
 /obj/item/dclass_contraband/electronics
+	contraband_key = "electronics"
 	name = "electronic components"
 	desc = "Various electronic parts. Could be used for hacking or crafting."
 	icon = 'icons/obj/module.dmi'
@@ -158,7 +175,7 @@
 		if(M.ckey && SSdclass && SSdclass.manager)
 			var/datum/dclass_player/player = SSdclass.manager.get_dclass_player(M.ckey)
 			if(player)
-				player.add_contraband(name)
+				player.add_contraband(contraband_key)
 
 // Use contraband item
 /obj/item/dclass_contraband/attack_self(mob/user)
@@ -235,11 +252,6 @@
 
 		H.equip_to_slot_if_possible(src, ITEM_SLOT_ICLOTHING, disable_warning = TRUE)
 		to_chat(user, "<span class='notice'>You put on the staff uniform as a disguise.</span>")
-
-		// Disguise effectiveness based on cleanliness and player skills
-		var/disguise_effectiveness = cleanliness + (player.skills["social"] - 1) * 10
-		player.abilities += "disguised"
-		player.abilities["disguise_effectiveness"] = disguise_effectiveness
 
 /obj/item/dclass_contraband/knife/use_item(mob/user, datum/dclass_player/player)
 	. = ..()

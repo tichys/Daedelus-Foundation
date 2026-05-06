@@ -302,11 +302,7 @@
 	. += "Current Target: [current_target ? current_target.name : "None"]"
 	. += "Total Kills: [kills_count]"
 
-/mob/living/carbon/human/scp096/verb/show_status_verb()
-	set name = "Show SCP Status"
-	set category = "SCP-096"
-	set desc = "Display your SCP-096 status"
-
+/mob/living/carbon/human/scp096/proc/show_status_verb()
 	to_chat(src, "<span class='notice'>=== SCP-096 Status ===</span>")
 	to_chat(src, "<span class='notice'>State: [state]</span>")
 	to_chat(src, "<span class='notice'>Current Target: [current_target ? current_target.name : "None"]</span>")

@@ -7,21 +7,21 @@ type ItemData = {
 };
 
 type SCP914Data = {
-  setting: string;
-  settings: string[];
   active: boolean;
-  progress: number;
-  max_progress: number;
-  mastery: number;
-  max_mastery: number;
   efficiency: number;
-  refinements_performed: number;
-  objects_destroyed: number;
-  objects_enhanced: number;
-  input_items: ItemData[];
-  output_items: ItemData[];
   has_input: boolean;
   has_output: boolean;
+  input_items: ItemData[];
+  mastery: number;
+  max_mastery: number;
+  max_progress: number;
+  objects_destroyed: number;
+  objects_enhanced: number;
+  output_items: ItemData[];
+  progress: number;
+  refinements_performed: number;
+  setting: string;
+  settings: string[];
 };
 
 const C = {
@@ -61,7 +61,8 @@ export const SCP914 = (_props: unknown) => {
     output_items = [],
   } = data;
 
-  const progressPct = max_progress > 0 ? Math.round((progress / max_progress) * 100) : 0;
+  const progressPct =
+    max_progress > 0 ? Math.round((progress / max_progress) * 100) : 0;
 
   return (
     <Window theme="scp_terminal" width={550} height={520}>
@@ -82,7 +83,9 @@ export const SCP914 = (_props: unknown) => {
               marginBottom: '12px',
             }}
           >
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: C.text }}>
+            <div
+              style={{ fontSize: '16px', fontWeight: 'bold', color: C.text }}
+            >
               SCP-914 REFINEMENT INTERFACE
             </div>
             <div style={{ fontSize: '11px', color: C.textDim }}>
@@ -121,8 +124,12 @@ export const SCP914 = (_props: unknown) => {
                 background: C.headerBg,
               }}
             >
-              <div style={{ fontSize: '10px', color: C.textDim }}>EFFICIENCY</div>
-              <div style={{ fontSize: '16px', color: C.text }}>{efficiency}x</div>
+              <div style={{ fontSize: '10px', color: C.textDim }}>
+                EFFICIENCY
+              </div>
+              <div style={{ fontSize: '16px', color: C.text }}>
+                {efficiency}x
+              </div>
             </div>
             <div
               style={{
@@ -133,7 +140,9 @@ export const SCP914 = (_props: unknown) => {
                 background: C.headerBg,
               }}
             >
-              <div style={{ fontSize: '10px', color: C.textDim }}>REFINEMENTS</div>
+              <div style={{ fontSize: '10px', color: C.textDim }}>
+                REFINEMENTS
+              </div>
               <div style={{ fontSize: '16px', color: C.text }}>
                 {refinements_performed}
               </div>
@@ -141,15 +150,25 @@ export const SCP914 = (_props: unknown) => {
           </div>
 
           <div style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '11px', color: C.textDim, marginBottom: '6px' }}>
+            <div
+              style={{
+                fontSize: '11px',
+                color: C.textDim,
+                marginBottom: '6px',
+              }}
+            >
               REFINEMENT SETTING
             </div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
               {settings.map((s) => (
                 <button
+                  type="button"
                   key={s}
                   style={{
-                    background: s === setting ? settingColors[s] || C.text : 'transparent',
+                    background:
+                      s === setting
+                        ? settingColors[s] || C.text
+                        : 'transparent',
                     border: `1px solid ${settingColors[s] || C.border}`,
                     color: s === setting ? '#000' : settingColors[s] || C.text,
                     padding: '6px 12px',
@@ -159,7 +178,9 @@ export const SCP914 = (_props: unknown) => {
                     fontSize: '12px',
                     opacity: active ? 0.5 : 1,
                   }}
-                  onClick={() => !active && act('change_setting', { setting: s })}
+                  onClick={() =>
+                    !active && act('change_setting', { setting: s })
+                  }
                 >
                   {s}
                 </button>
@@ -169,7 +190,13 @@ export const SCP914 = (_props: unknown) => {
 
           {active && (
             <div style={{ marginBottom: '12px' }}>
-              <div style={{ fontSize: '11px', color: C.textDim, marginBottom: '4px' }}>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: C.textDim,
+                  marginBottom: '4px',
+                }}
+              >
                 REFINEMENT PROGRESS: {progressPct}%
               </div>
               <div
@@ -192,9 +219,10 @@ export const SCP914 = (_props: unknown) => {
             </div>
           )}
 
-          {!active && length(input_items) > 0 && (
+          {!active && input_items.length > 0 && (
             <div style={{ marginBottom: '12px' }}>
               <button
+                type="button"
                 style={{
                   background: settingColors[setting] || C.text,
                   border: 'none',
@@ -216,6 +244,7 @@ export const SCP914 = (_props: unknown) => {
           {!active && (
             <div style={{ marginBottom: '12px' }}>
               <button
+                type="button"
                 style={{
                   background: 'transparent',
                   border: `1px solid ${C.border}`,
@@ -266,6 +295,7 @@ export const SCP914 = (_props: unknown) => {
                   <span>{item.name}</span>
                   {!active && (
                     <button
+                      type="button"
                       style={{
                         background: 'transparent',
                         border: `1px solid ${C.border}`,
@@ -313,6 +343,7 @@ export const SCP914 = (_props: unknown) => {
                 >
                   <span>{item.name}</span>
                   <button
+                    type="button"
                     style={{
                       background: 'transparent',
                       border: `1px solid ${C.border}`,

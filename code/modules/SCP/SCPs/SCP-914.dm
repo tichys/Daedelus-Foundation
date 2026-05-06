@@ -55,6 +55,16 @@
 		output_booth = new /obj/structure/scp914_booth/output(output_turf)
 		output_booth.linked_machine = src
 
+/obj/machinery/scp914/proc/check_research_access(mob/user)
+	if(!ishuman(user))
+		return FALSE
+	var/mob/living/carbon/human/H = user
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card || !(ACCESS_SCIENCE in id_card.access))
+		to_chat(user, span_warning("You need Science access to modify SCP-914's parameters."))
+		return FALSE
+	return TRUE
+
 /obj/machinery/scp914/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)
@@ -72,9 +82,6 @@
 		data["active"] = refinement_system.active
 		data["progress"] = refinement_system.refinement_progress
 		data["max_progress"] = refinement_system.max_refinement_progress
-		data["mastery"] = refinement_system.refinement_mastery
-		data["max_mastery"] = refinement_system.max_refinement_mastery
-		data["efficiency"] = refinement_system.refinement_efficiency
 		data["refinements_performed"] = refinement_system.refinements_performed
 		data["objects_destroyed"] = refinement_system.objects_destroyed
 		data["objects_enhanced"] = refinement_system.objects_enhanced
@@ -153,14 +160,13 @@
 			. = TRUE
 
 /obj/machinery/scp914/Destroy()
-	// Clean up system datums
-	if(refinement_system)
-		refinement_system.input_objects.Cut()
-		refinement_system.output_objects.Cut()
-	if(material_system)
-		material_system.refined_materials.Cut()
-	if(research_integration)
-		research_integration.research_data.Cut()
+	QDEL_NULL(refinement_system)
+	QDEL_NULL(reality_system)
+	QDEL_NULL(temporal_system)
+	QDEL_NULL(material_system)
+	QDEL_NULL(containment_system)
+	QDEL_NULL(environmental_system)
+	QDEL_NULL(research_integration)
 	return ..()
 
 // Core processing
@@ -170,7 +176,6 @@
 	// Process all systems
 	if(refinement_system)
 		refinement_system.process_refinement()
-		refinement_system.process_refinement_mastery()
 
 	if(reality_system)
 		reality_system.process_reality_manipulation()
@@ -199,11 +204,7 @@
 
 // ===== USER INTERFACE VERBS =====
 
-/obj/machinery/scp914/verb/change_setting()
-	set name = "Change Setting"
-	set category = "SCP-914"
-	set desc = "Change the refinement setting of SCP-914."
-
+/obj/machinery/scp914/proc/change_setting()
 	if(!usr || !usr.client)
 		return
 
@@ -216,11 +217,7 @@
 		refinement_system.refinement_setting = new_setting
 		to_chat(usr, "<span class='notice'>SCP-914 setting changed to [refinement_system.refinement_setting].</span>")
 
-/obj/machinery/scp914/verb/start_refinement()
-	set name = "Start Refinement"
-	set category = "SCP-914"
-	set desc = "Start the refinement process."
-
+/obj/machinery/scp914/proc/start_refinement()
 	if(!usr || !usr.client)
 		return
 
@@ -246,11 +243,7 @@
 		hook_scp_experiment(H, "SCP-914", EXPERIMENT_TYPE_TECHNICAL)
 		hook_scp_interaction(H, "SCP-914", INTERACTION_TYPE_EXPERIMENT, list("type" = "refinement", "setting" = refinement_system.refinement_setting))
 
-/obj/machinery/scp914/verb/add_to_input(obj/item/item in range(1, src))
-	set name = "Add to Input"
-	set category = "SCP-914"
-	set desc = "Add an item to SCP-914's input."
-
+/obj/machinery/scp914/proc/add_to_input(obj/item/item in range(1, src))
 	if(!usr || !usr.client)
 		return
 
@@ -270,11 +263,7 @@
 	item.forceMove(src)
 	to_chat(usr, "<span class='notice'>Added [item.name] to SCP-914 input.</span>")
 
-/obj/machinery/scp914/verb/remove_from_output(obj/item/item in refinement_system.output_objects)
-	set name = "Remove from Output"
-	set category = "SCP-914"
-	set desc = "Remove an item from SCP-914's output."
-
+/obj/machinery/scp914/proc/remove_from_output(obj/item/item in refinement_system.output_objects)
 	if(!usr || !usr.client)
 		return
 
@@ -290,133 +279,7 @@
 	item.forceMove(get_turf(src))
 	to_chat(usr, "<span class='notice'>Removed [item.name] from SCP-914 output.</span>")
 
-// ===== ADVANCED ABILITY VERBS =====
-
-/obj/machinery/scp914/verb/refinement_mastery()
-	set name = "Refinement Mastery"
-	set category = "SCP-914"
-	set desc = "Enhance SCP-914's refinement mastery."
-
-	if(!refinement_system)
-		to_chat(usr, "<span class='warning'>SCP-914 refinement system not available.</span>")
-		return
-
-	if(refinement_system.refinement_mastery >= refinement_system.max_refinement_mastery)
-		to_chat(usr, "<span class='warning'>SCP-914 has reached maximum refinement mastery.</span>")
-		return
-
-	refinement_system.refinement_mastery = min(refinement_system.max_refinement_mastery, refinement_system.refinement_mastery + 10)
-	to_chat(usr, "<span class='notice'>SCP-914's refinement mastery is enhanced. Mastery: [refinement_system.refinement_mastery]/[refinement_system.max_refinement_mastery]</span>")
-
-/obj/machinery/scp914/verb/material_synthesis()
-	set name = "Material Synthesis"
-	set category = "SCP-914"
-	set desc = "Begin material synthesis."
-
-	if(!material_system)
-		to_chat(usr, "<span class='warning'>SCP-914 material system not available.</span>")
-		return
-
-	if(material_system.activate_material_synthesis())
-		to_chat(usr, "<span class='notice'>SCP-914 begins material synthesis. Synthesis: [material_system.material_synthesis]/[material_system.max_material_synthesis]</span>")
-	else
-		to_chat(usr, "<span class='warning'>SCP-914 needs time to synthesize materials.</span>")
-
-/obj/machinery/scp914/verb/reality_manipulation()
-	set name = "Reality Manipulation"
-	set category = "SCP-914"
-	set desc = "Begin reality manipulation."
-
-	if(!reality_system)
-		to_chat(usr, "<span class='warning'>SCP-914 reality system not available.</span>")
-		return
-
-	if(reality_system.activate_reality_manipulation())
-		to_chat(usr, "<span class='notice'>SCP-914 begins reality manipulation. Manipulation: [reality_system.reality_manipulation]/[reality_system.max_reality_manipulation]</span>")
-	else
-		to_chat(usr, "<span class='warning'>SCP-914 needs time to manipulate reality.</span>")
-
-/obj/machinery/scp914/verb/temporal_effects()
-	set name = "Temporal Effects"
-	set category = "SCP-914"
-	set desc = "Create temporal effects."
-
-	if(!temporal_system)
-		to_chat(usr, "<span class='warning'>SCP-914 temporal system not available.</span>")
-		return
-
-	if(temporal_system.activate_temporal_effects())
-		to_chat(usr, "<span class='notice'>SCP-914 creates temporal effects. Effects: [temporal_system.temporal_effects]/[temporal_system.max_temporal_effects]</span>")
-
-/obj/machinery/scp914/verb/efficiency_improvement()
-	set name = "Efficiency Improvement"
-	set category = "SCP-914"
-	set desc = "Improve SCP-914's efficiency."
-
-	if(!refinement_system)
-		to_chat(usr, "<span class='warning'>SCP-914 refinement system not available.</span>")
-		return
-
-	if(refinement_system.refinement_efficiency >= refinement_system.max_refinement_efficiency)
-		to_chat(usr, "<span class='warning'>SCP-914 has reached maximum efficiency.</span>")
-		return
-
-	refinement_system.refinement_efficiency = min(refinement_system.max_refinement_efficiency, refinement_system.refinement_efficiency + 0.2)
-	to_chat(usr, "<span class='notice'>SCP-914's efficiency is improved. Efficiency: [refinement_system.refinement_efficiency]/[refinement_system.max_refinement_efficiency]</span>")
-
-/obj/machinery/scp914/verb/cooldown_reduction()
-	set name = "Cooldown Reduction"
-	set category = "SCP-914"
-	set desc = "Reduce SCP-914's cooldown."
-
-	if(!refinement_system)
-		to_chat(usr, "<span class='warning'>SCP-914 refinement system not available.</span>")
-		return
-
-	if(refinement_system.refinement_cooldown_reduction >= refinement_system.max_cooldown_reduction)
-		to_chat(usr, "<span class='warning'>SCP-914 has reached maximum cooldown reduction.</span>")
-		return
-
-	refinement_system.refinement_cooldown_reduction = min(refinement_system.max_cooldown_reduction, refinement_system.refinement_cooldown_reduction + 10)
-	to_chat(usr, "<span class='notice'>SCP-914's cooldown is reduced. Reduction: [refinement_system.refinement_cooldown_reduction]/[refinement_system.max_cooldown_reduction]</span>")
-
-/obj/machinery/scp914/verb/radius_expansion()
-	set name = "Radius Expansion"
-	set category = "SCP-914"
-	set desc = "Expand SCP-914's refinement radius."
-
-	if(!refinement_system)
-		to_chat(usr, "<span class='warning'>SCP-914 refinement system not available.</span>")
-		return
-
-	if(refinement_system.refinement_radius_expansion >= refinement_system.max_radius_expansion)
-		to_chat(usr, "<span class='warning'>SCP-914 has reached maximum radius expansion.</span>")
-		return
-
-	refinement_system.refinement_radius_expansion = min(refinement_system.max_radius_expansion, refinement_system.refinement_radius_expansion + 1)
-	to_chat(usr, "<span class='notice'>SCP-914's refinement radius is expanded. Radius: [refinement_system.refinement_radius + refinement_system.refinement_radius_expansion]</span>")
-
-/obj/machinery/scp914/verb/breakthrough_enhancement()
-	set name = "Breakthrough Enhancement"
-	set category = "SCP-914"
-	set desc = "Enhance SCP-914's breakthrough chance."
-
-	if(!refinement_system)
-		to_chat(usr, "<span class='warning'>SCP-914 refinement system not available.</span>")
-		return
-
-	if(refinement_system.breakthrough_chance >= refinement_system.max_breakthrough_chance)
-		to_chat(usr, "<span class='warning'>SCP-914 has reached maximum breakthrough chance.</span>")
-		return
-
-	refinement_system.breakthrough_chance = min(refinement_system.max_breakthrough_chance, refinement_system.breakthrough_chance + 5)
-	to_chat(usr, "<span class='notice'>SCP-914's breakthrough chance is enhanced. Chance: [refinement_system.breakthrough_chance]/[refinement_system.max_breakthrough_chance]</span>")
-
-/obj/machinery/scp914/verb/emergency_shutdown()
-	set name = "Emergency Shutdown"
-	set category = "SCP-914"
-	set desc = "Activate emergency shutdown procedure."
-
+/obj/machinery/scp914/proc/emergency_shutdown()
 	if(!containment_system)
 		to_chat(usr, "<span class='warning'>SCP-914 containment system not available.</span>")
 		return
@@ -426,11 +289,7 @@
 
 // ===== STATUS DISPLAY VERBS =====
 
-/obj/machinery/scp914/verb/view_status()
-	set name = "View Status"
-	set category = "SCP-914"
-	set desc = "View SCP-914's current status."
-
+/obj/machinery/scp914/proc/view_status()
 	if(!usr || !usr.client)
 		return
 
@@ -439,31 +298,15 @@
 	if(refinement_system)
 		message += "<b>Current Setting:</b> [refinement_system.refinement_setting]<br>"
 		message += "<b>Refinement Quality:</b> [refinement_system.refinement_quality]/[refinement_system.max_quality]<br>"
-		message += "<b>Refinement Mastery:</b> [refinement_system.refinement_mastery]/[refinement_system.max_refinement_mastery]<br>"
-		message += "<b>Refinement Efficiency:</b> [refinement_system.refinement_efficiency]/[refinement_system.max_refinement_efficiency]<br>"
-		message += "<b>Breakthrough Chance:</b> [refinement_system.breakthrough_chance]/[refinement_system.max_breakthrough_chance]<br>"
 		message += "<b>Active:</b> [refinement_system.active ? "Yes" : "No"]<br>"
 		message += "<b>Progress:</b> [refinement_system.refinement_progress]/[refinement_system.max_refinement_progress]<br>"
-
-	if(material_system)
-		message += "<b>Material Synthesis:</b> [material_system.material_synthesis]/[material_system.max_material_synthesis]<br>"
-
-	if(reality_system)
-		message += "<b>Reality Manipulation:</b> [reality_system.reality_manipulation]/[reality_system.max_reality_manipulation]<br>"
-
-	if(temporal_system)
-		message += "<b>Temporal Effects:</b> [temporal_system.temporal_effects]/[temporal_system.max_temporal_effects]<br>"
 
 	if(containment_system)
 		message += "<b>Containment Status:</b> [containment_system.containment_status]<br>"
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-/obj/machinery/scp914/verb/view_input_objects()
-	set name = "View Input Objects"
-	set category = "SCP-914"
-	set desc = "View objects in SCP-914's input."
-
+/obj/machinery/scp914/proc/view_input_objects()
 	if(!usr || !usr.client)
 		return
 
@@ -483,11 +326,7 @@
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-/obj/machinery/scp914/verb/view_output_objects()
-	set name = "View Output Objects"
-	set category = "SCP-914"
-	set desc = "View objects in SCP-914's output."
-
+/obj/machinery/scp914/proc/view_output_objects()
 	if(!usr || !usr.client)
 		return
 
@@ -507,11 +346,7 @@
 
 	to_chat(usr, "<span class='notice'>[message]</span>")
 
-/obj/machinery/scp914/verb/view_research_summary()
-	set name = "View Research Summary"
-	set category = "SCP-914"
-	set desc = "View SCP-914's research summary."
-
+/obj/machinery/scp914/proc/view_research_summary()
 	if(!usr || !usr.client)
 		return
 
@@ -523,11 +358,7 @@
 	to_chat(usr, "<span class='notice'>[summary]</span>")
 
 // Admin verb to view SCP-914 persistence data
-/obj/machinery/scp914/verb/view_persistence_data()
-	set name = "View Persistence Data"
-	set category = "SCP-914"
-	set desc = "View SCP-914 persistence data."
-
+/obj/machinery/scp914/proc/view_persistence_data()
 	if(!check_rights(R_ADMIN))
 		to_chat(usr, "<span class='warning'>You don't have permission to view persistence data.</span>")
 		return
@@ -544,23 +375,15 @@
 		message += "<b>Total Materials Processed:</b> [refinement_system.total_materials_processed]<br>"
 		message += "<b>Refinement Breakthroughs:</b> [refinement_system.refinement_breakthroughs]<br>"
 		message += "<b>Refinement Catastrophes:</b> [refinement_system.refinement_catastrophes]<br>"
-		message += "<b>Refinement Mastery:</b> [refinement_system.refinement_mastery]/[refinement_system.max_refinement_mastery]<br>"
-		message += "<b>Refinement Efficiency:</b> [refinement_system.refinement_efficiency]/[refinement_system.max_refinement_efficiency]<br>"
-		message += "<b>Cooldown Reduction:</b> [refinement_system.refinement_cooldown_reduction]/[refinement_system.max_cooldown_reduction]<br>"
-		message += "<b>Radius Expansion:</b> [refinement_system.refinement_radius_expansion]/[refinement_system.max_radius_expansion]<br>"
-		message += "<b>Breakthrough Chance:</b> [refinement_system.breakthrough_chance]/[refinement_system.max_breakthrough_chance]<br>"
 
 	if(material_system)
 		message += "<b>Material Syntheses:</b> [material_system.material_syntheses]<br>"
-		message += "<b>Material Synthesis:</b> [material_system.material_synthesis]/[material_system.max_material_synthesis]<br>"
 
 	if(reality_system)
 		message += "<b>Reality Manipulations:</b> [reality_system.reality_manipulations]<br>"
-		message += "<b>Reality Manipulation:</b> [reality_system.reality_manipulation]/[reality_system.max_reality_manipulation]<br>"
 
 	if(temporal_system)
 		message += "<b>Temporal Events:</b> [temporal_system.temporal_events]<br>"
-		message += "<b>Temporal Effects:</b> [temporal_system.temporal_effects]/[temporal_system.max_temporal_effects]<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-914"]

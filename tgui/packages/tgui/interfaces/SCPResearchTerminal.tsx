@@ -4,15 +4,15 @@ import { Window } from '../layouts';
 type Experiment = {
   id: string;
   name: string;
-  type: string;
-  risk: number;
   reward: number;
+  risk: number;
+  type: string;
 };
 
 type ResearchData = {
   experiments: Experiment[];
-  research_points: number;
   experiments_completed: number;
+  research_points: number;
   total_scps: number;
 };
 
@@ -62,7 +62,9 @@ export const SCPResearchTerminal = (_props: unknown) => {
               marginBottom: '12px',
             }}
           >
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: C.text }}>
+            <div
+              style={{ fontSize: '16px', fontWeight: 'bold', color: C.text }}
+            >
               SCP RESEARCH MANAGEMENT TERMINAL
             </div>
             <div style={{ fontSize: '11px', color: C.textDim }}>
@@ -163,12 +165,15 @@ export const SCPResearchTerminal = (_props: unknown) => {
                 <div style={{ flex: '1', color: C.textDim }}>
                   {exp.type.toUpperCase()}
                 </div>
-                <div style={{ flex: '1', color: risk.color, fontWeight: 'bold' }}>
+                <div
+                  style={{ flex: '1', color: risk.color, fontWeight: 'bold' }}
+                >
                   {risk.text}
                 </div>
                 <div style={{ flex: '1', color: C.safe }}>+{exp.reward} XP</div>
                 <div style={{ flex: '1' }}>
                   <button
+                    type="button"
                     style={{
                       background: 'transparent',
                       border: `1px solid ${C.border}`,

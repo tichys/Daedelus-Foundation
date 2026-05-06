@@ -407,3 +407,72 @@
 
 	hook_scp_recontainment("SCP-079", list())
 	priority_announce("SCP-079 has been successfully recontained via countermeasure protocol. Network stability restored.", sound_type = ANNOUNCER_DEFAULT)
+
+/obj/machinery/scp079_recontainment_terminal/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "SCP079Recontainment", "SCP-079 Recontainment")
+		ui.set_autoupdate(TRUE)
+		ui.open()
+
+/obj/machinery/scp079_recontainment_terminal/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/scp079_recontainment_terminal/ui_data(mob/user)
+	var/list/data = list()
+	data["hack_progress"] = hack_progress
+	data["hack_threshold"] = hack_threshold
+	data["hack_active"] = hack_active
+	data["completed"] = completed
+	data["current_stage"] = current_stage
+	data["failure_chance"] = failure_chance
+
+	var/list/stages = list()
+	for(var/i in 1 to length(countermeasure_stages))
+		stages += list(list(
+			"name" = countermeasure_stages[i],
+			"index" = i,
+			"completed" = (i < current_stage),
+			"current" = (i == current_stage),
+		))
+	data["countermeasure_stages"] = stages
+
+	var/mob/living/carbon/scp/scp079/ai = locate() in GLOB.mob_list
+	if(ai)
+		data["tier"] = ai.tier
+		data["processing_power"] = round(ai.processing_power)
+	else
+		data["tier"] = 0
+		data["processing_power"] = 0
+
+	return data
+
+/obj/machinery/scp079_recontainment_terminal/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+
+	switch(action)
+		if("initiate")
+			if(!ishuman(usr))
+				return
+			var/mob/living/carbon/human/H = usr
+
+			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+			if(!id_card || !(ACCESS_SCIENCE in id_card.access))
+				to_chat(H, "<span class='warning'>Requires Science access to operate.</span>")
+				return
+
+			if(completed)
+				to_chat(H, "<span class='notice'>Recontainment protocol already completed this shift.</span>")
+				return
+
+			if(hack_active)
+				return
+
+			hack_active = TRUE
+			hack_progress = 0
+			current_stage = 1
+			visible_message("<span class='notice'>[src] begins the countermeasure sequence against SCP-079!</span>")
+			priority_announce("ATTENTION: SCP-079 recontainment countermeasures initiated. Network isolation in progress.", sound_type = ANNOUNCER_ALERT)
+			START_PROCESSING(SSobj, src)

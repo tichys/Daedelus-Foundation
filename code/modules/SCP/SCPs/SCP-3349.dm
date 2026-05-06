@@ -89,7 +89,7 @@
 		infected_targets -= target
 		return
 
-	if(!target in infected_targets)
+	if(!(target in infected_targets))
 		return
 
 	var/vocalization_type = pick("laughter", "wailing", "whispering", "murmuring", "speech")

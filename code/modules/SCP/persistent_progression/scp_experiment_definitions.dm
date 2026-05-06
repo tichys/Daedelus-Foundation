@@ -75,6 +75,8 @@
 	initialize_scp529_experiments(manager)
 	initialize_scp1499_experiments(manager)
 	initialize_scp247_experiments(manager)
+	initialize_scp079_experiments(manager)
+	initialize_scp347_experiments(manager)
 
 /proc/register_experiment(datum/scp_experiment_manager/manager, scp_id, exp_type, name, desc, risk, duration, cooldown)
 	var/template_id = "[scp_id]_[exp_type]"
@@ -91,11 +93,11 @@
 	switch(scp_id)
 		if("SCP-173", "SCP-049", "SCP-914", "SCP-012", "SCP-013", "SCP-513", "SCP-066", "SCP-178", "SCP-2020", "SCP-216", "SCP-2398", "SCP-294", "SCP-3349", "SCP-5295", "SCP-999", "SCP-131", "SCP-2343", "SCP-1048", "SCP-427", "SCP-017", "SCP-457", "SCP-895", "SCP-1507", "SCP-2427-3")
 			return "Euclid"
-		if("SCP-096", "SCP-106", "SCP-682", "SCP-939", "SCP-966", "SCP-3199", "SCP-035", "SCP-008", "SCP-1471", "SCP-399")
+		if("SCP-096", "SCP-106", "SCP-682", "SCP-939", "SCP-966", "SCP-3199", "SCP-035", "SCP-008", "SCP-1471", "SCP-399", "SCP-079")
 			return "Keter"
 		if("SCP-500", "SCP-113", "SCP-714", "SCP-343", "SCP-080", "SCP-263", "SCP-280", "SCP-527", "SCP-529", "SCP-1499", "SCP-247")
 			return "Safe"
-		if("SCP-082", "SCP-087", "SCP-3008")
+		if("SCP-082", "SCP-087", "SCP-3008", "SCP-347")
 			return "Euclid"
 	return "Euclid"
 
@@ -754,3 +756,35 @@
 		"Effect Duration Analysis",
 		"Test how long SCP-247's effects persist.",
 		EXPERIMENT_RISK_LOW, 300, 9000)
+
+/proc/initialize_scp079_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-079", EXPERIMENT_TYPE_TECHNICAL,
+		"AI Capability Assessment",
+		"Document SCP-079's computational capabilities and learning rate.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-079", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Behavioral Pattern Analysis",
+		"Study SCP-079's behavioral patterns and decision-making processes.",
+		EXPERIMENT_RISK_HIGH, 600, 18000)
+
+	register_experiment(manager, "SCP-079", EXPERIMENT_TYPE_CONTAINMENT,
+		"Recontainment Protocol Testing",
+		"Test and document recontainment procedures for SCP-079.",
+		EXPERIMENT_RISK_MEDIUM, 300, 12000)
+
+/proc/initialize_scp347_experiments(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-347", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Invisibility Mechanics Study",
+		"Document SCP-347's invisibility properties and limitations.",
+		EXPERIMENT_RISK_LOW, 300, 9000)
+
+	register_experiment(manager, "SCP-347", EXPERIMENT_TYPE_INTERACTION,
+		"Social Behavior Analysis",
+		"Study SCP-347's social behavior and interaction with personnel.",
+		EXPERIMENT_RISK_LOW, 600, 18000)
+
+	register_experiment(manager, "SCP-347", EXPERIMENT_TYPE_CARE,
+		"Care Protocol Development",
+		"Develop optimal care and containment protocols for SCP-347.",
+		EXPERIMENT_RISK_MINIMAL, 300, 9000)

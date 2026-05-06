@@ -14,12 +14,81 @@
 
 	var/deployment_cooldown = 0
 	var/deployment_cooldown_time = 15 MINUTES
+	var/last_deployment = ""
 	var/available_teams = list(
-		"mtf_nu7" = list("name" = "Nu-7 'Hammer Down'", "desc" = "Heavy assault team. Best for Keter-class breaches.", "size" = 4, "min_breach" = 2),
-		"mtf_epsilon11" = list("name" = "Epsilon-11 'Nine-Tailed Fox'", "desc" = "Containment specialists. Best for Euclid breaches.", "size" = 3, "min_breach" = 1),
-		"mtf_epsilon9" = list("name" = "Epsilon-9 'Fire Eaters'", "desc" = "Fire/heat specialists. Best for SCP-457 breaches.", "size" = 3, "min_breach" = 1),
-		"mtf_beta7" = list("name" = "Beta-7 'Maz Hatters'", "desc" = "Biohazard specialists. Best for SCP-008/049 breaches.", "size" = 3, "min_breach" = 1),
+		"mtf_nu7" = list("name" = "Nu-7 'Hammer Down'", "desc" = "Heavy assault team. Best for Keter-class breaches.", "specialty" = "Heavy Assault / Keter-Class", "size" = 4, "min_breach" = 2),
+		"mtf_epsilon11" = list("name" = "Epsilon-11 'Nine-Tailed Fox'", "desc" = "Containment specialists. Best for Euclid breaches.", "specialty" = "Containment / Euclid-Class", "size" = 3, "min_breach" = 1),
+		"mtf_epsilon9" = list("name" = "Epsilon-9 'Fire Eaters'", "desc" = "Fire/heat specialists. Best for SCP-457 breaches.", "specialty" = "Fire / Heat Suppression", "size" = 3, "min_breach" = 1),
+		"mtf_beta7" = list("name" = "Beta-7 'Maz Hatters'", "desc" = "Biohazard specialists. Best for SCP-008/049 breaches.", "specialty" = "Biohazard / Quarantine", "size" = 3, "min_breach" = 1),
 	)
+
+/obj/machinery/mtf_deployment_console/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "MTFDeployment", "SCP FOUNDATION — MTF DEPLOYMENT TERMINAL")
+		ui.open()
+
+/obj/machinery/mtf_deployment_console/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/mtf_deployment_console/ui_data(mob/user)
+	var/list/data = list()
+
+	var/cooldown_remaining = max(0, deployment_cooldown - world.time)
+	data["cooldown_remaining"] = cooldown_remaining
+	data["cooldown_total"] = deployment_cooldown_time
+	data["on_cooldown"] = cooldown_remaining > 0
+
+	var/list/teams = list()
+	for(var/team_key in available_teams)
+		var/list/team = available_teams[team_key]
+		teams += list(list(
+			"key" = team_key,
+			"name" = team["name"],
+			"desc" = team["desc"],
+			"specialty" = team["specialty"],
+			"size" = team["size"],
+			"min_breach" = team["min_breach"],
+		))
+	data["available_teams"] = teams
+
+	var/active_breaches = 0
+	if(SSscp_persistence && SSscp_persistence.manager)
+		active_breaches = SSscp_persistence.manager.active_breaches
+	data["active_breach_count"] = active_breaches
+	data["last_deployment"] = last_deployment
+
+	return data
+
+/obj/machinery/mtf_deployment_console/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+
+	switch(action)
+		if("deploy")
+			var/team_key = params["team_name"]
+			if(!team_key || !(team_key in available_teams))
+				return
+			var/mob/living/carbon/human/H = usr
+			if(!istype(H))
+				return
+			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+			if(!id_card || !(ACCESS_ADMIN in id_card.access))
+				to_chat(H, "<span class='warning'>Requires Command access to authorize MTF deployment.</span>")
+				return
+			if(world.time < deployment_cooldown)
+				to_chat(H, "<span class='warning'>MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)].</span>")
+				return
+			var/list/team = available_teams[team_key]
+			var/active_breaches = 0
+			if(SSscp_persistence && SSscp_persistence.manager)
+				active_breaches = SSscp_persistence.manager.active_breaches
+			if(active_breaches < team["min_breach"])
+				to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
+				return
+			last_deployment = team["name"]
+			deploy_mtf_team(team_key, team, H)
 
 /obj/machinery/mtf_deployment_console/attack_hand(mob/user)
 	if(!ishuman(user))
@@ -83,16 +152,41 @@
 	var/list/objectives = generate_mtf_objectives(team_key)
 	var/list/deployed_members = list()
 
-	for(var/i in 1 to team_size)
-		var/turf/spawn_loc = length(spawn_turfs) ? pick(spawn_turfs) : get_turf(src)
-		var/mob/living/carbon/human/mtf_member = new(spawn_loc)
-		equip_mtf_member(mtf_member, team_key, i == 1)
-		deployed_members += mtf_member
+	var/list/spawn_loc = length(spawn_turfs) ? pick(spawn_turfs) : get_turf(src)
+	var/mob/living/carbon/human/mtf_commander = new(spawn_loc)
+	equip_mtf_member(mtf_commander, team_key, TRUE)
+	deployed_members += mtf_commander
 
-		if(i == 1 && deployer && deployer.ckey)
-			var/datum/mind/M = new /datum/mind(mtf_member.key)
-			M.assigned_role = "MTF Commander"
-			mtf_member.mind = M
+	var/datum/mind/commander_mind = new /datum/mind(mtf_commander.key)
+	commander_mind.assigned_role = "MTF Commander"
+	commander_mind.special_role = "MTF Commander"
+	mtf_commander.mind = commander_mind
+	commander_mind.active = TRUE
+
+	for(var/i in 2 to team_size)
+		var/turf/member_loc = length(spawn_turfs) ? pick(spawn_turfs) : get_turf(src)
+		var/mob/living/carbon/human/mtf_member = new(member_loc)
+		equip_mtf_member(mtf_member, team_key, FALSE)
+		deployed_members += mtf_member
+		var/datum/mind/member_mind = new /datum/mind(mtf_member.key)
+		member_mind.assigned_role = "MTF Operative"
+		member_mind.special_role = "MTF Operative"
+		mtf_member.mind = member_mind
+		member_mind.active = TRUE
+
+	var/list/candidates = poll_candidates_for_mob("Do you want to play as MTF [team_data["name"]]?", ROLE_MTF, null, 10 SECONDS, mtf_commander)
+	if(length(candidates))
+		var/mob/dead/observer/candidate = candidates[1]
+		candidate.mind.transfer_to(mtf_commander)
+		mtf_commander.key = candidate.key
+
+	for(var/i in 2 to length(deployed_members))
+		var/mob/living/carbon/human/mtf_member = deployed_members[i]
+		var/list/more_candidates = poll_candidates_for_mob("Do you want to play as MTF [team_data["name"]]?", ROLE_MTF, null, 10 SECONDS, mtf_member)
+		if(length(more_candidates))
+			var/mob/dead/observer/candidate = more_candidates[1]
+			candidate.mind.transfer_to(mtf_member)
+			mtf_member.key = candidate.key
 
 	for(var/mob/living/carbon/human/H in deployed_members)
 		for(var/obj in objectives)

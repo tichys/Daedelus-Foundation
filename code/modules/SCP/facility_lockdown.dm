@@ -44,6 +44,53 @@
 
 	initiate_lockdown(choice == "Full Lockdown" ? LOCKDOWN_FULL : LOCKDOWN_PARTIAL, reason, H)
 
+/obj/machinery/facility_lockdown_console/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "FacilityLockdown", "SCP FOUNDATION — FACILITY LOCKDOWN CONTROL")
+		ui.open()
+
+/obj/machinery/facility_lockdown_console/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/facility_lockdown_console/ui_data(mob/user)
+	var/list/data = list()
+	data["lockdown_state"] = lockdown_state
+	data["lockdown_reason"] = lockdown_reason
+	data["lockdown_start_time"] = lockdown_start_time
+	data["comms_jammed"] = comms_jammed
+	data["elevators_disabled"] = elevators_disabled
+	data["blast_doors_closed"] = blast_doors_closed
+	data["lockdown_duration"] = lockdown_start_time ? (world.time - lockdown_start_time) : 0
+	return data
+
+/obj/machinery/facility_lockdown_console/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+
+	if(!ishuman(usr))
+		return
+	var/mob/living/carbon/human/H = usr
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card || !(ACCESS_ADMIN in id_card.access))
+		to_chat(H, "<span class='warning'>Requires Command access to operate lockdown systems.</span>")
+		return
+
+	switch(action)
+		if("lockdown")
+			var/level = text2num(params["level"])
+			if(!level)
+				return
+			var/reason = params["reason"]
+			if(!reason)
+				reason = "Unspecified security concern"
+			initiate_lockdown(level, reason, H)
+			. = TRUE
+		if("lift_lockdown")
+			lift_lockdown(H)
+			. = TRUE
+
 /obj/machinery/facility_lockdown_console/proc/show_lockdown_status(mob/user)
 	var/duration = lockdown_start_time ? DisplayTimeText(world.time - lockdown_start_time) : "N/A"
 	to_chat(user, "<span class='notice'>Lockdown Status: [lockdown_state == LOCKDOWN_FULL ? "FULL" : "PARTIAL"]</span>")

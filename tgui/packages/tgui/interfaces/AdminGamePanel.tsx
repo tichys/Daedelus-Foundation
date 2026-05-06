@@ -8,15 +8,15 @@ type Ruleset = {
 };
 
 type GamePanelData = {
-  forced_rulesets: Ruleset[];
   force_extended: number;
+  forced_rulesets: Ruleset[];
+  forced_threat: number;
   has_marked_datum: boolean;
   mode: string;
   no_stacking: number;
-  forced_threat: number;
-  stacking_limit: number;
   round_state: number;
   round_state_text: string;
+  stacking_limit: number;
 };
 
 const C = {
@@ -186,10 +186,7 @@ export const AdminGamePanel = (_props: unknown) => {
                   >
                     FORCE ROUNDSTART RULESET
                   </TermButton>
-                  <TermButton
-                    color="red"
-                    onClick={() => act('clear_rulesets')}
-                  >
+                  <TermButton color="red" onClick={() => act('clear_rulesets')}>
                     CLEAR ALL
                   </TermButton>
                   <TermButton onClick={() => act('dynamic_options')}>
@@ -222,9 +219,7 @@ export const AdminGamePanel = (_props: unknown) => {
                         </Box>
                         <TermButton
                           color="red"
-                          onClick={() =>
-                            act('remove_ruleset', { ref: rs.ref })
-                          }
+                          onClick={() => act('remove_ruleset', { ref: rs.ref })}
                         >
                           REMOVE
                         </TermButton>
@@ -234,8 +229,23 @@ export const AdminGamePanel = (_props: unknown) => {
                 )}
 
                 <Box style={{ marginBottom: '16px' }}>
-                  <Box style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
-                    <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.1em', textTransform: 'uppercase', width: '160px' }}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'center',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        fontSize: '10px',
+                        color: C.textDim,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        width: '160px',
+                      }}
+                    >
                       Force Extended
                     </Box>
                     <TermButton
@@ -246,8 +256,23 @@ export const AdminGamePanel = (_props: unknown) => {
                       {force_extended ? 'ON' : 'OFF'}
                     </TermButton>
                   </Box>
-                  <Box style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
-                    <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.1em', textTransform: 'uppercase', width: '160px' }}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'center',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        fontSize: '10px',
+                        color: C.textDim,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        width: '160px',
+                      }}
+                    >
                       No Stacking
                     </Box>
                     <TermButton
@@ -258,16 +283,45 @@ export const AdminGamePanel = (_props: unknown) => {
                       {no_stacking ? 'ON' : 'OFF'}
                     </TermButton>
                   </Box>
-                  <Box style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
-                    <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.1em', textTransform: 'uppercase', width: '160px' }}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'center',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        fontSize: '10px',
+                        color: C.textDim,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        width: '160px',
+                      }}
+                    >
                       Forced Threat Level
                     </Box>
                     <TermButton onClick={() => act('set_forced_threat')}>
                       {forced_threat}
                     </TermButton>
                   </Box>
-                  <Box style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <Box style={{ fontSize: '10px', color: C.textDim, letterSpacing: '0.1em', textTransform: 'uppercase', width: '160px' }}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        fontSize: '10px',
+                        color: C.textDim,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        width: '160px',
+                      }}
+                    >
                       Stacking Limit
                     </Box>
                     <TermButton onClick={() => act('set_stacking_limit')}>
@@ -280,10 +334,7 @@ export const AdminGamePanel = (_props: unknown) => {
 
             {!isPregame && (
               <Box style={{ marginBottom: '16px' }}>
-                <TermButton
-                  color="green"
-                  onClick={() => act('gamemode_panel')}
-                >
+                <TermButton color="green" onClick={() => act('gamemode_panel')}>
                   GAME MODE PANEL
                 </TermButton>
               </Box>
@@ -304,8 +355,8 @@ export const AdminGamePanel = (_props: unknown) => {
                 letterSpacing: '0.1em',
               }}
             >
-              SCP FOUNDATION | GAME CONTROL | ALL ACTIONS LOGGED |
-              UNAUTHORIZED ACCESS IS A CLASS-A INFRACTION
+              SCP FOUNDATION | GAME CONTROL | ALL ACTIONS LOGGED | UNAUTHORIZED
+              ACCESS IS A CLASS-A INFRACTION
             </Box>
           </Box>
         </Box>

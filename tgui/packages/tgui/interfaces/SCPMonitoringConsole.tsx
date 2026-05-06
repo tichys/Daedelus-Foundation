@@ -2,20 +2,20 @@ import { useBackend } from '../backend';
 import { Window } from '../layouts';
 
 type SCPData = {
-  id: string;
-  status: string;
-  health: number;
-  last_breach: number;
   breach_count: number;
+  health: number;
+  id: string;
   interaction_count: number;
+  last_breach: number;
+  status: string;
 };
 
 type MonitoringData = {
-  scps: SCPData[];
-  global_stability: number;
   active_breaches: number;
-  time: number;
   alert_level: number;
+  global_stability: number;
+  scps: SCPData[];
+  time: number;
 };
 
 const C = {
@@ -40,7 +40,7 @@ const statusColor = (status: string) => {
       return C.warning;
     default:
       return C.textDim;
-  };
+  }
 };
 
 export const SCPMonitoringConsole = (_props: unknown) => {
@@ -150,7 +150,12 @@ export const SCPMonitoringConsole = (_props: unknown) => {
               <div
                 style={{
                   fontSize: '20px',
-                  color: alert_level >= 4 ? C.danger : alert_level >= 2 ? C.warning : C.safe,
+                  color:
+                    alert_level >= 4
+                      ? C.danger
+                      : alert_level >= 2
+                        ? C.warning
+                        : C.safe,
                 }}
               >
                 {alert_level}
@@ -168,6 +173,7 @@ export const SCPMonitoringConsole = (_props: unknown) => {
               }}
             >
               <button
+                type="button"
                 style={{
                   background: 'transparent',
                   border: `1px solid ${C.danger}`,
@@ -240,6 +246,7 @@ export const SCPMonitoringConsole = (_props: unknown) => {
               </div>
               <div style={{ flex: '1' }}>
                 <button
+                  type="button"
                   style={{
                     background: 'transparent',
                     border: `1px solid ${C.border}`,
@@ -249,9 +256,7 @@ export const SCPMonitoringConsole = (_props: unknown) => {
                     fontFamily: 'monospace',
                     fontSize: '10px',
                   }}
-                  onClick={() =>
-                    act('view_scp', { scp_id: scp.id })
-                  }
+                  onClick={() => act('view_scp', { scp_id: scp.id })}
                 >
                   VIEW
                 </button>

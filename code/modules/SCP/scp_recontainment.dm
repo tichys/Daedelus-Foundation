@@ -182,29 +182,335 @@
 		return
 
 	if(lure_active)
-		to_chat(user, "<span class='warning'>The lure is already active.</span>")
+		to_chat(user, span_warning("The lure is already active."))
 		return
 
 	if(!ishuman(user))
-		to_chat(user, "<span class='warning'>Requires Science access.</span>")
+		to_chat(user, span_warning("Requires Science access."))
 		return
 	var/mob/living/carbon/human/H = user
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_SCIENCE in id_card.access))
-		to_chat(user, "<span class='warning'>Requires Science access.</span>")
+		to_chat(user, span_warning("Requires Science access."))
 		return
 
 	lure_active = TRUE
-	visible_message("<span class='notice'>[src] begins broadcasting the containment lure signal.</span>")
+	visible_message(span_notice("[src] begins broadcasting the containment lure signal."))
 	priority_announce("SCP-049 containment lure protocol activated. The Doctor is being called back.", sound_type = ANNOUNCER_DEFAULT)
+
+	lure_scp049()
 
 	addtimer(CALLBACK(src, .proc/deactivate_lure), lure_duration)
 
+/obj/machinery/scp049_cure_station/proc/lure_scp049()
+	for(var/mob/living/carbon/human/scp049/scp in GLOB.mob_list)
+		if(scp.stat == DEAD)
+			continue
+		to_chat(scp, span_danger("You sense the call of the Pestilence... something draws you toward containment."))
+		scp.lure_target = get_turf(src)
+		addtimer(CALLBACK(src, .proc/guide_scp049, scp), 2 SECONDS)
+
+/obj/machinery/scp049_cure_station/proc/guide_scp049(mob/living/carbon/human/scp049/scp)
+	if(!lure_active || !scp || scp.stat == DEAD)
+		return
+	if(get_dist(scp, src) <= 2)
+		scp.lure_target = null
+		return
+	if(scp.lure_target != get_turf(src))
+		return
+	var/turf/T = get_step_towards(scp, src)
+	if(T)
+		scp.Move(T)
+	addtimer(CALLBACK(src, .proc/guide_scp049, scp), 0.5 SECONDS)
+
 /obj/machinery/scp049_cure_station/proc/deactivate_lure()
 	lure_active = FALSE
-	visible_message("<span class='notice'>[src] stops broadcasting.</span>")
+	visible_message(span_notice("[src] stops broadcasting."))
+
+	for(var/mob/living/carbon/human/scp049/scp in GLOB.mob_list)
+		scp.lure_target = null
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-049"]
 		if(instance && instance.containment_status == "breached")
 			hook_scp_recontainment("SCP-049", list())
+
+/obj/machinery/scp008_incinerator
+	name = "SCP-008 Biohazard Incinerator"
+	desc = "A specialized incinerator for neutralizing SCP-008 infected material and zombies."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "incinerator"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 50
+	var/active = FALSE
+	var/burn_duration = 300
+
+/obj/machinery/scp008_incinerator/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	if(active)
+		to_chat(user, span_warning("The incinerator is already running."))
+		return
+	var/confirm = alert(user, "Activate the biohazard incinerator? This will destroy all SCP-008 instances in range.", "Incinerator", "Activate", "Cancel")
+	if(confirm != "Activate")
+		return
+	active = TRUE
+	visible_message(span_danger("[src] roars to life! Intense heat washes over the area!"))
+	addtimer(CALLBACK(src, .proc/complete_incineration), burn_duration)
+
+/obj/machinery/scp008_incinerator/proc/complete_incineration()
+	active = FALSE
+	var/zombies_destroyed = 0
+	for(var/mob/living/simple_animal/hostile/scp008_zombie/Z in range(7, src))
+		Z.visible_message(span_danger("[Z] is consumed by the incinerator's flames!"))
+		Z.ghostize()
+		qdel(Z)
+		zombies_destroyed++
+	if(zombies_destroyed > 0)
+		hook_scp_recontainment("SCP-008", list())
+		priority_announce("SCP-008 biohazard incineration complete. [zombies_destroyed] instances neutralized.", sound_type = ANNOUNCER_DEFAULT)
+	else
+		visible_message(span_notice("The incinerator shuts down. No SCP-008 instances detected."))
+
+/obj/machinery/scp1507_speaker
+	name = "SCP-1507 Pacification Speaker"
+	desc = "A speaker system that broadcasts calming sounds to pacify SCP-1507 flocks."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "speaker"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 30
+	var/active = FALSE
+	var/pacification_duration = 600
+
+/obj/machinery/scp1507_speaker/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card || !(ACCESS_SCIENCE in id_card.access))
+		to_chat(user, span_warning("Requires Science access."))
+		return
+	if(active)
+		to_chat(user, span_warning("The speaker is already active."))
+		return
+	active = TRUE
+	visible_message(span_notice("[src] begins playing calming ambient sounds."))
+	for(var/mob/living/simple_animal/hostile/retaliate/scp1507/F in range(10, src))
+		F.melee_damage_lower = 0
+		F.melee_damage_upper = 0
+		F.combat_mode = FALSE
+		to_chat(F, span_notice("The soothing sounds calm your aggressive instincts."))
+	hook_scp_recontainment("SCP-1507", list())
+	addtimer(CALLBACK(src, .proc/deactivate_speaker), pacification_duration)
+
+/obj/machinery/scp1507_speaker/proc/deactivate_speaker()
+	active = FALSE
+	visible_message(span_notice("[src] stops playing."))
+	for(var/mob/living/simple_animal/hostile/retaliate/scp1507/F in range(10, src))
+		F.melee_damage_lower = initial(F.melee_damage_lower)
+		F.melee_damage_upper = initial(F.melee_damage_upper)
+
+/obj/machinery/scp263_remote_shutoff
+	name = "SCP-263 Remote Shutoff"
+	desc = "A device that can remotely disable SCP-263's anomalous broadcast."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "flasher"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 20
+	var/cooldown = 0
+	var/cooldown_time = 300 SECONDS
+
+/obj/machinery/scp263_remote_shutoff/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	if(world.time < cooldown)
+		to_chat(user, span_warning("Device recharging. Ready in [round((cooldown - world.time) / 10)] seconds."))
+		return
+	var/confirm = alert(user, "Transmit shutoff signal to SCP-263?", "Remote Shutoff", "Transmit", "Cancel")
+	if(confirm != "Transmit")
+		return
+	cooldown = world.time + cooldown_time
+	for(var/obj/machinery/scp263/tv in world)
+		if(tv.active)
+			tv.deactivate()
+			hook_scp_recontainment("SCP-263", list(user))
+			priority_announce("SCP-263 has been remotely deactivated.", sound_type = ANNOUNCER_DEFAULT)
+			return
+	to_chat(user, span_warning("No active SCP-263 instance detected."))
+
+/obj/machinery/scp3199_cryo_unit
+	name = "SCP-3199 Cryogenic Storage"
+	desc = "A cryogenic unit capable of freezing SCP-3199 eggs to prevent hatching."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "sleeper"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 100
+
+/obj/machinery/scp3199_cryo_unit/attackby(obj/item/I, mob/user, params)
+	if(istype(I, /obj/item/scp3199_egg))
+		if(!powered())
+			to_chat(user, span_warning("The cryogenic unit has no power!"))
+			return
+		user.dropItemToGround(I)
+		I.forceMove(src)
+		visible_message(span_notice("[user] places the egg into the cryogenic storage unit."))
+		var/obj/item/scp3199_egg/egg = I
+		egg.hatching_cooldown = -1
+		hook_scp_recontainment("SCP-3199", list(user))
+		return
+	return ..()
+
+/obj/machinery/scp682_containment_chamber
+	name = "SCP-682 Containment Chamber Controls"
+	desc = "Controls for the specialized containment chamber holding SCP-682. Includes hydrochloric acid dispensers."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "mass_driver"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 200
+	var/acid_cooldown = 0
+	var/acid_cooldown_time = 600 SECONDS
+
+/obj/machinery/scp682_containment_chamber/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card || !(ACCESS_SECURITY in id_card.access))
+		to_chat(user, span_warning("Requires Security access."))
+		return
+	if(world.time < acid_cooldown)
+		to_chat(user, span_warning("Acid dispensers recharging. Ready in [round((acid_cooldown - world.time) / 10)] seconds."))
+		return
+	var/confirm = alert(user, "Deploy hydrochloric acid to SCP-682's containment area?", "Containment", "Deploy", "Cancel")
+	if(confirm != "Deploy")
+		return
+	acid_cooldown = world.time + acid_cooldown_time
+	priority_announce("SCP-682 containment protocol activated. Deploying hydrochloric acid.", sound_type = ANNOUNCER_ALERT)
+	for(var/mob/living/carbon/human/scp682/reptile in range(5, src))
+		reptile.adjustFireLoss(150)
+		reptile.visible_message(span_danger("Acid sprays over SCP-682! It thrashes in pain!"))
+	hook_scp_recontainment("SCP-682", list(user))
+
+/obj/machinery/scp939_dampener
+	name = "SCP-939 Sonic Dampener"
+	desc = "A device that emits a counter-frequency to disorient SCP-939, preventing its voice mimicry and pack coordination."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "emitter"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 150
+	var/active = FALSE
+	var/dampen_duration = 600
+
+/obj/machinery/scp939_dampener/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	if(active)
+		to_chat(user, span_warning("The dampener is already active."))
+		return
+	if(!powered())
+		to_chat(user, span_warning("No power available."))
+		return
+	active = TRUE
+	visible_message(span_notice("[src] emits a low hum as counter-frequencies fill the air."))
+	for(var/mob/living/carbon/human/scp939/target in range(10, src))
+		target.set_confusion_if_lower(30)
+		to_chat(target, span_warning("A piercing frequency disrupts your senses! Your voice mimickry is impaired!"))
+	hook_scp_recontainment("SCP-939", list(user))
+	addtimer(CALLBACK(src, .proc/deactivate_dampener), dampen_duration)
+
+/obj/machinery/scp939_dampener/proc/deactivate_dampener()
+	active = FALSE
+	visible_message(span_notice("[src] powers down."))
+
+/obj/machinery/scp1471_memory_wipe
+	name = "SCP-1471 Memetic Cleanser"
+	desc = "A device that performs targeted memory alteration to remove SCP-1471's influence from affected subjects."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "mindshelf"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 200
+	var/cooldown = 0
+	var/cooldown_time = 300 SECONDS
+
+/obj/machinery/scp1471_memory_wipe/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	if(world.time < cooldown)
+		to_chat(user, span_warning("Device recharging."))
+		return
+	var/list/candidates = list()
+	for(var/mob/living/carbon/human/H in range(1, src))
+		candidates += H
+	if(!length(candidates))
+		to_chat(user, span_warning("No subjects in range. Have them stand next to the device."))
+		return
+	var/mob/living/carbon/human/target = input(user, "Select subject for memetic cleansing:", "Memory Wipe") as null|anything in candidates
+	if(!target)
+		return
+	cooldown = world.time + cooldown_time
+	target.adjustOrganLoss(ORGAN_SLOT_BRAIN, 15)
+	target.drowsyness = 0
+	target.hallucination = 0
+	to_chat(target, span_warning("A sharp pain lances through your skull! Your memories of... something... fade away."))
+	visible_message(span_notice("[src] activates, cleansing [target]'s memetic contamination."))
+	for(var/obj/item/device/scp1471/phone in target.get_all_contents())
+		phone.manifestation_level = max(0, phone.manifestation_level - 50)
+		phone.view_count = max(0, phone.view_count - 5)
+	for(var/obj/effect/scp1471_entity/entity in range(20, src))
+		if(entity.target == target)
+			qdel(entity)
+	hook_scp_recontainment("SCP-1471", list(user, target))
+
+/obj/machinery/scp427_reversal
+	name = "SCP-427 Cellular Stabilizer"
+	desc = "A medical device that can reverse early-stage SCP-427 transformation if applied before full conversion."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "medscan"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 100
+	var/cooldown = 0
+	var/cooldown_time = 120 SECONDS
+
+/obj/machinery/scp427_reversal/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	if(world.time < cooldown)
+		to_chat(user, span_warning("Device recharging."))
+		return
+	var/mob/living/carbon/human/H = user
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card || !(ACCESS_MEDICAL in id_card.access))
+		to_chat(user, span_warning("Requires Medical access."))
+		return
+	var/list/candidates = list()
+	for(var/mob/living/carbon/human/target in range(1, src))
+		candidates += target
+	if(!length(candidates))
+		to_chat(user, span_warning("No subjects in range."))
+		return
+	var/mob/living/carbon/human/patient = input(user, "Select subject for cellular stabilization:", "Stabilizer") as null|anything in candidates
+	if(!patient)
+		return
+	cooldown = world.time + cooldown_time
+	patient.adjustBruteLoss(-30)
+	patient.adjustToxLoss(-20)
+	patient.adjustFireLoss(-20)
+	to_chat(patient, span_notice("A soothing wave washes over you. Your cells feel stable again."))
+	visible_message(span_notice("[src] stabilizes [patient]'s cellular structure."))
+	hook_scp_recontainment("SCP-427", list(user, patient))

@@ -1,12 +1,5 @@
 import { useBackend } from '../backend';
-import {
-  Button,
-  LabeledList,
-  Section,
-  Box,
-  Stack,
-  Table,
-} from '../components';
+import { Box, Button, LabeledList, Section, Stack, Table } from '../components';
 import { Window } from '../layouts';
 
 export const DclassExperimentTerminal = (props, context) => {
@@ -37,7 +30,7 @@ export const DclassExperimentTerminal = (props, context) => {
         )}
 
         <Section title="Select SCP">
-          {available_scps.map(scp => (
+          {available_scps.map((scp) => (
             <Button
               key={scp.id}
               selected={selected_scp === scp.id}
@@ -80,16 +73,18 @@ export const DclassExperimentTerminal = (props, context) => {
             </LabeledList.Item>
             <LabeledList.Item label="Danger Level">
               <Stack>
-                {[1, 2, 3, 4, 5].map(level => (
+                {[1, 2, 3, 4, 5].map((level) => (
                   <Button
                     key={level}
-                    color={
-                      level <= 2 ? 'good' : level <= 3 ? 'average' : 'bad'
-                    }
+                    color={level <= 2 ? 'good' : level <= 3 ? 'average' : 'bad'}
                     selected={selected_danger === level}
                     onClick={() => act('select_danger', { danger: level })}
                   >
-                    {['Minimal', 'Low', 'Medium', 'High', 'Critical'][level - 1]}
+                    {
+                      ['Minimal', 'Low', 'Medium', 'High', 'Critical'][
+                        level - 1
+                      ]
+                    }
                   </Button>
                 ))}
               </Stack>
@@ -117,11 +112,19 @@ export const DclassExperimentTerminal = (props, context) => {
               <Table.Cell>Health</Table.Cell>
               <Table.Cell>Action</Table.Cell>
             </Table.Row>
-            {eligible_subjects.map(subject => (
+            {eligible_subjects.map((subject) => (
               <Table.Row key={subject.ckey}>
                 <Table.Cell>{subject.name}</Table.Cell>
                 <Table.Cell>
-                  {['Hostile', 'Suspicious', 'Neutral', 'Cooperative', 'Trusted'][subject.trust]}
+                  {
+                    [
+                      'Hostile',
+                      'Suspicious',
+                      'Neutral',
+                      'Cooperative',
+                      'Trusted',
+                    ][subject.trust]
+                  }
                 </Table.Cell>
                 <Table.Cell>{subject.tests}</Table.Cell>
                 <Table.Cell>{subject.health}%</Table.Cell>
@@ -129,7 +132,9 @@ export const DclassExperimentTerminal = (props, context) => {
                   <Button
                     icon="user-plus"
                     color="good"
-                    onClick={() => act('assign_subject', { ckey: subject.ckey })}
+                    onClick={() =>
+                      act('assign_subject', { ckey: subject.ckey })
+                    }
                   >
                     Assign
                   </Button>

@@ -17,9 +17,6 @@
 	var/evolution_cooldown_time = SCP682_EVOLUTION_COOLDOWN
 	var/last_evolution_check = 0
 	var/evolution_check_interval = SCP682_EVOLUTION_CHECK_INTERVAL
-	var/list/threat_memory = list()
-	var/learning_rate = 1.0
-	var/adaptation_efficiency = 1.0
 
 /datum/scp682_evolution_system/New(mob/living/carbon/human/scp682/new_owner)
 	. = ..()
@@ -37,9 +34,7 @@
 		last_evolution_check = world.time
 
 /datum/scp682_evolution_system/proc/setup_evolution_requirements()
-	// Initialize basic adaptations
 	active_adaptations = list()
-	threat_memory = list()
 
 /datum/scp682_evolution_system/proc/adapt_to_damage(damage_type, amount)
 	if(world.time < evolution_cooldown)
@@ -59,16 +54,8 @@
 	if(world.time < evolution_cooldown)
 		return
 
-	// Remember threat
-	if(!(threat in threat_memory))
-		threat_memory[threat] = list()
-	threat_memory[threat]["type"] = threat_type
-	threat_memory[threat]["first_encounter"] = world.time
-
-	// Award adaptation points
 	adaptation_points += points_per_threat
 
-	// Check for threat-specific adaptation
 	if(prob(SCP682_THREAT_ADAPT_CHANCE))
 		add_adaptation("threat_counter_[threat_type]")
 
@@ -77,7 +64,6 @@
 		return
 
 	active_adaptations += adaptation_type
-	adaptation_efficiency += 0.1
 
 	to_chat(owner, "<span class='notice'>You have adapted to [adaptation_type]!</span>")
 
@@ -137,7 +123,6 @@
 	var/base_health = SCP682_REGEN_BASE_HEALTH
 	var/regeneration_rate = SCP682_BASE_REGENERATION_RATE
 	var/damage_scaling = 0
-	var/adaptation_bonus = 0
 	var/critical_regeneration = SCP682_CRITICAL_REGENERATION_BONUS
 	var/last_damage_time = 0
 	var/damage_memory_duration = 30 SECONDS
@@ -224,8 +209,6 @@
 	var/mob/living/carbon/human/scp682/owner = null
 	var/list/threat_memory = list()
 	var/list/threat_priorities = list()
-	var/list/adaptation_counter = list()
-	var/learning_rate = 1.0
 	var/threat_assessment_cooldown = 0
 	var/threat_assessment_cooldown_time = 5 SECONDS
 	var/last_threat_scan = 0
@@ -304,12 +287,6 @@
 		return threat_priorities[1]
 	return null
 
-/datum/scp682_threat_system/proc/adapt_to_threat(threat)
-	if(!(threat in adaptation_counter))
-		adaptation_counter[threat] = 0
-
-	adaptation_counter[threat]++
-
 // ============================================================================
 // CONTAINMENT SYSTEM
 // ============================================================================
@@ -319,7 +296,6 @@
 	var/containment_integrity = SCP682_DEFAULT_CONTAINMENT_INTEGRITY
 	var/breach_phase = "contained"
 	var/list/adaptation_countermeasures = list()
-	var/escalation_timer = 0
 	var/escalation_interval = 60 SECONDS
 	var/last_containment_check = 0
 	var/containment_check_interval = SCP682_CONTAINMENT_CHECK_INTERVAL
@@ -368,19 +344,19 @@
 		hook_scp_recontainment("SCP-682", list("method" = "standard", "integrity" = containment_integrity))
 	switch(breach_phase)
 		if("agitated")
-			owner.attack_damage += 10
+			owner.add_movespeed_modifier("scp682_agitated")
 			to_chat(owner, "<span class='warning'>You feel agitated and more aggressive.</span>")
 		if("escalating")
-			owner.attack_damage += 20
-			owner.movement_speed += 0.3
+			if(!owner.has_movespeed_modifier("scp682_agitated"))
+				owner.add_movespeed_modifier("scp682_agitated")
 			to_chat(owner, "<span class='danger'>Your aggression is escalating!</span>")
 		if("full_breach")
-			owner.attack_damage += 30
-			owner.movement_speed += 0.5
+			if(!owner.has_movespeed_modifier("scp682_full_breach"))
+				owner.add_movespeed_modifier("scp682_full_breach")
 			to_chat(owner, "<span class='danger'>You have fully breached containment!</span>")
 		if("rampage")
-			owner.attack_damage += 50
-			owner.movement_speed += 0.8
+			if(!owner.has_movespeed_modifier("scp682_rage"))
+				owner.add_movespeed_modifier("scp682_rage")
 			to_chat(owner, "<span class='danger'>You are in a state of complete rampage!</span>")
 
 /datum/scp682_containment_system/proc/reduce_containment_integrity(amount)
@@ -432,12 +408,12 @@
 
 	if(distance <= 1)
 		perform_melee_attack(target)
-	else if(distance <= owner.area_attack_range)
+	else if(distance <= SCP682_BASE_AREA_ATTACK_RANGE + 3)
 		perform_area_attack()
 	else if(distance <= 5)
 		perform_charge_attack(target)
 	else
-		move_towards_target(target)
+		step_towards(owner, target)
 
 /datum/scp682_combat_system/proc/perform_melee_attack(mob/living/carbon/human/target)
 	if(world.time < attack_cooldown)
@@ -446,7 +422,7 @@
 	attack_cooldown = world.time + attack_cooldown_time
 
 	// Basic attack
-	var/damage = owner.attack_damage
+	var/damage = SCP682_BASE_ATTACK_DAMAGE
 	target.adjustBruteLoss(damage)
 
 	// Visual and audio feedback
@@ -468,11 +444,11 @@
 	area_attack_cooldown = world.time + area_attack_cooldown_time
 
 	// Area attack affecting all nearby targets
-	for(var/mob/living/carbon/human/H in range(owner.area_attack_range, owner))
+	for(var/mob/living/carbon/human/H in range(SCP682_BASE_AREA_ATTACK_RANGE, owner))
 		if(H == owner)
 			continue
 
-		var/damage = owner.attack_damage * 0.7
+		var/damage = SCP682_BASE_ATTACK_DAMAGE * 0.7
 		H.adjustBruteLoss(damage)
 
 		// Record threat
@@ -493,7 +469,7 @@
 	step_towards(owner, target)
 
 	// Charge damage
-	var/damage = owner.attack_damage * 1.5
+	var/damage = SCP682_BASE_ATTACK_DAMAGE * 1.5
 	target.adjustBruteLoss(damage)
 
 	// Visual and audio feedback

@@ -33,6 +33,13 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-1499"] = new /datum/scp_instance("SCP-1499", src)
 
+/obj/item/clothing/mask/gas/scp1499/Destroy()
+	QDEL_NULL(dimension_system)
+	QDEL_NULL(entity_system)
+	QDEL_NULL(research_system)
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 /obj/item/clothing/mask/gas/scp1499/equipped(mob/living/carbon/human/user, slot)
 	..()
 	if(slot == ITEM_SLOT_MASK)

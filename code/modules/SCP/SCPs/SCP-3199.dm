@@ -37,6 +37,13 @@
 	environment_system = new /datum/scp3199_environment_system(src)
 	research_system = new /datum/scp3199_research_system(src)
 
+/mob/living/carbon/human/scp3199/Destroy()
+	QDEL_NULL(reproduction_system)
+	QDEL_NULL(containment_system)
+	QDEL_NULL(environment_system)
+	QDEL_NULL(research_system)
+	return ..()
+
 /mob/living/carbon/human/scp3199/Life(datum/controller/process/mobs/parent)
 	. = ..()
 	if(stat == DEAD)
@@ -74,6 +81,7 @@
 
 /obj/item/scp3199_egg/Initialize()
 	. = ..()
+	hatching_cooldown = hatching_time
 	START_PROCESSING(SSobj, src)
 
 /obj/item/scp3199_egg/Destroy()
@@ -83,7 +91,8 @@
 /obj/item/scp3199_egg/process()
 	// Check for heat exposure
 	var/turf/T = get_turf(src)
-	if(T && T.temperature > 350) // Above 77°C
+	var/datum/gas_mixture/air = T?.return_air()
+	if(air && air.temperature > 350)
 		src.accelerated_hatching()
 
 	// Normal hatching countdown

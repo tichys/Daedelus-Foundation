@@ -43,6 +43,11 @@
 	START_PROCESSING(SSobj, src)
 
 /obj/structure/scp087/Destroy()
+	QDEL_NULL(descent_system)
+	QDEL_NULL(horror_system)
+	QDEL_NULL(entity_system)
+	QDEL_NULL(environmental_system)
+	QDEL_NULL(research_system)
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
@@ -187,17 +192,13 @@
 	return status
 
 // Admin verb for status checking
-/obj/structure/scp087/verb/show_status_verb()
-	set name = "Show SCP Status"
-	set category = "SCP-087"
-	set desc = "Display SCP-087 status (Admin Only)"
-
+/obj/structure/scp087/proc/show_status_verb()
 	if(!check_rights(R_ADMIN))
 		return
 
 	var/list/status = get_status()
 	for(var/line in status)
-		to_chat(src, "<span class='notice'>[line]</span>")
+		to_chat(usr, "<span class='notice'>[line]</span>")
 
 // Persistence system
 /obj/structure/scp087/proc/save_persistence_data()

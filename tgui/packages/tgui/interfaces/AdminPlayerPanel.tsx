@@ -4,37 +4,29 @@ import { Window } from '../layouts';
 
 type PlayerData = {
   admin_rank: string;
+  byond_version: string;
   ckey: string;
   discord_id: string;
   discord_linked: boolean;
   has_client: boolean;
   has_mind: boolean;
   input_mode: string;
-  is_antag: number;
   is_ai: boolean;
+  is_antag: number;
   is_cyborg: boolean;
   is_human: boolean;
   is_monkey: boolean;
   is_new_player: boolean;
   is_observer: boolean;
-  is_silicon: boolean;
   job: string;
   join_date: string;
   key: string;
   last_ip: string;
   mob_type: string;
-  muted_ahelp: boolean;
-  muted_all: boolean;
-  muted_deadchat: boolean;
-  muted_ic: boolean;
-  muted_ooc: boolean;
-  muted_pray: boolean;
   name: string;
-  playtime: string;
   previous_names: string;
   real_name: string;
   ref: string;
-  byond_version: string;
 };
 
 type PlayerPanelData = {
@@ -81,7 +73,12 @@ const TermButton = (props) => {
         background: 'transparent',
         border: `1px solid ${borderColor}`,
         borderRadius: 0,
-        color: color === 'red' ? C.redBright : color === 'green' ? '#33cc33' : C.textDim,
+        color:
+          color === 'red'
+            ? C.redBright
+            : color === 'green'
+              ? '#33cc33'
+              : C.textDim,
         padding: '2px 6px',
       }}
     />
@@ -165,7 +162,12 @@ export const AdminPlayerPanel = (_props: unknown) => {
             </Box>
           </Box>
 
-          <Box style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
+          <Box
+            style={{
+              padding: '8px 14px',
+              borderBottom: `1px solid ${C.border}`,
+            }}
+          >
             <Box style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <Box
                 style={{
@@ -279,7 +281,14 @@ export const AdminPlayerPanel = (_props: unknown) => {
               )}
             </Box>
 
-            <Box style={{ flex: '1', padding: '12px', overflowY: 'auto', maxHeight: '440px' }}>
+            <Box
+              style={{
+                flex: '1',
+                padding: '12px',
+                overflowY: 'auto',
+                maxHeight: '440px',
+              }}
+            >
               {selectedPlayer ? (
                 <PlayerDetail
                   player={selectedPlayer}
@@ -327,10 +336,10 @@ export const AdminPlayerPanel = (_props: unknown) => {
 };
 
 const PlayerDetail = (props: {
-  player: PlayerData;
   act: (action: string, params?: Record<string, string>) => void;
   has_centcom_db: boolean;
   has_exp_tracking: boolean;
+  player: PlayerData;
 }) => {
   const { player: p, act, has_centcom_db, has_exp_tracking } = props;
 
@@ -378,24 +387,16 @@ const PlayerDetail = (props: {
           Quick Actions
         </Box>
         <Box style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-          <TermButton onClick={() => act('pp', { ref: p.ref })}>
-            PP
-          </TermButton>
-          <TermButton onClick={() => act('vv', { ref: p.ref })}>
-            VV
-          </TermButton>
+          <TermButton onClick={() => act('pp', { ref: p.ref })}>PP</TermButton>
+          <TermButton onClick={() => act('vv', { ref: p.ref })}>VV</TermButton>
           <TermButton
             onClick={() => act('tp', { ref: p.ref })}
             color={p.has_mind ? undefined : 'red'}
           >
             TP
           </TermButton>
-          <TermButton onClick={() => act('pm', { ref: p.ref })}>
-            PM
-          </TermButton>
-          <TermButton onClick={() => act('sm', { ref: p.ref })}>
-            SM
-          </TermButton>
+          <TermButton onClick={() => act('pm', { ref: p.ref })}>PM</TermButton>
+          <TermButton onClick={() => act('sm', { ref: p.ref })}>SM</TermButton>
           <TermButton onClick={() => act('flw', { ref: p.ref })} color="green">
             FLW
           </TermButton>
@@ -459,7 +460,10 @@ const PlayerDetail = (props: {
           Movement
         </Box>
         <Box style={{ display: 'flex', gap: '4px' }}>
-          <TermButton color="green" onClick={() => act('jump_to', { ref: p.ref })}>
+          <TermButton
+            color="green"
+            onClick={() => act('jump_to', { ref: p.ref })}
+          >
             JUMP TO
           </TermButton>
           <TermButton onClick={() => act('get', { ref: p.ref })}>

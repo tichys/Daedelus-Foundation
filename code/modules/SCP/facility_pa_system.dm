@@ -74,9 +74,6 @@
 
 		to_chat(H, formatted)
 
-		if(H.sanity)
-			H.sanity.adjust_sanity(-2, "pa_announcement")
-
 	log_say("[key_name(sender)] made a PA announcement to [zone_name]: [message]")
 
 // Pre-recorded emergency announcements
@@ -172,17 +169,17 @@
 	active = !active
 	if(active)
 		to_chat(user, "<span class='notice'>Radio jammer activated. Foundation frequencies within [jam_range] meters will be disrupted.</span>")
-		GLOB.active_jammers |= src
+		LAZYADD(GLOB.active_scp_jammers, src)
 		START_PROCESSING(SSobj, src)
 	else
 		to_chat(user, "<span class='notice'>Radio jammer deactivated.</span>")
-		GLOB.active_jammers -= src
+		LAZYREMOVE(GLOB.active_scp_jammers, src)
 		STOP_PROCESSING(SSobj, src)
 
 /obj/item/scp_radio_jammer/process()
 	if(!active || battery <= 0)
 		active = FALSE
-		GLOB.active_jammers -= src
+		LAZYREMOVE(GLOB.active_scp_jammers, src)
 		STOP_PROCESSING(SSobj, src)
 		return
 

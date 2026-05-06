@@ -40,7 +40,7 @@
 	SCP = new /datum/scp(
 		src, // Ref to actual SCP atom
 		"painting", //Name (Should not be the scp desg, more like what it can be described as to viewers)
-		SCP_SAFE, //Obj Class
+		SCP_EUCLID, //Obj Class
 		"151", //Numerical Designation
 		SCP_MEMETIC
 	)

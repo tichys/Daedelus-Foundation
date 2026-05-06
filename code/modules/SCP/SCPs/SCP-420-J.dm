@@ -74,5 +74,5 @@
 		..()
 
 /datum/movespeed_modifier/scp420j_slowdown
-	slowdown = -1
+	slowdown = 1
 	id = "scp420j_slowdown"

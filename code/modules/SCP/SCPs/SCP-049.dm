@@ -61,6 +61,7 @@
 	var/evolution_events = 0
 	var/total_cures_performed = 0
 	var/session_start_time = 0
+	var/turf/lure_target = null
 	var/total_playtime = 0
 
 	// Progression integration tracking
@@ -349,40 +350,19 @@
 			total_cures_performed = persistence_data["total_cures_performed"] || 0
 			total_playtime = persistence_data["total_playtime"] || 0
 
-// Verbs (Foundation-19 style)
-/mob/living/carbon/human/scp049/verb/detect_pestilence_verb()
-	set name = "Detect Pestilence"
-	set category = "SCP-049"
-	set desc = "Sense the Pestilence in nearby subjects"
-
+/mob/living/carbon/human/scp049/proc/detect_pestilence_verb()
 	detect_pestilence()
 
-/mob/living/carbon/human/scp049/verb/breach_doors_verb()
-	set name = "Breach Doors"
-	set category = "SCP-049"
-	set desc = "Breach nearby doors"
-
+/mob/living/carbon/human/scp049/proc/breach_doors_verb()
 	breach_doors()
 
-/mob/living/carbon/human/scp049/verb/research_cure_verb()
-	set name = "Research Cure"
-	set category = "SCP-049"
-	set desc = "Research the cure for the pestilence"
-
+/mob/living/carbon/human/scp049/proc/research_cure_verb()
 	research_cure()
 
-/mob/living/carbon/human/scp049/verb/announce_verb()
-	set name = "Make Announcement"
-	set category = "SCP-049"
-	set desc = "Make a characteristic announcement"
-
+/mob/living/carbon/human/scp049/proc/announce_verb()
 	announce_presence()
 
-/mob/living/carbon/human/scp049/verb/show_status_verb()
-	set name = "Show Status"
-	set category = "SCP-049"
-	set desc = "Display current SCP-049 status"
-
+/mob/living/carbon/human/scp049/proc/show_status_verb()
 	show_status()
 
 /mob/living/carbon/human/scp049/proc/show_status()

@@ -114,6 +114,7 @@
 #define ROLE_SARKIC_CULT "Sarkic Cultist"
 #define ROLE_CHAOS_INSURGENCY "Chaos Insurgency Agent"
 #define ROLE_SERPENTS_HAND "Serpent's Hand Member"
+#define ROLE_MTF "Mobile Task Force"
 
 
 /// This defines the antagonists you can operate with in the settings.

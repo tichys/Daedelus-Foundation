@@ -428,12 +428,10 @@ SUBSYSTEM_DEF(scp_progression_integration)
 		metrics["containment_breaches"] = scp173.containment_breaches
 
 /datum/scp_progression_data/proc/update_scp457_metrics(mob/living/carbon/human/scp)
-	// Update SCP-457 specific metrics
 	if(istype(scp, /mob/living/carbon/human/scp457))
 		var/mob/living/carbon/human/scp457/scp457 = scp
-		metrics["fires_created"] = scp457.fires_created
-		metrics["damage_dealt"] = scp457.damage_dealt
-		metrics["victims_consumed"] = scp457.victims_consumed
+		metrics["current_heat"] = scp457.heat_system.current_heat
+		metrics["active_fires"] = length(scp457.fire_system.active_fires)
 
 /datum/scp_progression_data/proc/update_scp939_metrics(mob/living/carbon/human/scp)
 	// Update SCP-939 specific metrics
@@ -441,10 +439,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 		var/mob/living/carbon/human/scp939/scp939 = scp
 		if(scp939.voice_system)
 			metrics["voices_learned"] = length(scp939.voice_system.learned_voices)
-		if(scp939.pack_system)
-			metrics["pack_coordination"] = scp939.pack_system.pack_coordination
-		metrics["victims_hunted"] = scp939.victims_hunted
-		metrics["psychological_manipulations"] = scp939.psychological_manipulations
+
 
 /datum/scp_progression_data/proc/update_scp2020_metrics(mob/living/carbon/human/scp)
 	// Update SCP-2020 specific metrics

@@ -41,6 +41,11 @@
 	START_PROCESSING(SSobj, src)
 
 /obj/item/scp1981/Destroy()
+	QDEL_NULL(video_system)
+	QDEL_NULL(reality_system)
+	QDEL_NULL(temporal_system)
+	QDEL_NULL(synthesis_system)
+	QDEL_NULL(research_system)
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
@@ -179,11 +184,7 @@
 	return status
 
 // Admin verb for status checking
-/obj/item/scp1981/verb/show_status_verb()
-	set name = "Show SCP Status"
-	set category = "SCP-1981"
-	set desc = "Display SCP-1981 status (Admin Only)"
-
+/obj/item/scp1981/proc/show_status_verb()
 	if(!check_rights(R_ADMIN))
 		return
 
