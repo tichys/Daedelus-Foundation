@@ -8,14 +8,14 @@
 /* DATA HUD DATUMS */
 
 /atom/proc/add_to_all_human_data_huds()
-	for(var/hud_key, hud_type in GLOB.huds)
-		var/datum/atom_hud/data/human/human_hud = hud_type
+	for(var/hud_key in GLOB.huds)
+		var/datum/atom_hud/data/human/human_hud = GLOB.huds[hud_key]
 		if(istype(human_hud))
 			human_hud.add_atom_to_hud(src)
 
 /atom/proc/remove_from_all_data_huds()
-	for(var/hud_key, hud_type in GLOB.huds)
-		var/datum/atom_hud/data/data_hud = hud_type
+	for(var/hud_key in GLOB.huds)
+		var/datum/atom_hud/data/data_hud = GLOB.huds[hud_key]
 		if(istype(data_hud))
 			data_hud.remove_atom_from_hud(src)
 
