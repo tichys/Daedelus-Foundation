@@ -29,25 +29,25 @@ SUBSYSTEM_DEF(scp_research)
 /datum/research_data
 	var/project_id
 	var/scp_designation
-	var/research_type // "containment", "behavior", "properties", "interactions"
+	var/research_type
 	var/research_level = 0
 	var/max_research_level = 10
 	var/research_points = 0
 	var/research_cost = 1000
 	var/research_time = 0
 	var/researcher_ckey
-	var/status = "ACTIVE" // ACTIVE, COMPLETED, FAILED, PAUSED
+	var/status = "ACTIVE"
 	var/list/research_notes = list()
 	var/list/discoveries = list()
 	var/timestamp
 	var/completion_reward = 0
 
-	New(var/project_id, var/scp_designation, var/research_type, var/researcher_ckey)
-		src.project_id = project_id
-		src.scp_designation = scp_designation
-		src.research_type = research_type
-		src.researcher_ckey = researcher_ckey
-		src.timestamp = world.time
+/datum/research_data/New(project_id, scp_designation, research_type, researcher_ckey)
+	src.project_id = project_id
+	src.scp_designation = scp_designation
+	src.research_type = research_type
+	src.researcher_ckey = researcher_ckey
+	src.timestamp = world.time
 
 /datum/researcher_data
 	var/ckey
@@ -57,31 +57,31 @@ SUBSYSTEM_DEF(scp_research)
 	var/total_projects = 0
 	var/completed_projects = 0
 	var/failed_projects = 0
-	var/research_rank = "Trainee" // Trainee, Assistant, Researcher, Senior, Lead, Director
+	var/research_rank = "Trainee"
 	var/list/completed_research = list()
 	var/list/achievements = list()
 	var/list/specializations = list()
 	var/timestamp
 
-	New(var/ckey)
-		src.ckey = ckey
-		src.timestamp = world.time
+/datum/researcher_data/New(ckey)
+	src.ckey = ckey
+	src.timestamp = world.time
 
 /datum/research_reward_data
 	var/reward_id
-	var/reward_type // "budget", "progression", "equipment", "access", "achievement"
+	var/reward_type
 	var/reward_amount = 0
 	var/reward_description = ""
 	var/requirements = list()
 	var/unlocked = FALSE
 	var/timestamp
 
-	New(var/reward_id, var/reward_type, var/reward_amount, var/reward_description)
-		src.reward_id = reward_id
-		src.reward_type = reward_type
-		src.reward_amount = reward_amount
-		src.reward_description = reward_description
-		src.timestamp = world.time
+/datum/research_reward_data/New(reward_id, reward_type, reward_amount, reward_description)
+	src.reward_id = reward_id
+	src.reward_type = reward_type
+	src.reward_amount = reward_amount
+	src.reward_description = reward_description
+	src.timestamp = world.time
 
 /datum/research_milestone_data
 	var/milestone_id
@@ -93,10 +93,10 @@ SUBSYSTEM_DEF(scp_research)
 	var/completion_time
 	var/completed_by
 
-	New(var/milestone_id, var/milestone_name, var/milestone_description)
-		src.milestone_id = milestone_id
-		src.milestone_name = milestone_name
-		src.milestone_description = milestone_description
+/datum/research_milestone_data/New(milestone_id, milestone_name, milestone_description)
+	src.milestone_id = milestone_id
+	src.milestone_name = milestone_name
+	src.milestone_description = milestone_description
 
 // Research Manager Methods
 /datum/scp_research_manager/proc/initialize_research_system()

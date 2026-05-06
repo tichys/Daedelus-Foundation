@@ -1,15 +1,6 @@
 // D-Class Management Console
 // In-game device for researchers managing D-Class
 
-#ifndef DCLASS_STATUS_GENERAL
-#define DCLASS_STATUS_GENERAL 0
-#define DCLASS_STATUS_MEDICAL_SUBJECT 1
-#define DCLASS_STATUS_TEST_SUBJECT 2
-#define DCLASS_STATUS_OBSERVATION 3
-#define DCLASS_STATUS_SCP_HOST 4
-#define DCLASS_STATUS_ESCAPED 5
-#endif
-
 /obj/machinery/computer/dclass_management
 	name = "D-Class Management Console"
 	desc = "Console for managing D-Class."
