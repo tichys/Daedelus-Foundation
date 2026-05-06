@@ -37,7 +37,7 @@ export const ResearchLaboratory = (props, context) => {
       title="SCP Foundation Research Laboratory"
       width={1400}
       height={900}
-      theme="scp"
+      theme="scp_terminal"
     >
       <Window.Content>
         <Flex>

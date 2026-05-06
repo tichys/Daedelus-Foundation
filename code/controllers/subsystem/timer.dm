@@ -530,16 +530,17 @@ SUBSYSTEM_DEF(timer)
 	)
 #else
 	// Generate a debuggable name for the timer, simpler but wayyyy cheaper, string generation is a bitch and this saves a LOT of time
-	timer_info = list()
-	timer_info[1] = id
-	timer_info[2] = timeToRun
-	timer_info[3] = wait
-	timer_info[4] = flags
-	timer_info[5] = callBack
-	timer_info[6] = "[callBack.object]"
-	timer_info[7] = getcallingtype()
-	timer_info[8] = callBack.delegate
-	timer_info[9] = "[source]"
+	timer_info = alist(
+		1 = id,
+		2 = timeToRun,
+		3 = wait,
+		4 = flags,
+		5 = callBack,
+		6 = "[callBack.object]",
+		7 = getcallingtype(),
+		8 = callBack.delegate,
+		9 = "[source]"
+	)
 #endif
 
 	if (bucket_joined)

@@ -35,7 +35,7 @@ export const ErrorMonitor = (props, context) => {
       title="Enhanced Error Monitor"
       width={1200}
       height={800}
-      theme="scp"
+      theme="scp_terminal"
     >
       <Window.Content>
         <Tabs>

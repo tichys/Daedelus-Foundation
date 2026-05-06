@@ -35,7 +35,7 @@ export const SCPDocumentation = (props, context) => {
       title="SCP Foundation Documentation System"
       width={1400}
       height={900}
-      theme="scp"
+      theme="scp_terminal"
     >
       <Window.Content>
         <Flex>

@@ -10,7 +10,7 @@ import { Box, Button } from '../components';
 import { Window } from './Window';
 
 export const NtosWindow = (props) => {
-  const { title, width = 575, height = 700, theme = 'ntos', children } = props;
+  const { title, width = 575, height = 700, theme = 'scp_terminal', children } = props;
   const { act, data } = useBackend();
   const {
     PC_device_theme,
