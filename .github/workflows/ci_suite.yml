@@ -38,7 +38,18 @@ jobs:
       - name: Install Tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgit2-dev
+          sudo apt-get install -y libssl-dev pkg-config
+          # Install libgit2 1.3.x
+          cd /tmp
+          wget https://github.com/libgit2/libgit2/releases/download/v1.3.2/libgit2-1.3.2.tar.gz
+          tar xzf libgit2-1.3.2.tar.gz
+          cd libgit2-1.3.2
+          mkdir build && cd build
+          cmake ..
+          cmake --build .
+          sudo cmake --install .
+          sudo ldconfig
+          cd /
           pip3 install setuptools
           bash tools/ci/install_node.sh
           bash tools/ci/install_spaceman_dmm.sh dreamchecker
