@@ -39,11 +39,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libssl-dev pkg-config
-          # Install libgit2 1.8.x (latest stable)
+          # Install libgit2 from source using a stable version
           cd /tmp
-          wget https://github.com/libgit2/libgit2/releases/download/v1.8.1/libgit2-1.8.1.tar.gz
-          tar xzf libgit2-1.8.1.tar.gz
-          cd libgit2-1.8.1
+          wget https://github.com/libgit2/libgit2/archive/refs/tags/v1.9.3.tar.gz
+          tar xzf libgit2-1.9.3.tar.gz
+          cd libgit2-1.9.3
           mkdir build && cd build
           cmake ..
           cmake --build .
