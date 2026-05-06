@@ -507,13 +507,13 @@
 
 		if("toggle_spawn_schedule")
 			var/schedule_name = params["name"]
-			if(schedule_name && schedule_name in spawn_schedules)
+			if(schedule_name && (schedule_name in spawn_schedules))
 				spawn_schedules[schedule_name]["enabled"] = !spawn_schedules[schedule_name]["enabled"]
 				. = TRUE
 
 		if("delete_spawn_schedule")
 			var/schedule_name = params["name"]
-			if(schedule_name && schedule_name in spawn_schedules)
+			if(schedule_name && (schedule_name in spawn_schedules))
 				spawn_schedules -= schedule_name
 				. = TRUE
 

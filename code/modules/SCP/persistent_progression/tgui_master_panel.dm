@@ -594,7 +594,7 @@
 					var/unlocked_count = 0
 					for(var/ckey in SSpersistent_progression.player_data)
 						var/datum/persistent_player_data/pdata = SSpersistent_progression.player_data[ckey]
-						if(pdata && achievement_id in pdata.achievements)
+						if(pdata && (achievement_id in pdata.achievements))
 							unlocked_count++
 
 					player_data["achievements"] += list(list(

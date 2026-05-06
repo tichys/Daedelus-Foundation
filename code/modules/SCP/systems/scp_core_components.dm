@@ -264,7 +264,7 @@
 
 	// Check global category cooldown
 	var/category = skill_data["category"]
-	if(category in global_cooldowns && world.time < global_cooldowns[category])
+	if((category in global_cooldowns) && world.time < global_cooldowns[category])
 		return FALSE
 
 	// Check requirements
@@ -746,7 +746,7 @@ var/global/list/ADV_PERSIST_STORE = list()
 	var/id = ""
 	if(parent_mob)
 		// Try to discover an attached SCP controller datum pattern
-		if(istype(parent_mob:SCP))
+		if(istype(parent_mob:SCP, /datum/scp))
 			// Some SCP mobs hold a `SCP` datum reference
 			var/datum/scp/ctrl = parent_mob:SCP
 			if(ctrl && istext(ctrl?.designation))

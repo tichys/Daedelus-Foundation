@@ -48,7 +48,7 @@
 		<div class='flexRow' style='justify-content: space-between; background-color:[background_color]'>
 			<div style='padding-left: 0.5em;padding-right: 0.5em'>
 				<span class='computerText'>[antagonist]</span>
-				[antagonist in available_roles ? "<span style='color: green; font-size: 10px;'> (Available)</span>" : "<span style='color: red; font-size: 10px;'> (Restricted)</span>"]
+				[(antagonist in available_roles) ? "<span style='color: green; font-size: 10px;'> (Available)</span>" : "<span style='color: red; font-size: 10px;'> (Restricted)</span>"]
 			</div>
 			<div>
 				[button_element(prefs, client_antags[antagonist] ? "ENABLED" : "DISABLED", "pref_act=[/datum/preference/blob/antagonists];toggle_antag=[antagonist]", style = "margin-right: 0.5em")]

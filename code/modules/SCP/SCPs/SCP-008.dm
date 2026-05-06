@@ -155,7 +155,7 @@
 	if(!target || target.stat == DEAD)
 		return
 
-	if(target in infected_targets || target in zombified_targets)
+	if((target in infected_targets) || (target in zombified_targets))
 		return
 
 	infected_targets += target
