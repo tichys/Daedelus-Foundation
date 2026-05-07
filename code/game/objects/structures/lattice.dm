@@ -39,12 +39,16 @@
 /obj/structure/lattice/attackby(obj/item/C, mob/user, params)
 	if(resistance_flags & INDESTRUCTIBLE)
 		return
-	if(C.tool_behaviour == TOOL_WIRECUTTER)
-		to_chat(user, span_notice("Slicing [name] joints ..."))
-		deconstruct()
-	else
-		var/turf/T = get_turf(src)
-		return T.attackby(C, user) //hand this off to the turf instead (for building plating, catwalks, etc)
+	var/turf/T = get_turf(src)
+	return T.attackby(C, user) //hand this off to the turf instead (for building plating, catwalks, etc)
+
+/obj/structure/lattice/wirecutter_act(mob/living/user, obj/item/tool)
+	. = ..()
+	if(.)
+		return
+	to_chat(user, span_notice("Slicing [name] joints ..."))
+	deconstruct()
+	return TRUE
 
 /obj/structure/lattice/deconstruct(disassembled = TRUE)
 	if(!(flags_1 & NODECONSTRUCT_1))
@@ -133,3 +137,49 @@
 		else
 			to_chat(user, span_warning("You need one floor tile to build atop [src]."))
 		return
+
+//Not Really related to lattices but it's hard to know where to put things
+
+/obj/structure/supportlattice
+	name = "Lattice Support Pole"
+	desc = "A branching lattice framework that supports the structure above it."
+	icon = 'icons/80x80.dmi'
+	icon_state = "lattice-pole"
+	layer = ABOVE_MOB_LAYER
+
+/obj/structure/supportlattice/attackby(obj/item/O, mob/user)
+	. = ..()
+
+/obj/structure/supportlattice/welder_act(mob/living/user, obj/item/tool)
+	. = ..()
+	if(.)
+		return
+	user.visible_message(span_warning("[user] begins to dismantle the lattice structure."), span_warning("You begin to dismantle the lattice structure."))
+	if(!do_after(user, 4 SECONDS, target = src))
+		return
+	deconstruct()
+	return TRUE
+
+/obj/structure/supportlattice/arch
+	name = "Lattice Support Arch"
+	desc = "A branching lattice framework in the shape of an arch that supports the structure above it."
+	icon_state = "lattice-arch"
+
+//TD: Construction tie in for building support structures.
+
+/obj/structure/supportpole
+	name = "Metal Support Pole"
+	desc = "A solid steel support pole keeping the roof up and not on you."
+	icon = 'icons/80x80.dmi'
+	icon_state = "support-pole"
+	layer = ABOVE_MOB_LAYER
+
+/obj/structure/supportpole/attackby(obj/item/O, mob/user)
+	. = ..()
+
+/obj/structure/supportpole/welder_act(mob/living/user, obj/item/tool)
+	. = ..()
+	if(.)
+		return
+	user.visible_message(span_warning("[user] begins to dismantle the support pole."), span_warning("You begin to dismantle the support pole."))
+	return TRUE

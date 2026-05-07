@@ -19,6 +19,8 @@ SUBSYSTEM_DEF(persistence)
 	var/list/obj/item/storage/photo_album/photo_albums
 	/// Temporally displaced items from SCP-216
 	var/list/displaced_scp216_items = list()
+	/// Papers/Sticky Notes
+	var/list/sticky_notes = list()
 
 
 /datum/controller/subsystem/persistence/Initialize()
@@ -30,6 +32,7 @@ SUBSYSTEM_DEF(persistence)
 	LoadRandomizedRecipes()
 	load_custom_outfits()
 	LoadDisplacedSCP216Items()
+	LoadStickyNotes()
 
 	load_adventures()
 	return ..()
@@ -42,6 +45,7 @@ SUBSYSTEM_DEF(persistence)
 	SaveRandomizedRecipes()
 	save_custom_outfits()
 	SaveDisplacedSCP216Items()
+	SaveStickyNotes()
 
 /datum/controller/subsystem/persistence/proc/LoadPoly()
 	for(var/mob/living/simple_animal/parrot/poly/P in GLOB.alive_mob_list)
@@ -394,5 +398,21 @@ SUBSYSTEM_DEF(persistence)
 	var/json_file = file(FILE_SCP216_DISPLACED_ITEMS)
 	var/list/file_data = list()
 	file_data["data"] = displaced_scp216_items
+	fdel(json_file)
+	WRITE_FILE(json_file, json_encode(file_data))
+
+/datum/controller/subsystem/persistence/proc/LoadStickyNotes()
+	var/json_file = file("data/sticky_notes.json")
+	if(!fexists(json_file))
+		return
+	var/list/json = json_decode(file2text(json_file))
+	if(!json)
+		return
+	sticky_notes = json["data"]
+
+/datum/controller/subsystem/persistence/proc/SaveStickyNotes()
+	var/json_file = file("data/sticky_notes.json")
+	var/list/file_data = list()
+	file_data["data"] = sticky_notes
 	fdel(json_file)
 	WRITE_FILE(json_file, json_encode(file_data))

@@ -517,3 +517,23 @@
 
 /datum/effect_system/fluid_spread/smoke/chem/quick
 	effect_type = /obj/effect/particle_effect/fluid/smoke/chem/quick
+
+/////////////////////////////////////////////
+
+// A version of smoke that is tinted blue and overrides the process() that would kill it, making it effectively infinite.
+// It's also overriding the normal sources of lag since it won't be processing anything.
+/obj/effect/particle_effect/fluid/smoke/water
+	make_opaque = FALSE
+	color = "#cee0f2"
+
+/obj/effect/particle_effect/fluid/smoke/water/Initialize(mapload, datum/fluid_group/group, ...)
+	. = ..()
+	SSsmoke.stop_processing(src) // Prevent processing to avoid lagging out the server
+
+
+
+/obj/effect/particle_effect/fluid/smoke/water/can_affect_mob(mob/living/carbon/smoker)
+	return FALSE
+
+/obj/effect/particle_effect/fluid/smoke/water/spread(seconds_per_tick)
+	return FALSE

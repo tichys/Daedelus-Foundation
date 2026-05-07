@@ -19,6 +19,9 @@
 	pass_flags_self = PASSSTRUCTURE | LETPASSTHROW
 	var/crate_climb_time = 20
 	var/obj/item/paper/fluff/jobs/cargo/manifest/manifest
+	var/shelve = FALSE
+	var/shelve_range = 0
+	mouse_drag_pointer = TRUE
 
 /obj/structure/closet/crate/Initialize(mapload)
 	. = ..()
@@ -62,8 +65,26 @@
 	. = ..()
 	if(.)
 		return
+	if(istype(src.loc, /obj/structure/crate_shelf))
+		return FALSE // Can't open crates on shelves.
 	if(manifest)
 		tear_manifest(user)
+
+/obj/structure/closet/crate/MouseDrop(atom/drop_atom, src_location, over_location)
+	. = ..()
+	var/mob/living/user = usr
+	if(!isliving(user))
+		return // Ghosts busted.
+	if(!isturf(user.loc) || user.incapacitated() || user.body_position == LYING_DOWN)
+		return // If the user is in a weird state, don't bother trying.
+	if(get_dist(drop_atom, src) != 1 || get_dist(drop_atom, user) != 1)
+		return // Check whether the crate is exactly 1 tile from the shelf and the user.
+	if(istype(drop_atom, /turf/open) && istype(loc, /obj/structure/crate_shelf) && user.Adjacent(drop_atom))
+		var/obj/structure/crate_shelf/shelf = loc
+		return shelf.unload(src, user, drop_atom) // If we're being dropped onto a turf, and we're inside of a crate shelf, unload.
+	if(istype(drop_atom, /obj/structure/crate_shelf) && isturf(loc) && user.Adjacent(src))
+		var/obj/structure/crate_shelf/shelf = drop_atom
+		return shelf.load(src, user) // If we're being dropped onto a crate shelf, and we're in a turf, load.
 
 /obj/structure/closet/crate/after_open(mob/living/user, force)
 	. = ..()
@@ -272,3 +293,27 @@
 	. = ..()
 	for(var/i in 1 to 4)
 		new /obj/effect/spawner/random/decoration/generic(src)
+
+/obj/structure/closet/crate/woodencrate
+	name = "Wooden Crate"
+	desc = "A generic wooden crate, I wonder what's inside?"
+	icon = 'icons/obj/aquaticprops.dmi'
+	icon_state = "woodencrate"
+	layer = ABOVE_OBJ_LAYER
+
+/obj/structure/closet/crate/utilitycart
+	name = "Utility Cart"
+	desc = "A heavy, metal utility cart with wheels."
+	icon_state = "trashcart" //Maybe at some point I will retexture this to make it visually distinct from Trash Carts, but for now it works fine.
+
+/obj/structure/closet/crate/utilitycart/prefilled //Already has three random tools inside
+	name = "Utility Cart"
+	desc = "A heavy, metal utility cart with wheels."
+	icon_state = "trashcart"
+
+/obj/structure/closet/crate/utilitycart/prefilled/PopulateContents()
+	. = ..()
+	new /obj/effect/spawner/random/engineering/tool(src)
+	new /obj/effect/spawner/random/engineering/tool(src)
+	new /obj/effect/spawner/random/engineering/tool(src)
+	new /obj/item/stack/cable_coil/random(src)
