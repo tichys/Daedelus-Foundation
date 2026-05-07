@@ -1,13 +1,13 @@
 // SCP-173 Observation System
 /datum/scp173_observation_system
-	var/mob/living/carbon/human/scp173/owner
+	var/mob/living/scp/scp173/owner
 	var/is_being_observed = FALSE
 	var/observation_quality = 0
 	var/list/observers = list()
 	var/last_observation_check = 0
 	var/observation_check_interval = 1 SECONDS
 
-/datum/scp173_observation_system/New(mob/living/carbon/human/scp173/new_owner)
+/datum/scp173_observation_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
 
 /datum/scp173_observation_system/proc/process_observation()
@@ -44,10 +44,10 @@
 
 // Movement System
 /datum/scp173_movement_system
-	var/mob/living/carbon/human/scp173/owner
+	var/mob/living/scp/scp173/owner
 	var/movement_cooldown = 0
 
-/datum/scp173_movement_system/New(mob/living/carbon/human/scp173/new_owner)
+/datum/scp173_movement_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
 
 /datum/scp173_movement_system/proc/process_movement()
@@ -76,7 +76,7 @@
 
 // Containment System
 /datum/scp173_containment_system
-	var/mob/living/carbon/human/scp173/owner
+	var/mob/living/scp/scp173/owner
 	var/containment_integrity = SCP173_DEFAULT_CONTAINMENT_INTEGRITY
 	var/breach_threshold = SCP173_BREACH_THRESHOLD
 	var/is_contained = TRUE
@@ -115,13 +115,13 @@
 
 // Combat System
 /datum/scp173_combat_system
-	var/mob/living/carbon/human/scp173/owner
+	var/mob/living/scp/scp173/owner
 	var/attack_cooldown = 0
 	var/last_melee_attack = 0
 	var/kills_count = 0
 	var/list/current_targets = list()
 
-/datum/scp173_combat_system/New(mob/living/carbon/human/scp173/new_owner)
+/datum/scp173_combat_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
 
 /datum/scp173_combat_system/proc/process_combat()
@@ -153,12 +153,12 @@
 
 // Research System
 /datum/scp173_research_system
-	var/mob/living/carbon/human/scp173/owner
+	var/mob/living/scp/scp173/owner
 	var/list/research_data = list()
 	var/research_progress = 0
 	var/last_research_update = 0
 
-/datum/scp173_research_system/New(mob/living/carbon/human/scp173/new_owner)
+/datum/scp173_research_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
 
 /datum/scp173_research_system/proc/process_research()

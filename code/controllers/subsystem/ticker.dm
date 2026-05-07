@@ -311,6 +311,9 @@ SUBSYSTEM_DEF(ticker)
 
 	//Setup the antags AFTTTTER theyve gotten their jobs
 	mode.setup_antags()
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(find_scp_spawn_turfs)), 5 SECONDS)
+	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(create_scp_ghost_spawners)), 8 SECONDS)
+	addtimer(CALLBACK(GLOB.scp_role_controller, TYPE_PROC_REF(/datum/scp_role_controller, offer_all_available_scp_roles)), 60 SECONDS)
 	PostSetup()
 	SSticker.ready_players = null
 	SSlobby.game_status?.alpha = 0

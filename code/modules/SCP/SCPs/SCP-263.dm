@@ -185,7 +185,8 @@
 	current_contestant = null
 	game_phase = 0
 	if(parent)
-		parent:game_active = FALSE
+		var/obj/machinery/scp263/P = parent
+		P.game_active = FALSE
 
 /datum/scp263_effect_system
 	var/obj/machinery/parent

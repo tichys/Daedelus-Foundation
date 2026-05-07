@@ -349,6 +349,8 @@ SUBSYSTEM_DEF(scp_research)
 
 /datum/scp_research_manager/proc/get_researcher_by_ckey(ckey)
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
+		if(QDELETED(H))
+			continue
 		if(H.ckey == ckey)
 			return H
 	return null

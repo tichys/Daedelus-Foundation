@@ -52,7 +52,38 @@
 
 	report_breach_to_round_log(scp_id, breach_zone)
 
+	if(GLOB.scp_role_controller)
+		var/scp_type = get_scp_type_from_id(scp_id)
+		if(scp_type)
+			addtimer(CALLBACK(GLOB.scp_role_controller, TYPE_PROC_REF(/datum/scp_role_controller, offer_all_available_scp_roles)), 30 SECONDS)
+
 	return TRUE
+
+/proc/get_scp_type_from_id(scp_id)
+	if(!scp_id)
+		return null
+	var/id = lowertext(scp_id)
+	if(findtext(id, "173"))
+		return SCP_ROLE_173
+	if(findtext(id, "096"))
+		return SCP_ROLE_096
+	if(findtext(id, "008"))
+		return SCP_ROLE_008
+	if(findtext(id, "035"))
+		return SCP_ROLE_035
+	if(findtext(id, "049"))
+		return SCP_ROLE_049
+	if(findtext(id, "079"))
+		return SCP_ROLE_079
+	if(findtext(id, "106"))
+		return SCP_ROLE_106
+	if(findtext(id, "457"))
+		return SCP_ROLE_457
+	if(findtext(id, "939"))
+		return SCP_ROLE_939
+	if(findtext(id, "682"))
+		return SCP_ROLE_682
+	return null
 
 /proc/hook_scp_recontainment(scp_id, list/participants)
 	if(!scp_id)

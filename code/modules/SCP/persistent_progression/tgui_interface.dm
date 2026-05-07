@@ -497,6 +497,8 @@
 	var/list/players = list()
 
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.mind && H.ckey)
 			var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(H.ckey)
 			if(player_data)

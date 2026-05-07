@@ -64,6 +64,8 @@
 	var/formatted = "<h2 class='alert'>[html_encode(header)]</h2><br><span style='font-size:120%'>[span_alert("[html_encode(message)]")]</span>"
 
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 

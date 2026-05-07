@@ -162,7 +162,6 @@ SUBSYSTEM_DEF(ambient_audio)
 
 /datum/controller/subsystem/ambient_audio/Initialize()
 	controller = new()
-	controller.Initialize()
 	return ..()
 
 /datum/controller/subsystem/ambient_audio/fire()

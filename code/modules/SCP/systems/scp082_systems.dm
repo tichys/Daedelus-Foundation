@@ -6,7 +6,7 @@
 // ========================================
 
 /datum/scp082_hunger_system
-	var/mob/living/carbon/human/scp082/owner = null
+	var/mob/living/scp/scp082/owner = null
 	var/hunger_level = 50
 	var/max_hunger_level = 100
 	var/satiation_level = 50
@@ -16,7 +16,7 @@
 	var/hunger_decay_interval = 30 SECONDS
 	var/last_hunger_decay = 0
 
-/datum/scp082_hunger_system/New(mob/living/carbon/human/scp082/new_owner)
+/datum/scp082_hunger_system/New(mob/living/scp/scp082/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -58,13 +58,13 @@
 // ========================================
 
 /datum/scp082_hospitality_tracking_system
-	var/mob/living/carbon/human/scp082/owner = null
+	var/mob/living/scp/scp082/owner = null
 	var/intimidation_level = 50
 	var/max_intimidation_level = 100
 	var/presence_radius = 5
 	var/terror_intensity = 30
 
-/datum/scp082_hospitality_tracking_system/New(mob/living/carbon/human/scp082/new_owner)
+/datum/scp082_hospitality_tracking_system/New(mob/living/scp/scp082/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -109,12 +109,12 @@
 // ========================================
 
 /datum/scp082_research_integration
-	var/mob/living/carbon/human/scp082/owner = null
+	var/mob/living/scp/scp082/owner = null
 	var/list/research_data = list()
 	var/last_research_update = 0
 	var/research_update_interval = 120 SECONDS
 
-/datum/scp082_research_integration/New(mob/living/carbon/human/scp082/new_owner)
+/datum/scp082_research_integration/New(mob/living/scp/scp082/new_owner)
 	. = ..()
 	owner = new_owner
 

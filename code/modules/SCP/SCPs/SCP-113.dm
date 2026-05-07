@@ -149,7 +149,8 @@
 		victim.gib()
 		hook_scp_combat(victim, "SCP-113", 0, 100)
 		if(parent)
-			parent:rejection_count++
+			var/obj/item/scp113/P = parent
+			P.rejection_count++
 	else
 		victim.apply_damage(100, BRUTE, GROIN)
 		victim.apply_damage(50, TOX)

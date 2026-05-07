@@ -1,5 +1,4 @@
 @use 'sass:color';
-@use 'sass:meta';
 
 $scp-red: #8b0000;
 $scp-dark-red: #5c0000;
@@ -11,101 +10,12 @@ $scp-border: #2a2a30;
 $scp-text: #c8c8c8;
 $scp-dim-text: #6a6a70;
 $scp-highlight: #e8e8e8;
-
-@use '../colors.scss' with (
-  $primary: $scp-amber,
-  $good: $scp-green,
-  $bad: $scp-red,
-  $label: $scp-amber,
-  $fg-map-keys: (),
-  $bg-map-keys: ()
-);
-
-@use '../base.scss' with (
-  $color-bg: $scp-dark-bg,
-  $color-fg: $scp-text,
-  $color-bg-grad-spread: 0%,
-  $font-family: (
-    'Consolas',
-    'Courier New',
-    monospace,
-  )
-);
+$scp-mono: ('Consolas', 'Courier New', monospace);
 
 .theme-scp_terminal {
-  @include meta.load-css('../atomic/color.scss');
-
-  @include meta.load-css(
-    '../components/Button.scss',
-    $with: (
-      'color-default': #1a1a20,
-      'color-disabled': #0d0d10,
-      'color-selected': $scp-dark-red,
-      'color-caution': #2a1a00,
-      'color-danger': $scp-dark-red,
-      'color-transparent-text': $scp-text
-    )
-  );
-
-  @include meta.load-css(
-    '../components/Tabs.scss',
-    $with: (
-      'color-default': #1a1a20,
-      'tab-color-selected': $scp-dark-red,
-      'text-color': $scp-dim-text,
-      'text-color-selected': $scp-highlight
-    )
-  );
-
-  @include meta.load-css(
-    '../components/Input.scss',
-    $with: ('border-color': $scp-border)
-  );
-
-  @include meta.load-css(
-    '../components/Section.scss',
-    $with: ('title-text-color': $scp-amber)
-  );
-
-  @include meta.load-css(
-    '../components/Tooltip.scss',
-    $with: ('background-color': #1a1a1e)
-  );
-
-  @include meta.load-css(
-    '../components/Dimmer.scss',
-    $with: ('background-dimness': 0.7)
-  );
-
-  @include meta.load-css('../components/Modal.scss');
-
-  @include meta.load-css(
-    '../components/NoticeBox.scss',
-    $with: ('background-color': $scp-dark-red)
-  );
-
-  @include meta.load-css('../components/NumberInput.scss');
-
-  @include meta.load-css(
-    '../components/ProgressBar.scss',
-    $with: ('color-default-fill': $scp-amber, 'background-color': #1a1a20)
-  );
-
-  @include meta.load-css('../components/LabeledList.scss');
-
-  @include meta.load-css(
-    '../components/BlockQuote.scss',
-    $with: ('color-default': $scp-border)
-  );
-
-  @include meta.load-css('../components/Dropdown.scss');
-
-  @include meta.load-css('../layouts/Layout.scss');
-  @include meta.load-css('../layouts/Window.scss');
-  @include meta.load-css(
-    '../layouts/TitleBar.scss',
-    $with: ('background-color': $scp-dark-red, 'text-color': $scp-highlight)
-  );
+  color: $scp-text;
+  font-family: $scp-mono;
+  background-color: $scp-dark-bg;
 
   .Layout__content {
     background-image: none;
@@ -149,18 +59,22 @@ $scp-highlight: #e8e8e8;
   }
 
   .Window__contentPadding {
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
   }
 
   .TitleBar {
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
+    background-color: $scp-dark-red;
+    color: $scp-highlight;
     border-bottom: 2px solid $scp-red;
   }
 
   .Button {
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
+    background-color: #1a1a20;
     border: 1px solid $scp-border;
     border-radius: 0;
+    color: $scp-text;
     text-transform: uppercase;
     font-size: 0.85em;
     letter-spacing: 0.05em;
@@ -168,19 +82,28 @@ $scp-highlight: #e8e8e8;
     &:hover {
       border-color: $scp-red;
       background-color: rgba($scp-red, 0.3);
+      color: $scp-highlight;
     }
-  }
 
-  .Button--selected {
-    background-color: $scp-dark-red;
-    border-color: $scp-red;
-    color: $scp-highlight;
-    box-shadow: 0 0 8px rgba($scp-red, 0.4);
-  }
+    &--selected {
+      background-color: $scp-dark-red;
+      border-color: $scp-red;
+      color: $scp-highlight;
+      box-shadow: 0 0 8px rgba($scp-red, 0.4);
+    }
 
-  .Button--disabled {
-    opacity: 0.3;
-    border-color: #111;
+    &--disabled {
+      opacity: 0.3;
+      border-color: #111;
+    }
+
+    &--caution {
+      background-color: #2a1a00;
+    }
+
+    &--danger {
+      background-color: $scp-dark-red;
+    }
   }
 
   .Section {
@@ -189,7 +112,8 @@ $scp-highlight: #e8e8e8;
     background-color: $scp-panel-bg;
 
     .Section__title {
-      font-family: 'Consolas', 'Courier New', monospace;
+      font-family: $scp-mono;
+      color: $scp-amber;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       border-bottom: 1px solid $scp-border;
@@ -197,7 +121,7 @@ $scp-highlight: #e8e8e8;
   }
 
   .Input {
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
     background-color: #0d0d10;
     border: 1px solid $scp-border;
     border-radius: 0;
@@ -205,39 +129,100 @@ $scp-highlight: #e8e8e8;
   }
 
   .Dropdown {
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
     background-color: #0d0d10;
     border: 1px solid $scp-border;
     border-radius: 0;
+    color: $scp-text;
+  }
+
+  .Tabs {
+    font-family: $scp-mono;
+
+    .Tab {
+      font-family: $scp-mono;
+      color: $scp-dim-text;
+
+      &--selected {
+        background-color: $scp-dark-red;
+        color: $scp-highlight;
+      }
+    }
   }
 
   .LabeledList__label {
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
     text-transform: uppercase;
     font-size: 0.85em;
     letter-spacing: 0.05em;
     color: $scp-dim-text;
   }
 
+  .ProgressBar {
+    background-color: #1a1a20;
+
+    .ProgressBar__fill {
+      background-color: $scp-amber;
+    }
+
+    &--color-good .ProgressBar__fill {
+      background-color: $scp-green;
+    }
+
+    &--color-bad .ProgressBar__fill {
+      background-color: $scp-red;
+    }
+  }
+
+  .NoticeBox {
+    background-color: $scp-dark-red;
+  }
+
+  .Tooltip {
+    font-family: $scp-mono;
+    background-color: #1a1a1e;
+    border: 1px solid $scp-border;
+  }
+
+  .Dimmer {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+  .NumberInput {
+    font-family: $scp-mono;
+    border: 1px solid $scp-border;
+  }
+
+  .BlockQuote {
+    border-left: 2px solid $scp-border;
+  }
+
   .candystripe:nth-child(odd) {
     background-color: rgba(255, 255, 255, 0.02);
   }
 
-  .Tab {
-    font-family: 'Consolas', 'Courier New', monospace;
-  }
-
-  .Tooltip {
-    font-family: 'Consolas', 'Courier New', monospace;
-    border: 1px solid $scp-border;
-  }
-
   span {
     color: $scp-text;
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: $scp-mono;
   }
 
   hr {
     border: 1px solid $scp-border;
+  }
+
+  .color-good {
+    color: $scp-green;
+  }
+
+  .color-bad {
+    color: $scp-red;
+  }
+
+  .color-label {
+    color: $scp-amber;
+  }
+
+  .color-average {
+    color: $scp-amber;
   }
 }

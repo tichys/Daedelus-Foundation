@@ -69,6 +69,8 @@
 
 /datum/round_event/scp_memetic_hazard/start()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/area/A = get_area(H)
@@ -151,6 +153,8 @@
 
 /datum/round_event/scp_security_alert/start()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -179,6 +183,8 @@
 
 /datum/round_event/scp_dclass_uprising/start()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/area/A = get_area(H)
@@ -259,6 +265,8 @@
 	if(objective_completed && survivors > 0)
 		priority_announce("CRITICAL FAILURE: Chaos Insurgency operatives completed primary objective. Containment breach confirmed.", sound_type = ANNOUNCER_ALERT)
 		for(var/mob/living/carbon/human/H in GLOB.player_list)
+			if(QDELETED(H))
+				continue
 			if(H.stat != DEAD && H.client && (ACCESS_SECURITY in H.get_idcard(TRUE)?.access))
 				to_chat(H, span_userdanger("Mission failed. Chaos Insurgency won."))
 	else if(survivors == 0)

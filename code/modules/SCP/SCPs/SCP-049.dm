@@ -2,7 +2,7 @@
 // Complete Foundation-19 implementation with persistence and sanity integration
 // Ported from: https://github.com/Foundation-19/Daedelus-Foundation/pull/13/files
 
-/mob/living/carbon/human/scp049
+/mob/living/scp/scp049
 	name = "SCP-049"
 	desc = "A tall humanoid figure wearing the black robes and bird-like mask of a medieval plague doctor."
 	icon = 'icons/scp/scp-049.dmi'
@@ -64,11 +64,14 @@
 	var/turf/lure_target = null
 	var/total_playtime = 0
 
+	// Command system for SCP-049-1 servants
+	var/datum/scp049_command_system/command_system
+
 	// Progression integration tracking
 	var/cures_performed = 0
 	var/containment_breaches = 0
 
-/mob/living/carbon/human/scp049/Initialize()
+/mob/living/scp/scp049/Initialize()
 	. = ..()
 
 	faction |= "scp049"
@@ -85,6 +88,9 @@
 	// Set session start time
 	session_start_time = world.time
 
+	// Initialize command system
+	command_system = new /datum/scp049_command_system(src)
+
 	// Set up HUD systems
 	setup_pestilence_hud()
 
@@ -99,23 +105,17 @@
 		SSscp_persistence.manager.scp_instances["SCP-049"] = new /datum/scp_instance("SCP-049", src)
 
 	// Remove bodypart overlays to prevent covering the SCP icon
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
 	// Grant language
 	grant_language(/datum/language/common, TRUE, TRUE)
 
-/mob/living/carbon/human/scp049/proc/setup_pestilence_hud()
+/mob/living/scp/scp049/proc/setup_pestilence_hud()
 	// Add pestilence HUD capability (handled by species)
 	var/datum/atom_hud/data/human/pestilence/pestilence_hud = GLOB.huds[DATA_HUD_PESTILENCE]
 	if(pestilence_hud)
 		pestilence_hud.add_atom_to_hud(src)
 
-/mob/living/carbon/human/scp049/proc/announce_presence()
+/mob/living/scp/scp049/proc/announce_presence()
 	if(world.time < last_announcement + announcement_cooldown)
 		return
 
@@ -127,6 +127,8 @@
 
 	// Send announcement to nearby players
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.z == z && get_dist(H, src) <= 15)
 			to_chat(H, "<span class='danger'><b>[announcement]</b></span>")
 
@@ -137,7 +139,7 @@
 				continue
 
 // Pestilence detection (SCP-049 senses the Pestilence in others — its delusion)
-/mob/living/carbon/human/scp049/proc/detect_pestilence()
+/mob/living/scp/scp049/proc/detect_pestilence()
 	if(world.time < pestilence_cooldown)
 		to_chat(src, "<span class='warning'>You need a moment to sense the Pestilence again...</span>")
 		return FALSE
@@ -167,7 +169,7 @@
 	save_persistence_data()
 	return TRUE
 
-/mob/living/carbon/human/scp049/proc/mark_pestilence(mob/living/carbon/human/target)
+/mob/living/scp/scp049/proc/mark_pestilence(mob/living/carbon/human/target)
 	if(!target)
 		return FALSE
 
@@ -188,13 +190,13 @@
 	if(target.sanity)
 		target.sanity.adjust_sanity(-10, "Sensed by SCP-049 as Pestilence carrier")
 
-/mob/living/carbon/human/scp049/proc/isscp049_1(mob/M)
+/mob/living/scp/scp049/proc/isscp049_1(mob/M)
 	return istype(M, /mob/living/simple_animal/hostile/zombie/scp049_1)
 
 
 
 // Enhanced cure mechanics (Foundation-19 approach)
-/mob/living/carbon/human/scp049/proc/cure_target(mob/living/carbon/human/target)
+/mob/living/scp/scp049/proc/cure_target(mob/living/carbon/human/target)
 	if(world.time < cure_cooldown)
 		to_chat(src, "<span class='warning'>The cure needs time to prepare...</span>")
 		return FALSE
@@ -234,7 +236,7 @@
 	save_persistence_data()
 	return TRUE
 
-/mob/living/carbon/human/scp049/proc/create_scp049_1(mob/living/carbon/human/target)
+/mob/living/scp/scp049/proc/create_scp049_1(mob/living/carbon/human/target)
 	// Enhanced SCP-049-1 creation process
 	target.dust(just_ash = FALSE, drop_items = TRUE, force = TRUE)
 
@@ -247,6 +249,7 @@
 	zombie.melee_damage_lower = SCP049_1_MELEE_DAMAGE_LOWER
 	zombie.melee_damage_upper = SCP049_1_MELEE_DAMAGE_UPPER
 	zombie.move_to_delay = SCP049_1_MOVE_DELAY
+	zombie.setup_servant(src)
 	if(target.client)
 		zombie.key = target.key
 		to_chat(zombie, "<span class='danger'>You have been converted into SCP-049-1! You are now a mindless servant of SCP-049.</span>")
@@ -255,12 +258,12 @@
 	playsound(src, 'sound/scp/scp049/SCP049_4.ogg', 70, 0)
 
 // Door breaching (uses component)
-/mob/living/carbon/human/scp049/proc/breach_doors()
+/mob/living/scp/scp049/proc/breach_doors()
 	// Trigger the door breacher component
 	SEND_SIGNAL(src, COMSIG_MOB_BREACH_DOORS)
 
 // Research mechanics
-/mob/living/carbon/human/scp049/proc/research_cure()
+/mob/living/scp/scp049/proc/research_cure()
 	if(world.time < research_cooldown)
 		to_chat(src, "<span class='warning'>More research time is required...</span>")
 		return FALSE
@@ -276,7 +279,7 @@
 	save_persistence_data()
 	return TRUE
 
-/mob/living/carbon/human/scp049/proc/trigger_evolution()
+/mob/living/scp/scp049/proc/trigger_evolution()
 	if(evolution_stage >= max_evolution_stage)
 		to_chat(src, "<span class='notice'>You have achieved the pinnacle of the Great Work.</span>")
 		return
@@ -307,14 +310,16 @@
 	announce_evolution()
 	save_persistence_data()
 
-/mob/living/carbon/human/scp049/proc/announce_evolution()
+/mob/living/scp/scp049/proc/announce_evolution()
 	var/announcement = "SCP-049 has evolved to stage [evolution_stage]! The Great Work progresses..."
 	for(var/mob/M in GLOB.player_list)
+		if(QDELETED(M))
+			continue
 		to_chat(M, "<span class='danger'><b>[announcement]</b></span>")
 	playsound(src, 'sound/scp/scp049/SCP049_5.ogg', 100, 0)
 
 // Enhanced persistence integration
-/mob/living/carbon/human/scp049/proc/save_persistence_data()
+/mob/living/scp/scp049/proc/save_persistence_data()
 	var/list/persistence_data = list(
 		"pestilence_level" = pestilence_level,
 		"cure_potency" = cure_potency,
@@ -333,7 +338,7 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.save_scp_data("SCP-049", persistence_data)
 
-/mob/living/carbon/human/scp049/proc/load_persistence_data()
+/mob/living/scp/scp049/proc/load_persistence_data()
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/list/persistence_data = SSscp_persistence.manager.load_scp_data("SCP-049")
 		if(persistence_data)
@@ -350,22 +355,22 @@
 			total_cures_performed = persistence_data["total_cures_performed"] || 0
 			total_playtime = persistence_data["total_playtime"] || 0
 
-/mob/living/carbon/human/scp049/proc/detect_pestilence_verb()
+/mob/living/scp/scp049/proc/detect_pestilence_verb()
 	detect_pestilence()
 
-/mob/living/carbon/human/scp049/proc/breach_doors_verb()
+/mob/living/scp/scp049/proc/breach_doors_verb()
 	breach_doors()
 
-/mob/living/carbon/human/scp049/proc/research_cure_verb()
+/mob/living/scp/scp049/proc/research_cure_verb()
 	research_cure()
 
-/mob/living/carbon/human/scp049/proc/announce_verb()
+/mob/living/scp/scp049/proc/announce_verb()
 	announce_presence()
 
-/mob/living/carbon/human/scp049/proc/show_status_verb()
+/mob/living/scp/scp049/proc/show_status_verb()
 	show_status()
 
-/mob/living/carbon/human/scp049/proc/show_status()
+/mob/living/scp/scp049/proc/show_status()
 	var/status_text = "<b>SCP-049 Status Report:</b><br>"
 	status_text += "Pestilence Level: [pestilence_level]/[max_pestilence_level]<br>"
 	status_text += "Cure Potency: [cure_potency]/[max_cure_potency]<br>"
@@ -405,7 +410,7 @@
 
 
 // Progression Integration Hooks
-/mob/living/carbon/human/scp049/proc/on_cure_attempt(mob/living/carbon/human/target)
+/mob/living/scp/scp049/proc/on_cure_attempt(mob/living/carbon/human/target)
 	if(!target || !target.ckey)
 		return
 	
@@ -413,20 +418,20 @@
 	hook_scp_interaction(target, "SCP-049", INTERACTION_TYPE_MEDICAL, data)
 	hook_scp_combat(target, "SCP-049", 50, 0)
 
-/mob/living/carbon/human/scp049/proc/on_pestilence_detected(mob/living/carbon/human/target)
+/mob/living/scp/scp049/proc/on_pestilence_detected(mob/living/carbon/human/target)
 	if(!target || !target.ckey)
 		return
 	
 	hook_scp_combat(target, "SCP-049", 0, 0)
 	start_scp_survival_tracking(target, "SCP-049", INTERACTION_RISK_HIGH)
 
-/mob/living/carbon/human/scp049/proc/on_evolution()
+/mob/living/scp/scp049/proc/on_evolution()
 	if(SSscp_specializations && SSscp_specializations.manager && src.ckey)
 		SSscp_specializations.manager.add_specialization_xp(src.ckey, SPEC_TRACK_RESEARCH, 100)
 
-/mob/living/carbon/human/scp049/proc/on_breach()
+/mob/living/scp/scp049/proc/on_breach()
 	containment_breaches++
 	hook_scp_breach("SCP-049", src)
 
-/mob/living/carbon/human/scp049/proc/on_recontainment()
+/mob/living/scp/scp049/proc/on_recontainment()
 	hook_scp_recontainment("SCP-049", list("method" = "standard"))

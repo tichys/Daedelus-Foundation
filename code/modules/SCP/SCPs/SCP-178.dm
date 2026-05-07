@@ -71,7 +71,7 @@
 
 	if(dimension_phase % 50 == 0)
 		if(prob(15))
-			wearer.adjustBrainLoss(sanity_drain)
+			wearer.adjustOrganLoss(ORGAN_SLOT_BRAIN, sanity_drain)
 			to_chat(wearer, "<span class='danger'>You glimpse something... wrong.</span>")
 			hook_scp_combat(wearer, "SCP-178", 0, 5)
 

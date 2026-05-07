@@ -350,6 +350,111 @@ SUBSYSTEM_DEF(scp_experiments)
 	experiment_templates[template.template_id] = template
 	return TRUE
 
+/datum/scp_experiment_manager/proc/suspend_experiment(experiment_id, mob/user)
+	var/datum/scp_experiment/exp = active_experiments[experiment_id]
+	if(!exp)
+		return FALSE
+	if(exp.status != "active")
+		return FALSE
+	exp.status = "suspended"
+	if(user)
+		to_chat(user, "<span class='notice'>Experiment [exp.name] has been suspended.</span>")
+		log_game("[key_name(user)] suspended experiment [exp.name] ([experiment_id])")
+	return TRUE
+
+/datum/scp_experiment_manager/proc/resume_experiment(experiment_id, mob/user)
+	var/datum/scp_experiment/exp = active_experiments[experiment_id]
+	if(!exp)
+		return FALSE
+	if(exp.status != "suspended")
+		return FALSE
+	exp.status = "active"
+	if(user)
+		to_chat(user, "<span class='notice'>Experiment [exp.name] has been resumed.</span>")
+	return TRUE
+
+/datum/scp_experiment_manager/proc/terminate_experiment(experiment_id, mob/user)
+	var/datum/scp_experiment/exp = active_experiments[experiment_id]
+	if(!exp)
+		return FALSE
+	exp.status = "terminated"
+	exp.outcome = EXPERIMENT_OUTCOME_NEUTRAL
+	exp.completion_time = world.time
+	completed_experiments[experiment_id] = exp
+	active_experiments -= experiment_id
+	if(user)
+		to_chat(user, "<span class='warning'>Experiment [exp.name] has been terminated.</span>")
+		log_game("[key_name(user)] terminated experiment [exp.name] ([experiment_id])")
+	return TRUE
+
+/datum/scp_experiment_manager/proc/get_all_active_experiments_data()
+	var/list/result = list()
+	for(var/exp_id in active_experiments)
+		var/datum/scp_experiment/exp = active_experiments[exp_id]
+		var/phase_name = get_phase_name(exp.current_phase)
+		var/progress = round((exp.phase_progress / max(1, exp.phase_duration)) * 100)
+		result[exp_id] = list(
+			"id" = exp.experiment_id,
+			"name" = exp.name,
+			"scp_id" = exp.scp_id,
+			"type" = exp.experiment_type,
+			"type_name" = get_experiment_type_name(exp.experiment_type),
+			"risk_level" = exp.risk_level,
+			"risk_name" = get_experiment_risk_name(exp.risk_level),
+			"status" = exp.status,
+			"phase" = exp.current_phase,
+			"phase_name" = phase_name,
+			"progress" = progress,
+			"phase_progress" = exp.phase_progress,
+			"phase_duration" = exp.phase_duration,
+			"researcher" = exp.primary_researcher?.name || "Unknown",
+			"assistant_count" = length(exp.assistants),
+			"start_time" = exp.start_time,
+			"data_points" = length(exp.data_collected),
+		)
+	return result
+
+/datum/scp_experiment_manager/proc/get_experiment_detail(experiment_id)
+	var/datum/scp_experiment/exp = active_experiments[experiment_id]
+	if(!exp)
+		exp = completed_experiments[experiment_id]
+	if(!exp)
+		return null
+	return list(
+		"id" = exp.experiment_id,
+		"name" = exp.name,
+		"scp_id" = exp.scp_id,
+		"type" = exp.experiment_type,
+		"type_name" = get_experiment_type_name(exp.experiment_type),
+		"risk_level" = exp.risk_level,
+		"risk_name" = get_experiment_risk_name(exp.risk_level),
+		"status" = exp.status,
+		"phase" = exp.current_phase,
+		"phase_name" = get_phase_name(exp.current_phase),
+		"phase_progress" = exp.phase_progress,
+		"phase_duration" = exp.phase_duration,
+		"researcher" = exp.primary_researcher?.name || "Unknown",
+		"assistant_count" = length(exp.assistants),
+		"start_time" = exp.start_time,
+		"completion_time" = exp.completion_time,
+		"outcome" = exp.outcome,
+		"data_collected" = exp.data_collected,
+		"phase_results" = exp.phase_results,
+		"has_scp_parent" = !!exp.scp_parent,
+	)
+
+/proc/get_phase_name(phase)
+	switch(phase)
+		if(EXPERIMENT_PHASE_PREPARATION)
+			return "Preparation"
+		if(EXPERIMENT_PHASE_EXECUTION)
+			return "Execution"
+		if(EXPERIMENT_PHASE_OBSERVATION)
+			return "Observation"
+		if(EXPERIMENT_PHASE_CONCLUSION)
+			return "Conclusion"
+	return "Unknown"
+
 /datum/scp_experiment_manager/proc/get_available_experiments(mob/living/carbon/human/user, scp_id)
 	var/list/available = list()
 	
@@ -449,7 +554,25 @@ SUBSYSTEM_DEF(scp_experiments)
 	find_scp_parent()
 
 /datum/scp_experiment/proc/find_scp_parent()
-	return
+	if(!scp_id)
+		return
+	for(var/mob/living/scp/S in GLOB.mob_list)
+		if(QDELETED(S))
+			continue
+		if(S.persistence_id == scp_id)
+			scp_parent = S
+			return
+	for(var/mob/living/carbon/human/H in GLOB.human_list)
+		if(QDELETED(H))
+			continue
+		var/datum/scp/SCP = H.SCP
+		if(SCP && SCP.designation == scp_id)
+			scp_parent = H
+			return
+	if(SSscp_persistence && SSscp_persistence.manager)
+		for(var/instance_id in SSscp_persistence.manager.scp_instances)
+			if(instance_id == scp_id)
+				return
 
 /datum/scp_experiment/proc/process_experiment()
 	if(status != "active")
@@ -471,8 +594,8 @@ SUBSYSTEM_DEF(scp_experiments)
 	
 	notify_phase_change()
 	
-	if(scp_parent && istype(scp_parent, /mob/living/carbon/human/scp173))
-		var/mob/living/carbon/human/scp173/scp = scp_parent
+	if(scp_parent && istype(scp_parent, /mob/living/scp/scp173))
+		var/mob/living/scp/scp173/scp = scp_parent
 		scp.SCP?.log_interaction(primary_researcher, "experiment_phase:[current_phase]")
 
 /datum/scp_experiment/proc/notify_phase_change()

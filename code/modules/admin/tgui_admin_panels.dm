@@ -460,7 +460,20 @@
 			var/var_name = params["var_name"]
 			if(!target.can_vv_get(var_name))
 				return
-			target.vv_edit_var(var_name, params["value"])
+			var/current_value = target.vars[var_name]
+			var/default_class = usr.client.vv_get_class(var_name, current_value)
+			if(default_class == VV_TEXT)
+				default_class = VV_MESSAGE
+			var/list/L = usr.client.vv_get_value(default_class = default_class, current_value = current_value, extra_classes = list(VV_LIST), var_name = var_name)
+			if(!L["class"])
+				return
+			if(L["class"] == VV_LIST)
+				if(islist(current_value))
+					usr.client.mod_list(current_value, target, "[target]", var_name)
+				else
+					usr.client.mod_list(list(), target, "[target]", var_name)
+				return
+			target.vv_edit_var(var_name, L["value"])
 		if("mark")
 			usr.client.holder.marked_datum = target
 		if("tag")

@@ -5,12 +5,12 @@
 #define CONTAINMENT_RATING_D 5
 #define CONTAINMENT_RATING_F 6
 
-#define METRIC_RESPONSE_TIME 1
-#define METRIC_PERSONNEL_SAFETY 2
-#define METRIC_SCP_CONDITION 3
-#define METRIC_FACILITY_DAMAGE 4
-#define METAINMENT_TIME 5
-#define METRIC_PROTOCOL_ADHERENCE 6
+#define METRIC_RESPONSE_TIME "response_time"
+#define METRIC_PERSONNEL_SAFETY "personnel_safety"
+#define METRIC_SCP_CONDITION "scp_condition"
+#define METRIC_FACILITY_DAMAGE "facility_damage"
+#define METRIC_CONTAINMENT_TIME "containment_time"
+#define METRIC_PROTOCOL_ADHERENCE "protocol_adherence"
 
 SUBSYSTEM_DEF(containment_evaluation)
 	name = "Containment Evaluation"
@@ -292,8 +292,8 @@ SUBSYSTEM_DEF(containment_evaluation)
 		0.15,
 		"Collateral destruction"
 	)
-	metrics[METAINMENT_TIME] = new /datum/containment_metric(
-		METAINMENT_TIME,
+	metrics[METRIC_CONTAINMENT_TIME] = new /datum/containment_metric(
+		METRIC_CONTAINMENT_TIME,
 		"Recontainment Speed",
 		0.15,
 		"Time to recontain"
@@ -308,10 +308,10 @@ SUBSYSTEM_DEF(containment_evaluation)
 	response_time_start = world.time
 
 /datum/containment_evaluation/proc/process_evaluation()
-	if(metrics[METAINMENT_TIME])
+	if(metrics[METRIC_CONTAINMENT_TIME])
 		var/elapsed = (world.time - start_time) / 600
 		var/remaining = max(0, 100 - (elapsed * 2))
-		metrics[METAINMENT_TIME].score = remaining
+		metrics[METRIC_CONTAINMENT_TIME].score = remaining
 
 /datum/containment_evaluation/proc/update_metric(metric_type, value)
 	if(!(metric_type in metrics))

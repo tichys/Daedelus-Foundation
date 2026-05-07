@@ -99,7 +99,6 @@
 		trigger_deep_horror_event(nearby_people)
 
 /obj/structure/scp087/proc/escalate_all_systems()
-	// Escalate all systems simultaneously
 	if(descent_system)
 		descent_system.increase_descent_intensity()
 	if(horror_system)
@@ -109,10 +108,11 @@
 	if(environmental_system)
 		environmental_system.increase_darkness()
 
-	// Announce escalation
 	for(var/mob/living/carbon/human/H in range(8, src))
 		if(H.stat != DEAD)
 			to_chat(H, "<span class='danger'>The stairwell's malevolent presence intensifies dramatically!</span>")
+
+	activation_events = 50
 
 /obj/structure/scp087/proc/trigger_deep_horror_event(list/targets)
 	// Major event that affects all nearby people

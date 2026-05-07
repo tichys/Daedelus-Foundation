@@ -1,7 +1,7 @@
 // SCP-106 - The Old Man
 // An elderly humanoid that can phase through walls and create pocket dimensions
 
-/mob/living/carbon/human/scp106
+/mob/living/scp/scp106
 	name = "SCP-106"
 	desc = "An elderly humanoid figure with dark, wrinkled skin. It appears to be hunched over."
 	icon = 'icons/scp/scp-106.dmi'
@@ -16,7 +16,7 @@
 	var/datum/scp106_containment_system/containment_system
 	var/datum/scp106_research_integration/research_integration
 
-/mob/living/carbon/human/scp106/Initialize()
+/mob/living/scp/scp106/Initialize()
 	. = ..()
 
 	// Set species properly
@@ -55,14 +55,8 @@
 	START_PROCESSING(SSobj, src)
 
 	// Remove bodypart overlays to prevent covering the SCP icon
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp106/process(delta_time)
+/mob/living/scp/scp106/process(delta_time)
 	// Don't call parent - we're implementing our own process logic
 
 	// Update all systems
@@ -73,7 +67,7 @@
 	containment_system?.process_containment()
 	research_integration?.process_research()
 
-/mob/living/carbon/human/scp106/Destroy()
+/mob/living/scp/scp106/Destroy()
 	QDEL_NULL(phasing_system)
 	QDEL_NULL(pocket_dimension_system)
 	QDEL_NULL(corrosion_system)
@@ -84,7 +78,7 @@
 	return ..()
 
 // SCP-106 Status Display
-/mob/living/carbon/human/scp106/proc/get_scp106_status_items()
+/mob/living/scp/scp106/proc/get_scp106_status_items()
 	var/list/status_items = list()
 
 	if(phasing_system)
@@ -108,13 +102,13 @@
 	return status_items
 
 // Override get_status_tab_items to include SCP-106 specific information
-/mob/living/carbon/human/scp106/get_status_tab_items()
+/mob/living/scp/scp106/get_status_tab_items()
 	var/list/status_items = ..()
 	status_items += get_scp106_status_items()
 	return status_items
 
 // Enhanced examine for SCP-106
-/mob/living/carbon/human/scp106/examine(mob/user)
+/mob/living/scp/scp106/examine(mob/user)
 	. = ..()
 
 	if(phasing_system)
@@ -127,7 +121,7 @@
 		. += "<span class='danger'>This SCP-106 has breached containment!</span>"
 
 // Research contribution
-/mob/living/carbon/human/scp106/proc/contribute_research_data()
+/mob/living/scp/scp106/proc/contribute_research_data()
 	var/research_data = list(
 		"scp_type" = "SCP-106",
 		"dimensional_energy" = phasing_system?.dimensional_energy || 0,
@@ -140,19 +134,19 @@
 	research_integration?.research_data["last_update"] = research_data
 
 // Progression Integration Hooks
-/mob/living/carbon/human/scp106/proc/on_breach()
+/mob/living/scp/scp106/proc/on_breach()
 	hook_scp_breach("SCP-106", src)
 
-/mob/living/carbon/human/scp106/proc/on_pocket_capture(mob/living/carbon/human/victim)
+/mob/living/scp/scp106/proc/on_pocket_capture(mob/living/carbon/human/victim)
 	if(victim && victim.ckey)
 		hook_scp_interaction(victim, "SCP-106", INTERACTION_TYPE_CONTAINMENT, list("captured" = TRUE))
 		start_scp_survival_tracking(victim, "SCP-106", INTERACTION_RISK_CRITICAL)
 
-/mob/living/carbon/human/scp106/proc/on_pocket_escape(mob/living/carbon/human/escapee)
+/mob/living/scp/scp106/proc/on_pocket_escape(mob/living/carbon/human/escapee)
 	if(escapee && escapee.ckey)
 		stop_scp_survival_tracking(escapee, "SCP-106")
 		hook_scp_interaction(escapee, "SCP-106", INTERACTION_TYPE_SURVIVAL, list("escaped" = TRUE))
 
-/mob/living/carbon/human/scp106/proc/on_corrosion_use(mob/living/carbon/human/target)
+/mob/living/scp/scp106/proc/on_corrosion_use(mob/living/carbon/human/target)
 	if(target && target.ckey)
 		hook_scp_combat(target, "SCP-106", corrosion_system?.corrosion_potency || 0, 0)

@@ -6,7 +6,7 @@
 // ============================================================================
 
 /datum/scp682_evolution_system
-	var/mob/living/carbon/human/scp682/owner = null
+	var/mob/living/scp/scp682/owner = null
 	var/evolution_stage = 1
 	var/max_evolution_stage = SCP682_MAX_EVOLUTION_STAGE
 	var/adaptation_points = 0
@@ -18,7 +18,7 @@
 	var/last_evolution_check = 0
 	var/evolution_check_interval = SCP682_EVOLUTION_CHECK_INTERVAL
 
-/datum/scp682_evolution_system/New(mob/living/carbon/human/scp682/new_owner)
+/datum/scp682_evolution_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
@@ -28,6 +28,8 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
+/datum/scp682_evolution_system/process()
+	process_evolution()
 /datum/scp682_evolution_system/proc/process_evolution()
 	if(world.time >= last_evolution_check + evolution_check_interval)
 		check_evolution_opportunities()
@@ -119,7 +121,7 @@
 // ============================================================================
 
 /datum/scp682_regeneration_system
-	var/mob/living/carbon/human/scp682/owner = null
+	var/mob/living/scp/scp682/owner = null
 	var/base_health = SCP682_REGEN_BASE_HEALTH
 	var/regeneration_rate = SCP682_BASE_REGENERATION_RATE
 	var/damage_scaling = 0
@@ -130,7 +132,7 @@
 	var/regeneration_cooldown = 0
 	var/regeneration_cooldown_time = 1 SECONDS
 
-/datum/scp682_regeneration_system/New(mob/living/carbon/human/scp682/new_owner)
+/datum/scp682_regeneration_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
@@ -139,6 +141,8 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
+/datum/scp682_regeneration_system/process()
+	process_regeneration()
 /datum/scp682_regeneration_system/proc/process_regeneration()
 	if(world.time < regeneration_cooldown)
 		return
@@ -206,7 +210,7 @@
 // ============================================================================
 
 /datum/scp682_threat_system
-	var/mob/living/carbon/human/scp682/owner = null
+	var/mob/living/scp/scp682/owner = null
 	var/list/threat_memory = list()
 	var/list/threat_priorities = list()
 	var/threat_assessment_cooldown = 0
@@ -214,7 +218,7 @@
 	var/last_threat_scan = 0
 	var/threat_scan_interval = 10 SECONDS
 
-/datum/scp682_threat_system/New(mob/living/carbon/human/scp682/new_owner)
+/datum/scp682_threat_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
@@ -223,6 +227,8 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
+/datum/scp682_threat_system/process()
+	process_threats()
 /datum/scp682_threat_system/proc/process_threats()
 	if(world.time >= last_threat_scan + threat_scan_interval)
 		assess_threats()
@@ -292,7 +298,7 @@
 // ============================================================================
 
 /datum/scp682_containment_system
-	var/mob/living/carbon/human/scp682/owner = null
+	var/mob/living/scp/scp682/owner = null
 	var/containment_integrity = SCP682_DEFAULT_CONTAINMENT_INTEGRITY
 	var/breach_phase = "contained"
 	var/list/adaptation_countermeasures = list()
@@ -302,7 +308,7 @@
 	var/breach_cooldown = 0
 	var/breach_cooldown_time = 30 SECONDS
 
-/datum/scp682_containment_system/New(mob/living/carbon/human/scp682/new_owner)
+/datum/scp682_containment_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
@@ -311,6 +317,8 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
+/datum/scp682_containment_system/process()
+	process_containment()
 /datum/scp682_containment_system/proc/process_containment()
 	if(world.time >= last_containment_check + containment_check_interval)
 		check_containment_status()
@@ -370,7 +378,7 @@
 // ============================================================================
 
 /datum/scp682_combat_system
-	var/mob/living/carbon/human/scp682/owner = null
+	var/mob/living/scp/scp682/owner = null
 	var/attack_cooldown = 0
 	var/attack_cooldown_time = SCP682_MELEE_COOLDOWN
 	var/area_attack_cooldown = 0
@@ -380,7 +388,7 @@
 	var/last_combat_action = 0
 	var/combat_action_interval = 1 SECONDS
 
-/datum/scp682_combat_system/New(mob/living/carbon/human/scp682/new_owner)
+/datum/scp682_combat_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
@@ -389,6 +397,8 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
+/datum/scp682_combat_system/process()
+	process_combat()
 /datum/scp682_combat_system/proc/process_combat()
 	if(world.time < last_combat_action + combat_action_interval)
 		return
@@ -488,13 +498,13 @@
 // ============================================================================
 
 /datum/scp682_research_integration
-	var/mob/living/carbon/human/scp682/owner = null
+	var/mob/living/scp/scp682/owner = null
 	var/list/research_data = list()
 	var/research_update_cooldown = 0
 	var/research_update_interval = 120 SECONDS
 	var/last_research_update = 0
 
-/datum/scp682_research_integration/New(mob/living/carbon/human/scp682/new_owner)
+/datum/scp682_research_integration/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
 	// Don't start processing - already handled by SCP-682's process() method

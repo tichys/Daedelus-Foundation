@@ -1,11 +1,11 @@
 // SCP-3199 Modular Systems
 
 /datum/scp3199_reproduction_system
-	var/mob/living/carbon/human/scp3199/owner
+	var/mob/living/scp/scp3199/owner
 	var/egg_cooldown = 0
 	var/egg_time = 3000 // 5 minutes
 
-/datum/scp3199_reproduction_system/New(mob/living/carbon/human/scp3199/new_owner)
+/datum/scp3199_reproduction_system/New(mob/living/scp/scp3199/new_owner)
 	owner = new_owner
 
 /datum/scp3199_reproduction_system/proc/process_reproduction()
@@ -26,12 +26,12 @@
 			owner.SCP?.award_research(owner, "reproduction", 75)
 
 /datum/scp3199_containment_system
-	var/mob/living/carbon/human/scp3199/owner
+	var/mob/living/scp/scp3199/owner
 	var/last_check = 0
 	var/check_interval = 600
 	var/breached = FALSE
 
-/datum/scp3199_containment_system/New(mob/living/carbon/human/scp3199/new_owner)
+/datum/scp3199_containment_system/New(mob/living/scp/scp3199/new_owner)
 	owner = new_owner
 
 /datum/scp3199_containment_system/proc/process_containment()
@@ -53,11 +53,11 @@
 			owner.SCP?.log_interaction(owner, "containment_restored")
 
 /datum/scp3199_environment_system
-	var/mob/living/carbon/human/scp3199/owner
+	var/mob/living/scp/scp3199/owner
 	var/next_note = 0
 	var/note_interval = 12 SECONDS
 
-/datum/scp3199_environment_system/New(mob/living/carbon/human/scp3199/new_owner)
+/datum/scp3199_environment_system/New(mob/living/scp/scp3199/new_owner)
 	owner = new_owner
 
 /datum/scp3199_environment_system/proc/process_environment()
@@ -70,11 +70,11 @@
 		owner.visible_message("<span class='notice'>An acrid, albumen-like odor lingers in the air.</span>")
 
 /datum/scp3199_research_system
-	var/mob/living/carbon/human/scp3199/owner
+	var/mob/living/scp/scp3199/owner
 	var/last = 0
 	var/gap = 30 SECONDS
 
-/datum/scp3199_research_system/New(mob/living/carbon/human/scp3199/new_owner)
+/datum/scp3199_research_system/New(mob/living/scp/scp3199/new_owner)
 	owner = new_owner
 
 /datum/scp3199_research_system/proc/process_research()

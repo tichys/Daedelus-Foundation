@@ -759,6 +759,8 @@ SUBSYSTEM_DEF(research_persistence)
 
 /datum/research_persistence_manager/proc/get_researcher_by_name(researcher_name)
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
+		if(QDELETED(H))
+			continue
 		if(H.real_name == researcher_name)
 			return H
 	return null

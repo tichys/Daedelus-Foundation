@@ -12,7 +12,7 @@
 #define SCP082_OFFER_COOLDOWN 200
 #define SCP082_CONSUME_COOLDOWN 50
 
-/mob/living/carbon/human/scp082
+/mob/living/scp/scp082
 	name = "SCP-082"
 	desc = "A large, well-mannered humanoid standing nearly two and a half meters tall. He carries himself with an air of quiet dignity."
 	icon = 'icons/scp/scp-082.dmi'
@@ -32,7 +32,7 @@
 	var/conversations_held = 0
 	var/offers_made = 0
 
-/mob/living/carbon/human/scp082/Initialize()
+/mob/living/scp/scp082/Initialize()
 	. = ..()
 	set_species(/datum/species/scp082)
 	SCP = new /datum/scp(src, "Fernand", SCP_EUCLID, "082", SCP_PLAYABLE)
@@ -52,20 +52,14 @@
 
 	START_PROCESSING(SSobj, src)
 
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp082/Destroy()
+/mob/living/scp/scp082/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(hospitality_system)
 	QDEL_NULL(french_system)
 	return ..()
 
-/mob/living/carbon/human/scp082/process()
+/mob/living/scp/scp082/process()
 	if(stat == DEAD)
 		return
 
@@ -80,16 +74,16 @@
 	if(health < maxHealth && satiation > SCP082_HUNGER_THRESHOLD_HUNGRY)
 		adjustBruteLoss(-0.5)
 
-/mob/living/carbon/human/scp082/proc/is_hungry()
+/mob/living/scp/scp082/proc/is_hungry()
 	return satiation < SCP082_HUNGER_THRESHOLD_HUNGRY
 
-/mob/living/carbon/human/scp082/proc/is_starving()
+/mob/living/scp/scp082/proc/is_starving()
 	return satiation < SCP082_HUNGER_THRESHOLD_STARVING
 
-/mob/living/carbon/human/scp082/proc/is_well_fed()
+/mob/living/scp/scp082/proc/is_well_fed()
 	return satiation >= SCP082_HUNGER_THRESHOLD_HUNGRY
 
-/mob/living/carbon/human/scp082/examine(mob/user)
+/mob/living/scp/scp082/examine(mob/user)
 	. = ..()
 	if(is_hungry())
 		. += "<span class='warning'>There is a subtle hunger behind his polite demeanor.</span>"
@@ -97,7 +91,7 @@
 		. += "<span class='notice'>He appears content and well-fed.</span>"
 	. += "<span class='notice'>He stands nearly 2.4 meters tall, a gentleman of considerable stature.</span>"
 
-/mob/living/carbon/human/scp082/say(message)
+/mob/living/scp/scp082/say(message)
 	. = ..()
 	if(!.)
 		return
@@ -107,7 +101,7 @@
 			hook_scp_interaction(H, "SCP-082", INTERACTION_TYPE_COMMUNICATION)
 			conversations_held++
 
-/mob/living/carbon/human/scp082/UnarmedAttack(atom/A)
+/mob/living/scp/scp082/UnarmedAttack(atom/A)
 	if(istype(A, /mob/living/carbon/human))
 		var/mob/living/carbon/human/target = A
 		if(combat_mode && should_attack_target(target))
@@ -119,7 +113,7 @@
 
 	. = ..()
 
-/mob/living/carbon/human/scp082/proc/should_attack_target(mob/living/carbon/human/target)
+/mob/living/scp/scp082/proc/should_attack_target(mob/living/carbon/human/target)
 	if(target.stat == DEAD)
 		return FALSE
 	if(target == src)
@@ -134,7 +128,7 @@
 		return FALSE
 	return TRUE
 
-/mob/living/carbon/human/scp082/proc/attack_victim(mob/living/carbon/human/victim)
+/mob/living/scp/scp082/proc/attack_victim(mob/living/carbon/human/victim)
 	if(world.time < last_consume_time)
 		return
 
@@ -150,7 +144,7 @@
 		if(victim.sanity)
 			victim.sanity.adjust_sanity(-10, "scp082_attack")
 
-/mob/living/carbon/human/scp082/proc/consume_victim(mob/living/carbon/human/victim)
+/mob/living/scp/scp082/proc/consume_victim(mob/living/carbon/human/victim)
 	if(!victim || victim.stat != DEAD)
 		return
 
@@ -164,7 +158,7 @@
 
 	victim.gib()
 
-/mob/living/carbon/human/scp082/get_status_tab_items()
+/mob/living/scp/scp082/get_status_tab_items()
 	var/list/status_items = ..()
 	status_items += "Satiation: [round(satiation, 1)]/[SCP082_SATIATION_MAX]"
 	status_items += "Hunger: [is_starving() ? "STARVING" : is_hungry() ? "Hungry" : "Well-fed"]"
@@ -173,7 +167,7 @@
 	status_items += "Offers Made: [offers_made]"
 	return status_items
 
-/mob/living/carbon/human/scp082/proc/greet_nearby()
+/mob/living/scp/scp082/proc/greet_nearby()
 	if(world.time < last_greet_time + SCP082_GREET_COOLDOWN)
 		to_chat(src, "<span class='warning'>You have greeted people too recently.</span>")
 		return
@@ -197,7 +191,7 @@
 		hook_scp_interaction(H, "SCP-082", INTERACTION_TYPE_COMMUNICATION)
 		conversations_held++
 
-/mob/living/carbon/human/scp082/proc/offer_food()
+/mob/living/scp/scp082/proc/offer_food()
 	var/list/nearby = list()
 	for(var/mob/living/carbon/human/H in range(3, src))
 		if(H != src && H.stat != DEAD)
@@ -217,12 +211,12 @@
 
 	hospitality_system?.offer_hospitality(target)
 
-/mob/living/carbon/human/scp082/proc/speak_french()
+/mob/living/scp/scp082/proc/speak_french()
 	var/phrase = french_system?.get_random_phrase()
 	if(phrase)
 		say(phrase)
 
-/mob/living/carbon/human/scp082/proc/check_hunger()
+/mob/living/scp/scp082/proc/check_hunger()
 	var/status = "well-fed and content"
 	if(is_hungry())
 		status = "hungry - you should eat soon"
@@ -233,7 +227,7 @@
 
 // Hospitality System - Lures victims through polite conversation
 /datum/scp082_hospitality_system
-	var/mob/living/carbon/human/scp082/parent
+	var/mob/living/scp/scp082/parent
 	var/offer_cooldown = 0
 	var/offer_cooldown_time = SCP082_OFFER_COOLDOWN
 	var/list/guests_welcomed = list()
@@ -257,7 +251,7 @@
 		"Let me pour you another glass. Stay a little longer."
 	)
 
-/datum/scp082_hospitality_system/New(mob/living/carbon/human/scp082/P)
+/datum/scp082_hospitality_system/New(mob/living/scp/scp082/P)
 	parent = P
 
 /datum/scp082_hospitality_system/proc/tick()
@@ -331,7 +325,7 @@
 
 // French Speech System
 /datum/scp082_french_system
-	var/mob/living/carbon/human/scp082/parent
+	var/mob/living/scp/scp082/parent
 	var/last_auto_phrase = 0
 	var/auto_phrase_interval = 600
 	var/french_chance = 40
@@ -384,7 +378,7 @@
 		"Is anyone there? Personne ne répond."
 	)
 
-/datum/scp082_french_system/New(mob/living/carbon/human/scp082/P)
+/datum/scp082_french_system/New(mob/living/scp/scp082/P)
 	parent = P
 
 /datum/scp082_french_system/proc/tick()

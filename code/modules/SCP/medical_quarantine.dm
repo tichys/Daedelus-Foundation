@@ -77,6 +77,8 @@
 			A.lock()
 
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/area/A = get_area(H)
@@ -110,6 +112,8 @@
 
 	var/list/patients = list()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/area/A = get_area(H)

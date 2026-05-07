@@ -28,7 +28,7 @@
 /datum/dclass_event/scp_breach/start_event()
 	. = ..()
 	// Find nearby SCPs and create chaos
-	for(var/mob/living/carbon/scp/S in world)
+	for(var/mob/living/scp/S in world)
 		if(S.stat != DEAD)
 			// Make SCPs more aggressive during breach
 			S.containment_status = "breached"
@@ -86,7 +86,7 @@
 /datum/dclass_event/scp_escape_attempt/start_event()
 	. = ..()
 	// Create a distraction by making an SCP more active
-	for(var/mob/living/carbon/scp/S in world)
+	for(var/mob/living/scp/S in world)
 		if(S.stat != DEAD && prob(50))
 			// Make the SCP more visible and active
 			S.containment_status = "active"
@@ -202,7 +202,7 @@
 
 	// Check for SCPs in the world to determine available events
 	var/has_scps = FALSE
-	for(var/mob/living/carbon/scp/S in world)
+	for(var/mob/living/scp/S in world)
 		if(S.stat != DEAD)
 			has_scps = TRUE
 			break

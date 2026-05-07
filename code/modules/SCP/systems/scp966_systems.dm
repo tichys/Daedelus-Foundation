@@ -1,14 +1,14 @@
 // SCP-966 Modular, verb-less systems
 
 /datum/scp966_sleep_system
-	var/mob/living/carbon/human/scp966/owner
+	var/mob/living/scp/scp966/owner
 	var/next_drain = 0
 	var/drain_interval = 10 SECONDS
 	var/effect_radius = 5
 	var/intensity = 1
 	var/max_intensity = 5
 
-/datum/scp966_sleep_system/New(mob/living/carbon/human/scp966/new_owner)
+/datum/scp966_sleep_system/New(mob/living/scp/scp966/new_owner)
 	owner = new_owner
 
 /datum/scp966_sleep_system/proc/process_sleep()
@@ -24,12 +24,12 @@
 		to_chat(H, "<span class='warning'>An oppressive exhaustion presses upon you.</span>")
 
 /datum/scp966_stealth_system
-	var/mob/living/carbon/human/scp966/owner
+	var/mob/living/scp/scp966/owner
 	var/next_toggle = 0
 	var/toggle_interval = 20 SECONDS
 	var/active = TRUE
 
-/datum/scp966_stealth_system/New(mob/living/carbon/human/scp966/new_owner)
+/datum/scp966_stealth_system/New(mob/living/scp/scp966/new_owner)
 	owner = new_owner
 
 /datum/scp966_stealth_system/proc/process_stealth()
@@ -43,12 +43,12 @@
 			owner.visible_message("<span class='notice'>A shimmer reveals something in the air, then fades.</span>")
 
 /datum/scp966_stalk_system
-	var/mob/living/carbon/human/scp966/owner
+	var/mob/living/scp/scp966/owner
 	var/list/stalked = list()
 	var/next_scan = 0
 	var/scan_interval = 15 SECONDS
 
-/datum/scp966_stalk_system/New(mob/living/carbon/human/scp966/new_owner)
+/datum/scp966_stalk_system/New(mob/living/scp/scp966/new_owner)
 	owner = new_owner
 
 /datum/scp966_stalk_system/proc/process_stalk()
@@ -69,11 +69,11 @@
 			to_chat(choice, "<span class='danger'>You feel an unseen gaze upon you...</span>")
 
 /datum/scp966_nightmare_system
-	var/mob/living/carbon/human/scp966/owner
+	var/mob/living/scp/scp966/owner
 	var/next_event = 0
 	var/event_interval = 30 SECONDS
 
-/datum/scp966_nightmare_system/New(mob/living/carbon/human/scp966/new_owner)
+/datum/scp966_nightmare_system/New(mob/living/scp/scp966/new_owner)
 	owner = new_owner
 
 /datum/scp966_nightmare_system/proc/process_nightmares()
@@ -93,11 +93,11 @@
 			v.sanity?.adjust_sanity(-2)
 
 /datum/scp966_research_system
-	var/mob/living/carbon/human/scp966/owner
+	var/mob/living/scp/scp966/owner
 	var/last = 0
 	var/gap = 40 SECONDS
 
-/datum/scp966_research_system/New(mob/living/carbon/human/scp966/new_owner)
+/datum/scp966_research_system/New(mob/living/scp/scp966/new_owner)
 	owner = new_owner
 
 /datum/scp966_research_system/proc/process_research()

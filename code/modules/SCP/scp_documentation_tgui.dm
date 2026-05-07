@@ -184,6 +184,8 @@
 	var/component_count = 0
 
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(!M.SCP)
 			continue
 
@@ -256,6 +258,8 @@
 	var/list/priority_counts = list()
 
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(!M.SCP?.advanced_components?.components)
 			continue
 
@@ -315,6 +319,8 @@
 	var/manager_count = 0
 
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(!M.SCP?.advanced_components)
 			continue
 
@@ -346,6 +352,8 @@
 
 /datum/scp_documentation_interface/proc/examine_scp_details(scp_id)
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(M.SCP?.designation == scp_id)
 			to_chat(admin_client, "<span class='boldnotice'>=== SCP-[scp_id] Detailed Analysis ===</span>")
 			to_chat(admin_client, "<span class='notice'>Name: [M.SCP.name]</span>")
@@ -364,6 +372,8 @@
 
 /datum/scp_documentation_interface/proc/examine_component_details(scp_id, component_id)
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(M.SCP?.designation == scp_id && M.SCP.advanced_components)
 			var/datum/scp_advanced_component/component = M.SCP.advanced_components.components[component_id]
 			if(component)
@@ -414,6 +424,8 @@
 
 	// Check active SCPs with issues
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(!M.SCP?.advanced_components)
 			continue
 

@@ -1,4 +1,4 @@
-/mob/living/carbon/human/scp2343
+/mob/living/scp/scp2343
 	name = "strange american man"
 	desc = "A brusk and wiley man of american decent."
 	icon = 'icons/scp/scp_2343.dmi'
@@ -7,7 +7,7 @@
 	var/datum/scp2343_benevolence_system/benevolence_system
 	var/datum/scp2343_research_system/research_system
 
-/mob/living/carbon/human/scp2343/Initialize(mapload)
+/mob/living/scp/scp2343/Initialize(mapload)
 	. = ..()
 	set_species(/datum/species/scp2343)
 	SCP = new /datum/scp(src, "benevolent entity", SCP_SAFE, "2343", SCP_PLAYABLE)
@@ -20,41 +20,35 @@
 	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
 
 	// Remove bodypart overlays to prevent covering the SCP icon
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp2343/proc/initialize_systems()
+/mob/living/scp/scp2343/proc/initialize_systems()
 	benevolence_system = new /datum/scp2343_benevolence_system(src)
 	research_system = new /datum/scp2343_research_system(src)
 
-/mob/living/carbon/human/scp2343/Destroy()
+/mob/living/scp/scp2343/Destroy()
 	QDEL_NULL(benevolence_system)
 	QDEL_NULL(research_system)
 	return ..()
 
-/mob/living/carbon/human/scp2343/Life(datum/controller/process/mobs/parent)
+/mob/living/scp/scp2343/Life(datum/controller/process/mobs/parent)
 	. = ..()
 	if(stat == DEAD)
 		return
 	benevolence_system?.process_benevolence()
 	research_system?.process_research()
 
-/mob/living/carbon/human/scp2343/say(message)
+/mob/living/scp/scp2343/say(message)
 	. = ..()
 	if(.)
 		for(var/mob/living/carbon/human/H in range(5, src))
 			if(H.stat != DEAD && H != src)
 				hook_scp_interaction(H, "SCP-2343", INTERACTION_TYPE_COMMUNICATION)
 
-/mob/living/carbon/human/scp2343/proc/on_benevolent_act(mob/living/carbon/human/beneficiary)
+/mob/living/scp/scp2343/proc/on_benevolent_act(mob/living/carbon/human/beneficiary)
 	if(!beneficiary)
 		return
 	hook_scp_care(beneficiary, "SCP-2343", "benevolence")
 
-/mob/living/carbon/human/scp2343/examine(mob/living/user)
+/mob/living/scp/scp2343/examine(mob/living/user)
 	. = ..()
 	to_chat(user, "<span class='notice'>This being seems to have reality-bending powers.</span>")

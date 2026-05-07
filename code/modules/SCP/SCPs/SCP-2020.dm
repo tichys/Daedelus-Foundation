@@ -3,7 +3,7 @@
 // Behaves according to sci-fi cliches, narrates events as story beats
 // Completely harmless - just talks about being in a story
 
-/mob/living/carbon/human/scp2020
+/mob/living/scp/scp2020
 	name = "SCP-2020"
 	desc = "A green-skinned humanoid with an earnest expression. It seems convinced it is a character in a science fiction narrative."
 	icon = 'icons/scp/scp-2020.dmi'
@@ -55,7 +55,7 @@
 		"Rising stakes! This is how you build tension!"
 	)
 
-/mob/living/carbon/human/scp2020/Initialize(mapload)
+/mob/living/scp/scp2020/Initialize(mapload)
 	. = ..()
 	set_species(/datum/species/scp2020)
 	SCP = new /datum/scp(src, "Cliche, Right?", SCP_SAFE, "2020", SCP_PLAYABLE|SCP_ROLEPLAY)
@@ -67,21 +67,15 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-2020"] = new /datum/scp_instance("SCP-2020", src)
 
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp2020/Life()
+/mob/living/scp/scp2020/Life()
 	. = ..()
 	if(stat == DEAD)
 		return
 
 	process_narrative()
 
-/mob/living/carbon/human/scp2020/proc/process_narrative()
+/mob/living/scp/scp2020/proc/process_narrative()
 	if(world.time < narrative_cooldown)
 		return
 
@@ -94,7 +88,7 @@
 
 	update_narrative_phase()
 
-/mob/living/carbon/human/scp2020/proc/update_narrative_phase()
+/mob/living/scp/scp2020/proc/update_narrative_phase()
 	var/nearby_people = 0
 	for(var/mob/living/carbon/human/H in range(7, src))
 		if(H != src && H.stat != DEAD)
@@ -110,7 +104,7 @@
 		else
 			narrative_phase = "climax"
 
-/mob/living/carbon/human/scp2020/say(message)
+/mob/living/scp/scp2020/say(message)
 	. = ..()
 	if(.)
 		for(var/mob/living/carbon/human/H in range(5, src))
@@ -118,10 +112,10 @@
 				hook_scp_interaction(H, "SCP-2020", INTERACTION_TYPE_COMMUNICATION)
 				conversations_held++
 
-/mob/living/carbon/human/scp2020/proc/say_reaction(reaction)
+/mob/living/scp/scp2020/proc/say_reaction(reaction)
 	say(reaction)
 
-/mob/living/carbon/human/scp2020/Hear(message, atom/movable/speaker, message_language, raw_message, radio_freq, list/spans, list/message_mods, message_range)
+/mob/living/scp/scp2020/Hear(message, atom/movable/speaker, message_language, raw_message, radio_freq, list/spans, list/message_mods, message_range)
 	. = ..()
 
 	if(speaker == src)
@@ -139,7 +133,7 @@
 		var/reaction = pick(reaction_phrases)
 		addtimer(CALLBACK(src, PROC_REF(say_reaction), reaction), 20)
 
-/mob/living/carbon/human/scp2020/UnarmedAttack(atom/A)
+/mob/living/scp/scp2020/UnarmedAttack(atom/A)
 	if(ishuman(A))
 		var/mob/living/carbon/human/H = A
 		if(world.time >= narrative_cooldown)
@@ -156,12 +150,12 @@
 
 	return ..()
 
-/mob/living/carbon/human/scp2020/examine(mob/user)
+/mob/living/scp/scp2020/examine(mob/user)
 	. = ..()
 	to_chat(user, "<span class='notice'>A green-skinned humanoid that seems convinced it exists within a science fiction story.</span>")
 	to_chat(user, "<span class='notice'>It appears completely harmless, if rather talkative about narrative conventions.</span>")
 
-/mob/living/carbon/human/scp2020/proc/give_dramatic_speech()
+/mob/living/scp/scp2020/proc/give_dramatic_speech()
 	if(stat == DEAD)
 		return
 
@@ -178,7 +172,7 @@
 
 	visible_message("<span class='notice'>[src] gestures dramatically!</span>")
 
-/mob/living/carbon/human/scp2020/proc/narrate_events()
+/mob/living/scp/scp2020/proc/narrate_events()
 	if(stat == DEAD)
 		return
 
@@ -210,7 +204,7 @@
 	say(narration)
 	cliche_count++
 
-/mob/living/carbon/human/scp2020/proc/identify_cliche()
+/mob/living/scp/scp2020/proc/identify_cliche()
 	if(stat == DEAD)
 		return
 
@@ -234,7 +228,7 @@
 	say(cliche)
 	cliche_count++
 
-/mob/living/carbon/human/scp2020/proc/check_narrative_status()
+/mob/living/scp/scp2020/proc/check_narrative_status()
 	var/message = "<b>=== SCP-2020 Narrative Status ===</b><br>"
 	message += "<b>Current Phase:</b> [narrative_phase]<br>"
 	message += "<b>Cliches Identified:</b> [cliche_count]<br>"
@@ -244,7 +238,7 @@
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
-/mob/living/carbon/human/scp2020/death()
+/mob/living/scp/scp2020/death()
 	say("I... I don't think... this is how the story... was supposed to end...")
 	visible_message("<span class='danger'>[src] collapses, looking genuinely surprised!</span>")
 	return ..()

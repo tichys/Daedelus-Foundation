@@ -47,10 +47,12 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 /datum/scp_progression_manager/proc/process_scp_entities()
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
+		if(QDELETED(H))
+			continue
 		if(H.SCP && H.ckey)
 			process_scp_entity(H)
 
-/datum/scp_progression_manager/proc/process_scp_entity(mob/living/carbon/human/scp)
+/datum/scp_progression_manager/proc/process_scp_entity(mob/living/scp/scp)
 	if(!scp || !scp.SCP || !scp.ckey)
 		return
 
@@ -77,7 +79,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 		scp_progression_data[key] = new /datum/scp_progression_data(scp_id, ckey)
 	return scp_progression_data[key]
 
-/datum/scp_progression_manager/proc/award_scp_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	if(!scp || !prog_data)
 		return
 
@@ -102,7 +104,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(experience_awarded > 0 && SSpersistent_progression)
 		SSpersistent_progression.award_experience(scp.ckey, "scp_[scp.SCP.designation]", experience_awarded, "SCP Activity")
 
-/datum/scp_progression_manager/proc/award_scp049_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp049_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/experience = 0
 
 	// Award for cures performed
@@ -117,7 +119,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	return experience
 
-/datum/scp_progression_manager/proc/award_scp096_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp096_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/experience = 0
 
 	// Award for rage activations
@@ -132,7 +134,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	return experience
 
-/datum/scp_progression_manager/proc/award_scp173_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp173_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/experience = 0
 
 	// Award for successful movements
@@ -147,7 +149,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	return experience
 
-/datum/scp_progression_manager/proc/award_scp457_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp457_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/experience = 0
 
 	// Award for fires created
@@ -162,7 +164,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	return experience
 
-/datum/scp_progression_manager/proc/award_scp939_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp939_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/experience = 0
 
 	// Award for voices learned
@@ -177,7 +179,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	return experience
 
-/datum/scp_progression_manager/proc/award_scp2020_experience(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/award_scp2020_experience(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/experience = 0
 
 	// Award for teleportations
@@ -192,7 +194,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	return experience
 
-/datum/scp_progression_manager/proc/check_scp_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	if(!scp || !prog_data || !SSpersistent_progression)
 		return
 
@@ -219,7 +221,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 		if("2020")
 			check_scp2020_achievements(scp, prog_data)
 
-/datum/scp_progression_manager/proc/check_scp049_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp049_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Cure
@@ -230,7 +232,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(prog_data.metrics["cures_performed"] >= 10 && !("scp049_master_healer" in prog_data.achievements))
 		unlock_scp_achievement(ckey, "scp049_master_healer", "Master Healer", "Perform 10 cures as SCP-049", prog_data)
 
-/datum/scp_progression_manager/proc/check_scp096_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp096_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Rage
@@ -241,7 +243,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(prog_data.metrics["victims_hunted"] >= 15 && !("scp096_efficient_hunter" in prog_data.achievements))
 		unlock_scp_achievement(ckey, "scp096_efficient_hunter", "Efficient Hunter", "Hunt 15 victims as SCP-096", prog_data)
 
-/datum/scp_progression_manager/proc/check_scp173_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp173_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Movement
@@ -252,7 +254,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(prog_data.metrics["victims_killed"] >= 20 && !("scp173_silent_killer" in prog_data.achievements))
 		unlock_scp_achievement(ckey, "scp173_silent_killer", "Silent Killer", "Kill 20 victims as SCP-173", prog_data)
 
-/datum/scp_progression_manager/proc/check_scp457_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp457_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Fire
@@ -263,7 +265,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(prog_data.metrics["victims_consumed"] >= 10 && !("scp457_consuming_flame" in prog_data.achievements))
 		unlock_scp_achievement(ckey, "scp457_consuming_flame", "Consuming Flame", "Consume 10 victims as SCP-457", prog_data)
 
-/datum/scp_progression_manager/proc/check_scp939_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp939_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Voice
@@ -274,7 +276,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	if(prog_data.metrics["voices_learned"] >= 20 && !("scp939_voice_master" in prog_data.achievements))
 		unlock_scp_achievement(ckey, "scp939_voice_master", "Voice Master", "Learn 20 voices as SCP-939", prog_data)
 
-/datum/scp_progression_manager/proc/check_scp2020_achievements(mob/living/carbon/human/scp, datum/scp_progression_data/prog_data)
+/datum/scp_progression_manager/proc/check_scp2020_achievements(mob/living/scp/scp, datum/scp_progression_data/prog_data)
 	var/ckey = scp.ckey
 
 	// First Teleport
@@ -379,7 +381,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	// Copy to last_metrics
 	last_metrics = metrics.Copy()
 
-/datum/scp_progression_data/proc/update_from_scp(mob/living/carbon/human/scp)
+/datum/scp_progression_data/proc/update_from_scp(mob/living/scp/scp)
 	if(!scp || !scp.SCP)
 		return
 
@@ -403,48 +405,48 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 	last_update = world.time
 
-/datum/scp_progression_data/proc/update_scp049_metrics(mob/living/carbon/human/scp)
+/datum/scp_progression_data/proc/update_scp049_metrics(mob/living/scp/scp)
 	// Update SCP-049 specific metrics
-	if(istype(scp, /mob/living/carbon/human/scp049))
-		var/mob/living/carbon/human/scp049/scp049 = scp
+	if(istype(scp, /mob/living/scp/scp049))
+		var/mob/living/scp/scp049/scp049 = scp
 		metrics["cures_performed"] = scp049.cures_performed
 		metrics["containment_breaches"] = scp049.containment_breaches
 		metrics["research_progress"] = scp049.research_progress
 
-/datum/scp_progression_data/proc/update_scp096_metrics(mob/living/carbon/human/scp)
+/datum/scp_progression_data/proc/update_scp096_metrics(mob/living/scp/scp)
 	// Update SCP-096 specific metrics
-	if(istype(scp, /mob/living/carbon/human/scp096))
-		var/mob/living/carbon/human/scp096/scp096 = scp
+	if(istype(scp, /mob/living/scp/scp096))
+		var/mob/living/scp/scp096/scp096 = scp
 		metrics["rage_activations"] = scp096.rage_activations
 		metrics["victims_hunted"] = scp096.victims_hunted
 		metrics["containment_breaches"] = scp096.containment_escapes
 
-/datum/scp_progression_data/proc/update_scp173_metrics(mob/living/carbon/human/scp)
+/datum/scp_progression_data/proc/update_scp173_metrics(mob/living/scp/scp)
 	// Update SCP-173 specific metrics
-	if(istype(scp, /mob/living/carbon/human/scp173))
-		var/mob/living/carbon/human/scp173/scp173 = scp
+	if(istype(scp, /mob/living/scp/scp173))
+		var/mob/living/scp/scp173/scp173 = scp
 		metrics["successful_movements"] = scp173.successful_movements
 		metrics["victims_killed"] = scp173.victims_killed
 		metrics["containment_breaches"] = scp173.containment_breaches
 
-/datum/scp_progression_data/proc/update_scp457_metrics(mob/living/carbon/human/scp)
-	if(istype(scp, /mob/living/carbon/human/scp457))
-		var/mob/living/carbon/human/scp457/scp457 = scp
+/datum/scp_progression_data/proc/update_scp457_metrics(mob/living/scp/scp)
+	if(istype(scp, /mob/living/scp/scp457))
+		var/mob/living/scp/scp457/scp457 = scp
 		metrics["current_heat"] = scp457.heat_system.current_heat
 		metrics["active_fires"] = length(scp457.fire_system.active_fires)
 
-/datum/scp_progression_data/proc/update_scp939_metrics(mob/living/carbon/human/scp)
+/datum/scp_progression_data/proc/update_scp939_metrics(mob/living/scp/scp)
 	// Update SCP-939 specific metrics
-	if(istype(scp, /mob/living/carbon/human/scp939))
-		var/mob/living/carbon/human/scp939/scp939 = scp
+	if(istype(scp, /mob/living/scp/scp939))
+		var/mob/living/scp/scp939/scp939 = scp
 		if(scp939.voice_system)
 			metrics["voices_learned"] = length(scp939.voice_system.learned_voices)
 
 
-/datum/scp_progression_data/proc/update_scp2020_metrics(mob/living/carbon/human/scp)
+/datum/scp_progression_data/proc/update_scp2020_metrics(mob/living/scp/scp)
 	// Update SCP-2020 specific metrics
-	if(istype(scp, /mob/living/carbon/human/scp2020))
-		var/mob/living/carbon/human/scp2020/scp2020 = scp
+	if(istype(scp, /mob/living/scp/scp2020))
+		var/mob/living/scp/scp2020/scp2020 = scp
 		metrics["cliche_count"] = scp2020.cliche_count
 		metrics["plot_developments"] = scp2020.plot_developments
 		metrics["conversations_held"] = scp2020.conversations_held

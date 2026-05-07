@@ -96,6 +96,8 @@
 	if(alert_security && world.time > last_alert_time + alert_cooldown)
 		last_alert_time = world.time
 		for(var/mob/living/carbon/human/sec in GLOB.player_list)
+			if(QDELETED(sec))
+				continue
 			if(sec.stat == DEAD || !sec.client)
 				continue
 			var/obj/item/card/id/sec_id = sec.get_idcard(TRUE)

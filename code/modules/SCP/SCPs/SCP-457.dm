@@ -1,4 +1,4 @@
-/mob/living/carbon/human/scp457
+/mob/living/scp/scp457
 	name = "SCP-457"
 	desc = "A living flame that moves with purpose and spreads with intent."
 	icon = 'icons/scp/scp-457.dmi'
@@ -11,7 +11,7 @@
 	var/datum/scp457_environmental_system/environmental_system
 	var/datum/scp457_research_integration/research_integration
 
-/mob/living/carbon/human/scp457/Initialize()
+/mob/living/scp/scp457/Initialize()
 	. = ..()
 
 	set_species(/datum/species/scp457)
@@ -29,10 +29,7 @@
 
 	maxHealth = SCP457_MAX_HEALTH
 	health = maxHealth
-	if(!physiology)
-		physiology = new /datum/physiology(src)
-	physiology.burn_mod = SCP457_BURN_MOD
-	physiology.brute_mod = SCP457_BRUTE_MOD
+
 
 	heat_system = new /datum/scp457_heat_system(src)
 	fire_system = new /datum/scp457_fire_system(src)
@@ -44,18 +41,15 @@
 	update_fov_angles()
 	update_cone_show()
 
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
 	START_PROCESSING(SSobj, src)
 
 	addtimer(CALLBACK(fire_system, TYPE_PROC_REF(/datum/scp457_fire_system, create_initial_fires)), 1)
 
-/mob/living/carbon/human/scp457/Destroy()
+/mob/living/scp/scp457/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
+	return 0
+
+/mob/living/scp/scp457/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(heat_system)
 	QDEL_NULL(fire_system)
@@ -64,7 +58,7 @@
 	QDEL_NULL(research_integration)
 	return ..()
 
-/mob/living/carbon/human/scp457/process(delta_time)
+/mob/living/scp/scp457/process(delta_time)
 	heat_system?.process()
 	fire_system?.process()
 	containment_system?.process()
@@ -72,12 +66,12 @@
 	research_integration?.process()
 	process_scp457_effects()
 
-/mob/living/carbon/human/scp457/proc/process_scp457_effects()
+/mob/living/scp/scp457/proc/process_scp457_effects()
 	update_scp457_appearance()
 	process_movement_effects()
 	process_target_interaction()
 
-/mob/living/carbon/human/scp457/proc/update_scp457_appearance()
+/mob/living/scp/scp457/proc/update_scp457_appearance()
 	icon_state = "fireguy"
 	var/heat_level = heat_system.get_heat_percentage()
 
@@ -91,19 +85,19 @@
 		if(75 to INFINITY)
 			add_atom_colour("#FFFFFF", FIXED_COLOUR_PRIORITY)
 
-/mob/living/carbon/human/scp457/proc/process_movement_effects()
+/mob/living/scp/scp457/proc/process_movement_effects()
 	if(heat_system.current_heat > 25)
 		var/turf/current_turf = get_turf(src)
 		if(current_turf && !(locate(/obj/effect/scp457_fire) in current_turf))
 			fire_system.create_fire_at_turf(current_turf)
 
-/mob/living/carbon/human/scp457/proc/process_target_interaction()
+/mob/living/scp/scp457/proc/process_target_interaction()
 	for(var/mob/living/carbon/human/H in range(2, src))
 		if(H != src && !H.SCP && H.stat != DEAD && !QDELETED(H))
 			if(fovangle && can_see_cone(H))
 				attempt_target_consumption(H)
 
-/mob/living/carbon/human/scp457/proc/attempt_target_consumption(mob/living/carbon/human/target)
+/mob/living/scp/scp457/proc/attempt_target_consumption(mob/living/carbon/human/target)
 	if(target.stat == DEAD || QDELETED(target))
 		return
 
@@ -118,10 +112,10 @@
 	if(target.stat == DEAD)
 		to_chat(src, "<span class='notice'>You consume [target] with your flames. Heat: [heat_system.current_heat]/[heat_system.max_heat]</span>")
 
-/mob/living/carbon/human/scp457/proc/is_spreading_fires()
+/mob/living/scp/scp457/proc/is_spreading_fires()
 	return length(fire_system.active_fires) > 0
 
-/mob/living/carbon/human/scp457/UnarmedAttack(atom/A)
+/mob/living/scp/scp457/UnarmedAttack(atom/A)
 	if(isliving(A))
 		var/mob/living/L = A
 
@@ -144,18 +138,18 @@
 
 	return ..()
 
-/mob/living/carbon/human/scp457/proc/create_fire()
+/mob/living/scp/scp457/proc/create_fire()
 	if(fire_system)
 		fire_system.create_initial_fires()
 
-/mob/living/carbon/human/scp457/get_status_tab_items()
+/mob/living/scp/scp457/get_status_tab_items()
 	. = ..()
 	. += "Heat Level: [heat_system.current_heat]/[heat_system.max_heat]"
 	. += "Fire Type: [heat_system.get_fire_type()]"
 	. += "Active Fires: [length(fire_system.active_fires)]"
 	. += "Containment Level: [containment_system.containment_level]"
 
-/mob/living/carbon/human/scp457/examine(mob/user)
+/mob/living/scp/scp457/examine(mob/user)
 	. = ..()
 
 	if(ishuman(user))
@@ -169,17 +163,17 @@
 				H.sanity.adjust_sanity(-2)
 				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 3)
 
-/mob/living/carbon/human/scp457/proc/get_persistence_data()
+/mob/living/scp/scp457/proc/get_persistence_data()
 	var/list/data = list()
 	data["current_heat"] = heat_system.current_heat
 	data["current_containment_level"] = containment_system.containment_level
 	return data
 
-/mob/living/carbon/human/scp457/proc/load_persistence_data(list/data)
+/mob/living/scp/scp457/proc/load_persistence_data(list/data)
 	if(!data)
 		return
 
-/mob/living/carbon/human/scp457/proc/contribute_research_data()
+/mob/living/scp/scp457/proc/contribute_research_data()
 	if(!SSresearch_persistence || !SSresearch_persistence.manager)
 		return
 
@@ -212,13 +206,13 @@
 				3
 			)
 
-/mob/living/carbon/human/scp457/proc/on_fire_spread(turf/location)
+/mob/living/scp/scp457/proc/on_fire_spread(turf/location)
 	if(!location)
 		return
 	hook_scp_breach("SCP-457", src)
 	hook_facility_damage_near_scp("SCP-457", 1)
 
-/mob/living/carbon/human/scp457/proc/on_target_consumption(mob/living/carbon/human/victim)
+/mob/living/scp/scp457/proc/on_target_consumption(mob/living/carbon/human/victim)
 	if(!victim)
 		return
 	hook_scp_combat(victim, "SCP-457", 100, 0)

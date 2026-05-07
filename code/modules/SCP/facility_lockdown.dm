@@ -203,6 +203,8 @@
 /obj/machinery/facility_lockdown_console/proc/jam_communications()
 	comms_jammed = TRUE
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/area/A = get_area(H)
@@ -215,6 +217,8 @@
 /obj/machinery/facility_lockdown_console/proc/unjam_communications()
 	comms_jammed = FALSE
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.stat == DEAD || !H.client)
 			continue
 		var/area/A = get_area(H)

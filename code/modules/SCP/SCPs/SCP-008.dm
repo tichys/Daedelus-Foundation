@@ -162,7 +162,7 @@
 	total_infections_caused++
 	containment_breached = TRUE
 	containment_status = "breached"
-	if(!SSscp_persistence || !SSscp_persistence.manager || !SSscp_persistence.manager.scp_instances["SCP-008"]?.containment_status == "breached")
+	if(!SSscp_persistence || !SSscp_persistence.manager || SSscp_persistence.manager.scp_instances["SCP-008"]?.containment_status != "breached")
 		hook_scp_breach("SCP-008", src)
 
 	visible_message("<span class='danger'>[target] has been infected with SCP-008!</span>")

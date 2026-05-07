@@ -73,12 +73,12 @@
 
 	// Check if converted SCP types exist and inherit from human
 	var/list/converted_scps = list(
-		/mob/living/carbon/human/scp049,
-		/mob/living/carbon/human/scp082,
-		/mob/living/carbon/human/scp096,
-		/mob/living/carbon/human/scp343,
-		/mob/living/carbon/human/scp939,
-		/mob/living/carbon/human/scp966
+		/mob/living/scp/scp049,
+		/mob/living/scp/scp082,
+		/mob/living/scp/scp096,
+		/mob/living/scp/scp343,
+		/mob/living/scp/scp939,
+		/mob/living/scp/scp966
 	)
 
 	for(var/scp_type in converted_scps)
@@ -103,14 +103,14 @@
 
 	// Test with a temporary SCP to validate skill system
 	var/mob/living/carbon/human/test_scp = new /mob/living/carbon/human()
-	var/datum/scp/test_scp_datum = new /datum/scp(test_scp, "Test SCP", "Safe", "TEST", "SCP_SENTIENT")
+	var/datum/scp/test_SCP = new /datum/scp(test_scp, "Test SCP", "Safe", "TEST", "SCP_SENTIENT")
 
-	if(test_scp_datum)
-		test_scp_datum.uses_advanced_components = TRUE
-		test_scp_datum.compInit_advanced()
+	if(test_SCP)
+		test_SCP.uses_advanced_components = TRUE
+		test_SCP.compInit_advanced()
 
 		// Check if skill system component was added
-		var/datum/scp_advanced_component/advanced_skill_system/skill_system = test_scp_datum.get_component("skill_system")
+		var/datum/scp_advanced_component/advanced_skill_system/skill_system = test_SCP.get_component("skill_system")
 
 		if(!skill_system)
 			result["status"] = "FAIL"
@@ -126,7 +126,7 @@
 				result["details"] += "Skill system properly integrated and functional"
 
 		// Cleanup
-		qdel(test_scp_datum)
+		qdel(test_SCP)
 		qdel(test_scp)
 	else
 		result["status"] = "FAIL"
@@ -145,13 +145,13 @@
 
 	// Test containment system functionality
 	var/mob/living/carbon/human/test_scp = new /mob/living/carbon/human()
-	var/datum/scp/test_scp_datum = new /datum/scp(test_scp, "Test SCP", "Euclid", "TEST", "SCP_SENTIENT")
+	var/datum/scp/test_SCP = new /datum/scp(test_scp, "Test SCP", "Euclid", "TEST", "SCP_SENTIENT")
 
-	if(test_scp_datum)
-		test_scp_datum.uses_advanced_components = TRUE
-		test_scp_datum.compInit_advanced()
+	if(test_SCP)
+		test_SCP.uses_advanced_components = TRUE
+		test_SCP.compInit_advanced()
 
-		var/datum/scp_advanced_component/advanced_containment_system/containment = test_scp_datum.get_component("containment_system")
+		var/datum/scp_advanced_component/advanced_containment_system/containment = test_SCP.get_component("containment_system")
 
 		if(!containment)
 			result["status"] = "FAIL"
@@ -167,7 +167,7 @@
 			else
 				result["details"] += "Containment system properly integrated and functional"
 
-		qdel(test_scp_datum)
+		qdel(test_SCP)
 		qdel(test_scp)
 	else
 		result["status"] = "FAIL"
@@ -191,11 +191,11 @@
 	else
 		// Test network registration
 		var/mob/living/carbon/human/test_scp = new /mob/living/carbon/human()
-		var/datum/scp/test_scp_datum = new /datum/scp(test_scp, "Test SCP", "Safe", "NET_TEST", "SCP_SENTIENT")
+		var/datum/scp/test_SCP = new /datum/scp(test_scp, "Test SCP", "Safe", "NET_TEST", "SCP_SENTIENT")
 
-		if(test_scp_datum)
-			test_scp_datum.uses_advanced_components = TRUE
-			test_scp_datum.compInit_advanced()
+		if(test_SCP)
+			test_SCP.uses_advanced_components = TRUE
+			test_SCP.compInit_advanced()
 
 			// Register with network
 			GLOB_SCP_NETWORK.register_scp(test_scp)
@@ -208,7 +208,7 @@
 
 			// Cleanup
 			GLOB_SCP_NETWORK.unregister_scp(test_scp)
-			qdel(test_scp_datum)
+			qdel(test_SCP)
 			qdel(test_scp)
 		else
 			result["status"] = "FAIL"
@@ -272,13 +272,13 @@
 
 	// Test performance optimizer component
 	var/mob/living/carbon/human/test_scp = new /mob/living/carbon/human()
-	var/datum/scp/test_scp_datum = new /datum/scp(test_scp, "Test SCP", "Safe", "PERF_TEST", "SCP_SENTIENT")
+	var/datum/scp/test_SCP = new /datum/scp(test_scp, "Test SCP", "Safe", "PERF_TEST", "SCP_SENTIENT")
 
-	if(test_scp_datum)
-		test_scp_datum.uses_advanced_components = TRUE
-		test_scp_datum.compInit_advanced()
+	if(test_SCP)
+		test_SCP.uses_advanced_components = TRUE
+		test_SCP.compInit_advanced()
 
-		var/datum/scp_advanced_component/performance_optimizer/optimizer = test_scp_datum.get_component("performance_optimizer")
+		var/datum/scp_advanced_component/performance_optimizer/optimizer = test_SCP.get_component("performance_optimizer")
 
 		if(!optimizer)
 			result["status"] = "FAIL"
@@ -294,7 +294,7 @@
 				result["status"] = "FAIL"
 				result["details"] += "Performance monitoring not working"
 
-		qdel(test_scp_datum)
+		qdel(test_SCP)
 		qdel(test_scp)
 	else
 		result["status"] = "FAIL"
@@ -315,7 +315,7 @@
 	var/datum/scp_management_interface/test_interface = new()
 
 	// Simulate creating an SCP-096 (which should be human-based now)
-	var/mob/living/carbon/human/scp096/test_scp = new /mob/living/carbon/human/scp096()
+	var/mob/living/scp/scp096/test_scp = new /mob/living/scp/scp096()
 
 	if(!test_scp)
 		result["status"] = "FAIL"
@@ -347,13 +347,13 @@
 
 	// Test inter-component communication
 	var/mob/living/carbon/human/test_scp = new /mob/living/carbon/human()
-	var/datum/scp/test_scp_datum = new /datum/scp(test_scp, "Test SCP", "Safe", "COMM_TEST", "SCP_SENTIENT")
+	var/datum/scp/test_SCP = new /datum/scp(test_scp, "Test SCP", "Safe", "COMM_TEST", "SCP_SENTIENT")
 
-	if(test_scp_datum)
-		test_scp_datum.uses_advanced_components = TRUE
-		test_scp_datum.compInit_advanced()
+	if(test_SCP)
+		test_SCP.uses_advanced_components = TRUE
+		test_SCP.compInit_advanced()
 
-		var/datum/scp_advanced_component/communication_hub/comm_hub = test_scp_datum.get_component("communication_hub")
+		var/datum/scp_advanced_component/communication_hub/comm_hub = test_SCP.get_component("communication_hub")
 
 		if(!comm_hub)
 			result["status"] = "FAIL"
@@ -368,7 +368,7 @@
 				result["status"] = "FAIL"
 				result["details"] += "Message queuing failed"
 
-		qdel(test_scp_datum)
+		qdel(test_SCP)
 		qdel(test_scp)
 	else
 		result["status"] = "FAIL"

@@ -105,7 +105,8 @@
 	parent = P
 
 /datum/scp080_darkness_system/proc/process_darkness()
-	if(!parent || !parent:opened)
+	var/obj/structure/closet/scp080/scp080_parent = parent
+	if(!scp080_parent || !scp080_parent.opened)
 		return
 
 	darkness_radius = min(max_radius, darkness_radius + light_absorption_rate)
@@ -128,11 +129,12 @@
 	parent = P
 
 /datum/scp080_absorption_system/proc/check_for_victims()
-	if(!parent || !parent:opened || absorption_cooldown > world.time)
+	var/obj/structure/closet/scp080/scp080_parent = parent
+	if(!scp080_parent || !scp080_parent.opened || absorption_cooldown > world.time)
 		return
 
-	for(var/mob/living/carbon/human/H in range(absorption_range, parent))
-		if(H.stat != DEAD && prob(20 * (parent:darkness_level / 100)))
+	for(var/mob/living/carbon/human/H in range(absorption_range, scp080_parent))
+		if(!QDELETED(H) && H.stat != DEAD && prob(20 * (scp080_parent.darkness_level / 100)))
 			attempt_absorption(H)
 			absorption_cooldown = world.time + absorption_delay
 			break
@@ -141,12 +143,16 @@
 	if(!victim)
 		return
 
-	victim.visible_message("<span class='danger'>[victim] is pulled into the darkness of [parent]!</span>", "<span class='danger'>The darkness pulls you in!</span>")
+	var/obj/structure/closet/scp080/scp080_parent = parent
+	if(!scp080_parent)
+		return
 
-	if(do_after(victim, parent, 30))
+	victim.visible_message("<span class='danger'>[victim] is pulled into the darkness of [scp080_parent]!</span>", "<span class='danger'>The darkness pulls you in!</span>")
+
+	if(do_after(victim, scp080_parent, 30))
 		if(prob(70))
-			parent:on_victim_absorbed(victim)
-			victim.forceMove(parent)
+			scp080_parent.on_victim_absorbed(victim)
+			victim.forceMove(scp080_parent)
 			victim.stat = DEAD
 			victim.visible_message("<span class='danger'>[victim] disappears into the wardrobe!</span>")
 		else

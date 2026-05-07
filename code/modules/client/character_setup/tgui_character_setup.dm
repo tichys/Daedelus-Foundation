@@ -65,6 +65,13 @@
 	data["gender_choices"] = list("male", "female", "plural")
 	return data
 
+/datum/character_setup_ui/ui_assets(mob/user)
+	var/list/assets = list(
+		get_asset_datum(/datum/asset/spritesheet/preferences),
+		get_asset_datum(/datum/asset/json/preferences),
+	)
+	return assets
+
 /datum/character_setup_ui/proc/get_scp_roles()
 	return list(
 		"SCP-173", "SCP-096", "SCP-049", "SCP-106", "SCP-939",
@@ -163,6 +170,14 @@
 	data["loadout_entries"] = loadout_serialized
 	data["appearance_mods"] = prefs.read_preference(/datum/preference/appearance_mods) || list()
 	data["augments"] = prefs.read_preference(/datum/preference/blob/augments) || list()
+	data["character_preferences"] = prefs.compile_character_preferences(user)
+	data["character_profiles"] = prefs.create_character_profiles()
+	data["content_unlocked"] = prefs.unlock_content
+	data["preview_options"] = list(PREVIEW_PREF_JOB, PREVIEW_PREF_LOADOUT, PREVIEW_PREF_UNDERWEAR)
+	data["preview_selection"] = prefs.preview_pref
+	data["overflow_role"] = SSjob.GetJobType(SSjob.overflow_role).title
+	for (var/datum/preference_middleware/preference_middleware as anything in prefs.middleware)
+		data += preference_middleware.get_ui_data(user)
 	return data
 
 /datum/character_setup_ui/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
@@ -343,6 +358,51 @@
 				return TRUE
 		if ("close")
 			return TRUE
+		if ("change_slot")
+			prefs.save_character()
+			if (!prefs.load_character(params["slot"]))
+				prefs.tainted_character_profiles = TRUE
+				prefs.randomise_appearance_prefs()
+				prefs.save_character()
+			for (var/datum/preference_middleware/preference_middleware as anything in prefs.middleware)
+				preference_middleware.on_new_character(usr)
+			if (prefs.character_preview_view)
+				prefs.character_preview_view.update_body()
+			return TRUE
+		if ("randomize_name")
+			var/name_key = params["preference"] || "real_name"
+			var/datum/preference/name/P = GLOB.preference_entries_by_key[name_key]
+			if (!P)
+				return FALSE
+			var/species_type = prefs.read_preference(/datum/preference/choiced/species)
+			var/datum/species/S = GLOB.species_list[species_type]
+			var/gender = prefs.read_preference(/datum/preference/choiced/gender)
+			var/new_name = S?.random_name(gender, TRUE) || random_unique_name(gender)
+			return prefs.update_preference(P, new_name)
+		if ("randomize_character")
+			prefs.randomise_appearance_prefs()
+			prefs.save_character()
+			if (prefs.character_preview_view)
+				prefs.character_preview_view.update_body()
+			return TRUE
+		if ("set_color_preference")
+			var/color_key = params["preference"]
+			var/new_color = input(usr, "Choose color", "Character Preference") as color|null
+			if (new_color)
+				return prefs.ui_act("set_preference", list("preference" = color_key, "value" = new_color), null, null)
+			return FALSE
+		if ("set_random_preference")
+			var/rand_key = params["preference"]
+			var/rand_value = params["value"]
+			return prefs.ui_act("set_preference", list("preference" = rand_key, "value" = rand_value), null, null)
+		if ("set_preview_pref")
+			var/preview_val = params["value"]
+			if (preview_val in list(PREVIEW_PREF_JOB, PREVIEW_PREF_LOADOUT, PREVIEW_PREF_UNDERWEAR))
+				prefs.preview_pref = preview_val
+				if (prefs.character_preview_view)
+					prefs.character_preview_view.update_body()
+				return TRUE
+			return FALSE
 	return FALSE
 
 /datum/character_setup_ui/proc/SYNC_PERSONNEL_RECORD(job_title)

@@ -341,3 +341,111 @@
 /obj/structure/dclass_maintenance_tunnel/science
 	name = "science tunnel"
 	tunnel_id = "sci_maint"
+
+/obj/structure/dclass_escape_point/disguise
+	name = "staff exit checkpoint"
+	desc = "A checkpoint where staff exit the facility. Maybe you could blend in..."
+	icon_state = "checkpoint"
+	route_id = "disguise"
+	difficulty = 4
+	discovery_chance = 25
+	escape_route_type = /datum/dclass_escape_route/disguise
+
+/obj/structure/dclass_escape_point/vehicle
+	name = "loading dock"
+	desc = "A loading dock where supply vehicles come and go. If you could stow away..."
+	icon_state = "dock"
+	route_id = "vehicle"
+	difficulty = 5
+	discovery_chance = 20
+	escape_route_type = /datum/dclass_escape_route/vehicle
+
+/obj/structure/dclass_escape_point/laundry
+	name = "laundry chute"
+	desc = "A large laundry chute leading to the surface level. A long, risky drop..."
+	icon_state = "chute"
+	route_id = "laundry"
+	difficulty = 4
+	discovery_chance = 30
+	escape_route_type = /datum/dclass_escape_route/laundry
+
+/obj/structure/dclass_escape_point/elevator_shaft
+	name = "elevator shaft"
+	desc = "An elevator shaft with maintenance ladders. Dangerous, but leads to the surface."
+	icon_state = "shaft"
+	route_id = "elevator"
+	difficulty = 5
+	discovery_chance = 15
+	escape_route_type = /datum/dclass_escape_route/elevator
+
+/datum/dclass_escape_route/disguise
+	name = "Disguise Escape"
+	desc = "Blend in with departing staff to walk out the front door."
+	difficulty = 4
+	discovery_difficulty = 25
+	completion_xp = 400
+	trust_change = -50
+	suspicion_change = 55
+
+/datum/dclass_escape_route/disguise/get_success_chance(mob/living/carbon/human/H)
+	. = ..()
+	var/datum/dclass_player/player = SSdclass.manager.dclass_players[H.ckey]
+	if(player?.has_contraband("staff_uniform"))
+		. += 20
+	if(player?.has_contraband("fake_id"))
+		. += 15
+	if(player?.has_contraband("disguise_kit"))
+		. += 10
+
+/datum/dclass_escape_route/vehicle
+	name = "Vehicle Stowaway"
+	desc = "Hide in a departing supply vehicle."
+	difficulty = 5
+	discovery_difficulty = 20
+	completion_xp = 450
+	trust_change = -55
+	suspicion_change = 60
+
+/datum/dclass_escape_route/vehicle/get_success_chance(mob/living/carbon/human/H)
+	. = ..()
+	var/datum/dclass_player/player = SSdclass.manager.dclass_players[H.ckey]
+	if(player?.has_contraband("lockpick"))
+		. += 10
+	if(player?.has_contraband("improvised_tool"))
+		. += 5
+
+/datum/dclass_escape_route/laundry
+	name = "Laundry Chute"
+	desc = "Slide down the laundry chute to the surface."
+	difficulty = 4
+	discovery_difficulty = 30
+	completion_xp = 300
+	trust_change = -40
+	suspicion_change = 45
+
+/datum/dclass_escape_route/laundry/complete_escape(mob/living/carbon/human/H)
+	to_chat(H, "<span class='greenannounce big'>You slide down the laundry chute and land in a cart of linens on the surface!</span>")
+	. = ..()
+
+/datum/dclass_escape_route/laundry/fail_escape(mob/living/carbon/human/H)
+	to_chat(H, "<span class='danger'>You get stuck halfway down the chute!</span>")
+	H.Paralyze(40)
+	H.adjustBruteLoss(10)
+
+/datum/dclass_escape_route/elevator
+	name = "Elevator Shaft Climb"
+	desc = "Climb the maintenance ladder in the elevator shaft to reach the surface."
+	difficulty = 5
+	discovery_difficulty = 15
+	completion_xp = 500
+	trust_change = -60
+	suspicion_change = 65
+
+/datum/dclass_escape_route/elevator/complete_escape(mob/living/carbon/human/H)
+	to_chat(H, "<span class='greenannounce big'>You climb the maintenance ladder and emerge on the surface!</span>")
+	. = ..()
+
+/datum/dclass_escape_route/elevator/fail_escape(mob/living/carbon/human/H)
+	to_chat(H, "<span class='danger'>You lose your grip and fall down the shaft!</span>")
+	H.Paralyze(50)
+	H.adjustBruteLoss(25)

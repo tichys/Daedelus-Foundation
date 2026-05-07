@@ -73,7 +73,7 @@
 	department_bitflags = DEPARTMENT_BITFLAG_ENGINEERING
 	department_head = /datum/job/engineering_director
 	department_experience_type = EXP_TYPE_ENGINEERING
-	display_order = 3
+	display_order = 5
 	label_class = "engineering"
 	latejoin_color = "#aa6a3a"
 	nation_prefixes = list("Atomo", "Engino", "Power", "Teleco")
@@ -97,7 +97,7 @@
 	department_bitflags = DEPARTMENT_BITFLAG_SCIENCE
 	department_head = /datum/job/research_director
 	department_experience_type = EXP_TYPE_SCIENCE
-	display_order = 5
+	display_order = 3
 	label_class = "medical"
 	latejoin_color = "#8a6aaa"
 	nation_prefixes = list("Sci", "Researcha")
@@ -121,7 +121,7 @@
 	department_bitflags = DEPARTMENT_BITFLAG_SILICON
 	department_head = /datum/job/ai
 	department_experience_type = EXP_TYPE_SILICON
-	display_order = 7
+	display_order = 8
 	label_class = "silicon"
 	latejoin_color = "#4aaa4a"
 
@@ -133,7 +133,7 @@
 	department_bitflags = DEPARTMENT_BITFLAG_SERVICE
 	department_head = /datum/job/head_of_personnel
 	department_experience_type = EXP_TYPE_SERVICE
-	display_order = 8
+	display_order = 7
 	label_class = "service"
 	latejoin_color = "#5a8a3a"
 	nation_prefixes = list("Honka", "Boozo", "Fatu", "Danka", "Mimi", "Libra", "Jani", "Religi")

@@ -1,12 +1,12 @@
 // SCP-2343 Modular Systems (benevolent reality effects)
 
 /datum/scp2343_benevolence_system
-	var/mob/living/carbon/human/scp2343/owner
+	var/mob/living/scp/scp2343/owner
 	var/next_tick = 0
 	var/tick_interval = 6 SECONDS
 	var/effect_radius = 5
 
-/datum/scp2343_benevolence_system/New(mob/living/carbon/human/scp2343/new_owner)
+/datum/scp2343_benevolence_system/New(mob/living/scp/scp2343/new_owner)
 	owner = new_owner
 
 /datum/scp2343_benevolence_system/proc/process_benevolence()
@@ -41,11 +41,11 @@
 			target.adjustToxLoss(-2)
 
 /datum/scp2343_research_system
-	var/mob/living/carbon/human/scp2343/owner
+	var/mob/living/scp/scp2343/owner
 	var/last = 0
 	var/gap = 30 SECONDS
 
-/datum/scp2343_research_system/New(mob/living/carbon/human/scp2343/new_owner)
+/datum/scp2343_research_system/New(mob/living/scp/scp2343/new_owner)
 	owner = new_owner
 
 /datum/scp2343_research_system/proc/process_research()

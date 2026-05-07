@@ -1,5 +1,5 @@
 /datum/scp939_voice_system
-	var/mob/living/carbon/human/scp939/owner = null
+	var/mob/living/scp/scp939/owner = null
 	var/list/learned_voices = list()
 	var/mimicry_accuracy = SCP939_INITIAL_MIMICRY_ACCURACY
 	var/max_mimicry_accuracy = SCP939_MAX_MIMICRY_ACCURACY
@@ -11,10 +11,17 @@
 	var/last_voice_learning = 0
 	var/voice_learning_interval = SCP939_VOICE_LEARNING_INTERVAL
 
-/datum/scp939_voice_system/New(mob/living/carbon/human/scp939/new_owner)
+/datum/scp939_voice_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
+
+/datum/scp939_voice_system/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/datum/scp939_voice_system/process()
+	process_voice()
 
 /datum/scp939_voice_system/proc/process_voice()
 	if(world.time >= last_voice_learning + voice_learning_interval)
@@ -88,7 +95,7 @@
 				H.visible_message("<span class='warning'>[H] looks confused and frightened.</span>")
 
 /datum/scp939_pack_system
-	var/mob/living/carbon/human/scp939/owner = null
+	var/mob/living/scp/scp939/owner = null
 	var/list/pack_members = list()
 	var/list/hunting_formation = list()
 	var/list/territory_boundaries = list()
@@ -97,11 +104,18 @@
 	var/last_pack_update = 0
 	var/pack_update_interval = SCP939_PACK_UPDATE_INTERVAL
 
-/datum/scp939_pack_system/New(mob/living/carbon/human/scp939/new_owner)
+/datum/scp939_pack_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
 	find_pack_members()
+
+/datum/scp939_pack_system/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/datum/scp939_pack_system/process()
+	process_pack()
 
 /datum/scp939_pack_system/proc/process_pack()
 	if(world.time >= last_pack_update + pack_update_interval)
@@ -113,7 +127,9 @@
 
 /datum/scp939_pack_system/proc/find_pack_members()
 	pack_members.Cut()
-	for(var/mob/living/carbon/human/scp939/H in GLOB.mob_list)
+	for(var/mob/living/scp/scp939/H in GLOB.mob_list)
+		if(QDELETED(H))
+			continue
 		if(H == owner || H.stat == DEAD)
 			continue
 		if(H.z == owner.z)
@@ -125,14 +141,14 @@
 	if(pack_communication_cooldown > 0)
 		return FALSE
 
-	for(var/mob/living/carbon/human/scp939/member in pack_members)
+	for(var/mob/living/scp/scp939/member in pack_members)
 		if(member.stat != DEAD && member.pack_system)
 			member.pack_system.receive_coordination(owner)
 
 	pack_communication_cooldown = pack_communication_time
 	return TRUE
 
-/datum/scp939_pack_system/proc/receive_coordination(mob/living/carbon/human/scp939/coordinator)
+/datum/scp939_pack_system/proc/receive_coordination(mob/living/scp/scp939/coordinator)
 	if(coordinator.hunting_system && coordinator.hunting_system.current_target)
 		owner.hunting_system?.share_target(coordinator.hunting_system.current_target)
 
@@ -144,17 +160,24 @@
 	return FALSE
 
 /datum/scp939_psychology_system
-	var/mob/living/carbon/human/scp939/owner = null
+	var/mob/living/scp/scp939/owner = null
 	var/list/target_profiles = list()
 	var/list/manipulation_tactics = list()
 	var/last_psychology_update = 0
 	var/psychology_update_interval = SCP939_PSYCHOLOGY_UPDATE_INTERVAL
 
-/datum/scp939_psychology_system/New(mob/living/carbon/human/scp939/new_owner)
+/datum/scp939_psychology_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
 	setup_manipulation_tactics()
+
+/datum/scp939_psychology_system/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/datum/scp939_psychology_system/process()
+	process_psychology()
 
 /datum/scp939_psychology_system/proc/process_psychology()
 	if(world.time >= last_psychology_update + psychology_update_interval)
@@ -223,7 +246,7 @@
 	return FALSE
 
 /datum/scp939_territory_system
-	var/mob/living/carbon/human/scp939/owner = null
+	var/mob/living/scp/scp939/owner = null
 	var/list/controlled_areas = list()
 	var/list/patrol_routes = list()
 	var/list/ambush_points = list()
@@ -234,10 +257,17 @@
 	var/last_territory_update = 0
 	var/territory_update_interval = SCP939_TERRITORY_UPDATE_INTERVAL
 
-/datum/scp939_territory_system/New(mob/living/carbon/human/scp939/new_owner)
+/datum/scp939_territory_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
+
+/datum/scp939_territory_system/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/datum/scp939_territory_system/process()
+	process_territory()
 
 /datum/scp939_territory_system/proc/process_territory()
 	if(world.time >= last_territory_update + territory_update_interval)
@@ -269,7 +299,7 @@
 	return target_area in controlled_areas
 
 /datum/scp939_hunting_system
-	var/mob/living/carbon/human/scp939/owner = null
+	var/mob/living/scp/scp939/owner = null
 	var/list/hunting_targets = list()
 	var/mob/living/carbon/human/current_target = null
 	var/hunt_mode = FALSE
@@ -279,11 +309,18 @@
 	var/last_hunt_update = 0
 	var/hunt_update_interval = SCP939_HUNT_UPDATE_INTERVAL
 
-/datum/scp939_hunting_system/New(mob/living/carbon/human/scp939/new_owner)
+/datum/scp939_hunting_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
 	START_PROCESSING(SSobj, src)
 	setup_hunting_strategies()
+
+/datum/scp939_hunting_system/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/datum/scp939_hunting_system/process()
+	process_hunting()
 
 /datum/scp939_hunting_system/proc/process_hunting()
 	if(world.time >= last_hunt_update + hunt_update_interval)
@@ -424,7 +461,7 @@
 			attack_target(current_target)
 
 /datum/scp939_hunting_system/proc/share_target(mob/living/carbon/human/target)
-	for(var/mob/living/carbon/human/scp939/member in owner.pack_system.pack_members)
+	for(var/mob/living/scp/scp939/member in owner.pack_system.pack_members)
 		if(member.hunting_system && member != owner)
 			member.hunting_system.current_target = target
 			member.hunting_system.hunt_mode = TRUE
@@ -444,12 +481,12 @@
 		hunt_mode = FALSE
 
 /datum/scp939_research_integration
-	var/mob/living/carbon/human/scp939/owner = null
+	var/mob/living/scp/scp939/owner = null
 	var/list/research_data = list()
 	var/last_research_update = 0
 	var/research_update_interval = 120 SECONDS
 
-/datum/scp939_research_integration/New(mob/living/carbon/human/scp939/new_owner)
+/datum/scp939_research_integration/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
 

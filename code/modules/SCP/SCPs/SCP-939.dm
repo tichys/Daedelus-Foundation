@@ -1,4 +1,4 @@
-/mob/living/carbon/human/scp939
+/mob/living/scp/scp939
 	name = "SCP-939"
 	desc = "A large, reptilian creature with sharp claws and teeth."
 	icon = 'icons/scp/scp_939.dmi'
@@ -12,7 +12,7 @@
 	var/datum/scp939_hunting_system/hunting_system
 	var/datum/scp939_research_integration/research_integration
 
-/mob/living/carbon/human/scp939/Initialize()
+/mob/living/scp/scp939/Initialize()
 	. = ..()
 
 	set_species(/datum/species/scp939)
@@ -44,7 +44,7 @@
 
 	START_PROCESSING(SSobj, src)
 
-/mob/living/carbon/human/scp939/process(delta_time)
+/mob/living/scp/scp939/process(delta_time)
 	voice_system?.process_voice()
 	pack_system?.process_pack()
 	psychology_system?.process_psychology()
@@ -52,7 +52,7 @@
 	hunting_system?.process_hunting()
 	research_integration?.process_research()
 
-/mob/living/carbon/human/scp939/Destroy()
+/mob/living/scp/scp939/Destroy()
 	QDEL_NULL(voice_system)
 	QDEL_NULL(pack_system)
 	QDEL_NULL(psychology_system)
@@ -62,7 +62,7 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
-/mob/living/carbon/human/scp939/proc/get_scp939_status_items()
+/mob/living/scp/scp939/proc/get_scp939_status_items()
 	var/list/status_items = list()
 
 	if(voice_system)
@@ -84,12 +84,12 @@
 
 	return status_items
 
-/mob/living/carbon/human/scp939/get_status_tab_items()
+/mob/living/scp/scp939/get_status_tab_items()
 	var/list/status_items = ..()
 	status_items += get_scp939_status_items()
 	return status_items
 
-/mob/living/carbon/human/scp939/examine(mob/user)
+/mob/living/scp/scp939/examine(mob/user)
 	. = ..()
 
 	if(voice_system)
@@ -101,7 +101,7 @@
 	if(hunting_system && hunting_system.hunt_mode)
 		. += "<span class='danger'>This SCP-939 is actively hunting!</span>"
 
-/mob/living/carbon/human/scp939/proc/contribute_research_data()
+/mob/living/scp/scp939/proc/contribute_research_data()
 	var/research_data = list(
 		"scp_type" = "SCP-939",
 		"learned_voices_count" = length(voice_system?.learned_voices) || 0,
@@ -114,17 +114,17 @@
 
 	research_integration?.research_data["last_update"] = research_data
 
-/mob/living/carbon/human/scp939/proc/on_voice_mimic(mob/living/carbon/human/target)
+/mob/living/scp/scp939/proc/on_voice_mimic(mob/living/carbon/human/target)
 	if(!target)
 		return
 	hook_scp_interaction(target, "SCP-939", INTERACTION_TYPE_COMMUNICATION)
 
-/mob/living/carbon/human/scp939/proc/on_pack_communication(mob/living/carbon/human/pack_member)
+/mob/living/scp/scp939/proc/on_pack_communication(mob/living/carbon/human/pack_member)
 	if(!pack_member)
 		return
 	hook_scp_interaction(pack_member, "SCP-939", INTERACTION_TYPE_COMMUNICATION)
 
-/mob/living/carbon/human/scp939/proc/on_hunt_kill(mob/living/carbon/human/victim)
+/mob/living/scp/scp939/proc/on_hunt_kill(mob/living/carbon/human/victim)
 	if(!victim)
 		return
 	hook_scp_breach("SCP-939", src)
@@ -132,20 +132,20 @@
 	hook_player_death_near_scp(victim, "SCP-939")
 	stop_scp_survival_tracking(victim, "SCP-939")
 
-/mob/living/carbon/human/scp939/proc/on_hunt_start(mob/living/carbon/human/target)
+/mob/living/scp/scp939/proc/on_hunt_start(mob/living/carbon/human/target)
 	if(!target || !target.ckey)
 		return
 	start_scp_survival_tracking(target, "SCP-939", INTERACTION_RISK_HIGH)
 
-/mob/living/carbon/human/scp939/proc/on_territory_claim(area/claimed_area)
+/mob/living/scp/scp939/proc/on_territory_claim(area/claimed_area)
 	if(!claimed_area)
 		return
 	hook_scp_breach("SCP-939", src)
 
-/mob/living/carbon/human/scp939/proc/on_psychological_manipulation(mob/living/carbon/human/target)
+/mob/living/scp/scp939/proc/on_psychological_manipulation(mob/living/carbon/human/target)
 	if(!target)
 		return
 	hook_scp_interaction(target, "SCP-939", INTERACTION_TYPE_COMMUNICATION)
 
-/mob/living/carbon/human/scp939/proc/on_recontainment()
+/mob/living/scp/scp939/proc/on_recontainment()
 	hook_scp_recontainment("SCP-939", list("method" = "standard"))

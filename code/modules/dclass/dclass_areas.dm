@@ -176,10 +176,10 @@
 	var/zone = get_containment_zone(A)
 	if(!zone)
 		return TRUE
-	var/datum/scp/scp_datum = scp_obj.SCP
-	if(!scp_datum)
+	var/datum/scp/SCP = scp_obj.SCP
+	if(!SCP)
 		return FALSE
-	var/obj_class = scp_datum.classification
+	var/obj_class = SCP.classification
 	if(obj_class == SCP_KETER && zone != "hcz")
 		return TRUE
 	if(obj_class == SCP_EUCLID && zone == "surface")

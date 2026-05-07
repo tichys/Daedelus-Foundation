@@ -3,7 +3,7 @@
 
 // Teleportation System - Manages SCP-2020's teleportation abilities
 /datum/scp2020_teleportation_system
-	var/mob/living/carbon/human/scp2020/owner
+	var/mob/living/scp/scp2020/owner
 	var/teleport_range = 7
 	var/max_teleport_range = 15
 	var/teleport_cooldown = 0
@@ -12,7 +12,7 @@
 	var/max_teleport_mastery = 100
 	var/teleport_events = 0
 
-/datum/scp2020_teleportation_system/New(mob/living/carbon/human/scp2020/new_owner)
+/datum/scp2020_teleportation_system/New(mob/living/scp/scp2020/new_owner)
 	owner = new_owner
 
 /datum/scp2020_teleportation_system/proc/process_teleportation()
@@ -97,14 +97,14 @@
 
 // Phasing System - Manages wall phasing abilities
 /datum/scp2020_phasing_system
-	var/mob/living/carbon/human/scp2020/owner
+	var/mob/living/scp/scp2020/owner
 	var/phasing_cooldown = 0
 	var/phasing_cooldown_time = 15 SECONDS
 	var/phasing_mastery = 0
 	var/max_phasing_mastery = 100
 	var/phasing_events = 0
 
-/datum/scp2020_phasing_system/New(mob/living/carbon/human/scp2020/new_owner)
+/datum/scp2020_phasing_system/New(mob/living/scp/scp2020/new_owner)
 	owner = new_owner
 
 /datum/scp2020_phasing_system/proc/process_phasing()
@@ -172,14 +172,14 @@
 
 // Stealth System - Manages stealth and evasion abilities
 /datum/scp2020_stealth_system
-	var/mob/living/carbon/human/scp2020/owner
+	var/mob/living/scp/scp2020/owner
 	var/stealth_level = 0
 	var/max_stealth_level = 50
 	var/stealth_cooldown = 0
 	var/stealth_cooldown_time = 45 SECONDS
 	var/stealth_events = 0
 
-/datum/scp2020_stealth_system/New(mob/living/carbon/human/scp2020/new_owner)
+/datum/scp2020_stealth_system/New(mob/living/scp/scp2020/new_owner)
 	owner = new_owner
 
 /datum/scp2020_stealth_system/proc/process_stealth()
@@ -220,7 +220,7 @@
 
 // Hunting System - Manages target acquisition and pursuit
 /datum/scp2020_hunting_system
-	var/mob/living/carbon/human/scp2020/owner
+	var/mob/living/scp/scp2020/owner
 	var/current_target = null
 	var/hunting_intensity = 0
 	var/max_hunting_intensity = 100
@@ -228,7 +228,7 @@
 	var/hunt_cooldown_time = 20 SECONDS
 	var/hunting_events = 0
 
-/datum/scp2020_hunting_system/New(mob/living/carbon/human/scp2020/new_owner)
+/datum/scp2020_hunting_system/New(mob/living/scp/scp2020/new_owner)
 	owner = new_owner
 
 /datum/scp2020_hunting_system/proc/process_hunting()
@@ -274,10 +274,10 @@
 
 // Research System - Collects data on SCP-2020's abilities
 /datum/scp2020_research_system
-	var/mob/living/carbon/human/scp2020/owner
+	var/mob/living/scp/scp2020/owner
 	var/list/research_data = list()
 
-/datum/scp2020_research_system/New(mob/living/carbon/human/scp2020/new_owner)
+/datum/scp2020_research_system/New(mob/living/scp/scp2020/new_owner)
 	owner = new_owner
 
 /datum/scp2020_research_system/proc/process_research()

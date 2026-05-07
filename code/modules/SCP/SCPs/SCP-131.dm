@@ -68,7 +68,7 @@
 			break
 
 /mob/living/simple_animal/scp131a/proc/stare_down_scp173()
-	for(var/mob/living/carbon/human/scp173/scp in view(observation_range, src))
+	for(var/mob/living/scp/scp173/scp in view(observation_range, src))
 		if(scp.stat != DEAD && scp.observation_system)
 			scp.observation_system.observers += src
 			scp.observation_system.observation_quality += 2.0
@@ -160,7 +160,7 @@
 			break
 
 /mob/living/simple_animal/scp131b/proc/stare_down_scp173()
-	for(var/mob/living/carbon/human/scp173/scp in view(observation_range, src))
+	for(var/mob/living/scp/scp173/scp in view(observation_range, src))
 		if(scp.stat != DEAD && scp.observation_system)
 			scp.observation_system.observers += src
 			scp.observation_system.observation_quality += 2.5

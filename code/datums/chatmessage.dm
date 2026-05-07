@@ -163,7 +163,8 @@
 
 	// Approximate text height
 	var/complete_text = "<span class='center [extra_classes.Join(" ")]' style='color: [tgt_color]'>[owner.say_emphasis(text)]</span>"
-	var/mheight = WXH_TO_HEIGHT(owned_by.MeasureText(complete_text, null, 160))
+	var/measured = owned_by?.MeasureText(complete_text, null, 160)
+	var/mheight = measured ? WXH_TO_HEIGHT(measured) : CHAT_MESSAGE_APPROX_LHEIGHT
 
 
 	message_loc = isturf(target) ? target : get_atom_on_turf(target)

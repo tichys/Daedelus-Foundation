@@ -1,7 +1,7 @@
 // SCP-527 - Mr. Fish
 // A fish-man from the SCP-005 "Mr." series
 
-/mob/living/carbon/human/scp527
+/mob/living/scp/scp527
 	name = "Mr. Fish"
 	desc = "A humanoid male with a fish head. He appears to be a specimen from the 'Mr.' series of SCPs."
 	icon = 'icons/scp/scp-527.dmi'
@@ -15,7 +15,7 @@
 	var/swim_time = 0
 	var/conversations_held = 0
 
-/mob/living/carbon/human/scp527/Initialize(mapload)
+/mob/living/scp/scp527/Initialize(mapload)
 	. = ..()
 	set_species(/datum/species/scp527)
 	SCP = new /datum/scp(src, "Mr. Fish", SCP_SAFE, "527", SCP_PLAYABLE|SCP_ROLEPLAY)
@@ -31,14 +31,8 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		SSscp_persistence.manager.scp_instances["SCP-527"] = new /datum/scp_instance("SCP-527", src)
 
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp527/Life()
+/mob/living/scp/scp527/Life()
 	. = ..()
 	if(stat == DEAD)
 		return
@@ -46,7 +40,7 @@
 	if(aquatic_system)
 		aquatic_system.process_aquatic()
 
-/mob/living/carbon/human/scp527/say(message)
+/mob/living/scp/scp527/say(message)
 	. = ..()
 	if(.)
 		for(var/mob/living/carbon/human/H in range(5, src))
@@ -54,7 +48,7 @@
 				hook_scp_interaction(H, "SCP-527", INTERACTION_TYPE_COMMUNICATION)
 				conversations_held++
 
-/mob/living/carbon/human/scp527/UnarmedAttack(atom/A)
+/mob/living/scp/scp527/UnarmedAttack(atom/A)
 	. = ..()
 	if(istype(A, /obj/structure/sink) || istype(A, /turf/open/water))
 		if(aquatic_system)
@@ -62,12 +56,12 @@
 			swim_time++
 			hook_scp_interaction(src, "SCP-527", INTERACTION_TYPE_EXPLORATION)
 
-/mob/living/carbon/human/scp527/examine(mob/user)
+/mob/living/scp/scp527/examine(mob/user)
 	. = ..()
 	to_chat(user, "<span class='notice'>A fish-headed humanoid from Dr. Wondertainment's 'Mr.' series.</span>")
 	to_chat(user, "<span class='notice'>He seems comfortable in and out of water.</span>")
 
-/mob/living/carbon/human/scp527/proc/dive()
+/mob/living/scp/scp527/proc/dive()
 	var/turf/open/water/W = locate() in range(1, src)
 	if(W)
 		forceMove(W)
@@ -77,7 +71,7 @@
 	else
 		to_chat(src, "<span class='warning'>No water nearby to dive into!</span>")
 
-/mob/living/carbon/human/scp527/proc/breathe_underwater()
+/mob/living/scp/scp527/proc/breathe_underwater()
 	if(aquatic_system)
 		aquatic_system.toggle_underwater_mode()
 		to_chat(src, "<span class='notice'>You [aquatic_system.underwater_mode ? "begin" : "stop"] breathing underwater.</span>")

@@ -135,6 +135,8 @@
 		GLOB_SCP_ROUND_REPORT = new()
 
 	for(var/mob/M in GLOB.player_list)
+		if(QDELETED(M))
+			continue
 		if(M.client)
 			var/datum/scp_round_report_ui/report_ui = new(M)
 			report_ui.ui_interact(M)

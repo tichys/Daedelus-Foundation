@@ -103,21 +103,21 @@
 
 	if(SSfoundation_politics && SSfoundation_politics.manager)
 		for(var/structure_id in SSfoundation_politics.manager.power_structures)
-			var/datum/power_structure/structure = SSfoundation_politics.manager.power_structures[structure_id]
+			var/list/structure = SSfoundation_politics.manager.power_structures[structure_id]
 			if(structure)
 				power_structures[structure_id] = list(
-					"structure_id" = structure.structure_id,
-					"name" = structure.structure_name,
-					"type" = structure.structure_type,
-					"leader" = structure.structure_leader,
-					"members" = structure.structure_members,
-					"policies" = structure.structure_policies,
-					"influence" = structure.structure_influence,
-					"alliances" = structure.structure_alliances,
-					"conflicts" = structure.structure_conflicts,
-					"decisions" = structure.structure_decisions,
-					"creation_date" = structure.structure_creation_date,
-					"last_updated" = structure.structure_last_updated
+					"structure_id" = structure_id,
+					"name" = structure["name"] || structure_id,
+					"type" = structure["type"] || "unknown",
+					"leader" = structure["leader"] || "Unknown",
+					"members" = structure["members"] || list(),
+					"policies" = structure["policies"] || list(),
+					"influence" = structure["influence"] || 50,
+					"alliances" = structure["alliances"] || list(),
+					"conflicts" = structure["conflicts"] || list(),
+					"decisions" = structure["decisions"] || list(),
+					"creation_date" = structure["creation_date"] || 0,
+					"last_updated" = structure["last_updated"] || 0
 				)
 
 	return power_structures

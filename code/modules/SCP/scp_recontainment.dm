@@ -76,9 +76,8 @@
 		return
 	var/mob/living/carbon/human/H = user
 	var/found_scp = FALSE
-	for(var/mob/living/carbon/human/scp096/S in oview(1, H))
-		if(S.head && istype(S.head, /obj/item/clothing/head/scp096_hood))
-			continue
+	for(var/mob/living/scp/scp096/S in oview(1, H))
+
 		user.visible_message("<span class='danger'>[user] attempts to place the containment bag over SCP-096's head!</span>")
 		if(do_after(user, 30, target = S))
 			var/hood = new /obj/item/clothing/head/scp096_hood()
@@ -101,7 +100,7 @@
 
 /obj/item/clothing/head/scp096_hood/equipped(mob/living/carbon/human/H, slot)
 	. = ..()
-	if(slot == ITEM_SLOT_HEAD && istype(H, /mob/living/carbon/human/scp096))
+	if(slot == ITEM_SLOT_HEAD && istype(H, /mob/living/scp/scp096))
 		can_trigger = FALSE
 		H.visible_message("<span class='notice'>SCP-096's face is now covered.</span>")
 
@@ -203,14 +202,16 @@
 	addtimer(CALLBACK(src, .proc/deactivate_lure), lure_duration)
 
 /obj/machinery/scp049_cure_station/proc/lure_scp049()
-	for(var/mob/living/carbon/human/scp049/scp in GLOB.mob_list)
+	for(var/mob/living/scp/scp049/scp in GLOB.mob_list)
+		if(QDELETED(scp))
+			continue
 		if(scp.stat == DEAD)
 			continue
 		to_chat(scp, span_danger("You sense the call of the Pestilence... something draws you toward containment."))
 		scp.lure_target = get_turf(src)
 		addtimer(CALLBACK(src, .proc/guide_scp049, scp), 2 SECONDS)
 
-/obj/machinery/scp049_cure_station/proc/guide_scp049(mob/living/carbon/human/scp049/scp)
+/obj/machinery/scp049_cure_station/proc/guide_scp049(mob/living/scp/scp049/scp)
 	if(!lure_active || !scp || scp.stat == DEAD)
 		return
 	if(get_dist(scp, src) <= 2)
@@ -227,7 +228,9 @@
 	lure_active = FALSE
 	visible_message(span_notice("[src] stops broadcasting."))
 
-	for(var/mob/living/carbon/human/scp049/scp in GLOB.mob_list)
+	for(var/mob/living/scp/scp049/scp in GLOB.mob_list)
+		if(QDELETED(scp))
+			continue
 		scp.lure_target = null
 
 	if(SSscp_persistence && SSscp_persistence.manager)
@@ -396,7 +399,7 @@
 		return
 	acid_cooldown = world.time + acid_cooldown_time
 	priority_announce("SCP-682 containment protocol activated. Deploying hydrochloric acid.", sound_type = ANNOUNCER_ALERT)
-	for(var/mob/living/carbon/human/scp682/reptile in range(5, src))
+	for(var/mob/living/scp/scp682/reptile in range(5, src))
 		reptile.adjustFireLoss(150)
 		reptile.visible_message(span_danger("Acid sprays over SCP-682! It thrashes in pain!"))
 	hook_scp_recontainment("SCP-682", list(user))
@@ -424,7 +427,7 @@
 		return
 	active = TRUE
 	visible_message(span_notice("[src] emits a low hum as counter-frequencies fill the air."))
-	for(var/mob/living/carbon/human/scp939/target in range(10, src))
+	for(var/mob/living/scp/scp939/target in range(10, src))
 		target.set_confusion_if_lower(30)
 		to_chat(target, span_warning("A piercing frequency disrupts your senses! Your voice mimickry is impaired!"))
 	hook_scp_recontainment("SCP-939", list(user))

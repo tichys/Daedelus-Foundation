@@ -6,7 +6,7 @@
 // ========================================
 
 /datum/scp106_phasing_system
-	var/mob/living/carbon/human/scp106/owner = null
+	var/mob/living/scp/scp106/owner = null
 	var/dimensional_energy = SCP106_INITIAL_DIMENSIONAL_ENERGY
 	var/max_dimensional_energy = SCP106_MAX_DIMENSIONAL_ENERGY
 	var/phase_range = SCP106_BASE_PHASE_RANGE
@@ -19,7 +19,7 @@
 	var/phase_energy_regen_interval = SCP106_ENERGY_REGEN_INTERVAL
 	var/last_energy_regen = 0
 
-/datum/scp106_phasing_system/New(mob/living/carbon/human/scp106/new_owner)
+/datum/scp106_phasing_system/New(mob/living/scp/scp106/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -131,7 +131,7 @@
 // ========================================
 
 /datum/scp106_pocket_dimension_system
-	var/mob/living/carbon/human/scp106/owner = null
+	var/mob/living/scp/scp106/owner = null
 	var/list/active_dimensions = list()
 	var/dimension_capacity = 3
 	var/dimension_stability = 100
@@ -140,7 +140,7 @@
 	var/dimension_maintenance_interval = 60 SECONDS
 	var/last_maintenance = 0
 
-/datum/scp106_pocket_dimension_system/New(mob/living/carbon/human/scp106/new_owner)
+/datum/scp106_pocket_dimension_system/New(mob/living/scp/scp106/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -324,7 +324,7 @@
 // ========================================
 
 /datum/scp106_corrosion_system
-	var/mob/living/carbon/human/scp106/owner = null
+	var/mob/living/scp/scp106/owner = null
 	var/corrosion_potency = 50
 	var/corrosion_spread = 2
 	var/material_dissolution = 10
@@ -333,7 +333,7 @@
 	var/corrosion_cooldown_time = 45 SECONDS
 	var/last_corrosion = 0
 
-/datum/scp106_corrosion_system/New(mob/living/carbon/human/scp106/new_owner)
+/datum/scp106_corrosion_system/New(mob/living/scp/scp106/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -449,14 +449,14 @@
 // ========================================
 
 /datum/scp106_hunting_system
-	var/mob/living/carbon/human/scp106/owner = null
+	var/mob/living/scp/scp106/owner = null
 	var/list/preferred_targets = list()
 	var/hunt_mode = FALSE
 	var/mob/living/carbon/human/current_target = null
 	var/stalking_cooldown = 0
 	var/stalking_cooldown_time = 30 SECONDS
 
-/datum/scp106_hunting_system/New(mob/living/carbon/human/scp106/new_owner)
+/datum/scp106_hunting_system/New(mob/living/scp/scp106/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -576,7 +576,7 @@
 // ========================================
 
 /datum/scp106_containment_system
-	var/mob/living/carbon/human/scp106/owner = null
+	var/mob/living/scp/scp106/owner = null
 	var/containment_status = "contained"
 	var/breach_capability = SCP106_INITIAL_BREACH_CAPABILITY
 	var/max_breach_capability = SCP106_MAX_BREACH_CAPABILITY
@@ -589,7 +589,7 @@
 	var/last_breach_attempt = 0
 	var/breach_attempt_cooldown = SCP106_BREACH_ATTEMPT_COOLDOWN
 
-/datum/scp106_containment_system/New(mob/living/carbon/human/scp106/new_owner)
+/datum/scp106_containment_system/New(mob/living/scp/scp106/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -686,12 +686,12 @@
 // ========================================
 
 /datum/scp106_research_integration
-	var/mob/living/carbon/human/scp106/owner = null
+	var/mob/living/scp/scp106/owner = null
 	var/list/research_data = list()
 	var/last_research_update = 0
 	var/research_update_interval = 120 SECONDS
 
-/datum/scp106_research_integration/New(mob/living/carbon/human/scp106/new_owner)
+/datum/scp106_research_integration/New(mob/living/scp/scp106/new_owner)
 	. = ..()
 	owner = new_owner
 	// Don't start processing - already handled by SCP-106's process() method

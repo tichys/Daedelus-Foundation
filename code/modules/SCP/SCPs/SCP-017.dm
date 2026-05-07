@@ -1,7 +1,7 @@
 // SCP-017 - Shadow Person
 // A shadowy humanoid that attacks anything which casts a shadow upon it, engulfing the shadow-caster entirely
 
-/mob/living/carbon/scp/scp017
+/mob/living/scp/scp017
 	name = "shadow person"
 	desc = "A 1.8-metre-tall shadowy humanoid figure. It seems to absorb the light around it."
 	icon = 'icons/scp/scp-017.dmi'
@@ -21,13 +21,13 @@
 	var/shadow_detection_range = 7
 	var/victims_engulfed = 0
 
-/mob/living/carbon/scp/scp017/Initialize(mapload, new_species = "SCP-017")
+/mob/living/scp/scp017/Initialize(mapload, new_species = "SCP-017")
 	. = ..()
 	SCP = new /datum/scp(src, "shadow person", SCP_EUCLID, "017", SCP_PLAYABLE)
 	SCP.min_playercount = 20
 	SCP.min_time = 5 MINUTES
 
-/mob/living/carbon/scp/scp017/process_scp_effects()
+/mob/living/scp/scp017/process_scp_effects()
 	. = ..()
 
 	if(stat == DEAD)
@@ -48,7 +48,7 @@
 	if(shadow_caster)
 		engulf_target(shadow_caster)
 
-/mob/living/carbon/scp/scp017/proc/find_shadow_caster(turf/my_turf, my_lumcount)
+/mob/living/scp/scp017/proc/find_shadow_caster(turf/my_turf, my_lumcount)
 	for(var/mob/living/L in range(shadow_detection_range, src))
 		if(L == src || L.stat == DEAD)
 			continue
@@ -88,7 +88,7 @@
 
 	return null
 
-/mob/living/carbon/scp/scp017/proc/engulf_target(mob/living/target)
+/mob/living/scp/scp017/proc/engulf_target(mob/living/target)
 	if(!target || engulf_cooldown > world.time)
 		return
 
@@ -127,7 +127,7 @@
 			engulf_cooldown = 0
 			engulf_target(target)
 
-/mob/living/carbon/scp/scp017/UnarmedAttack(atom/A)
+/mob/living/scp/scp017/UnarmedAttack(atom/A)
 	if(!istype(A, /mob/living))
 		return ..()
 
@@ -137,7 +137,7 @@
 
 	engulf_target(L)
 
-/mob/living/carbon/scp/scp017/get_status_tab_items()
+/mob/living/scp/scp017/get_status_tab_items()
 	. = ..()
 	. += "Victims Engulfed: [victims_engulfed]"
 	. += "Engulf Cooldown: [max(0, round((engulf_cooldown - world.time) / 10))] seconds"
@@ -147,13 +147,13 @@
 		var/lum = round(T.get_lumcount() * 100, 1)
 		. += "Local Light Level: [lum]%"
 
-/mob/living/carbon/scp/scp017/examine(mob/user)
+/mob/living/scp/scp017/examine(mob/user)
 	. = ..()
 	. += "<span class='warning'>A shadowy figure that attacks anything which casts a shadow upon it. Keep it in the dark.</span>"
 	if(victims_engulfed > 0)
 		. += "<span class='danger'>It has consumed [victims_engulfed] victim\s.</span>"
 
-/mob/living/carbon/scp/scp017/scp_death()
+/mob/living/scp/scp017/scp_death()
 	visible_message("<span class='danger'>[src] dissolves into darkness!</span>")
 	playsound(src, 'sound/effects/explosion2.ogg', 50)
 	..()

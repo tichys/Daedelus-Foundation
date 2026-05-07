@@ -98,7 +98,6 @@
 		trigger_ultimate_video_event(nearby_viewers)
 
 /obj/item/scp1981/proc/escalate_all_systems()
-	// Escalate all systems simultaneously
 	if(video_system)
 		video_system.increase_video_manipulation()
 	if(reality_system)
@@ -106,10 +105,11 @@
 	if(temporal_system)
 		temporal_system.increase_temporal_effects()
 
-	// Announce escalation
 	for(var/mob/living/carbon/human/H in range(8, src))
 		if(H.stat != DEAD)
 			to_chat(H, "<span class='danger'>The video recording's effects intensify dramatically!</span>")
+
+	activation_events = 50
 
 /obj/item/scp1981/proc/trigger_ultimate_video_event(list/targets)
 	// Major event that affects all nearby people

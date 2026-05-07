@@ -22,7 +22,6 @@
 	// Auto-registered via datum/scp
 
 /obj/item/clothing/accessory/scp427/process()
-	// Only work when worn by a human
 	var/mob/living/carbon/human/user = loc
 	if(!istype(user))
 		return
@@ -30,28 +29,24 @@
 	if(!locket_open)
 		return
 
-	// Initialize tracking for this user
-	if(!(user in time_used))
-		time_used[user] = 0
+	var/user_key = user.ckey || "\ref[user]"
+	if(!(user_key in time_used))
+		time_used[user_key] = 0
 
-	time_used[user] += 1
+	time_used[user_key] += 1
 
-	// Provide healing effects
 	user.adjustBruteLoss(-10)
 	user.adjustFireLoss(-10)
 	user.adjustToxLoss(-5)
 	user.adjustOxyLoss(-5)
 
-	// Log healing interaction
 	SCP.log_interaction(user, "healing")
 	SCP.award_research(user, "anomaly", 5)
 
-	// Check for transformation if overused
-	if(time_used[user] < transformation_time_min)
+	if(time_used[user_key] < transformation_time_min)
 		return
 
-	// Calculate transformation probability
-	var/transform_prob = transformation_max_prob * min(1, time_used[user] / transformation_time_max)
+	var/transform_prob = transformation_max_prob * min(1, time_used[user_key] / transformation_time_max)
 	if(prob(transform_prob))
 		transform_user(user)
 

@@ -18,14 +18,14 @@
 /datum/action/scp049cure/New(Target)
 	..()
 	// Don't delete if owner is not set yet - it will be set when granted
-	if(owner && !istype(owner, /mob/living/carbon/human/scp049))
+	if(owner && !istype(owner, /mob/living/scp/scp049))
 		qdel(src)
 
 /datum/action/scp049cure/IsAvailable(feedback = FALSE)
 	if(!..())
 		return FALSE
 
-	if(!owner || !istype(owner, /mob/living/carbon/human/scp049))
+	if(!owner || !istype(owner, /mob/living/scp/scp049))
 		return FALSE
 
 	if(world.time < cure_cooldown)
@@ -34,7 +34,7 @@
 		return FALSE
 
 	// Check if there are any valid targets in range
-	var/mob/living/carbon/human/scp049/scp = owner
+	var/mob/living/scp/scp049/scp = owner
 	for(var/mob/living/carbon/human/H in range(cure_range, scp))
 		if(HAS_TRAIT(H, TRAIT_PESTILENCE))
 			return TRUE
@@ -50,10 +50,10 @@
 	if(!IsAvailable(TRUE))
 		return FALSE
 
-	if(!owner || !istype(owner, /mob/living/carbon/human/scp049))
+	if(!owner || !istype(owner, /mob/living/scp/scp049))
 		return FALSE
 
-	var/mob/living/carbon/human/scp049/scp = owner
+	var/mob/living/scp/scp049/scp = owner
 
 	// Get list of valid targets
 	var/list/targets = list()
@@ -86,7 +86,7 @@
 	perform_cure(scp, target)
 	return TRUE
 
-/datum/action/scp049cure/proc/perform_cure(mob/living/carbon/human/scp049/scp, mob/living/carbon/human/target)
+/datum/action/scp049cure/proc/perform_cure(mob/living/scp/scp049/scp, mob/living/carbon/human/target)
 	if(!scp || !target) // Safety check
 		return
 

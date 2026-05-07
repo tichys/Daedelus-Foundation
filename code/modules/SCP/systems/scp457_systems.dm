@@ -1,5 +1,5 @@
 /datum/scp457_heat_system
-	var/mob/living/carbon/human/scp457/owner
+	var/mob/living/scp/scp457/owner
 	var/current_heat = SCP457_INITIAL_HEAT
 	var/max_heat = SCP457_MAX_HEAT
 	var/heat_generation_rate = SCP457_HEAT_GENERATION_RATE
@@ -10,7 +10,7 @@
 	var/heat_decay_multiplier = 1.0
 	var/containment_heat_penalty = 0
 
-/datum/scp457_heat_system/New(mob/living/carbon/human/scp457/new_owner)
+/datum/scp457_heat_system/New(mob/living/scp/scp457/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -55,7 +55,7 @@
 	containment_heat_penalty += penalty
 
 /datum/scp457_fire_system
-	var/mob/living/carbon/human/scp457/owner
+	var/mob/living/scp/scp457/owner
 	var/list/active_fires = list()
 	var/spread_cooldown = 0
 	var/spread_interval = 10 SECONDS
@@ -65,7 +65,7 @@
 	var/fire_creation_cooldown = 0
 	var/fire_creation_interval = 5 SECONDS
 
-/datum/scp457_fire_system/New(mob/living/carbon/human/scp457/new_owner)
+/datum/scp457_fire_system/New(mob/living/scp/scp457/new_owner)
 	. = ..()
 	owner = new_owner
 	current_fire_type = "basic"
@@ -179,7 +179,7 @@
 	active_fires.Cut()
 
 /datum/scp457_containment_system
-	var/mob/living/carbon/human/scp457/owner
+	var/mob/living/scp/scp457/owner
 	var/containment_level = 0
 	var/max_containment_level = SCP457_MAX_CONTAINMENT_LEVEL
 	var/response_cooldown = 0
@@ -192,7 +192,7 @@
 	var/containment_successes = 0
 	var/containment_failures = 0
 
-/datum/scp457_containment_system/New(mob/living/carbon/human/scp457/new_owner)
+/datum/scp457_containment_system/New(mob/living/scp/scp457/new_owner)
 	. = ..()
 	owner = new_owner
 
@@ -271,7 +271,7 @@
 	log_game("SCP-457 triggered breach protocol")
 
 /datum/scp457_environmental_system
-	var/mob/living/carbon/human/scp457/owner
+	var/mob/living/scp/scp457/owner
 	var/list/controlled_room_types = list()
 	var/list/room_effects = list()
 	var/environmental_hazards = list()
@@ -279,7 +279,7 @@
 	var/last_environment_check = 0
 	var/environment_check_interval = 20 SECONDS
 
-/datum/scp457_environmental_system/New(mob/living/carbon/human/scp457/new_owner)
+/datum/scp457_environmental_system/New(mob/living/scp/scp457/new_owner)
 	. = ..()
 	owner = new_owner
 	setup_room_effects()
@@ -329,14 +329,14 @@
 	return room_effects[room_type] || room_effects["standard"]
 
 /datum/scp457_research_integration
-	var/mob/living/carbon/human/scp457/owner
+	var/mob/living/scp/scp457/owner
 	var/list/research_projects = list()
 	var/list/research_data = list()
 	var/research_update_cooldown = 0
 	var/research_update_interval = 120 SECONDS
 	var/last_research_update = 0
 
-/datum/scp457_research_integration/New(mob/living/carbon/human/scp457/new_owner)
+/datum/scp457_research_integration/New(mob/living/scp/scp457/new_owner)
 	. = ..()
 	owner = new_owner
 	setup_research_projects()
@@ -385,7 +385,7 @@
 	layer = 3
 	anchored = TRUE
 	var/fire_type = "basic"
-	var/mob/living/carbon/human/scp457/owner
+	var/mob/living/scp/scp457/owner
 	var/fire_duration = 60 SECONDS
 	var/creation_time = 0
 	var/damage_tick = 0

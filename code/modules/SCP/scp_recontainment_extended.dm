@@ -64,8 +64,8 @@
 
 	acid_level -= 0.5
 
-	var/mob/living/carbon/human/scp682/target = null
-	for(var/mob/living/carbon/human/scp682/S in range(3, src))
+	var/mob/living/scp/scp682/target = null
+	for(var/mob/living/scp/scp682/S in range(3, src))
 		target = S
 		break
 
@@ -83,7 +83,7 @@
 	else
 		containment_progress = max(0, containment_progress - 1)
 
-/obj/machinery/scp682_acid_bath/proc/complete_acid_containment(mob/living/carbon/human/scp682/target)
+/obj/machinery/scp682_acid_bath/proc/complete_acid_containment(mob/living/scp/scp682/target)
 	bath_active = FALSE
 	containment_progress = 0
 
@@ -138,7 +138,9 @@
 
 /obj/item/scp939_sound_lure/proc/attract_scp939(mob/user)
 	var/list/attracted = list()
-	for(var/mob/living/carbon/human/scp939/S in GLOB.mob_list)
+	for(var/mob/living/scp/scp939/S in GLOB.mob_list)
+		if(QDELETED(S))
+			continue
 		var/dist = get_dist(user, S)
 		if(dist <= lure_range)
 			attracted += S
@@ -148,7 +150,7 @@
 	if(length(attracted))
 		to_chat(user, "<span class='notice'>The lure is attracting [length(attracted)] SCP-939 instance(s)!</span>")
 
-		for(var/mob/living/carbon/human/scp939/S in attracted)
+		for(var/mob/living/scp/scp939/S in attracted)
 			var/dist = get_dist(user, S)
 			if(dist <= 2)
 				S.Stun(40)
@@ -294,8 +296,8 @@
 		if(prob(60))
 			L.set_on(FALSE)
 
-	var/mob/living/carbon/scp/scp017/target = null
-	for(var/mob/living/carbon/scp/scp017/S in range(range, T))
+	var/mob/living/scp/scp017/target = null
+	for(var/mob/living/scp/scp017/S in range(range, T))
 		target = S
 		break
 

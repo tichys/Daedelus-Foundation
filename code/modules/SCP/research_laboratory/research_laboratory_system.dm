@@ -1,34 +1,29 @@
-// Advanced Research Laboratory System
-// A comprehensive, centralized research system for SCP Foundation experiments and studies
-
 SUBSYSTEM_DEF(research_laboratory)
 	name = "Research Laboratory"
-	wait = 600 // 10 seconds
+	wait = 100
 	priority = FIRE_PRIORITY_RESEARCH
 	init_order = INIT_ORDER_RESEARCH
 	var/datum/research_laboratory_manager/manager
 
 /datum/controller/subsystem/research_laboratory/Initialize()
 	manager = new /datum/research_laboratory_manager()
+	manager.initialize()
 	world.log << "Research Laboratory Subsystem: Initialized"
 	return ..()
 
 /datum/controller/subsystem/research_laboratory/fire()
 	if(manager)
-		manager.process_research_laboratory()
+		manager.tick()
 
-// Research Laboratory Manager
 /datum/research_laboratory_manager
-	var/list/research_projects = list() // project_id -> project_data
-	var/list/active_experiments = list() // experiment_id -> experiment_data
-	var/list/research_facilities = list() // facility_id -> facility_data
-	var/list/research_teams = list() // team_id -> team_data
-	var/list/research_data = list() // data_id -> research_data
-	var/list/experiment_protocols = list() // protocol_id -> protocol_data
-	var/list/safety_protocols = list() // safety_id -> safety_data
-	var/list/research_achievements = list() // achievement_id -> achievement_data
+	var/list/research_projects = list()
+	var/list/active_experiments = list()
+	var/list/research_facilities = list()
+	var/list/research_teams = list()
+	var/list/safety_protocols = list()
+	var/list/research_achievements = list()
+	var/datum/tech_tree/tech_tree
 
-	// Research metrics
 	var/total_research_points = 0
 	var/total_experiments_conducted = 0
 	var/total_breakthroughs = 0
@@ -37,906 +32,577 @@ SUBSYSTEM_DEF(research_laboratory)
 	var/containment_breaches = 0
 	var/research_incidents = 0
 
-	// Facility management
-	var/list/laboratory_rooms = list()
-	var/list/containment_chambers = list()
-	var/list/observation_decks = list()
-	var/list/analysis_labs = list()
-	var/list/storage_facilities = list()
+/datum/research_laboratory_manager/proc/initialize()
+	tech_tree = new /datum/tech_tree()
+	tech_tree.initialize()
+	sync_from_subsystems()
+	initialize_default_facility()
+	initialize_default_safety_protocols()
 
-/datum/research_laboratory_manager/proc/process_research_laboratory()
-	// Process active experiments with skill integration
+/datum/research_laboratory_manager/proc/sync_from_subsystems()
+	if(SSscp_research && SSscp_research.manager)
+		total_research_points = SSscp_research.manager.total_research_points
+		total_breakthroughs = SSscp_research.manager.research_breakthroughs
+	if(SSscp_experiments && SSscp_experiments.manager)
+		total_experiments_conducted = SSscp_experiments.manager.global_experiment_count
+		containment_breaches = SSscp_experiments.manager.global_catastrophe_count
+
+/datum/research_laboratory_manager/proc/tick()
+	sync_from_subperiments()
 	for(var/experiment_id in active_experiments)
 		var/list/experiment = active_experiments[experiment_id]
 		if(experiment["status"] == "active")
-			process_experiment_with_skills(experiment_id)
+			process_lab_experiment(experiment_id)
+	update_safety_rating()
+	update_facility_metrics()
 
-	// Generate research reports
-	generate_research_reports()
+/datum/research_laboratory_manager/proc/sync_from_subperiments()
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return
+	var/datum/scp_experiment_manager/exp_mgr = SSscp_experiments.manager
+	for(var/exp_id in exp_mgr.active_experiments)
+		if(!active_experiments[exp_id])
+			var/datum/scp_experiment/exp = exp_mgr.active_experiments[exp_id]
+			active_experiments[exp_id] = list(
+				"id" = exp.experiment_id,
+				"name" = exp.name,
+				"scp_id" = exp.scp_id,
+				"type" = exp.experiment_type,
+				"risk_level" = exp.risk_level,
+				"status" = exp.status,
+				"researcher" = exp.primary_researcher?.name || "Unknown",
+				"start_time" = exp.start_time,
+				"source" = "scp_experiments",
+			)
+	for(var/exp_id in exp_mgr.completed_experiments)
+		active_experiments -= exp_id
 
-	// Update research metrics
-	// update_research_metrics() // This proc will be implemented when research metrics are needed
-
-/datum/research_laboratory_manager/proc/process_experiment_with_skills(experiment_id)
+/datum/research_laboratory_manager/proc/process_lab_experiment(experiment_id)
 	var/list/experiment = active_experiments[experiment_id]
 	if(!experiment)
 		return
+	if(experiment["source"] == "scp_experiments")
+		return
+	var/progress_rate = experiment["progress_rate"] || 1.0
+	experiment["current_progress"] = (experiment["current_progress"] || 0) + progress_rate
+	if(experiment["current_progress"] >= (experiment["max_progress"] || 100))
+		complete_lab_experiment(experiment_id)
 
-	// Get research team members
-	var/list/team_members = get_experiment_team_members(experiment_id)
-	var/total_skill_bonus = 0
-
-	// Calculate skill bonuses from team members
-	for(var/member_data in team_members)
-		var/mob/living/carbon/human/researcher = get_researcher_by_ckey(member_data["ckey"])
-		if(researcher && researcher.mind)
-			var/research_skill = researcher.mind.get_skill_level(/datum/skill/research) || 0
-			total_skill_bonus += research_skill * 0.01 // +1% per skill level per team member
-
-			// Apply research skill effects
-			if(SSskill_integration && SSskill_integration.manager)
-				SSskill_integration.manager.apply_research_skill_effects(researcher, experiment["name"])
-
-	// Apply skill bonuses to experiment progress
-	var/base_progress_rate = experiment["progress_rate"] || 1.0
-	var/skill_enhanced_rate = base_progress_rate * (1 + total_skill_bonus)
-
-	// Update experiment progress
-	experiment["current_progress"] += skill_enhanced_rate
-
-	// Check for breakthroughs with skill-enhanced chances
-	if(experiment["current_progress"] >= experiment["max_progress"] * 0.8) // 80% progress
-		var/base_breakthrough_chance = experiment["breakthrough_chance"] || 5
-		var/enhanced_chance = base_breakthrough_chance
-
-		// Apply skill-based breakthrough chance enhancement
-		if(SSskill_integration && SSskill_integration.manager)
-			var/lead_researcher = get_lead_researcher(experiment_id)
-			if(lead_researcher)
-				enhanced_chance = SSskill_integration.manager.calculate_research_breakthrough_chance(lead_researcher, base_breakthrough_chance)
-
-		if(prob(enhanced_chance))
-			trigger_research_breakthrough(experiment_id)
-
-	// Check for completion
-	if(experiment["current_progress"] >= experiment["max_progress"])
-		complete_experiment(experiment_id)
-
-/datum/research_laboratory_manager/proc/get_experiment_team_members(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return list()
-
-	var/team_id = experiment["team_id"]
-	if(!team_id)
-		return list()
-
-	var/list/team = research_teams[team_id]
-	if(!team)
-		return list()
-
-	return team["members"] || list()
-
-/datum/research_laboratory_manager/proc/get_researcher_by_ckey(ckey)
-	for(var/mob/living/carbon/human/H in world)
-		if(H.ckey == ckey)
-			return H
-	return null
-
-/datum/research_laboratory_manager/proc/get_lead_researcher(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return null
-
-	var/team_id = experiment["team_id"]
-	if(!team_id)
-		return null
-
-	var/list/team = research_teams[team_id]
-	if(!team || !team["members"])
-		return null
-
-	// Find the first team member as lead researcher
-	var/list/members = team["members"]
-	if(length(members) > 0)
-		return get_researcher_by_ckey(members[1]["ckey"])
-
-	return null
-
-/datum/research_laboratory_manager/proc/complete_experiment(experiment_id)
+/datum/research_laboratory_manager/proc/complete_lab_experiment(experiment_id)
 	var/list/experiment = active_experiments[experiment_id]
 	if(!experiment)
 		return
-
 	experiment["status"] = "completed"
 	experiment["completion_time"] = world.time
+	var/points = experiment["research_points"] || 100
+	total_research_points += points
+	total_experiments_conducted++
+	if(SSscp_research && SSscp_research.manager)
+		SSscp_research.manager.total_research_points += points
 
-	// Award research points with skill bonuses
-	var/base_points = experiment["research_points"] || 100
-	var/enhanced_points = base_points
+/datum/research_laboratory_manager/proc/update_safety_rating()
+	var/active_high_risk = 0
+	for(var/exp_id in active_experiments)
+		var/list/exp = active_experiments[exp_id]
+		if(exp["status"] == "active" && (exp["risk_level"] || 1) >= 4)
+			active_high_risk++
+	safety_rating = max(0, 100 - (active_high_risk * 10) - (research_incidents * 5))
 
-	// Apply skill bonuses to research points
-	if(SSskill_integration)
-		var/lead_researcher = get_lead_researcher(experiment_id)
-		if(lead_researcher)
-			enhanced_points = SSskill_integration.manager.apply_research_skill_bonuses(lead_researcher, "experiment", base_points)
+/datum/research_laboratory_manager/proc/update_facility_metrics()
+	for(var/facility_id in research_facilities)
+		var/list/facility = research_facilities[facility_id]
+		var/active_count = 0
+		for(var/exp_id in active_experiments)
+			var/list/exp = active_experiments[exp_id]
+			if(exp["facility_id"] == facility_id && exp["status"] == "active")
+				active_count++
+		facility["active_experiments"] = active_count
 
-	total_research_points += enhanced_points
+/datum/research_laboratory_manager/proc/initialize_default_facility()
+	var/facility_id = "facility_site53_main"
+	research_facilities[facility_id] = list(
+		"id" = facility_id,
+		"name" = "Site-53 Main Research Wing",
+		"status" = "operational",
+		"active_experiments" = 0,
+		"safety_rating" = 100,
+		"location" = "Site-53",
+	)
+	var/facility_id2 = "facility_site53_containment"
+	research_facilities[facility_id2] = list(
+		"id" = facility_id2,
+		"name" = "Site-53 Containment Research Lab",
+		"status" = "operational",
+		"active_experiments" = 0,
+		"safety_rating" = 100,
+		"location" = "Site-53 HCZ",
+	)
 
-	// Award experience to team members
-	award_experiment_experience(experiment_id, enhanced_points)
+/datum/research_laboratory_manager/proc/initialize_default_safety_protocols()
+	var/protocol_id = "safety_standard"
+	safety_protocols[protocol_id] = list(
+		"id" = protocol_id,
+		"name" = "Standard Research Safety Protocol",
+		"description" = "Baseline safety requirements for all SCP experiments.",
+		"status" = "active",
+		"violations" = 0,
+		"violation_threshold" = 5,
+	)
+	var/protocol_id2 = "safety_high_risk"
+	safety_protocols[protocol_id2] = list(
+		"id" = protocol_id2,
+		"name" = "High-Risk Experiment Protocol",
+		"description" = "Additional safety measures for High and Critical risk experiments.",
+		"status" = "active",
+		"violations" = 0,
+		"violation_threshold" = 3,
+	)
 
-	// Announce completion
-	announce_experiment_completion(experiment_id, enhanced_points)
-
-/datum/research_laboratory_manager/proc/award_experiment_experience(experiment_id, research_points)
-	var/list/team_members = get_experiment_team_members(experiment_id)
-	var/points_per_member = research_points / max(length(team_members), 1)
-
-	for(var/member_data in team_members)
-		var/mob/living/carbon/human/researcher = get_researcher_by_ckey(member_data["ckey"])
-		if(researcher && SSskill_integration)
-			SSskill_integration.manager.add_experience(researcher, /datum/skill/research, points_per_member)
-
-/datum/research_laboratory_manager/proc/announce_experiment_completion(experiment_id, research_points)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	var/completion_message = "RESEARCH COMPLETED: [experiment["name"]] has been completed! Research points awarded: [research_points]"
-
-	// Notify all research personnel
-	for(var/mob/living/carbon/human/H in world)
-		if(H.mind && H.mind.assigned_role && is_research_role(H.mind.assigned_role))
-			to_chat(H, "<span class='boldnotice'>[completion_message]</span>")
-
-	// Log completion
-	log_game("Research experiment completed: [experiment["name"]] - [research_points] points")
-
-/datum/research_laboratory_manager/proc/monitor_experiment_safety(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	var/risk_level = experiment["risk_level"] || 1
-	var/safety_threshold = experiment["safety_threshold"] || 50
-
-	// Check for safety violations
-	if(risk_level > safety_threshold)
-		trigger_safety_protocol(experiment_id)
-		safety_rating = max(0, safety_rating - 5)
-
-/datum/research_laboratory_manager/proc/trigger_safety_protocol(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	experiment["status"] = "suspended"
-	experiment["safety_violations"] = (experiment["safety_violations"] || 0) + 1
-
-	// Notify research team
-	notify_research_team(experiment["team_id"], "Safety protocol triggered for experiment [experiment_id]")
-
-	// Log incident
-	log_research_incident(experiment_id, "Safety violation detected")
-
-/datum/research_laboratory_manager/proc/trigger_research_breakthrough(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	total_breakthroughs++
-	experiment["breakthrough"] = TRUE
-	experiment["breakthrough_time"] = world.time
-
-	// Award bonus research points
-	var/bonus_points = experiment["research_points"] * 2
-	total_research_points += bonus_points
-
-	// Announce breakthrough
-	announce_research_breakthrough(experiment_id)
-
-/datum/research_laboratory_manager/proc/announce_research_breakthrough(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	var/breakthrough_message = "RESEARCH BREAKTHROUGH: [experiment["name"]] has achieved a major breakthrough!"
-
-	// Notify all research personnel
-	for(var/mob/living/carbon/human/H in world)
-		if(H.mind && H.mind.assigned_role && is_research_role(H.mind.assigned_role))
-			to_chat(H, "<span class='boldnotice'>[breakthrough_message]</span>")
-
-	// Log breakthrough
-	log_game("Research breakthrough achieved: [experiment["name"]]")
-
-/datum/research_laboratory_manager/proc/is_research_role(role)
-	var/research_roles = list("Scientist", "Research Director", "Geneticist", "Roboticist", "Xenobiologist")
-	return role in research_roles
-
-// Research Project Management
-/datum/research_laboratory_manager/proc/create_research_project(project_data)
+/datum/research_laboratory_manager/proc/create_research_project(list/project_data)
 	var/project_id = "project_[world.time]_[rand(1000, 9999)]"
-
 	project_data["id"] = project_id
 	project_data["creation_time"] = world.time
-	project_data["status"] = "proposed"
+	project_data["status"] = project_data["status"] || "proposed"
 	project_data["progress"] = 0
-
 	research_projects[project_id] = project_data
-
 	return project_id
 
 /datum/research_laboratory_manager/proc/approve_research_project(project_id)
 	var/list/project = research_projects[project_id]
 	if(!project)
 		return FALSE
-
 	project["status"] = "approved"
 	project["approval_time"] = world.time
-
-	// Create initial experiment
-	create_experiment_from_project(project_id)
-
 	return TRUE
 
-/datum/research_laboratory_manager/proc/create_experiment_from_project(project_id)
-	var/list/project = research_projects[project_id]
-	if(!project)
-		return
+/datum/research_laboratory_manager/proc/delete_research_project(project_id)
+	research_projects -= project_id
+	return TRUE
 
-	var/experiment_id = "exp_[world.time]_[rand(1000, 9999)]"
-
-	var/list/experiment_data = list(
-		"id" = experiment_id,
-		"project_id" = project_id,
-		"name" = project["name"],
-		"description" = project["description"],
-		"scp_target" = project["scp_target"],
-		"research_points" = project["research_points"] || 100,
-		"risk_level" = project["risk_level"] || 1,
-		"safety_threshold" = project["safety_threshold"] || 50,
-		"progress_rate" = project["progress_rate"] || 1.0,
-		"max_progress" = project["max_progress"] || 100,
-		"breakthrough_chance" = project["breakthrough_chance"] || 5,
-		"team_id" = project["team_id"],
-		"facility_id" = project["facility_id"],
-		"status" = "active",
-		"start_time" = world.time,
-		"current_progress" = 0,
-		"data_points_collected" = 0
-	)
-
-	active_experiments[experiment_id] = experiment_data
-
-	return experiment_id
-
-// Research Team Management
-/datum/research_laboratory_manager/proc/create_research_team(team_data)
+/datum/research_laboratory_manager/proc/create_research_team(list/team_data)
 	var/team_id = "team_[world.time]_[rand(1000, 9999)]"
-
 	team_data["id"] = team_id
 	team_data["creation_time"] = world.time
 	team_data["status"] = "active"
 	team_data["members"] = list()
 	team_data["completed_experiments"] = 0
 	team_data["total_research_points"] = 0
-
 	research_teams[team_id] = team_data
-
 	return team_id
 
 /datum/research_laboratory_manager/proc/add_team_member(team_id, mob/living/carbon/human/researcher)
 	var/list/team = research_teams[team_id]
 	if(!team)
 		return FALSE
-
-	var/member_data = list(
+	team["members"] += list(list(
 		"ckey" = researcher.ckey,
 		"name" = researcher.real_name,
-		"role" = researcher.mind?.assigned_role || "Researcher",
+		"role" = researcher.mind?.assigned_role?.title || "Researcher",
 		"join_time" = world.time,
-		"research_contribution" = 0
-	)
-
-	team["members"] += list(member_data)
-
+	))
 	return TRUE
 
-/datum/research_laboratory_manager/proc/notify_research_team(team_id, message)
+/datum/research_laboratory_manager/proc/remove_team_member(team_id, ckey)
 	var/list/team = research_teams[team_id]
 	if(!team)
-		return
+		return FALSE
+	var/list/new_members = list()
+	for(var/list/member in team["members"])
+		if(member["ckey"] != ckey)
+			new_members += list(member)
+	team["members"] = new_members
+	return TRUE
 
-	for(var/member in team["members"])
-		var/ckey = member["ckey"]
-		for(var/mob/living/carbon/human/H in world)
-			if(H.ckey == ckey)
-				to_chat(H, "<span class='notice'>[message]</span>")
-				break
-
-// Research Facility Management
-/datum/research_laboratory_manager/proc/register_research_facility(facility_data)
+/datum/research_laboratory_manager/proc/register_research_facility(list/facility_data)
 	var/facility_id = "facility_[world.time]_[rand(1000, 9999)]"
-
 	facility_data["id"] = facility_id
-	facility_data["registration_time"] = world.time
 	facility_data["status"] = "operational"
 	facility_data["active_experiments"] = 0
-	facility_data["safety_rating"] = 100.0
-
+	facility_data["safety_rating"] = 100
 	research_facilities[facility_id] = facility_data
-
 	return facility_id
 
-/datum/research_laboratory_manager/proc/update_research_facilities()
-	for(var/facility_id in research_facilities)
-		var/list/facility = research_facilities[facility_id]
-		if(!facility)
-			continue
-
-		// Count active experiments
-		var/active_count = 0
-		for(var/experiment_id in active_experiments)
-			var/list/experiment = active_experiments[experiment_id]
-			if(experiment["facility_id"] == facility_id && experiment["status"] == "active")
-				active_count++
-
-		facility["active_experiments"] = active_count
-
-		// Update safety rating
-		update_facility_safety_rating(facility_id)
-
-/datum/research_laboratory_manager/proc/update_facility_safety_rating(facility_id)
-	var/list/facility = research_facilities[facility_id]
-	if(!facility)
-		return
-
-	var/total_risk = 0
-	var/experiment_count = 0
-
-	for(var/experiment_id in active_experiments)
-		var/list/experiment = active_experiments[experiment_id]
-		if(experiment["facility_id"] == facility_id && experiment["status"] == "active")
-			total_risk += experiment["risk_level"] || 1
-			experiment_count++
-
-	if(experiment_count > 0)
-		var/average_risk = total_risk / experiment_count
-		facility["safety_rating"] = max(0, 100 - (average_risk * 10))
-
-// Safety Protocol Management
-/datum/research_laboratory_manager/proc/create_safety_protocol(protocol_data)
+/datum/research_laboratory_manager/proc/create_safety_protocol(list/protocol_data)
 	var/protocol_id = "safety_[world.time]_[rand(1000, 9999)]"
-
 	protocol_data["id"] = protocol_id
-	protocol_data["creation_time"] = world.time
 	protocol_data["status"] = "active"
 	protocol_data["violations"] = 0
-
 	safety_protocols[protocol_id] = protocol_data
-
 	return protocol_id
 
-/datum/research_laboratory_manager/proc/update_safety_protocols()
-	for(var/protocol_id in safety_protocols)
-		var/list/protocol = safety_protocols[protocol_id]
-		if(!protocol)
-			continue
-
-		// Check for violations
-		check_protocol_violations(protocol_id)
-
-/datum/research_laboratory_manager/proc/check_protocol_violations(protocol_id)
+/datum/research_laboratory_manager/proc/record_safety_violation(protocol_id)
 	var/list/protocol = safety_protocols[protocol_id]
 	if(!protocol)
 		return
-
-	var/violation_threshold = protocol["violation_threshold"] || 5
-	var/current_violations = protocol["violations"] || 0
-
-	if(current_violations >= violation_threshold)
-		trigger_emergency_protocol(protocol_id)
-
-/datum/research_laboratory_manager/proc/trigger_emergency_protocol(protocol_id)
-	var/list/protocol = safety_protocols[protocol_id]
-	if(!protocol)
-		return
-
-	protocol["status"] = "emergency"
-	protocol["emergency_time"] = world.time
-
-	// Notify all research personnel
-	for(var/mob/living/carbon/human/H in world)
-		if(H.mind && H.mind.assigned_role && is_research_role(H.mind.assigned_role))
-			to_chat(H, "<span class='bolddanger'>EMERGENCY PROTOCOL ACTIVATED: [protocol["name"]]</span>")
-
-	// Log emergency
-	log_game("Emergency protocol activated: [protocol["name"]]")
-
-// Research Data Management
-/datum/research_laboratory_manager/proc/collect_research_data(experiment_id, data_type, data_value)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	var/data_id = "data_[world.time]_[rand(1000, 9999)]"
-
-	var/list/data_entry = list(
-		"id" = data_id,
-		"experiment_id" = experiment_id,
-		"data_type" = data_type,
-		"data_value" = data_value,
-		"collection_time" = world.time,
-		"researcher" = "system"
-	)
-
-	research_data[data_id] = data_entry
-
-	// Update experiment data points
-	experiment["data_points_collected"] = (experiment["data_points_collected"] || 0) + 1
-
-/datum/research_laboratory_manager/proc/generate_research_reports()
-	// Generate periodic research reports
-	if(world.time % 6000 == 0) // Every 10 minutes
-		generate_system_report()
-
-/datum/research_laboratory_manager/proc/generate_system_report()
-	var/report = "=== RESEARCH LABORATORY SYSTEM REPORT ===\n"
-	report += "Total Research Points: [total_research_points]\n"
-	report += "Active Experiments: [length(active_experiments)]\n"
-	report += "Research Teams: [length(research_teams)]\n"
-	report += "Safety Rating: [safety_rating]%\n"
-	report += "Total Breakthroughs: [total_breakthroughs]\n"
-	report += "Research Incidents: [research_incidents]\n"
-	report += "==========================================\n"
-
-	world.log << report
-
-/datum/research_laboratory_manager/proc/generate_experiment_report(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	var/report = "=== EXPERIMENT COMPLETION REPORT ===\n"
-	report += "Experiment: [experiment["name"]]\n"
-	report += "Duration: [round((experiment["completion_time"] - experiment["start_time"]) / 600)] minutes\n"
-	report += "Research Points: [experiment["research_points"]]\n"
-	report += "Data Points Collected: [experiment["data_points_collected"]]\n"
-	report += "Breakthrough: [experiment["breakthrough"] ? "YES" : "NO"]\n"
-	report += "Safety Violations: [experiment["safety_violations"] || 0]\n"
-	report += "=====================================\n"
-
-	world.log << report
-
-/datum/research_laboratory_manager/proc/log_research_incident(experiment_id, incident_description)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
+	protocol["violations"] = (protocol["violations"] || 0) + 1
 	research_incidents++
+	if(protocol["violations"] >= (protocol["violation_threshold"] || 5))
+		protocol["status"] = "emergency"
 
-	var/incident_log = "RESEARCH INCIDENT: [incident_description] - Experiment: [experiment["name"]]"
-	world.log << incident_log
+/datum/research_laboratory_manager/proc/get_available_scp_targets()
+	var/list/targets = list()
+	if(SSscp_persistence && SSscp_persistence.manager)
+		for(var/scp_id in SSscp_persistence.manager.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+			targets += list(list(
+				"id" = scp_id,
+				"status" = instance.containment_status,
+				"class" = instance.containment_class,
+			))
+	return targets
 
-/datum/research_laboratory_manager/proc/check_research_achievements(experiment_id)
-	var/list/experiment = active_experiments[experiment_id]
-	if(!experiment)
-		return
-
-	// Check for various achievements
-	if(experiment["breakthrough"])
-		check_breakthrough_achievements(experiment_id)
-
-	if(experiment["data_points_collected"] >= 100)
-		check_data_collection_achievements(experiment_id)
-
-/datum/research_laboratory_manager/proc/check_breakthrough_achievements(experiment_id)
-	// Check for breakthrough-related achievements
-	if(total_breakthroughs >= 10)
-		unlock_achievement("breakthrough_master", "Achieved 10 research breakthroughs")
-
-	if(total_breakthroughs >= 50)
-		unlock_achievement("breakthrough_expert", "Achieved 50 research breakthroughs")
-
-/datum/research_laboratory_manager/proc/check_data_collection_achievements(experiment_id)
-	// Check for data collection achievements
-	var/total_data_points = 0
-	for(var/data_id in research_data)
-		total_data_points++
-
-	if(total_data_points >= 1000)
-		unlock_achievement("data_collector", "Collected 1000 research data points")
-
-	if(total_data_points >= 10000)
-		unlock_achievement("data_expert", "Collected 10000 research data points")
-
-/datum/research_laboratory_manager/proc/unlock_achievement(achievement_id, achievement_description)
-	if(achievement_id in research_achievements)
-		return // Already unlocked
-
-	research_achievements[achievement_id] = list(
-		"id" = achievement_id,
-		"description" = achievement_description,
-		"unlock_time" = world.time
-	)
-
-	// Announce achievement
-	for(var/mob/living/carbon/human/H in world)
-		if(H.mind && H.mind.assigned_role && is_research_role(H.mind.assigned_role))
-			to_chat(H, "<span class='boldnotice'>ACHIEVEMENT UNLOCKED: [achievement_description]</span>")
-
-	world.log << "Research Achievement Unlocked: [achievement_description]"
-
-/datum/research_laboratory_manager/proc/save_research_data()
-	// Save research data to persistent storage
-	// This would integrate with your existing persistence system
-	world.log << "Research Laboratory: Saving research data to persistent storage"
-
-	// Sync with research persistence system
-	sync_with_research_persistence()
-
-	// Sync with SCP research system
-	sync_with_scp_research()
-
-	// Sync with technology persistence system
-	sync_with_technology_persistence()
-
-/datum/research_laboratory_manager/proc/sync_with_research_persistence()
-	if(!SSresearch_persistence || !SSresearch_persistence.manager)
-		return
-
-	var/datum/research_persistence_manager/research_mgr = SSresearch_persistence.manager
-
-	// Sync research projects
-	for(var/project_id in research_projects)
-		var/list/project = research_projects[project_id]
-		if(project["source"] != "persistence") // Don't sync back to avoid loops
-			// Create or update persistent project
-			if(!research_mgr.research_projects[project_id])
-				research_mgr.add_research_project(
-					project["name"],
-					project["description"],
-					project["research_field"] || "GENERAL",
-					project["lead_researcher"] || "",
-					project["budget_allocated"] || 0,
-					project["priority"] || 1
-				)
-
-	// Update global metrics
-	research_mgr.total_research_projects = length(research_projects)
-	research_mgr.research_efficiency = research_efficiency
-	research_mgr.scientific_breakthroughs = total_breakthroughs
-
-/datum/research_laboratory_manager/proc/sync_with_scp_research()
-	if(!SSscp_research || !SSscp_research.manager)
-		return
-
-	var/datum/scp_research_manager/scp_mgr = SSscp_research.manager
-
-	// Sync SCP research data
-	scp_mgr.total_research_points = max(scp_mgr.total_research_points, total_research_points)
-	scp_mgr.research_breakthroughs = max(scp_mgr.research_breakthroughs, total_breakthroughs)
-
-/datum/research_laboratory_manager/proc/sync_with_technology_persistence()
-	if(!SStechnology_persistence || !SStechnology_persistence.manager)
-		return
-
-	var/datum/technology_persistence_manager/tech_mgr = SStechnology_persistence.manager
-
-	// Sync technology data
-	tech_mgr.research_progress = max(tech_mgr.research_progress, total_experiments_conducted)
-	tech_mgr.innovation_score = max(tech_mgr.innovation_score, total_breakthroughs * 100)
-
-/datum/research_laboratory_manager/proc/process_research_teams()
-	// Process and update research teams
-	for(var/team_id in research_teams)
-		var/list/team = research_teams[team_id]
-		if(!team)
-			continue
-
-		// Update team performance metrics
-		update_team_performance(team_id)
-
-		// Check team achievements
-		check_team_achievements(team_id)
-
-		// Process team collaboration
-		process_team_collaboration(team_id)
-
-/datum/research_laboratory_manager/proc/update_team_performance(team_id)
-	var/list/team = research_teams[team_id]
-	if(!team)
-		return
-
-	// Calculate team performance based on completed experiments
-	var/team_performance = 0
-	for(var/experiment_id in active_experiments)
-		var/list/experiment = active_experiments[experiment_id]
-		if(experiment["team_id"] == team_id && experiment["status"] == "completed")
-			team_performance += experiment["research_points"] || 0
-
-	team["performance"] = team_performance
-	team["last_updated"] = world.time
-
-/datum/research_laboratory_manager/proc/check_team_achievements(team_id)
-	var/list/team = research_teams[team_id]
-	if(!team)
-		return
-
-	var/team_performance = team["performance"] || 0
-
-	// Check for team performance achievements
-	if(team_performance >= 1000)
-		unlock_team_achievement(team_id, "high_performer", "Team achieved 1000 research points")
-
-	if(team_performance >= 5000)
-		unlock_team_achievement(team_id, "expert_team", "Team achieved 5000 research points")
-
-/datum/research_laboratory_manager/proc/unlock_team_achievement(team_id, achievement_id, achievement_description)
-	var/list/team = research_teams[team_id]
-	if(!team)
-		return
-
-	if(!team["achievements"])
-		team["achievements"] = list()
-
-	if(achievement_id in team["achievements"])
-		return // Already unlocked
-
-	team["achievements"][achievement_id] = list(
-		"id" = achievement_id,
-		"description" = achievement_description,
-		"unlock_time" = world.time
-	)
-
-	world.log << "Team Achievement Unlocked: [achievement_description] for team [team_id]"
-
-/datum/research_laboratory_manager/proc/process_team_collaboration(team_id)
-	var/list/team = research_teams[team_id]
-	if(!team)
-		return
-
-	// Process team collaboration bonuses
-	var/team_size = length(team["members"] || list())
-	if(team_size >= 3)
-		// Apply collaboration bonus
-		team["collaboration_bonus"] = min(20, (team_size - 2) * 5)
-	else
-		team["collaboration_bonus"] = 0
-
-// Research Laboratory Interface
-/datum/research_laboratory_interface
-	var/client/admin_client
-	var/datum/research_laboratory_manager/lab_manager
-
-/datum/research_laboratory_interface/New(client/admin)
-	admin_client = admin
-	lab_manager = SSresearch_laboratory.manager
-	ui_interact(admin.mob, null)
-
-/datum/research_laboratory_interface/ui_state(mob/user)
-	return GLOB.admin_state
-
-/datum/research_laboratory_interface/ui_interact(mob/user, datum/tgui/ui)
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "ResearchLaboratory", "Research Laboratory System")
-		ui.open()
-
-/datum/research_laboratory_interface/ui_data(mob/user)
+/datum/research_laboratory_manager/proc/get_all_data(mob/user)
 	var/list/data = list()
 
-	// Get data from research laboratory manager
-	data["research_projects"] = lab_manager.research_projects
-	data["active_experiments"] = lab_manager.active_experiments
-	data["research_teams"] = lab_manager.research_teams
-	data["research_facilities"] = lab_manager.research_facilities
-	data["safety_protocols"] = lab_manager.safety_protocols
-	data["research_achievements"] = lab_manager.research_achievements
+	data["research_projects"] = get_projects_data()
+	data["active_experiments"] = get_experiments_data()
+	data["research_teams"] = get_teams_data()
+	data["research_facilities"] = get_facilities_data()
+	data["safety_protocols"] = get_safety_data()
+	data["research_achievements"] = get_achievements_data()
+	data["researcher_skills"] = get_researcher_skills_data()
+	data["scp_targets"] = get_available_scp_targets()
+	data["tech_tree"] = tech_tree.get_all_nodes_data()
+	data["available_tech"] = tech_tree.get_available_nodes(total_research_points)
 
-	// Add researcher skill data
-	data["researcher_skills"] = get_researcher_skill_data()
-
-	// Add skill-based bonuses to experiments
-	enhance_experiments_with_skill_data(data["active_experiments"])
-
-	// Add skill-based bonuses to teams
-	enhance_teams_with_skill_data(data["research_teams"])
-
-	// Integrate with existing research persistence systems
-	if(SSresearch_persistence && SSresearch_persistence.manager)
-		var/datum/research_persistence_manager/research_mgr = SSresearch_persistence.manager
-		// Merge research projects from persistence system
-		for(var/project_id in research_mgr.research_projects)
-			if(!data["research_projects"][project_id])
-				var/datum/research_persistence_project/persistent_project = research_mgr.research_projects[project_id]
-				data["research_projects"][project_id] = list(
-					"id" = project_id,
-					"name" = persistent_project.project_name,
-					"description" = persistent_project.project_description,
-					"research_field" = persistent_project.research_field,
-					"lead_researcher" = persistent_project.lead_researcher,
-					"progress" = persistent_project.progress,
-					"status" = persistent_project.status,
-					"budget_allocated" = persistent_project.budget_allocated,
-					"budget_used" = persistent_project.budget_used,
-					"start_date" = persistent_project.start_date,
-					"estimated_completion" = persistent_project.estimated_completion,
-					"priority" = persistent_project.priority,
-					"source" = "persistence"
-				)
-
-	// Integrate with SCP research system
 	if(SSscp_research && SSscp_research.manager)
-		var/datum/scp_research_manager/scp_mgr = SSscp_research.manager
-		// Add SCP-specific research data
 		data["scp_research_data"] = list(
-			"total_research_points" = scp_mgr.total_research_points,
-			"research_breakthroughs" = scp_mgr.research_breakthroughs,
-			"containment_improvements" = scp_mgr.containment_improvements,
-			"classification_updates" = scp_mgr.classification_updates
+			"total_research_points" = SSscp_research.manager.total_research_points,
+			"research_breakthroughs" = SSscp_research.manager.research_breakthroughs,
+			"containment_improvements" = SSscp_research.manager.containment_improvements,
+			"classification_updates" = SSscp_research.manager.classification_updates,
 		)
 
-	// Integrate with technology persistence system
 	if(SStechnology_persistence && SStechnology_persistence.manager)
 		var/datum/technology_persistence_manager/tech_mgr = SStechnology_persistence.manager
 		data["technology_data"] = list(
 			"technology_level" = tech_mgr.technology_level,
 			"innovation_score" = tech_mgr.innovation_score,
 			"research_progress" = tech_mgr.research_progress,
-			"breakthrough_chance" = tech_mgr.breakthrough_chance
+			"breakthrough_chance" = tech_mgr.breakthrough_chance,
 		)
 
 	data["system_metrics"] = list(
-		"total_research_points" = lab_manager.total_research_points,
-		"total_experiments" = lab_manager.total_experiments_conducted,
-		"total_breakthroughs" = lab_manager.total_breakthroughs,
-		"research_efficiency" = lab_manager.research_efficiency,
-		"safety_rating" = lab_manager.safety_rating,
-		"containment_breaches" = lab_manager.containment_breaches,
-		"research_incidents" = lab_manager.research_incidents
+		"total_research_points" = total_research_points,
+		"total_experiments" = total_experiments_conducted,
+		"total_breakthroughs" = total_breakthroughs,
+		"research_efficiency" = research_efficiency,
+		"safety_rating" = safety_rating,
+		"containment_breaches" = containment_breaches,
+		"research_incidents" = research_incidents,
 	)
+
+	data["is_admin"] = check_rights(R_ADMIN, FALSE, user)
+	data["user_ckey"] = user?.ckey
+	data["user_name"] = user?.name
+	var/datum/job/user_job = ishuman(user) ? user?.job : null
+	data["user_job"] = istype(user_job) ? user_job.title : "Unknown"
+	data["user_access_level"] = get_user_access_level(user)
 
 	return data
 
-/datum/research_laboratory_interface/proc/get_researcher_skill_data()
-	var/list/researcher_skills = list()
+/datum/research_laboratory_manager/proc/get_user_access_level(mob/user)
+	if(!user || !user.client)
+		return EXPERIMENT_ACCESS_NONE
+	if(check_rights(R_ADMIN, FALSE, user))
+		return EXPERIMENT_ACCESS_FULL
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return EXPERIMENT_ACCESS_NONE
+	var/job_name = "Unknown"
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.job)
+			job_name = H.job
+	return SSscp_experiments.manager.get_default_certification(job_name)
 
-	// Get all researchers and their skill levels
-	for(var/mob/living/carbon/human/H in world)
-		if(H.mind && H.mind.assigned_role && lab_manager.is_research_role(H.mind.assigned_role))
-			var/research_skill = H.mind.get_skill_level(/datum/skill/research) || 0
-			var/skill_bonus = research_skill * 2 // +2% per level
+/datum/research_laboratory_manager/proc/get_projects_data()
+	var/list/result = list()
+	for(var/project_id in research_projects)
+		var/list/project = research_projects[project_id]
+		result[project_id] = project
+	return result
 
-			researcher_skills[H.real_name] = list(
+/datum/research_laboratory_manager/proc/get_experiments_data()
+	var/list/result = list()
+	for(var/exp_id in active_experiments)
+		var/list/exp = active_experiments[exp_id]
+		result[exp_id] = exp
+	if(SSscp_experiments && SSscp_experiments.manager)
+		var/datum/scp_experiment_manager/exp_mgr = SSscp_experiments.manager
+		for(var/exp_id in exp_mgr.active_experiments)
+			if(!result[exp_id])
+				var/datum/scp_experiment/scp_exp = exp_mgr.active_experiments[exp_id]
+				var/progress = round((scp_exp.phase_progress / max(1, scp_exp.phase_duration)) * 100)
+				result[exp_id] = list(
+					"id" = scp_exp.experiment_id,
+					"name" = scp_exp.name,
+					"scp_id" = scp_exp.scp_id,
+					"risk_level" = scp_exp.risk_level,
+					"risk_name" = get_experiment_risk_name(scp_exp.risk_level),
+					"status" = scp_exp.status,
+					"current_progress" = progress,
+					"max_progress" = 100,
+					"researcher" = scp_exp.primary_researcher?.name || "Unknown",
+					"team_id" = null,
+					"start_time" = scp_exp.start_time,
+					"source" = "scp_experiments",
+					"skill_bonus" = 0,
+					"breakthrough_chance" = 5,
+				)
+	return result
+
+/datum/research_laboratory_manager/proc/get_teams_data()
+	var/list/result = list()
+	for(var/team_id in research_teams)
+		var/list/team = research_teams[team_id]
+		result[team_id] = team
+	return result
+
+/datum/research_laboratory_manager/proc/get_facilities_data()
+	var/list/result = list()
+	for(var/facility_id in research_facilities)
+		var/list/facility = research_facilities[facility_id]
+		result[facility_id] = facility
+	return result
+
+/datum/research_laboratory_manager/proc/get_safety_data()
+	var/list/result = list()
+	for(var/protocol_id in safety_protocols)
+		var/list/protocol = safety_protocols[protocol_id]
+		result[protocol_id] = protocol
+	return result
+
+/datum/research_laboratory_manager/proc/get_achievements_data()
+	var/list/result = list()
+	for(var/achievement_id in research_achievements)
+		var/list/achievement = research_achievements[achievement_id]
+		result[achievement_id] = achievement
+	if(SSscp_research && SSscp_research.manager)
+		var/datum/scp_research_manager/scp_mgr = SSscp_research.manager
+		for(var/ckey in scp_mgr.researcher_profiles)
+			var/datum/researcher_data/rd = scp_mgr.researcher_profiles[ckey]
+			for(var/achievement in rd.achievements)
+				var/ach_id = "scp_[ckey]_[achievement]"
+				if(!result[ach_id])
+					result[ach_id] = list(
+						"id" = ach_id,
+						"description" = achievement,
+						"unlock_time" = world.time,
+						"researcher" = ckey,
+					)
+	return result
+
+/datum/research_laboratory_manager/proc/get_researcher_skills_data()
+	var/list/result = list()
+	for(var/mob/living/carbon/human/H in GLOB.human_list)
+		if(QDELETED(H))
+			continue
+		if(!H.mind || !H.job)
+			continue
+		var/job_title = H.job
+		if(job_title in list("Research Director", "Scientist", "Senior Researcher", "Research Assistant", "Junior Researcher", "Assistant Research Director"))
+			var/skill_level = 0
+			if(H.mind)
+				skill_level = H.mind.get_skill_level(/datum/skill/research) || 0
+			result[H.real_name] = list(
 				"skill_name" = "Research",
-				"level" = research_skill,
-				"bonus" = skill_bonus,
-				"ckey" = H.ckey
+				"level" = skill_level,
+				"bonus" = skill_level * 2,
+				"ckey" = H.ckey,
+				"job" = job_title,
 			)
+	return result
 
-	return researcher_skills
+/datum/research_laboratory_manager/proc/get_available_experiments_for_scp(mob/user, scp_id)
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return list()
+	if(!ishuman(user))
+		return list()
+	return SSscp_experiments.manager.get_available_experiments(user, scp_id)
 
-/datum/research_laboratory_interface/proc/enhance_experiments_with_skill_data(list/experiments)
-	if(!experiments)
+/datum/research_laboratory_manager/proc/start_scp_experiment(mob/living/carbon/human/user, scp_id, experiment_type)
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return null
+	return SSscp_experiments.manager.start_experiment(scp_id, experiment_type, user)
+
+/datum/research_laboratory_manager/proc/suspend_scp_experiment(experiment_id, mob/user)
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return FALSE
+	return SSscp_experiments.manager.suspend_experiment(experiment_id, user)
+
+/datum/research_laboratory_manager/proc/resume_scp_experiment(experiment_id, mob/user)
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return FALSE
+	return SSscp_experiments.manager.resume_experiment(experiment_id, user)
+
+/datum/research_laboratory_manager/proc/terminate_scp_experiment(experiment_id, mob/user)
+	if(!SSscp_experiments || !SSscp_experiments.manager)
+		return FALSE
+	return SSscp_experiments.manager.terminate_experiment(experiment_id, user)
+
+/datum/research_laboratory_manager/proc/unlock_tech_node(node_id, mob/user)
+	if(!tech_tree.can_unlock(node_id, total_research_points))
+		return FALSE
+	var/cost = tech_tree.nodes[node_id].research_cost
+	if(!tech_tree.unlock_node(node_id, user?.ckey))
+		return FALSE
+	total_research_points -= cost
+	apply_tech_unlock(node_id, user)
+	return TRUE
+
+/datum/research_laboratory_manager/proc/apply_tech_unlock(node_id, mob/user)
+	var/datum/tech_node/node = tech_tree.nodes[node_id]
+	if(!node)
 		return
-
-	for(var/experiment_id in experiments)
-		var/list/experiment = experiments[experiment_id]
-		if(!experiment)
+	log_game("Tech unlocked: [node.name] by [key_name(user)]")
+	message_admins("Research tech unlocked: [node.name] by [key_name(user)]")
+	for(var/mob/living/carbon/human/H in GLOB.human_list)
+		if(QDELETED(H))
 			continue
+		if(H.job && (H.job in list("Research Director", "Scientist", "Senior Researcher", "Site Director")))
+			to_chat(H, "<span class='boldnotice'>RESEARCH BREAKTHROUGH: [node.name] unlocked!</span>")
+	switch(node_id)
+		if("improved_containment")
+			apply_containment_bonus(0.1)
+		if("containment_reinforcement")
+			apply_containment_bonus(0.15)
+		if("keter_protocols")
+			apply_containment_bonus(0.2)
 
-		// Calculate skill bonus for this experiment
-		var/skill_bonus = 0
-		var/breakthrough_chance = experiment["breakthrough_chance"] || 5
+/datum/research_laboratory_manager/proc/apply_containment_bonus(bonus)
+	for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		if(instance)
+			instance.containment_effectiveness = min(1.0, instance.containment_effectiveness + bonus)
+			instance.containment_difficulty = max(1, instance.containment_difficulty - 1)
 
-		// Get team members and calculate their skill bonuses
-		var/team_id = experiment["team_id"]
-		if(team_id && lab_manager.research_teams[team_id])
-			var/list/team = lab_manager.research_teams[team_id]
-			var/list/members = team["members"] || list()
+/obj/machinery/computer/scp_research_console
+	name = "SCP Research Console"
+	desc = "A terminal for accessing the SCP Foundation research database."
+	icon = 'icons/obj/computer.dmi'
+	icon_state = "research"
+	circuit = /obj/item/circuitboard/computer/scp_research
+	req_access = list(ACCESS_SCIENCE)
 
-			for(var/member_data in members)
-				var/mob/living/carbon/human/researcher = lab_manager.get_researcher_by_ckey(member_data["ckey"])
-				if(researcher && researcher.mind)
-					var/research_skill = researcher.mind.get_skill_level(/datum/skill/research) || 0
-					skill_bonus += research_skill * 1 // +1% per skill level per team member
+/obj/machinery/computer/scp_research_console/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "ResearchLaboratory", "SCP Research Terminal")
+		ui.open()
 
-			// Enhance breakthrough chance based on lead researcher
-			var/lead_researcher = lab_manager.get_lead_researcher(experiment_id)
-			if(lead_researcher && SSskill_integration)
-				breakthrough_chance = SSskill_integration.manager.calculate_research_breakthrough_chance(lead_researcher, breakthrough_chance)
+/obj/machinery/computer/scp_research_console/ui_data(mob/user)
+	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
+		return list()
+	return SSresearch_laboratory.manager.get_all_data(user)
 
-		experiment["skill_bonus"] = skill_bonus
-		experiment["breakthrough_chance"] = breakthrough_chance
-
-/datum/research_laboratory_interface/proc/enhance_teams_with_skill_data(list/teams)
-	if(!teams)
-		return
-
-	for(var/team_id in teams)
-		var/list/team = teams[team_id]
-		if(!team)
-			continue
-
-		// Calculate average research skill for the team
-		var/list/members = team["members"] || list()
-		var/total_skill = 0
-		var/skill_count = 0
-
-		for(var/member_data in members)
-			var/mob/living/carbon/human/researcher = lab_manager.get_researcher_by_ckey(member_data["ckey"])
-			if(researcher && researcher.mind)
-				var/research_skill = researcher.mind.get_skill_level(/datum/skill/research) || 0
-				total_skill += research_skill
-				skill_count++
-
-		var/avg_skill = skill_count > 0 ? total_skill / skill_count : 0
-		team["avg_research_skill"] = avg_skill
-
-/datum/research_laboratory_interface/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+/obj/machinery/computer/scp_research_console/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
+	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
+		return
+	var/datum/research_laboratory_manager/mgr = SSresearch_laboratory.manager
 
 	switch(action)
 		if("create_project")
-			create_new_project(params)
+			if(!params["name"])
+				return
+			mgr.create_research_project(list(
+				"name" = params["name"],
+				"description" = params["description"] || "No description provided.",
+				"scp_target" = params["scp_target"] || "",
+				"research_points" = text2num(params["research_points"]) || 100,
+				"risk_level" = text2num(params["risk_level"]) || 1,
+				"team_id" = params["team_id"] || "",
+				"facility_id" = params["facility_id"] || "",
+				"progress_rate" = text2num(params["progress_rate"]) || 1.0,
+				"max_progress" = text2num(params["max_progress"]) || 100,
+				"breakthrough_chance" = text2num(params["breakthrough_chance"]) || 5,
+			))
 			. = TRUE
 
 		if("approve_project")
-			var/project_id = params["project_id"]
-			if(project_id)
-				lab_manager.approve_research_project(project_id)
+			if(params["project_id"])
+				mgr.approve_research_project(params["project_id"])
+			. = TRUE
+
+		if("delete_project")
+			if(params["project_id"])
+				mgr.delete_research_project(params["project_id"])
 			. = TRUE
 
 		if("create_team")
-			create_new_team(params)
+			if(!params["name"])
+				return
+			mgr.create_research_team(list("name" = params["name"]))
 			. = TRUE
 
 		if("add_team_member")
 			var/team_id = params["team_id"]
-			var/mob/living/carbon/human/researcher = locate(params["researcher"])
-			if(team_id && researcher)
-				lab_manager.add_team_member(team_id, researcher)
+			if(team_id && ishuman(usr))
+				mgr.add_team_member(team_id, usr)
 			. = TRUE
 
-		if("create_facility")
-			create_new_facility(params)
+		if("remove_team_member")
+			var/team_id = params["team_id"]
+			var/ckey = params["ckey"]
+			if(team_id && ckey)
+				mgr.remove_team_member(team_id, ckey)
 			. = TRUE
 
-		if("create_safety_protocol")
-			create_new_safety_protocol(params)
+		if("start_experiment")
+			var/scp_id = params["scp_id"]
+			var/exp_type = text2num(params["experiment_type"])
+			if(scp_id && exp_type && ishuman(usr))
+				var/mob/living/carbon/human/H = usr
+				var/datum/scp_experiment/exp = mgr.start_scp_experiment(H, scp_id, exp_type)
+				if(!exp)
+					to_chat(H, "<span class='warning'>Failed to start experiment.</span>")
 			. = TRUE
 
-/datum/research_laboratory_interface/proc/create_new_project(list/project_data)
-	var/project_id = lab_manager.create_research_project(project_data)
-	to_chat(admin_client, "<span class='notice'>Research project created: [project_id]</span>")
+		if("suspend_experiment")
+			var/exp_id = params["experiment_id"]
+			if(exp_id)
+				mgr.suspend_scp_experiment(exp_id, usr)
+			. = TRUE
 
-/datum/research_laboratory_interface/proc/create_new_team(list/team_data)
-	var/team_id = lab_manager.create_research_team(team_data)
-	to_chat(admin_client, "<span class='notice'>Research team created: [team_id]</span>")
+		if("resume_experiment")
+			var/exp_id = params["experiment_id"]
+			if(exp_id)
+				mgr.resume_scp_experiment(exp_id, usr)
+			. = TRUE
 
-/datum/research_laboratory_interface/proc/create_new_facility(list/facility_data)
-	var/facility_id = lab_manager.register_research_facility(facility_data)
-	to_chat(admin_client, "<span class='notice'>Research facility registered: [facility_id]</span>")
+		if("terminate_experiment")
+			var/exp_id = params["experiment_id"]
+			if(exp_id)
+				mgr.terminate_scp_experiment(exp_id, usr)
+			. = TRUE
 
-/datum/research_laboratory_interface/proc/create_new_safety_protocol(list/protocol_data)
-	var/protocol_id = lab_manager.create_safety_protocol(protocol_data)
-	to_chat(admin_client, "<span class='notice'>Safety protocol created: [protocol_id]</span>")
+		if("unlock_tech")
+			var/node_id = params["node_id"]
+			if(node_id)
+				if(!mgr.unlock_tech_node(node_id, usr))
+					to_chat(usr, "<span class='warning'>Cannot unlock this technology.</span>")
+			. = TRUE
 
-// Admin verb to access the research laboratory
+		if("record_violation")
+			var/protocol_id = params["protocol_id"]
+			if(protocol_id)
+				mgr.record_safety_violation(protocol_id)
+			. = TRUE
+
+/obj/item/circuitboard/computer/scp_research
+	name = "SCP Research Console (Computer Board)"
+	build_path = /obj/machinery/computer/scp_research_console
+
 /client/proc/open_research_laboratory()
 	set name = "Research Laboratory"
 	set category = "Admin"
 	set desc = "Open the advanced research laboratory system"
-
 	if(!check_rights(R_ADMIN))
 		return
-
-	var/datum/research_laboratory_interface/interface = new(src)
-	interface.ui_interact(usr)
-
-
+	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
+		to_chat(src, "<span class='warning'>Research laboratory system not available.</span>")
+		return
+	var/obj/machinery/computer/scp_research_console/virtual_console = new()
+	virtual_console.ui_interact(mob)

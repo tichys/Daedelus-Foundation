@@ -196,6 +196,12 @@ SUBSYSTEM_DEF(id_access)
 			"templates" = list(),
 			"pdas" = list(),
 		),
+		"[ACCESS_LOGISTICS_LVL5]" = list(
+			"regions" = list(REGION_SUPPLY),
+			"head" = JOB_LOGISTICS_OFFICER,
+			"templates" = list(),
+			"pdas" = list(),
+		),
 	)
 
 	var/list/station_job_trims = subtypesof(/datum/id_trim/job)

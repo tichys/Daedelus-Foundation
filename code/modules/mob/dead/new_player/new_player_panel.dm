@@ -121,6 +121,30 @@
 		parent.AttemptLateSpawn(href_list["SelectedJob"])
 		return
 
+	if(href_list["SelectedSCP"])
+		if(!SSticker?.IsRoundInProgress())
+			to_chat(usr, span_danger("The round is either not ready, or has already finished..."))
+			return
+
+		var/scp_type = href_list["SelectedSCP"]
+		var/datum/scp_role_controller/controller = GLOB.scp_role_controller
+		if(!controller)
+			return
+
+		var/role_flag = controller.get_role_flag(scp_type)
+		if(role_flag && parent.client?.prefs)
+			var/list/client_antags = parent.client.prefs.read_preference(/datum/preference/blob/antagonists)
+			if(!(client_antags?[role_flag]))
+				to_chat(usr, span_warning("You do not have this role enabled in your preferences."))
+				return
+
+		if(check_scp_blacklist(parent.ckey, scp_type))
+			to_chat(usr, span_warning("You are blacklisted from this SCP role."))
+			return
+
+		INVOKE_ASYNC(controller, TYPE_PROC_REF(/datum/scp_role_controller, offer_scp_role_from_lobby), parent, scp_type)
+		return
+
 	else if(!href_list["late_join"])
 		open()
 
@@ -618,6 +642,12 @@
 			dept_data += "<div class='scp-empty'>// NO POSITIONS AVAILABLE //</div>"
 
 		dat += dept_data.Join()
+
+	var/list/scp_info = GLOB.scp_role_controller?.get_scp_info_list() || list()
+	if(length(scp_info))
+		dat += "<div class='scp-dept' style='border-bottom-color: #8b0000; border-top-color: #8b0000;'>ANOMALOUS ENTITIES</div>"
+		for(var/list/scp as anything in scp_info)
+			dat += "<div class='scp-job-row'><a href='byond://?src=[REF(src)];SelectedSCP=[scp["scp_type"]]' style='color: #8b0000;'>[scp["name"]]</a></div>"
 
 	dat += "<div class='scp-footer'>SECURE. CONTAIN. PROTECT.<span class='scp-cursor'></span></div>"
 	dat += "</div>"

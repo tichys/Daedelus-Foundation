@@ -113,11 +113,31 @@ interface ContainmentProtocol {
 }
 
 interface Data {
+  blacklist_data: BlacklistData;
   containment_protocols: Record<string, ContainmentProtocol>;
   player_data: PlayerData[];
   scp_data: SCPData;
+  scp_role_types: SCPRoleType[];
   scp_templates: Record<string, SCPTemplate>;
   spawn_schedules: Record<string, SpawnSchedule>;
+}
+
+interface BlacklistEntry {
+  admin: string;
+  ckey: string;
+  date: string;
+  reason: string;
+  target: string;
+  type: string;
+}
+
+interface BlacklistData {
+  entries: BlacklistEntry[];
+}
+
+interface SCPRoleType {
+  name: string;
+  type: string;
 }
 
 const C = {
@@ -352,6 +372,14 @@ export const SCPManagementInterface = (props) => {
     'showConfigModal',
     false,
   );
+  const [showBlacklistModal, setShowBlacklistModal] = useLocalState(
+    'showBlacklistModal',
+    false,
+  );
+  const [blacklistModalType, setBlacklistModalType] = useLocalState(
+    'blacklistModalType',
+    'scp',
+  );
 
   const {
     scp_data: raw_scp_data,
@@ -359,6 +387,8 @@ export const SCPManagementInterface = (props) => {
     player_data = [],
     spawn_schedules = {},
     containment_protocols = {},
+    blacklist_data = { entries: [] },
+    scp_role_types = [],
   } = data || ({} as Data);
 
   const scp_data = {
@@ -392,6 +422,7 @@ export const SCPManagementInterface = (props) => {
     { key: 'spawning', label: 'SPAWN' },
     { key: 'players', label: 'ACCESS' },
     { key: 'containment', label: 'CONTAIN' },
+    { key: 'blacklist', label: 'BLACKLIST' },
     { key: 'logs', label: 'LOGS' },
   ];
 
@@ -939,6 +970,173 @@ export const SCPManagementInterface = (props) => {
               </Box>
             )}
 
+            {selectedTab === 'blacklist' && (
+              <Box>
+                <TermHeader>SCP ROLE BLACKLIST</TermHeader>
+                <Box
+                  style={term({
+                    color: C.textDim,
+                    fontSize: '11px',
+                    fontStyle: 'italic',
+                    marginBottom: '12px',
+                    borderLeft: `2px solid ${C.red}`,
+                    paddingLeft: '8px',
+                  })}
+                >
+                  Blacklisted players cannot be offered or assigned SCP roles.
+                  Blacklists are persisted across rounds.
+                </Box>
+                <Box style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+                  <TermButton
+                    color="red"
+                    onClick={() => {
+                      setBlacklistModalType('scp');
+                      setShowBlacklistModal(true);
+                    }}
+                  >
+                    ADD SCP BAN
+                  </TermButton>
+                  <TermButton
+                    color="red"
+                    onClick={() => {
+                      setBlacklistModalType('category');
+                      setShowBlacklistModal(true);
+                    }}
+                  >
+                    ADD CATEGORY BAN
+                  </TermButton>
+                  <TermButton
+                    color="red"
+                    onClick={() => {
+                      setBlacklistModalType('global');
+                      setShowBlacklistModal(true);
+                    }}
+                  >
+                    ADD GLOBAL BAN
+                  </TermButton>
+                </Box>
+
+                <TermDivider />
+
+                {(blacklist_data?.entries || []).length > 0 ? (
+                  blacklist_data.entries.map((entry, idx) => (
+                    <Box
+                      key={`${entry.ckey}-${entry.type}-${idx}`}
+                      style={{
+                        marginBottom: '6px',
+                        padding: '8px',
+                        borderLeft: `2px solid ${
+                          entry.type === 'global'
+                            ? C.redBright
+                            : entry.type === 'category'
+                              ? C.amber
+                              : C.borderRed
+                        }`,
+                        background: C.panel,
+                      }}
+                    >
+                      <TermRow>
+                        <TermValue bold color={C.amber}>
+                          {entry.ckey}
+                        </TermValue>
+                        <TermLabel style={{ marginLeft: '8px' }}>TYPE</TermLabel>
+                        <TermValue
+                          color={
+                            entry.type === 'global'
+                              ? C.redBright
+                              : entry.type === 'category'
+                                ? C.amber
+                                : C.textBright
+                          }
+                        >
+                          {entry.type === 'global'
+                            ? 'GLOBAL'
+                            : entry.type === 'category'
+                              ? 'CATEGORY'
+                              : 'SCP'}
+                        </TermValue>
+                        <TermLabel style={{ marginLeft: '8px' }}>
+                          TARGET
+                        </TermLabel>
+                        <TermValue>{entry.target}</TermValue>
+                        <TermLabel style={{ marginLeft: '8px' }}>
+                          ADMIN
+                        </TermLabel>
+                        <TermValue color={C.textDim}>{entry.admin}</TermValue>
+                        <TermLabel style={{ marginLeft: '8px' }}>
+                          DATE
+                        </TermLabel>
+                        <TermValue color={C.textDim}>{entry.date}</TermValue>
+                      </TermRow>
+                      <Box
+                        style={term({
+                          color: C.textDim,
+                          fontSize: '11px',
+                          marginTop: '2px',
+                        })}
+                      >
+                        REASON: {entry.reason || 'No reason provided'}
+                      </Box>
+                      <Box
+                        style={{ display: 'flex', gap: '4px', marginTop: '4px' }}
+                      >
+                        {entry.type === 'scp' && (
+                          <TermButton
+                            color="green"
+                            onClick={() =>
+                              act('blacklist_remove_scp', {
+                                ckey: entry.ckey,
+                                scp_type: entry.target,
+                              })
+                            }
+                          >
+                            REMOVE
+                          </TermButton>
+                        )}
+                        {entry.type === 'category' && (
+                          <TermButton
+                            color="green"
+                            onClick={() =>
+                              act('blacklist_remove_category', {
+                                ckey: entry.ckey,
+                                category: entry.target.replace('-class', ''),
+                              })
+                            }
+                          >
+                            REMOVE
+                          </TermButton>
+                        )}
+                        {entry.type === 'global' && (
+                          <TermButton
+                            color="green"
+                            onClick={() =>
+                              act('blacklist_remove_global', {
+                                ckey: entry.ckey,
+                              })
+                            }
+                          >
+                            REMOVE
+                          </TermButton>
+                        )}
+                        <TermButton
+                          color="red"
+                          onClick={() =>
+                            act('blacklist_remove_all', { ckey: entry.ckey })
+                          }
+                        >
+                          REMOVE ALL
+                        </TermButton>
+                      </Box>
+                    </Box>
+                  ))
+                ) : (
+                  <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>
+                    NO BLACKLIST ENTRIES
+                  </Box>
+                )}
+              </Box>
+            )}
+
             {selectedTab === 'logs' && (
               <Box>
                 <TermHeader>SCP LOGS & ANALYTICS</TermHeader>
@@ -984,6 +1182,14 @@ export const SCPManagementInterface = (props) => {
               scp_id={selectedSCP}
               onClose={() => setShowConfigModal(false)}
               act={act}
+            />
+          )}
+
+          {showBlacklistModal && (
+            <BlacklistModal
+              modalType={blacklistModalType}
+              scpRoleTypes={scp_role_types}
+              onClose={() => setShowBlacklistModal(false)}
             />
           )}
 
@@ -1320,6 +1526,84 @@ const SCPConfigModal = (props) => {
         <TermButton color="red" onClick={onClose}>
           CANCEL
         </TermButton>
+      </Box>
+    </TermModal>
+  );
+};
+
+const BlacklistModal = (props) => {
+  const { modalType, scpRoleTypes, onClose } = props;
+  const { act } = useBackend<Data>();
+  const [ckey, setCkey] = useLocalState('blacklistCkey', '');
+  const [reason, setReason] = useLocalState('blacklistReason', '');
+  const [scpType, setScpType] = useLocalState('blacklistScpType', '');
+  const [category, setCategory] = useLocalState('blacklistCategory', '');
+
+  const handleSubmit = () => {
+    if (!ckey) return;
+    if (modalType === 'scp' && scpType) {
+      act('blacklist_add_scp', { ckey, scp_type: scpType, reason });
+      onClose();
+    } else if (modalType === 'category' && category) {
+      act('blacklist_add_category', { ckey, category, reason });
+      onClose();
+    } else if (modalType === 'global') {
+      act('blacklist_add_global', { ckey, reason });
+      onClose();
+    }
+  };
+
+  return (
+    <TermModal>
+      <TermHeader>
+        ADD {modalType === 'global' ? 'GLOBAL' : modalType === 'category' ? 'CATEGORY' : 'SCP'} BLACKLIST
+      </TermHeader>
+      <Box style={{ marginBottom: '10px' }}>
+        <TermLabel>CKEY</TermLabel>
+        <Input
+          value={ckey}
+          onChange={(e, value) => setCkey(value)}
+          placeholder="Enter player ckey..."
+          style={{ fontFamily: C.mono, fontSize: '14px', height: '32px' }}
+        />
+      </Box>
+      {modalType === 'scp' && (
+        <Box style={{ marginBottom: '10px' }}>
+          <TermLabel>SCP ROLE</TermLabel>
+          <Dropdown
+            selected={scpType}
+            options={scpRoleTypes.map((s) => s.type)}
+            displayText={
+              scpRoleTypes.find((s) => s.type === scpType)?.name || 'Select SCP...'
+            }
+            onSelected={(value) => setScpType(value)}
+          />
+        </Box>
+      )}
+      {modalType === 'category' && (
+        <Box style={{ marginBottom: '10px' }}>
+          <TermLabel>CATEGORY</TermLabel>
+          <Dropdown
+            selected={category}
+            options={['SAFE', 'EUCLID', 'KETER']}
+            onSelected={(value) => setCategory(value)}
+          />
+        </Box>
+      )}
+      <Box style={{ marginBottom: '10px' }}>
+        <TermLabel>REASON</TermLabel>
+        <Input
+          value={reason}
+          onChange={(e, value) => setReason(value)}
+          placeholder="Enter reason..."
+          style={{ fontFamily: C.mono, fontSize: '14px', height: '32px' }}
+        />
+      </Box>
+      <Box style={{ display: 'flex', gap: '4px' }}>
+        <TermButton color="red" onClick={handleSubmit}>
+          CONFIRM BAN
+        </TermButton>
+        <TermButton onClick={onClose}>CANCEL</TermButton>
       </Box>
     </TermModal>
   );

@@ -1,4 +1,4 @@
-/mob/living/carbon/human/scp343
+/mob/living/scp/scp343
 	name = "SCP-343"
 	desc = "An elderly man who claims to be God. He radiates an aura of divine power and benevolence."
 	icon = 'icons/scp/scp-343.dmi'
@@ -11,7 +11,7 @@
 	var/divine_zone_cooldown = 0
 	var/divine_heal_cooldown = 0
 
-/mob/living/carbon/human/scp343/Initialize()
+/mob/living/scp/scp343/Initialize()
 	. = ..()
 
 	set_species(/datum/species/scp343)
@@ -22,18 +22,12 @@
 
 	START_PROCESSING(SSobj, src)
 
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
-/mob/living/carbon/human/scp343/Destroy()
+/mob/living/scp/scp343/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
-/mob/living/carbon/human/scp343/process()
+/mob/living/scp/scp343/process()
 	. = ..()
 
 	if(stat == DEAD)
@@ -45,12 +39,12 @@
 	if(divine_energy < max_divine_energy)
 		divine_energy = min(max_divine_energy, divine_energy + 1)
 
-/mob/living/carbon/human/scp343/proc/update_divine_presence()
+/mob/living/scp/scp343/proc/update_divine_presence()
 	if(prob(5))
 		var/obj/effect/temp_visual/divine_presence/presence = new(loc)
 		presence.color = "#FFD700"
 
-/mob/living/carbon/human/scp343/proc/passive_healing_aura()
+/mob/living/scp/scp343/proc/passive_healing_aura()
 	for(var/mob/living/carbon/human/H in range(comfort_range, src))
 		if(H == src || H.SCP)
 			continue
@@ -62,7 +56,7 @@
 			H.adjustBruteLoss(-1)
 			H.adjustFireLoss(-1)
 
-/mob/living/carbon/human/scp343/proc/divine_heal_ability(mob/living/carbon/human/target)
+/mob/living/scp/scp343/proc/divine_heal_ability(mob/living/carbon/human/target)
 	if(!target || target == src)
 		return
 
@@ -87,7 +81,7 @@
 
 	on_divine_healing(target)
 
-/mob/living/carbon/human/scp343/proc/divine_zone_ability()
+/mob/living/scp/scp343/proc/divine_zone_ability()
 	if(world.time < divine_zone_cooldown)
 		to_chat(src, "<span class='warning'>You need to wait before creating another divine zone.</span>")
 		return
@@ -108,7 +102,7 @@
 		if(H != src && !H.SCP)
 			on_divine_protection(H)
 
-/mob/living/carbon/human/scp343/proc/divine_heal_verb()
+/mob/living/scp/scp343/proc/divine_heal_verb()
 	var/mob/living/carbon/human/target = null
 	for(var/mob/living/carbon/human/H in range(2, src))
 		if(H != src && H.stat != DEAD)
@@ -121,10 +115,10 @@
 
 	divine_heal_ability(target)
 
-/mob/living/carbon/human/scp343/proc/divine_zone_verb()
+/mob/living/scp/scp343/proc/divine_zone_verb()
 	divine_zone_ability()
 
-/mob/living/carbon/human/scp343/examine(mob/user)
+/mob/living/scp/scp343/examine(mob/user)
 	. = ..()
 
 	if(user == src)
@@ -140,12 +134,12 @@
 				H.sanity.adjust_sanity(5, "scp343_examine")
 				. += "<span class='notice'>His presence soothes your mind.</span>"
 
-/mob/living/carbon/human/scp343/proc/on_divine_protection(mob/living/carbon/human/protected)
+/mob/living/scp/scp343/proc/on_divine_protection(mob/living/carbon/human/protected)
 	if(!protected)
 		return
 	hook_scp_care(protected, "SCP-343", "protection")
 
-/mob/living/carbon/human/scp343/proc/on_divine_healing(mob/living/carbon/human/healed)
+/mob/living/scp/scp343/proc/on_divine_healing(mob/living/carbon/human/healed)
 	if(!healed)
 		return
 	hook_scp_care(healed, "SCP-343", "healing")

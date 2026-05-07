@@ -1,11 +1,11 @@
 // SCP-173 - The Sculpture
 // Complete Production-Ready Redesign Implementation
 
-/mob/living/carbon/human/scp173
+/mob/living/scp/scp173
 	name = "SCP-173"
 	desc = "A tall, thin humanoid figure made of concrete and rebar. It appears to be a sculpture."
 	icon = 'icons/scp/scp-173.dmi'
-	icon_state = "scp173"
+	icon_state = "173"
 	real_name = "SCP-173"
 
 	// SCP-173 specific variables
@@ -26,7 +26,7 @@
 	var/victims_killed = 0
 	var/containment_breaches = 0
 
-/mob/living/carbon/human/scp173/Initialize()
+/mob/living/scp/scp173/Initialize()
 	. = ..()
 	set_species(/datum/species/scp173)
 	SCP = new /datum/scp(src, "The Sculpture", SCP_EUCLID, "173", SCP_PLAYABLE)
@@ -51,24 +51,18 @@
 	START_PROCESSING(SSobj, src)
 
 	// Remove bodypart overlays to prevent covering the SCP icon
-	remove_overlay(BODYPARTS_LAYER)
-	remove_overlay(EYE_LAYER)
-	remove_overlay(BODY_LAYER)
-	overlays_standing[BODYPARTS_LAYER] = null
-	overlays_standing[EYE_LAYER] = null
-	overlays_standing[BODY_LAYER] = null
 
 	// Load persistence data
 	load_persistence_data()
 
 // Process method to prevent CPU waste warning
-/mob/living/carbon/human/scp173/process(delta_time)
+/mob/living/scp/scp173/process(delta_time)
 	// Don't call parent - we're implementing our own process logic
 	// SCP-173 uses Life() for main processing, this is just to prevent CPU waste
 
 	// Return nothing to continue processing (not PROCESS_KILL)
 
-/mob/living/carbon/human/scp173/Destroy()
+/mob/living/scp/scp173/Destroy()
 	QDEL_NULL(observation_system)
 	QDEL_NULL(movement_system)
 	QDEL_NULL(containment_system)
@@ -78,7 +72,7 @@
 	return ..()
 
 // Enhanced life cycle integration
-/mob/living/carbon/human/scp173/Life()
+/mob/living/scp/scp173/Life()
 	. = ..()
 
 	// Process all modular systems
@@ -97,7 +91,7 @@
 	update_state()
 
 // Update SCP-173 state based on current conditions
-/mob/living/carbon/human/scp173/proc/update_state()
+/mob/living/scp/scp173/proc/update_state()
 	if(observation_system && observation_system.is_being_observed)
 		state = "contained"
 	else if(combat_system && combat_system.attack_cooldown > world.time)
@@ -108,7 +102,7 @@
 		state = "idle"
 
 // Persistence system
-/mob/living/carbon/human/scp173/proc/save_persistence_data()
+/mob/living/scp/scp173/proc/save_persistence_data()
 	if(!SCP)
 		return
 
@@ -128,7 +122,7 @@
 	if(research_system)
 		research_system.research_data = data
 
-/mob/living/carbon/human/scp173/proc/load_persistence_data()
+/mob/living/scp/scp173/proc/load_persistence_data()
 	// Load data from research system if available
 	if(research_system && research_system.research_data && length(research_system.research_data) > 0)
 		var/list/data = research_system.research_data
@@ -145,7 +139,7 @@
 			combat_system.kills_count = data["kills_count"] || 0
 
 // Enhanced status display
-/mob/living/carbon/human/scp173/proc/get_scp_status()
+/mob/living/scp/scp173/proc/get_scp_status()
 	var/list/status = list()
 	status += "=== SCP-173 Status ==="
 	status += "State: [state]"
@@ -170,42 +164,42 @@
 
 	return status
 
-/mob/living/carbon/human/scp173/proc/show_status_verb()
+/mob/living/scp/scp173/proc/show_status_verb()
 	var/list/status = get_scp_status()
 	for(var/line in status)
 		to_chat(src, "<span class='notice'>[line]</span>")
 
 // Override death to save persistence data
-/mob/living/carbon/human/scp173/death(gibbed)
+/mob/living/scp/scp173/death(gibbed)
 	save_persistence_data()
 	. = ..()
 
 // Override logout to save persistence data
-/mob/living/carbon/human/scp173/Logout()
+/mob/living/scp/scp173/Logout()
 	save_persistence_data()
 	. = ..()
 
 // Progression Integration Hooks
-/mob/living/carbon/human/scp173/proc/on_breach()
+/mob/living/scp/scp173/proc/on_breach()
 	containment_breaches++
 	hook_scp_breach("SCP-173", src)
-	
+
 	for(var/mob/living/carbon/human/H in range(10, src))
 		if(H != src)
 			hook_scp_interaction(H, "SCP-173", INTERACTION_TYPE_OBSERVATION)
 
-/mob/living/carbon/human/scp173/proc/on_recontainment(list/participants)
+/mob/living/scp/scp173/proc/on_recontainment(list/participants)
 	hook_scp_recontainment("SCP-173", participants)
 
-/mob/living/carbon/human/scp173/proc/on_kill(mob/living/carbon/human/victim)
+/mob/living/scp/scp173/proc/on_kill(mob/living/carbon/human/victim)
 	if(victim && victim.ckey)
 		hook_player_death_near_scp(victim, "SCP-173")
 		hook_scp_combat(victim, "SCP-173", 100, 0)
 
-/mob/living/carbon/human/scp173/proc/on_observation_start(mob/living/carbon/human/observer)
+/mob/living/scp/scp173/proc/on_observation_start(mob/living/carbon/human/observer)
 	if(observer && observer.ckey)
 		hook_scp_observation(observer, "SCP-173")
 
-/mob/living/carbon/human/scp173/proc/on_observation_end(mob/living/carbon/human/observer)
+/mob/living/scp/scp173/proc/on_observation_end(mob/living/carbon/human/observer)
 	if(observer && observer.ckey)
 		stop_scp_survival_tracking(observer, "SCP-173")

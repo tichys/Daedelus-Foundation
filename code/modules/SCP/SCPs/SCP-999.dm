@@ -1,4 +1,4 @@
-/mob/living/carbon/scp/scp999
+/mob/living/scp/scp999
 	name = "SCP-999"
 	desc = "A large, amorphous, gelatinous mass of translucent orange slime. It appears to be friendly and seeks physical contact."
 	icon = 'icons/scp/scp-999.dmi'
@@ -19,7 +19,7 @@
 	var/mood_improvements = 0
 	var/comfort_provided = 0
 
-/mob/living/carbon/scp/scp999/Initialize()
+/mob/living/scp/scp999/Initialize()
 	. = ..()
 
 	SCP = new /datum/scp(
@@ -38,12 +38,12 @@
 	max_scp_armor = 25
 	scp_armor = max_scp_armor
 
-/mob/living/carbon/scp/scp999/Destroy()
+/mob/living/scp/scp999/Destroy()
 	healed_targets = list()
 	mood_improved_targets = list()
 	return ..()
 
-/mob/living/carbon/scp/scp999/process_scp_effects()
+/mob/living/scp/scp999/process_scp_effects()
 	. = ..()
 
 	provide_comfort()
@@ -59,7 +59,7 @@
 			continue
 		award_research_points("999", "behavior", 2, H.ckey)
 
-/mob/living/carbon/scp/scp999/proc/provide_comfort()
+/mob/living/scp/scp999/proc/provide_comfort()
 	for(var/mob/living/carbon/human/H in range(comfort_radius, src))
 		if(H == src || H.SCP)
 			continue
@@ -76,7 +76,7 @@
 			comfort_provided++
 			to_chat(H, "<span class='notice'>You feel a sense of calm and happiness from [src]'s presence.</span>")
 
-/mob/living/carbon/scp/scp999/proc/find_target()
+/mob/living/scp/scp999/proc/find_target()
 	var/mob/living/carbon/human/closest = null
 	var/shortest_distance = 999
 
@@ -92,7 +92,7 @@
 
 	return closest
 
-/mob/living/carbon/scp/scp999/proc/approach_target(mob/living/carbon/human/target)
+/mob/living/scp/scp999/proc/approach_target(mob/living/carbon/human/target)
 	if(!target)
 		return
 
@@ -101,7 +101,7 @@
 	if(get_dist(src, target) <= 1)
 		heal_target(target)
 
-/mob/living/carbon/scp/scp999/proc/heal_target(mob/living/carbon/human/target)
+/mob/living/scp/scp999/proc/heal_target(mob/living/carbon/human/target)
 	if(!target || world.time < healing_cooldown)
 		return
 
@@ -131,13 +131,13 @@
 
 	add_interaction_record(target, "healing")
 
-/mob/living/carbon/scp/scp999/proc/update_happiness()
+/mob/living/scp/scp999/proc/update_happiness()
 	if(healing_sessions > 0 || comfort_provided > 0)
 		happiness_level = min(max_happiness, happiness_level + 1)
 
 	healing_power = 25 + (happiness_level / 4)
 
-/mob/living/carbon/scp/scp999/UnarmedAttack(atom/A)
+/mob/living/scp/scp999/UnarmedAttack(atom/A)
 	if(ishuman(A))
 		var/mob/living/carbon/human/H = A
 		heal_target(H)
@@ -145,7 +145,7 @@
 
 	return ..()
 
-/mob/living/carbon/scp/scp999/proc/heal_nearby_ability()
+/mob/living/scp/scp999/proc/heal_nearby_ability()
 	if(world.time < healing_cooldown)
 		return
 
@@ -164,7 +164,7 @@
 
 	healing_cooldown = world.time + healing_cooldown_time
 
-/mob/living/carbon/scp/scp999/proc/comfort_zone_ability()
+/mob/living/scp/scp999/proc/comfort_zone_ability()
 	to_chat(src, "<span class='notice'>You create a comfort zone. Comfort provided: [comfort_provided]</span>")
 
 	for(var/mob/living/carbon/human/H in range(comfort_radius, src))
@@ -174,7 +174,7 @@
 			H.adjustFireLoss(-(healing_power / 2))
 			H.adjustToxLoss(-(healing_power / 2))
 
-/mob/living/carbon/scp/scp999/proc/view_healing_stats_ability()
+/mob/living/scp/scp999/proc/view_healing_stats_ability()
 	var/message = "<h2>SCP-999 Healing Statistics</h2>"
 	message += "<b>Healing Power:</b> [healing_power]<br>"
 	message += "<b>Happiness Level:</b> [happiness_level]/[max_happiness]<br>"
@@ -185,14 +185,14 @@
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
-/mob/living/carbon/scp/scp999/get_status_tab_items()
+/mob/living/scp/scp999/get_status_tab_items()
 	. = ..()
 	. += "Healing Power: [healing_power]"
 	. += "Happiness Level: [happiness_level]/[max_happiness]"
 	. += "Comfort Radius: [comfort_radius]"
 	. += "Healed Targets: [length(healed_targets)]"
 
-/mob/living/carbon/scp/scp999/examine(mob/user)
+/mob/living/scp/scp999/examine(mob/user)
 	. = ..()
 
 	if(ishuman(user))
@@ -202,21 +202,21 @@
 		else
 			to_chat(user, "<span class='notice'>A friendly orange slime that seems to radiate happiness and healing energy.</span>")
 
-/mob/living/carbon/scp/scp999/scp_death()
+/mob/living/scp/scp999/scp_death()
 	visible_message("<span class='danger'>[src] appears to lose its vibrant color and stops moving!</span>")
 	playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
 	..()
 
-/mob/living/carbon/scp/scp999/proc/heal_nearby()
+/mob/living/scp/scp999/proc/heal_nearby()
 	heal_nearby_ability()
 
-/mob/living/carbon/scp/scp999/proc/comfort_zone()
+/mob/living/scp/scp999/proc/comfort_zone()
 	comfort_zone_ability()
 
-/mob/living/carbon/scp/scp999/proc/view_healing_stats()
+/mob/living/scp/scp999/proc/view_healing_stats()
 	view_healing_stats_ability()
 
-/mob/living/carbon/scp/scp999/proc/view_scp999_persistence_data()
+/mob/living/scp/scp999/proc/view_scp999_persistence_data()
 	if(!check_rights(R_ADMIN))
 		to_chat(src, "<span class='warning'>You don't have permission to view persistence data.</span>")
 		return

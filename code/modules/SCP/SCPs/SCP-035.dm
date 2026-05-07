@@ -1,6 +1,86 @@
 // SCP-035 - The Possessive Mask
 // Complete Production-Ready Implementation
 
+/mob/living/scp035
+	name = "SCP-035"
+	desc = "A white porcelain mask with a sad expression. It seems to be constantly weeping a black, corrosive substance."
+	real_name = "SCP-035"
+	icon = 'icons/scp/scp-035.dmi'
+	icon_state = "tragedy_obj_rot"
+	status_flags = GODMODE|CANPUSH
+	maxHealth = 200
+	health = 200
+	density = FALSE
+	sight = SEE_TURFS|SEE_MOBS|SEE_OBJS
+	see_in_dark = 8
+	see_invisible = SEE_INVISIBLE_LIVING
+	hud_possible = list()
+	hud_type = /datum/hud
+
+	var/obj/item/clothing/mask/scp035/mask
+
+/mob/living/scp035/Move()
+	return FALSE
+
+/mob/living/scp035/Initialize(mapload)
+	. = ..()
+	SCP = new /datum/scp(src, "SCP-035", SCP_KETER, "035", SCP_PLAYABLE)
+	SCP.min_playercount = 20
+	SCP.min_time = 30 MINUTES
+	SCP.memeticFlags = MVISUAL|MAUDIBLE|MSYNCED
+
+	mask = new /obj/item/clothing/mask/scp035(get_turf(src))
+	mask.linked_mob = src
+
+	if(SSscp_persistence && SSscp_persistence.manager)
+		SSscp_persistence.manager.scp_instances["SCP-035"] = new /datum/scp_instance("SCP-035", src)
+
+/mob/living/scp035/Destroy()
+	if(mask)
+		mask.linked_mob = null
+		QDEL_NULL(mask)
+	QDEL_NULL(SCP)
+	return ..()
+
+/mob/living/scp035/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(mask && mask.possession_system?.current_host)
+		var/mob/living/carbon/human/host = mask.possession_system.current_host
+		if(host.stat == DEAD)
+			exit_host(host)
+			return
+		forceMove(host)
+	else if(mask)
+		forceMove(get_turf(mask))
+	if(mask && !mask.possession_system?.current_host)
+		if(prob(5))
+			for(var/mob/living/carbon/human/H in range(6, src))
+				if(H.stat != DEAD && !H.SCP)
+					mask.telepathy_system.apply_influence(H)
+					break
+
+/mob/living/scp035/proc/enter_host(mob/living/carbon/human/host)
+	if(!host || !mask)
+		return
+	if(mind)
+		mind.transfer_to(host)
+	else if(key)
+		host.ckey = ckey
+	mask.possession_system.transfer_host(host)
+
+/mob/living/scp035/proc/exit_host(mob/living/carbon/human/host)
+	if(!host || !mask)
+		return
+	if(host.mind)
+		host.mind.transfer_to(src)
+	else if(host.key)
+		ckey = host.key
+	forceMove(get_turf(host))
+	if(host.stat != DEAD)
+		host.death()
+
 // Core SCP-035 mask object
 /obj/item/clothing/mask/scp035
 	name = "SCP-035"
@@ -23,6 +103,8 @@
 	var/containment_status = "contained"
 	var/possession_cooldown = 0
 	var/possession_cooldown_time = 300 SECONDS
+	var/mob/living/scp035/linked_mob
+	var/removing_from_host = FALSE
 
 	// Persistence tracking
 	var/possessions_performed = 0
@@ -66,7 +148,28 @@
 	QDEL_NULL(corruption_system)
 	QDEL_NULL(telepathy_system)
 	QDEL_NULL(personality_system)
+	linked_mob = null
 	return ..()
+
+/obj/item/clothing/mask/scp035/equipped(mob/user, slot)
+	. = ..()
+	if(slot == ITEM_SLOT_MASK && ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.SCP)
+			return
+		if(linked_mob && linked_mob.key)
+			linked_mob.enter_host(H)
+		else
+			possession_system.transfer_host(H, skip_cooldown = TRUE)
+
+/obj/item/clothing/mask/scp035/unequipped(mob/user, silent = FALSE)
+	. = ..()
+	if(removing_from_host)
+		return
+	if(possession_system?.current_host == user)
+		possession_system.remove_from_current_host()
+	else if(linked_mob && linked_mob.key && ishuman(user))
+		linked_mob.exit_host(user)
 
 /obj/item/clothing/mask/scp035/process()
 	. = ..()
@@ -115,28 +218,28 @@
 	)
 
 /datum/scp035_possession/proc/update()
-	if(current_host)
-		// Drain consciousness from current host
-		consciousness_level = max(0, consciousness_level - 0.5)
+	if(!current_host)
+		return
 
-		// Apply gradual sanity damage
-		if(current_host.sanity)
-			current_host.sanity.adjust_sanity(-0.1)
+	consciousness_level = max(0, consciousness_level - 0.5)
 
-		if(consciousness_level <= 20)
+	if(current_host.sanity)
+		current_host.sanity.adjust_sanity(-0.1)
+
+	if(consciousness_level <= 20 && consciousness_level > 0)
+		if(prob(10))
 			to_chat(current_host, "<span class='danger'>Your consciousness is fading! The mask is consuming your mind!</span>")
-			// Apply additional sanity damage when consciousness is low
-			if(current_host.sanity)
-				current_host.sanity.adjust_sanity(-1)
+		if(current_host.sanity)
+			current_host.sanity.adjust_sanity(-1)
 
-		if(consciousness_level <= 0)
-			complete_corruption(current_host)
+	if(consciousness_level <= 0)
+		complete_corruption(current_host)
 
-/datum/scp035_possession/proc/transfer_host(mob/living/carbon/human/new_host)
+/datum/scp035_possession/proc/transfer_host(mob/living/carbon/human/new_host, skip_cooldown = FALSE)
 	if(!new_host || new_host.SCP || new_host.stat == DEAD)
 		return FALSE
 
-	if(world.time < mask.possession_cooldown)
+	if(!skip_cooldown && world.time < mask.possession_cooldown)
 		return FALSE
 
 	// Backup current host consciousness if exists
@@ -157,7 +260,7 @@
 
 	// Create possession record
 	var/possession_record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [current_host.name] possessed by SCP-035"
-	host_memories += possession_record
+	host_memories["[current_host.name]_[world.time]"] = possession_record
 
 	// Apply possession effects
 	apply_possession_effects(current_host)
@@ -171,6 +274,9 @@
 
 	// Learn from new host
 	learn_host_abilities(current_host)
+
+	// Fire breach hook
+	mask.on_possession(current_host)
 
 	// Update persistence
 	if(SSscp_persistence && SSscp_persistence.manager)
@@ -199,21 +305,23 @@
 	if(!current_host)
 		return
 
-	// Unequip mask
-	current_host.dropItemToGround(mask)
-
-	// Apply removal effects
-	current_host.adjustBruteLoss(5)
-	current_host.stamina.adjust(-25)
-
-	to_chat(current_host, "<span class='danger'>The mask's influence is removed! You feel weakened!</span>")
-
-	// Stop processing when no host
-	STOP_PROCESSING(SSobj, mask)
-
-	// Reset possession state
+	var/mob/living/carbon/human/former_host = current_host
 	current_host = null
 	consciousness_level = max_consciousness
+
+	mask.removing_from_host = TRUE
+
+	if(mask.linked_mob)
+		mask.linked_mob.exit_host(former_host)
+
+	former_host.dropItemToGround(mask)
+	former_host.adjustBruteLoss(5)
+	former_host.stamina.adjust(-25)
+	to_chat(former_host, "<span class='danger'>The mask's influence is removed! You feel weakened!</span>")
+
+	STOP_PROCESSING(SSobj, mask)
+	mask.corruption_system.reset_for_new_host()
+	mask.removing_from_host = FALSE
 
 /datum/scp035_possession/proc/apply_possession_effects(mob/living/carbon/human/host)
 	// Transfer mask to host
@@ -292,10 +400,12 @@
 	return personality
 
 /datum/scp035_possession/proc/complete_corruption(mob/living/carbon/human/host)
+	if(!host || !current_host)
+		return
+
 	mask.hosts_corrupted++
 	mask.containment_status = "breached"
 
-	// Apply severe sanity damage
 	if(host.sanity)
 		host.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 50)
 		host.sanity.hallucination_level = host.sanity.max_hallucination
@@ -305,14 +415,9 @@
 	host.visible_message("<span class='danger'>[host] has been completely corrupted by SCP-035!</span>")
 	to_chat(host, "<span class='danger'>You have been completely corrupted! Your consciousness is fading...</span>")
 
-	// Transfer consciousness to mask
 	mask.consciousness_transfers++
-	consciousness_level = max_consciousness
-
-	// Remove mask and reset
 	remove_from_current_host()
 
-	// Update persistence
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-035"]
 		if(instance)
@@ -335,45 +440,47 @@
 	if(!mask.possession_system.current_host)
 		return
 
-	// Apply corrosion effect
 	apply_corrosion_effect()
 
-	// Update corruption level
+	if(!mask.possession_system.current_host)
+		return
+
 	update_corruption()
 
 /datum/scp035_corruption/proc/apply_corrosion_effect()
 	if(!mask.possession_system.current_host)
 		return
 
+	var/mob/living/carbon/human/host = mask.possession_system.current_host
 	corrosion_damage = min(max_corrosion, corrosion_damage + 1)
 	mask.total_corrosion_caused++
 
-	// Apply corrosion damage to host
 	if(corrosion_damage >= 20)
-		mask.possession_system.current_host.adjustBruteLoss(1)
-		to_chat(mask.possession_system.current_host, "<span class='warning'>The mask's corrosive substance is burning your skin!</span>")
+		host.adjustBruteLoss(1)
+		if(prob(5))
+			to_chat(host, "<span class='warning'>The mask's corrosive substance is burning your skin!</span>")
 
 	if(corrosion_damage >= 50)
-		mask.possession_system.current_host.adjustBruteLoss(2)
-		mask.possession_system.current_host.adjustToxLoss(1)
-		to_chat(mask.possession_system.current_host, "<span class='danger'>The corrosion is spreading! You can feel it eating away at you!</span>")
+		host.adjustBruteLoss(2)
+		host.adjustToxLoss(1)
+		if(prob(5))
+			to_chat(host, "<span class='danger'>The corrosion is spreading! You can feel it eating away at you!</span>")
 
 	if(corrosion_damage >= 80)
-		mask.possession_system.current_host.adjustBruteLoss(3)
-		mask.possession_system.current_host.adjustToxLoss(2)
-		to_chat(mask.possession_system.current_host, "<span class='danger'>The corrosion is overwhelming! Your body is being consumed!</span>")
+		host.adjustBruteLoss(3)
+		host.adjustToxLoss(2)
+		if(prob(5))
+			to_chat(host, "<span class='danger'>The corrosion is overwhelming! Your body is being consumed!</span>")
 
 	if(corrosion_damage >= 100)
-		mask.possession_system.complete_corruption(mask.possession_system.current_host)
+		mask.possession_system.complete_corruption(host)
 
 /datum/scp035_corruption/proc/update_corruption()
 	if(!mask.possession_system.current_host)
 		return
 
-	// Natural corruption progression
 	corruption_level = min(max_corruption, corruption_level + corruption_rate)
 
-	// Apply corruption effects based on level
 	apply_corruption_effects()
 
 /datum/scp035_corruption/proc/apply_corruption_effects()
@@ -384,24 +491,28 @@
 
 	if(corruption_level >= 20)
 		host.stamina.adjust(-5)
-		to_chat(host, "<span class='warning'>You feel the mask's influence growing stronger...</span>")
+		if(prob(5))
+			to_chat(host, "<span class='warning'>You feel the mask's influence growing stronger...</span>")
 
 	if(corruption_level >= 40)
 		host.adjustBruteLoss(1)
 		host.stamina.adjust(-10)
-		to_chat(host, "<span class='danger'>The mask's corruption is affecting your body!</span>")
+		if(prob(5))
+			to_chat(host, "<span class='danger'>The mask's corruption is affecting your body!</span>")
 
 	if(corruption_level >= 60)
 		host.adjustBruteLoss(2)
 		host.adjustToxLoss(1)
 		host.stamina.adjust(-15)
-		to_chat(host, "<span class='danger'>Your consciousness is being consumed by the mask!</span>")
+		if(prob(5))
+			to_chat(host, "<span class='danger'>Your consciousness is being consumed by the mask!</span>")
 
 	if(corruption_level >= 80)
 		host.adjustBruteLoss(3)
 		host.adjustToxLoss(2)
 		host.stamina.adjust(-25)
-		to_chat(host, "<span class='danger'>The mask's corruption is nearly complete!</span>")
+		if(prob(5))
+			to_chat(host, "<span class='danger'>The mask's corruption is nearly complete!</span>")
 
 /datum/scp035_corruption/proc/reset_for_new_host()
 	corruption_level = 0
@@ -413,6 +524,7 @@
 	var/range = 6
 	var/max_range = 12
 	var/list/affected_targets = list()
+	var/list/influence_levels = list()
 	var/influence_power = 1
 
 /datum/scp035_telepathy/New(obj/item/clothing/mask/scp035/mask_ref)
@@ -420,43 +532,44 @@
 	mask = mask_ref
 
 /datum/scp035_telepathy/proc/update()
-	// Scan for targets within range
 	scan_for_targets()
 
-	// Apply influence to affected targets
 	for(var/mob/living/carbon/human/target in affected_targets)
 		apply_influence(target)
 
 /datum/scp035_telepathy/proc/scan_for_targets()
-	affected_targets.Cut()
+	var/list/new_targets = list()
 
 	for(var/mob/living/carbon/human/H in range(range, mask))
 		if(H.SCP || H.stat == DEAD || H == mask.possession_system.current_host)
 			continue
 
-		// Check if target is within vision cone (if SCP-035 has vision cone)
 		if(mask.possession_system.current_host && mask.possession_system.current_host.fovangle)
 			if(!mask.possession_system.current_host.can_see_cone(H))
 				continue
 
-		affected_targets += H
+		new_targets += H
+		if(!(H in influence_levels))
+			influence_levels[H] = 0
+
+	for(var/mob/living/carbon/human/old_target in influence_levels)
+		if(!(old_target in new_targets))
+			influence_levels -= old_target
+
+	affected_targets = new_targets
 
 /datum/scp035_telepathy/proc/apply_influence(mob/living/carbon/human/target)
-	if(!(target in affected_targets))
-		affected_targets[target] = 0
-
-	if(!isnum(affected_targets[target]))
-		affected_targets[target] = 0
+	if(!isnum(influence_levels[target]))
+		influence_levels[target] = 0
 
 	var/distance = get_dist(mask, target)
 	var/influence_gain = calculate_influence_gain(distance)
 	var/resistance = calculate_resistance(target)
 
-	affected_targets[target] = min(100, affected_targets[target] + influence_gain - resistance)
+	influence_levels[target] = min(100, influence_levels[target] + influence_gain - resistance)
 	mask.telepathic_communications++
 
-	// Apply influence effects
-	apply_influence_effects(target, affected_targets[target])
+	apply_influence_effects(target, influence_levels[target])
 
 /datum/scp035_telepathy/proc/calculate_influence_gain(distance)
 	var/gain = 0
@@ -494,44 +607,48 @@
 		resistance += 0.2 // Mental toughness
 
 	// Previous exposure builds immunity
-	if(target in affected_targets)
+	if(target in influence_levels)
 		resistance += 0.1
 
 	return resistance
 
 /datum/scp035_telepathy/proc/apply_influence_effects(mob/living/carbon/human/target, influence_level)
-	if(influence_level >= 20)
+	if(influence_level >= 20 && prob(10))
 		to_chat(target, "<span class='warning'>You hear whispers in your mind...</span>")
 
 	if(influence_level >= 40)
-		to_chat(target, "<span class='danger'>The whispers are getting louder! You feel drawn to the mask!</span>")
+		if(prob(10))
+			to_chat(target, "<span class='danger'>The whispers are getting louder! You feel drawn to the mask!</span>")
 		target.stamina.adjust(-5)
 
 	if(influence_level >= 60)
-		to_chat(target, "<span class='danger'>The mask is calling to you! You must wear it!</span>")
+		if(prob(10))
+			to_chat(target, "<span class='danger'>The mask is calling to you! You must wear it!</span>")
 		target.stamina.adjust(-10)
 		target.adjustToxLoss(1)
 
-		// Random movement towards mask
 		if(prob(20))
 			step_towards(target, mask)
 
 	if(influence_level >= 80)
-		to_chat(target, "<span class='danger'>The mask's influence is overwhelming! You need to wear it!</span>")
+		if(prob(10))
+			to_chat(target, "<span class='danger'>The mask's influence is overwhelming! You need to wear it!</span>")
 		target.stamina.adjust(-15)
 		target.adjustToxLoss(2)
 		mask.personality_changes_induced++
 
-		// Force attempt to wear mask
 		if(prob(30))
 			force_possession(target)
+			return
 
 	if(influence_level >= 100)
-		to_chat(target, "<span class='danger'>You can't resist anymore! You must wear the mask!</span>")
+		if(!target || target.stat == DEAD || target.SCP)
+			return
+		if(prob(10))
+			to_chat(target, "<span class='danger'>You can't resist anymore! You must wear the mask!</span>")
 		target.stamina.adjust(-25)
 		target.adjustToxLoss(5)
 
-		// Immediate possession attempt
 		force_possession(target)
 
 /datum/scp035_telepathy/proc/force_possession(mob/living/carbon/human/target)
@@ -621,8 +738,8 @@
 
 	if(length(possession_system.host_memories))
 		message += "<h3>Possession History:</h3>"
-		for(var/record in possession_system.host_memories)
-			message += "[record]<br>"
+		for(var/key in possession_system.host_memories)
+			message += "[possession_system.host_memories[key]]<br>"
 	else
 		message += "<i>No possession history yet.</i>"
 
@@ -634,7 +751,7 @@
 	if(length(telepathy_system.affected_targets))
 		message += "<h3>Telepathically Influenced:</h3>"
 		for(var/mob/living/carbon/human/H in telepathy_system.affected_targets)
-			var/influence_level = telepathy_system.affected_targets[H]
+			var/influence_level = telepathy_system.influence_levels[H] || 0
 			message += "- [H.name]: Influence Level [influence_level]/100<br>"
 	else
 		message += "<i>No targets currently affected.</i>"
@@ -824,7 +941,7 @@
 		if("Enhanced Speed")
 			H.add_movespeed_modifier(/datum/movespeed_modifier/scp035_speed)
 			to_chat(usr, "<span class='notice'>You move with stolen supernatural speed!</span>")
-			addtimer(CALLBACK(H, /mob/living/carbon/human.proc/remove_movespeed_modifier, /datum/movespeed_modifier/scp035_speed), 30 SECONDS)
+			addtimer(CALLBACK(H, /mob/proc/remove_movespeed_modifier, /datum/movespeed_modifier/scp035_speed), 30 SECONDS)
 
 		if("Enhanced Durability")
 			H.physiology.brute_mod *= 0.5
@@ -847,10 +964,12 @@
 /datum/movespeed_modifier/scp035_speed
 	slowdown = -1.5
 
-// Attack behavior - attempt possession when used
 /obj/item/clothing/mask/scp035/attack(mob/living/carbon/human/M, mob/living/carbon/human/user)
-	if(ishuman(M))
-		possession_system.transfer_host(M)
+	if(ishuman(M) && !M.SCP && M.stat != DEAD)
+		if(linked_mob)
+			linked_mob.enter_host(M)
+		else
+			possession_system.transfer_host(M, skip_cooldown = TRUE)
 		return TRUE
 	return ..()
 
@@ -869,7 +988,8 @@
 
 			// Apply initial telepathic influence
 			if(!(H in telepathy_system.affected_targets))
-				telepathy_system.affected_targets[H] = 15
+				telepathy_system.affected_targets += H
+				telepathy_system.influence_levels[H] = 15
 				to_chat(user, "<span class='danger'>The mask's telepathic influence begins to affect you!</span>")
 
 // Enhanced status display

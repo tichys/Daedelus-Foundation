@@ -23,7 +23,7 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	/datum/job/hcz_guard,
 	/datum/job/junior_hcz_guard,
 	/datum/job/dclass,
-	//Science
+	// Science
 	/datum/job/research_director,
 	/datum/job/assistant_research_director,
 	/datum/job/senior_researcher,
@@ -39,7 +39,7 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	/datum/job/paramedic,
 	/datum/job/trainee_doctor,
 	/datum/job/psychologist,
-	// Engineeering
+	// Engineering
 	/datum/job/engineering_director,
 	/datum/job/assistant_engineering_director,
 	/datum/job/containment_engineer,
@@ -51,13 +51,14 @@ GLOBAL_LIST_INIT(job_display_order, list(
 	// Supply
 	/datum/job/logistics_officer,
 	/datum/job/logistics_technician,
-	// Other
+	// Service
 	/datum/job/botanist,
 	/datum/job/chaplain,
 	/datum/job/janitor,
 	/datum/job/clown,
 	/datum/job/mime,
 	/datum/job/assistant,
+	// Silicon
 	/datum/job/ai,
 	/datum/job/cyborg
 ))

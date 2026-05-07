@@ -2,7 +2,7 @@
 // Automatically tracks SCP activities and integrates them with the progression system
 
 // Global event tracking hooks
-/proc/track_scp_event(mob/living/carbon/human/scp, event_type, event_data = list())
+/proc/track_scp_event(mob/living/scp/scp, event_type, event_data = list())
 	if(!scp || !scp.SCP || !scp.ckey)
 		return
 
@@ -10,8 +10,8 @@
 		SSscp_progression_integration.manager.track_scp_event(scp, event_type, event_data)
 
 // SCP-049 Event Tracking
-/proc/track_scp049_cure(mob/living/carbon/human/scp, mob/living/target, success = TRUE)
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp049))
+/proc/track_scp049_cure(mob/living/scp/scp, mob/living/target, success = TRUE)
+	if(!scp || !istype(scp, /mob/living/scp/scp049))
 		return
 
 	var/target_name = "unknown"
@@ -32,12 +32,12 @@
 	track_scp_event(scp, "cure_performed", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp049))
-		var/mob/living/carbon/human/scp049/scp049 = scp
+	if(istype(scp, /mob/living/scp/scp049))
+		var/mob/living/scp/scp049/scp049 = scp
 		scp049.cures_performed++
 
-/proc/track_scp049_containment_breach(mob/living/carbon/human/scp, breach_type = "door")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp049))
+/proc/track_scp049_containment_breach(mob/living/scp/scp, breach_type = "door")
+	if(!scp || !istype(scp, /mob/living/scp/scp049))
 		return
 
 	var/location_name = "unknown"
@@ -53,12 +53,12 @@
 	track_scp_event(scp, "containment_breach", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp049))
-		var/mob/living/carbon/human/scp049/scp049 = scp
+	if(istype(scp, /mob/living/scp/scp049))
+		var/mob/living/scp/scp049/scp049 = scp
 		scp049.containment_breaches++
 
-/proc/track_scp049_research(mob/living/carbon/human/scp, research_type, progress = 0)
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp049))
+/proc/track_scp049_research(mob/living/scp/scp, research_type, progress = 0)
+	if(!scp || !istype(scp, /mob/living/scp/scp049))
 		return
 
 	var/location_name = "unknown"
@@ -75,13 +75,13 @@
 	track_scp_event(scp, "research_progress", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp049))
-		var/mob/living/carbon/human/scp049/scp049 = scp
+	if(istype(scp, /mob/living/scp/scp049))
+		var/mob/living/scp/scp049/scp049 = scp
 		scp049.research_progress += progress
 
 // SCP-096 Event Tracking
-/proc/track_scp096_rage_activation(mob/living/carbon/human/scp, trigger_type = "face_seen")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp096))
+/proc/track_scp096_rage_activation(mob/living/scp/scp, trigger_type = "face_seen")
+	if(!scp || !istype(scp, /mob/living/scp/scp096))
 		return
 
 	var/location_name = "unknown"
@@ -97,12 +97,12 @@
 	track_scp_event(scp, "rage_activation", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp096))
-		var/mob/living/carbon/human/scp096/scp096 = scp
+	if(istype(scp, /mob/living/scp/scp096))
+		var/mob/living/scp/scp096/scp096 = scp
 		scp096.rage_activations++
 
-/proc/track_scp096_victim_hunt(mob/living/carbon/human/scp, mob/living/victim, outcome = "hunted")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp096))
+/proc/track_scp096_victim_hunt(mob/living/scp/scp, mob/living/victim, outcome = "hunted")
+	if(!scp || !istype(scp, /mob/living/scp/scp096))
 		return
 
 	var/victim_name = "unknown"
@@ -123,12 +123,12 @@
 	track_scp_event(scp, "victim_hunt", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp096))
-		var/mob/living/carbon/human/scp096/scp096 = scp
+	if(istype(scp, /mob/living/scp/scp096))
+		var/mob/living/scp/scp096/scp096 = scp
 		scp096.victims_hunted++
 
-/proc/track_scp096_containment_escape(mob/living/carbon/human/scp, escape_method = "breach")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp096))
+/proc/track_scp096_containment_escape(mob/living/scp/scp, escape_method = "breach")
+	if(!scp || !istype(scp, /mob/living/scp/scp096))
 		return
 
 	var/location_name = "unknown"
@@ -144,13 +144,13 @@
 	track_scp_event(scp, "containment_escape", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp096))
-		var/mob/living/carbon/human/scp096/scp096 = scp
+	if(istype(scp, /mob/living/scp/scp096))
+		var/mob/living/scp/scp096/scp096 = scp
 		scp096.containment_escapes++
 
 // SCP-173 Event Tracking
-/proc/track_scp173_movement(mob/living/carbon/human/scp, movement_type = "successful")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp173))
+/proc/track_scp173_movement(mob/living/scp/scp, movement_type = "successful")
+	if(!scp || !istype(scp, /mob/living/scp/scp173))
 		return
 
 	var/location_name = "unknown"
@@ -166,12 +166,12 @@
 	track_scp_event(scp, "movement", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp173))
-		var/mob/living/carbon/human/scp173/scp173 = scp
+	if(istype(scp, /mob/living/scp/scp173))
+		var/mob/living/scp/scp173/scp173 = scp
 		scp173.successful_movements++
 
-/proc/track_scp173_victim_kill(mob/living/carbon/human/scp, mob/living/victim, kill_method = "snap")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp173))
+/proc/track_scp173_victim_kill(mob/living/scp/scp, mob/living/victim, kill_method = "snap")
+	if(!scp || !istype(scp, /mob/living/scp/scp173))
 		return
 
 	var/victim_name = "unknown"
@@ -192,12 +192,12 @@
 	track_scp_event(scp, "victim_kill", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp173))
-		var/mob/living/carbon/human/scp173/scp173 = scp
+	if(istype(scp, /mob/living/scp/scp173))
+		var/mob/living/scp/scp173/scp173 = scp
 		scp173.victims_killed++
 
-/proc/track_scp173_containment_breach(mob/living/carbon/human/scp, breach_type = "movement")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp173))
+/proc/track_scp173_containment_breach(mob/living/scp/scp, breach_type = "movement")
+	if(!scp || !istype(scp, /mob/living/scp/scp173))
 		return
 
 	var/location_name = "unknown"
@@ -213,13 +213,13 @@
 	track_scp_event(scp, "containment_breach", event_data)
 
 	// Update progression tracking
-	if(istype(scp, /mob/living/carbon/human/scp173))
-		var/mob/living/carbon/human/scp173/scp173 = scp
+	if(istype(scp, /mob/living/scp/scp173))
+		var/mob/living/scp/scp173/scp173 = scp
 		scp173.containment_breaches++
 
 // SCP-457 Event Tracking
-/proc/track_scp457_fire_creation(mob/living/carbon/human/scp, fire_type = "basic", location = null)
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp457))
+/proc/track_scp457_fire_creation(mob/living/scp/scp, fire_type = "basic", location = null)
+	if(!scp || !istype(scp, /mob/living/scp/scp457))
 		return
 
 	var/location_name = "unknown"
@@ -237,8 +237,8 @@
 
 	track_scp_event(scp, "fire_creation", event_data)
 
-/proc/track_scp457_damage_dealt(mob/living/carbon/human/scp, mob/living/target, damage_amount = 0, damage_type = "fire")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp457))
+/proc/track_scp457_damage_dealt(mob/living/scp/scp, mob/living/target, damage_amount = 0, damage_type = "fire")
+	if(!scp || !istype(scp, /mob/living/scp/scp457))
 		return
 
 	var/target_name = "unknown"
@@ -259,8 +259,8 @@
 
 	track_scp_event(scp, "damage_dealt", event_data)
 
-/proc/track_scp457_victim_consumption(mob/living/carbon/human/scp, mob/living/victim)
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp457))
+/proc/track_scp457_victim_consumption(mob/living/scp/scp, mob/living/victim)
+	if(!scp || !istype(scp, /mob/living/scp/scp457))
 		return
 
 	var/victim_name = "unknown"
@@ -280,8 +280,8 @@
 	track_scp_event(scp, "victim_consumption", event_data)
 
 // SCP-939 Event Tracking
-/proc/track_scp939_voice_learning(mob/living/carbon/human/scp, mob/living/speaker, voice_quality = "good")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp939))
+/proc/track_scp939_voice_learning(mob/living/scp/scp, mob/living/speaker, voice_quality = "good")
+	if(!scp || !istype(scp, /mob/living/scp/scp939))
 		return
 
 	var/speaker_name = "unknown"
@@ -301,8 +301,8 @@
 
 	track_scp_event(scp, "voice_learning", event_data)
 
-/proc/track_scp939_victim_hunt(mob/living/carbon/human/scp, mob/living/victim, hunt_method = "voice_mimicry")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp939))
+/proc/track_scp939_victim_hunt(mob/living/scp/scp, mob/living/victim, hunt_method = "voice_mimicry")
+	if(!scp || !istype(scp, /mob/living/scp/scp939))
 		return
 
 	var/victim_name = "unknown"
@@ -322,8 +322,8 @@
 
 	track_scp_event(scp, "victim_hunt", event_data)
 
-/proc/track_scp939_psychological_manipulation(mob/living/carbon/human/scp, mob/living/target, manipulation_type = "voice_confusion")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp939))
+/proc/track_scp939_psychological_manipulation(mob/living/scp/scp, mob/living/target, manipulation_type = "voice_confusion")
+	if(!scp || !istype(scp, /mob/living/scp/scp939))
 		return
 
 	var/target_name = "unknown"
@@ -346,8 +346,8 @@
 
 
 // SCP-2020 Event Tracking
-/proc/track_scp2020_teleportation(mob/living/carbon/human/scp, turf/destination, teleport_type = "player_controlled")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp2020))
+/proc/track_scp2020_teleportation(mob/living/scp/scp, turf/destination, teleport_type = "player_controlled")
+	if(!scp || !istype(scp, /mob/living/scp/scp2020))
 		return
 
 	var/destination_name = "unknown"
@@ -368,8 +368,8 @@
 	track_scp_event(scp, "teleportation", event_data)
 
 	// Update progression tracking (SCP-2020 is harmless — no teleportation tracking)
-/proc/track_scp2020_stealth_action(mob/living/carbon/human/scp, action_type = "phasing", success = TRUE)
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp2020))
+/proc/track_scp2020_stealth_action(mob/living/scp/scp, action_type = "phasing", success = TRUE)
+	if(!scp || !istype(scp, /mob/living/scp/scp2020))
 		return
 
 	var/location_name = "unknown"
@@ -387,8 +387,8 @@
 
 	// SCP-2020 is harmless — no stealth_action tracking
 
-/proc/track_scp2020_victim_elimination(mob/living/carbon/human/scp, mob/living/victim, elimination_method = "stealth")
-	if(!scp || !istype(scp, /mob/living/carbon/human/scp2020))
+/proc/track_scp2020_victim_elimination(mob/living/scp/scp, mob/living/victim, elimination_method = "stealth")
+	if(!scp || !istype(scp, /mob/living/scp/scp2020))
 		return
 
 	var/victim_name = "unknown"
@@ -411,7 +411,7 @@
 	// SCP-2020 is harmless — no victims_eliminated tracking
 
 // Event tracking manager extension
-/datum/scp_progression_manager/proc/track_scp_event(mob/living/carbon/human/scp, event_type, list/event_data)
+/datum/scp_progression_manager/proc/track_scp_event(mob/living/scp/scp, event_type, list/event_data)
 	if(!scp || !scp.SCP || !scp.ckey)
 		return
 

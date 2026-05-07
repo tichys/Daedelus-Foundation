@@ -26,7 +26,7 @@ SUBSYSTEM_DEF(scp_persistence)
 			var/id = manager?.get_scp_id(O)
 			if(id)
 				cached_scp_atoms[id] = O
-				if(istype(O, /mob/living/carbon/scp))
+				if(istype(O, /mob/living/scp))
 					cached_scp_mobs[id] = O
 	cache_dirty = FALSE
 
@@ -83,10 +83,10 @@ SUBSYSTEM_DEF(scp_persistence)
 		save_scp_data()
 
 	for(var/client/C in GLOB.clients)
-		if(C.mob && istype(C.mob, /mob/living/carbon/scp))
-			var/mob/living/carbon/scp/S = C.mob
+		if(C.mob && istype(C.mob, /mob/living/scp))
+			var/mob/living/scp/S = C.mob
 			var/datum/player_performance/perf = get_player_performance(C.ckey)
-			perf.register_scp_skill_snapshot(S.SCP_datum ? S.SCP_datum.name : (S.name || "SCP"), S.skill_levels)
+			perf.register_scp_skill_snapshot(S.SCP ? S.SCP.name : (S.name || "SCP"), S.skill_levels)
 
 	process_scp_management()
 
@@ -106,8 +106,8 @@ SUBSYSTEM_DEF(scp_persistence)
 		if(scp_id in scp_instances)
 			var/datum/scp_instance/instance = scp_instances[scp_id]
 			instance.update_status(O)
-			if(istype(O, /mob/living/carbon/scp))
-				var/mob/living/carbon/scp/S = O
+			if(istype(O, /mob/living/scp))
+				var/mob/living/scp/S = O
 				if(!S.skills_restored)
 					instance.apply_to_scp(S)
 					S.skills_restored = TRUE
@@ -115,8 +115,8 @@ SUBSYSTEM_DEF(scp_persistence)
 			var/datum/scp_instance/new_instance = new /datum/scp_instance(scp_id, O)
 			scp_instances[scp_id] = new_instance
 			new_instance.update_status(O)
-			if(istype(O, /mob/living/carbon/scp))
-				var/mob/living/carbon/scp/S2 = O
+			if(istype(O, /mob/living/scp))
+				var/mob/living/scp/S2 = O
 				new_instance.apply_to_scp(S2)
 				S2.skills_restored = TRUE
 
@@ -250,7 +250,34 @@ SUBSYSTEM_DEF(scp_persistence)
 		var/list/data = json_decode(json_data)
 
 		if(data)
-			scp_instances = data["scp_instances"] || list()
+			var/list/raw_instances = data["scp_instances"] || list()
+			for(var/scp_id in raw_instances)
+				var/list/raw = raw_instances[scp_id]
+				if(istype(raw, /datum/scp_instance))
+					scp_instances[scp_id] = raw
+				else if(islist(raw))
+					var/datum/scp_instance/instance = new /datum/scp_instance(scp_id, null)
+					if(raw["containment_status"])
+						instance.containment_status = raw["containment_status"]
+					if(raw["containment_health"])
+						instance.containment_health = raw["containment_health"]
+					if(raw["containment_difficulty"])
+						instance.containment_difficulty = raw["containment_difficulty"]
+					if(raw["current_state"])
+						instance.current_state = raw["current_state"]
+					if(raw["containment_class"])
+						instance.containment_class = raw["containment_class"]
+					if(raw["containment_effectiveness"])
+						instance.containment_effectiveness = raw["containment_effectiveness"]
+					if(raw["research_value"])
+						instance.research_value = raw["research_value"]
+					if(raw["threat_level"])
+						instance.threat_level = raw["threat_level"]
+					if(raw["last_breach"])
+						instance.last_breach = raw["last_breach"]
+					scp_instances[scp_id] = instance
+				else
+					scp_instances[scp_id] = new /datum/scp_instance(scp_id, null)
 			research_projects = data["research_projects"] || list()
 			containment_protocols = data["containment_protocols"] || list()
 			anomaly_effects = data["anomaly_effects"] || list()
@@ -329,8 +356,8 @@ SUBSYSTEM_DEF(scp_persistence)
 
 		containment_effectiveness = containment_health / 100
 
-		if(istype(O, /mob/living/carbon/scp))
-			var/mob/living/carbon/scp/S = O
+		if(istype(O, /mob/living/scp))
+			var/mob/living/scp/S = O
 			persisted_skill_levels = islist(S.skill_levels) ? S.skill_levels.Copy() : list()
 			persisted_skill_experience = islist(S.skill_experience) ? S.skill_experience.Copy() : list()
 			persisted_skill_cooldowns = islist(S.skill_cooldowns) ? S.skill_cooldowns.Copy() : list()
@@ -339,7 +366,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 
 // Apply persisted state back onto a live SCP mob
-/datum/scp_instance/proc/apply_to_scp(var/mob/living/carbon/scp/S)
+/datum/scp_instance/proc/apply_to_scp(var/mob/living/scp/S)
 	if(!S)
 		return
 	if(islist(persisted_skill_levels) && length(persisted_skill_levels))

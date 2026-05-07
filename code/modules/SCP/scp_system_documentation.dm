@@ -55,14 +55,14 @@
 		"title" = "Human-Based SCP Conversion",
 		"content" = list(
 			"Converted Sentient SCPs:",
-			"• SCP-049 (Plague Doctor) - /mob/living/carbon/human/scp049",
-			"• SCP-082 (Fernand) - /mob/living/carbon/human/scp082",
-			"• SCP-096 (Shy Guy) - /mob/living/carbon/human/scp096",
-			"• SCP-106 (Old Man) - /mob/living/carbon/human/scp106",
-			"• SCP-343 (God) - /mob/living/carbon/human/scp343",
-			"• SCP-457 (Burning Man) - /mob/living/carbon/human/scp457",
-			"• SCP-939 (Voice Mimics) - /mob/living/carbon/human/scp939",
-			"• SCP-966 (Sleep Killers) - /mob/living/carbon/human/scp966",
+			"• SCP-049 (Plague Doctor) - /mob/living/scp/scp049",
+			"• SCP-082 (Fernand) - /mob/living/scp/scp082",
+			"• SCP-096 (Shy Guy) - /mob/living/scp/scp096",
+			"• SCP-106 (Old Man) - /mob/living/scp/scp106",
+			"• SCP-343 (God) - /mob/living/scp/scp343",
+			"• SCP-457 (Burning Man) - /mob/living/scp/scp457",
+			"• SCP-939 (Voice Mimics) - /mob/living/scp/scp939",
+			"• SCP-966 (Sleep Killers) - /mob/living/scp/scp966",
 			"",
 			"Benefits:",
 			"• Unified mob systems and interactions",
@@ -212,12 +212,12 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 	// Converted SCPs Status
 	to_chat(src, "<span class='boldnotice'>Human-Converted SCPs:</span>")
 	var/list/converted_scps = list(
-		"SCP-049" = /mob/living/carbon/human/scp049,
-		"SCP-082" = /mob/living/carbon/human/scp082,
-		"SCP-096" = /mob/living/carbon/human/scp096,
-		"SCP-343" = /mob/living/carbon/human/scp343,
-		"SCP-939" = /mob/living/carbon/human/scp939,
-		"SCP-966" = /mob/living/carbon/human/scp966
+		"SCP-049" = /mob/living/scp/scp049,
+		"SCP-082" = /mob/living/scp/scp082,
+		"SCP-096" = /mob/living/scp/scp096,
+		"SCP-343" = /mob/living/scp/scp343,
+		"SCP-939" = /mob/living/scp/scp939,
+		"SCP-966" = /mob/living/scp/scp966
 	)
 
 	for(var/scp_name in converted_scps)
@@ -243,6 +243,8 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 
 	// Count active SCPs with components
 	for(var/mob/living/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(M.SCP)
 			active_scps++
 			if(M.SCP.uses_advanced_components)

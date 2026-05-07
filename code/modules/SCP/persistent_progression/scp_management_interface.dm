@@ -435,6 +435,19 @@
 	// Get spawn schedule data
 	data["spawn_schedules"] = spawn_schedules
 
+	// Get blacklist data
+	data["blacklist_data"] = GLOB.scp_blacklist?.get_all_blacklists_data() || list("entries" = list())
+
+	// Get SCP role types for blacklist dropdown
+	var/list/scp_role_types = list()
+	var/datum/scp_role_controller/controller = GLOB.scp_role_controller
+	if(controller)
+		for(var/scp_type in list(SCP_ROLE_173, SCP_ROLE_096, SCP_ROLE_008, SCP_ROLE_035, SCP_ROLE_049, SCP_ROLE_079, SCP_ROLE_106, SCP_ROLE_457, SCP_ROLE_939, SCP_ROLE_682))
+			var/role_name = controller.get_role_name(scp_type)
+			if(role_name)
+				scp_role_types += list(list("type" = scp_type, "name" = role_name))
+	data["scp_role_types"] = scp_role_types
+
 	return data
 
 /datum/scp_management_interface/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
@@ -626,6 +639,55 @@
 				import_scp_data(data)
 				. = TRUE
 
+		if("blacklist_add_scp")
+			var/ckey = ckey(params["ckey"])
+			var/scp_type = params["scp_type"]
+			var/reason = params["reason"] || "No reason provided"
+			if(ckey && scp_type && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.add_scp_blacklist(ckey, scp_type, reason, admin_client.key)
+				. = TRUE
+
+		if("blacklist_remove_scp")
+			var/ckey = ckey(params["ckey"])
+			var/scp_type = params["scp_type"]
+			if(ckey && scp_type && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.remove_scp_blacklist(ckey, scp_type)
+				. = TRUE
+
+		if("blacklist_add_category")
+			var/ckey = ckey(params["ckey"])
+			var/category = params["category"]
+			var/reason = params["reason"] || "No reason provided"
+			if(ckey && category && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.add_category_blacklist(ckey, category, reason, admin_client.key)
+				. = TRUE
+
+		if("blacklist_remove_category")
+			var/ckey = ckey(params["ckey"])
+			var/category = params["category"]
+			if(ckey && category && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.remove_category_blacklist(ckey, category)
+				. = TRUE
+
+		if("blacklist_add_global")
+			var/ckey = ckey(params["ckey"])
+			var/reason = params["reason"] || "No reason provided"
+			if(ckey && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.add_global_blacklist(ckey, reason, admin_client.key)
+				. = TRUE
+
+		if("blacklist_remove_global")
+			var/ckey = ckey(params["ckey"])
+			if(ckey && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.remove_global_blacklist(ckey)
+				. = TRUE
+
+		if("blacklist_remove_all")
+			var/ckey = ckey(params["ckey"])
+			if(ckey && GLOB.scp_blacklist)
+				GLOB.scp_blacklist.remove_all_blacklists(ckey)
+				. = TRUE
+
 /datum/scp_management_interface/proc/force_spawn_scp(scp_id)
 	if(!scp_id || !SSscp_persistence || !SSscp_persistence.manager)
 		return
@@ -666,12 +728,12 @@
 			return scp
 		if("SCP-173")
 			// Create SCP-173 object
-			var/mob/living/carbon/human/scp173/scp = new /mob/living/carbon/human/scp173()
+			var/mob/living/scp/scp173/scp = new /mob/living/scp/scp173()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("SCP-096")
 			// Create SCP-096 object
-			var/mob/living/carbon/human/scp096/scp = new /mob/living/carbon/human/scp096()
+			var/mob/living/scp/scp096/scp = new /mob/living/scp/scp096()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("SCP-035")
@@ -680,7 +742,7 @@
 			H.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return H
 		if("SCP-049")
-			var/mob/living/carbon/human/scp049/scp = new /mob/living/carbon/human/scp049()
+			var/mob/living/scp/scp049/scp = new /mob/living/scp/scp049()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("SCP-2427-3")
@@ -689,7 +751,7 @@
 			H3.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return H3
 		if("SCP-3199")
-			var/mob/living/carbon/human/scp3199/scp = new /mob/living/carbon/human/scp3199()
+			var/mob/living/scp/scp3199/scp = new /mob/living/scp/scp3199()
 			scp.forceMove(pick(get_area_turfs(pick(GLOB.the_station_areas))))
 			return scp
 		if("Split Personality Necklace")
@@ -710,6 +772,8 @@
 			scp_objects += O
 
 	for(var/mob/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(findtext(M.name, scp_id))
 			scp_objects += M
 

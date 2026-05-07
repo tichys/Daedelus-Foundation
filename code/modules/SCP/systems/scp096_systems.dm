@@ -2,7 +2,7 @@
 // Rage Tracking, Face Revelation, and Research Systems
 
 /datum/scp096_rage_system
-	var/mob/living/carbon/human/scp096/owner
+	var/mob/living/scp/scp096/owner
 	var/rage_level = 0
 	var/max_rage_level = 100
 	var/rage_multiplier = 1.0
@@ -15,7 +15,7 @@
 	var/last_rage_time = 0
 	var/total_damage_dealt = 0
 
-/datum/scp096_rage_system/New(mob/living/carbon/human/scp096/new_owner)
+/datum/scp096_rage_system/New(mob/living/scp/scp096/new_owner)
 	owner = new_owner
 
 /datum/scp096_rage_system/proc/process_rage()
@@ -62,7 +62,7 @@
 
 // Face Revelation System
 /datum/scp096_face_system
-	var/mob/living/carbon/human/scp096/owner
+	var/mob/living/scp/scp096/owner
 	var/face_revelation_cooldown = 0
 	var/face_revelation_cooldown_time = 60 SECONDS
 	var/face_revelations = 0
@@ -77,7 +77,7 @@
 		"*tries to hide in shadows*"
 	)
 
-/datum/scp096_face_system/New(mob/living/carbon/human/scp096/new_owner)
+/datum/scp096_face_system/New(mob/living/scp/scp096/new_owner)
 	owner = new_owner
 
 /datum/scp096_face_system/proc/process_face_revelation()
@@ -113,19 +113,21 @@
 	playsound(owner, 'sound/effects/ghost.ogg', 30, 0)
 
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H))
+			continue
 		if(H.z == owner.z)
 			to_chat(H, "<span class='danger'>[announcement]</span>")
 
 // Scream System
 /datum/scp096_scream_system
-	var/mob/living/carbon/human/scp096/owner
+	var/mob/living/scp/scp096/owner
 	var/scream_cooldown = 0
 	var/scream_cooldown_time = 30 SECONDS
 	var/scream_range = 5
 	var/scream_damage = 15
 	var/scream_attacks = 0
 
-/datum/scp096_scream_system/New(mob/living/carbon/human/scp096/new_owner)
+/datum/scp096_scream_system/New(mob/living/scp/scp096/new_owner)
 	owner = new_owner
 
 /datum/scp096_scream_system/proc/process_scream()
@@ -153,13 +155,13 @@
 
 // Hysteria System
 /datum/scp096_hysteria_system
-	var/mob/living/carbon/human/scp096/owner
+	var/mob/living/scp/scp096/owner
 	var/hysteria_radius = 7
 	var/hysteria_duration = 0
 	var/hysteria_duration_time = 3 MINUTES
 	var/hysteria_events = 0
 
-/datum/scp096_hysteria_system/New(mob/living/carbon/human/scp096/new_owner)
+/datum/scp096_hysteria_system/New(mob/living/scp/scp096/new_owner)
 	owner = new_owner
 
 /datum/scp096_hysteria_system/proc/process_hysteria()
@@ -183,10 +185,10 @@
 
 // Research System
 /datum/scp096_research_system
-	var/mob/living/carbon/human/scp096/owner
+	var/mob/living/scp/scp096/owner
 	var/list/research_data = list()
 
-/datum/scp096_research_system/New(mob/living/carbon/human/scp096/new_owner)
+/datum/scp096_research_system/New(mob/living/scp/scp096/new_owner)
 	owner = new_owner
 
 /datum/scp096_research_system/proc/process_research()

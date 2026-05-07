@@ -201,6 +201,8 @@
 
 	// Save all active SCP component managers
 	for(var/mob/M in GLOB.mob_list)
+		if(QDELETED(M))
+			continue
 		if(M.SCP && M.SCP.uses_advanced_components)
 			var/key = "autosave_[M.SCP.designation]_[world.time]"
 			store_manager_state(M.SCP.advanced_components, key)

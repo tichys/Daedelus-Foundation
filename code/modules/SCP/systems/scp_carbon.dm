@@ -1,14 +1,14 @@
 // SCP Carbon Base Type
 // A custom carbon type specifically designed for SCP entities
 
-/mob/living/carbon/scp
+/mob/living/scp
 	name = "SCP Entity"
 	desc = "A mysterious SCP entity."
 	real_name = "SCP Entity"
 	status_flags = 0
 
 	// SCP-specific variables
-	var/datum/scp/SCP_datum = null
+	var/datum/scp/SCP = null
 	var/containment_status = "contained"
 	var/breach_count = 0
 	var/last_breach_time = 0
@@ -478,8 +478,8 @@
 	add_security_measure("Surveillance", "24/7 monitoring of SCP containment area")
 
 	// Set default containment level based on SCP class
-	if(SCP_datum)
-		switch(SCP_datum.classification)
+	if(SCP)
+		switch(SCP.classification)
 			if(SCP_SAFE)
 				containment_level = 2
 				containment_integrity = 80
@@ -496,7 +496,7 @@
 				containment_level = 1
 				containment_integrity = 100
 	else
-		// Fallback if SCP_datum is not set
+		// Fallback if SCP is not set
 		containment_level = 3
 		containment_integrity = 70
 

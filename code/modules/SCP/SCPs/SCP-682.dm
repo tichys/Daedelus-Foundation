@@ -5,7 +5,7 @@
 // MAIN SCP-682 MOB
 // ============================================================================
 
-/mob/living/carbon/human/scp682
+/mob/living/scp/scp682
 	name = "SCP-682"
 	desc = "A massive, hostile reptilian creature with extreme regenerative abilities and adaptive evolution."
 	icon = 'icons/scp/scp-682.dmi'
@@ -21,20 +21,16 @@
 	var/datum/scp682_research_integration/research_integration
 
 	var/evolution_stage = 1
-	var/containment_status = "contained"
 
 	var/attack_damage = SCP682_BASE_ATTACK_DAMAGE
 	var/attack_speed = SCP682_BASE_ATTACK_SPEED
 	var/movement_speed = SCP682_BASE_MOVEMENT_SPEED
 	var/area_attack_range = SCP682_BASE_AREA_ATTACK_RANGE
+	var/damage_modifier = 1.0
 
-/mob/living/carbon/human/scp682/Initialize(mapload)
+/mob/living/scp/scp682/Initialize(mapload)
 	. = ..()
 
-	// Set species properly
-	set_species(/datum/species/scp682)
-
-	// Initialize SCP datum
 	SCP = new /datum/scp(
 		src,
 		"SCP-682",
@@ -46,16 +42,8 @@
 	SCP.min_playercount = 25
 	SCP.min_time = 45 MINUTES
 
-	// Set up human-specific properties for SCP-682
 	maxHealth = SCP682_MAX_HEALTH
 	health = maxHealth
-
-	// Set up physiology for damage resistance
-	if(!physiology)
-		physiology = new /datum/physiology(src)
-	physiology.brute_mod = SCP682_INITIAL_BRUTE_MOD
-	physiology.burn_mod = SCP682_INITIAL_BURN_MOD
-	physiology.tox_mod = SCP682_INITIAL_TOX_MOD
 
 	// Initialize core systems
 	evolution_system = new /datum/scp682_evolution_system(src)
@@ -73,7 +61,7 @@
 	// Start processing
 	START_PROCESSING(SSobj, src)
 
-/mob/living/carbon/human/scp682/Destroy()
+/mob/living/scp/scp682/Destroy()
 	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(evolution_system)
 	QDEL_NULL(regeneration_system)
@@ -83,7 +71,7 @@
 	QDEL_NULL(research_integration)
 	return ..()
 
-/mob/living/carbon/human/scp682/process(delta_time)
+/mob/living/scp/scp682/process(delta_time)
 	// Don't call parent - we're implementing our own process logic
 
 	// Update all systems
@@ -99,7 +87,7 @@
 
 	// Return nothing to continue processing (not PROCESS_KILL)
 
-/mob/living/carbon/human/scp682/proc/process_scp682_effects()
+/mob/living/scp/scp682/proc/process_scp682_effects()
 	for(var/mob/living/carbon/human/H in range(5, src))
 		if(H == src || H.stat == DEAD)
 			continue
@@ -114,22 +102,22 @@
 // DAMAGE HANDLING & ADAPTATION
 // ============================================================================
 
-/mob/living/carbon/human/scp682/adjustBruteLoss(amount, updating_health = TRUE, forced = FALSE)
+/mob/living/scp/scp682/adjustBruteLoss(amount, updating_health = TRUE, forced = FALSE)
 	. = ..()
 	if(amount > 0)
 		handle_damage_adaptation(amount, "brute")
 
-/mob/living/carbon/human/scp682/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
+/mob/living/scp/scp682/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
 	. = ..()
 	if(amount > 0)
 		handle_damage_adaptation(amount, "burn")
 
-/mob/living/carbon/human/scp682/adjustToxLoss(amount, updating_health = TRUE, forced = FALSE)
+/mob/living/scp/scp682/adjustToxLoss(amount, updating_health = TRUE, forced = FALSE)
 	. = ..()
 	if(amount > 0)
 		handle_damage_adaptation(amount, "toxin")
 
-/mob/living/carbon/human/scp682/proc/handle_damage_adaptation(amount, damage_type)
+/mob/living/scp/scp682/proc/handle_damage_adaptation(amount, damage_type)
 	// Record damage for regeneration system
 	if(regeneration_system)
 		regeneration_system.record_damage(amount, damage_type)
@@ -143,7 +131,7 @@
 		if(threat_system)
 			threat_system.remember_threat(attacker, damage_type, amount)
 
-/mob/living/carbon/human/scp682/proc/get_attacker()
+/mob/living/scp/scp682/proc/get_attacker()
 	// This is a simplified version - in a full implementation,
 	// you'd track the actual attacker from the damage event
 	return null
@@ -152,7 +140,7 @@
 // COMBAT & ATTACKS
 // ============================================================================
 
-/mob/living/carbon/human/scp682/UnarmedAttack(atom/A)
+/mob/living/scp/scp682/UnarmedAttack(atom/A)
 	if(isliving(A))
 		var/mob/living/L = A
 		if(ishuman(L))
@@ -191,7 +179,7 @@
 // STATUS DISPLAY
 // ============================================================================
 
-/mob/living/carbon/human/scp682/get_status_tab_items()
+/mob/living/scp/scp682/get_status_tab_items()
 	. = ..()
 	. += "Evolution Stage: [evolution_stage]/10"
 	. += "Containment Status: [containment_status]"
@@ -212,7 +200,7 @@
 // EXAMINE BEHAVIOR
 // ============================================================================
 
-/mob/living/carbon/human/scp682/examine(mob/user)
+/mob/living/scp/scp682/examine(mob/user)
 	. = ..()
 
 	if(ishuman(user))
@@ -231,7 +219,7 @@
 // PERSISTENCE INTEGRATION
 // ============================================================================
 
-/mob/living/carbon/human/scp682/proc/get_persistence_data()
+/mob/living/scp/scp682/proc/get_persistence_data()
 	var/list/data = list()
 	data["evolution_stage"] = evolution_stage
 	data["containment_status"] = containment_status
@@ -258,7 +246,7 @@
 
 	return data
 
-/mob/living/carbon/human/scp682/proc/load_persistence_data(list/data)
+/mob/living/scp/scp682/proc/load_persistence_data(list/data)
 	if(!data)
 		return
 
@@ -286,7 +274,7 @@
 // RESEARCH INTEGRATION
 // ============================================================================
 
-/mob/living/carbon/human/scp682/proc/contribute_research_data()
+/mob/living/scp/scp682/proc/contribute_research_data()
 	if(!SSresearch_persistence || !SSresearch_persistence.manager)
 		return
 
@@ -303,21 +291,21 @@
 		// For now, just store the data
 		research_integration.research_data["last_update"] = research_data
 
-/mob/living/carbon/human/scp682/proc/on_evolution(new_stage)
+/mob/living/scp/scp682/proc/on_evolution(new_stage)
 	evolution_stage = new_stage
 	hook_scp_breach("SCP-682", src)
 	if(threat_system)
 		for(var/mob/living/carbon/human/H in threat_system.threat_memory)
 			hook_scp_combat(H, "SCP-682", 0, 0)
 
-/mob/living/carbon/human/scp682/proc/on_adaptation(damage_type, amount)
+/mob/living/scp/scp682/proc/on_adaptation(damage_type, amount)
 	hook_scp_damage("SCP-682", (health / maxHealth) * 100)
 
-/mob/living/carbon/human/scp682/proc/on_breach()
+/mob/living/scp/scp682/proc/on_breach()
 	containment_status = "breached"
 	hook_scp_breach("SCP-682", src)
 
-/mob/living/carbon/human/scp682/proc/on_combat_kill(mob/living/carbon/human/victim)
+/mob/living/scp/scp682/proc/on_combat_kill(mob/living/carbon/human/victim)
 	if(!victim)
 		return
 	hook_scp_combat(victim, "SCP-682", 100, 0)

@@ -745,15 +745,12 @@ var/global/list/ADV_PERSIST_STORE = list()
 /datum/scp_advanced_component/advanced_persistence_system/proc/get_owner_id()
 	var/id = ""
 	if(parent_mob)
-		// Try to discover an attached SCP controller datum pattern
-		if(istype(parent_mob:SCP, /datum/scp))
-			// Some SCP mobs hold a `SCP` datum reference
-			var/datum/scp/ctrl = parent_mob:SCP
+		if(istype(parent_mob.SCP, /datum/scp))
+			var/datum/scp/ctrl = parent_mob.SCP
 			if(ctrl && istext(ctrl?.designation))
 				id = "SCP-[ctrl.designation]"
 		if(!length(id))
-			// Fallback to ckey/name to scope data per player instance
-			id = (parent_mob:ckey) ? "ckey:[parent_mob:ckey]" : "name:[parent_mob:name]"
+			id = (parent_mob.ckey) ? "ckey:[parent_mob.ckey]" : "name:[parent_mob.name]"
 	return "[persistence_namespace]|[id]"
 
 // Save a single value under a key

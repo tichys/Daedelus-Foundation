@@ -77,6 +77,13 @@
 	initialize_scp247_experiments(manager)
 	initialize_scp079_experiments(manager)
 	initialize_scp347_experiments(manager)
+	initialize_scp966_experiments_extended(manager)
+	initialize_scp082_experiments_extended(manager)
+	initialize_scp3199_experiments_extended(manager)
+	initialize_scp1048_experiments_extended(manager)
+	initialize_scp1507_experiments_extended(manager)
+	initialize_scp2427_experiments_extended(manager)
+	initialize_scp3008_experiments_extended(manager)
 
 /proc/register_experiment(datum/scp_experiment_manager/manager, scp_id, exp_type, name, desc, risk, duration, cooldown)
 	var/template_id = "[scp_id]_[exp_type]"
@@ -788,3 +795,95 @@
 		"Care Protocol Development",
 		"Develop optimal care and containment protocols for SCP-347.",
 		EXPERIMENT_RISK_MINIMAL, 300, 9000)
+
+	register_experiment(manager, "SCP-347", EXPERIMENT_TYPE_HAZARD,
+		"Theft Pattern Analysis",
+		"Document SCP-347's pickpocketing behavior and item preferences.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+	register_experiment(manager, "SCP-347", EXPERIMENT_TYPE_TECHNICAL,
+		"Visibility Threshold Testing",
+		"Determine conditions that disrupt SCP-347's invisibility.",
+		EXPERIMENT_RISK_LOW, 600, 18000)
+
+/proc/initialize_scp966_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-966", EXPERIMENT_TYPE_COGNITIVE,
+		"Sleep Deprivation Effects",
+		"Document the neurological effects of SCP-966's insomnia induction.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-966", EXPERIMENT_TYPE_TECHNICAL,
+		"Infrared Imaging Study",
+		"Attempt to capture SCP-966 imagery using specialized sensors.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+/proc/initialize_scp082_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-082", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Hunger Cycle Documentation",
+		"Document SCP-082's behavioral changes across hunger states.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+	register_experiment(manager, "SCP-082", EXPERIMENT_TYPE_CARE,
+		"Dietary Requirement Analysis",
+		"Determine optimal feeding schedule and dietary requirements.",
+		EXPERIMENT_RISK_LOW, 300, 9000)
+
+/proc/initialize_scp3199_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-3199", EXPERIMENT_TYPE_MEDICAL,
+		"Reproduction Cycle Analysis",
+		"Document SCP-3199's asexual reproduction mechanism and hatchling development.",
+		EXPERIMENT_RISK_CRITICAL, 1200, 36000)
+
+	register_experiment(manager, "SCP-3199", EXPERIMENT_TYPE_CONTAINMENT,
+		"Population Control Testing",
+		"Test containment protocols for limiting SCP-3199 reproduction.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+/proc/initialize_scp1048_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-1048", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Replica Construction Analysis",
+		"Document SCP-1048's replica construction process and material requirements.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-1048", EXPERIMENT_TYPE_CONTAINMENT,
+		"Material Denial Testing",
+		"Test containment by denying SCP-1048 access to construction materials.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+/proc/initialize_scp1507_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-1507", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Flock Coordination Study",
+		"Document SCP-1507's coordinated hunting behavior and communication methods.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-1507", EXPERIMENT_TYPE_TECHNICAL,
+		"Anomalous Plastic Analysis",
+		"Study the anomalous properties of SCP-1507's plastic composition.",
+		EXPERIMENT_RISK_MEDIUM, 600, 18000)
+
+/proc/initialize_scp2427_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-2427-3", EXPERIMENT_TYPE_TECHNICAL,
+		"Digital Manifestation Study",
+		"Document SCP-2427-3's ability to manifest through electronic systems.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-2427-3", EXPERIMENT_TYPE_COGNITIVE,
+		"Purity Detection Analysis",
+		"Study SCP-2427-3's ability to detect and target 'impure' individuals.",
+		EXPERIMENT_RISK_CRITICAL, 1200, 36000)
+
+/proc/initialize_scp3008_experiments_extended(datum/scp_experiment_manager/manager)
+	register_experiment(manager, "SCP-3008", EXPERIMENT_TYPE_EXPLORATION,
+		"Interior Cartography",
+		"Map the interior layout and document spatial anomalies within SCP-3008.",
+		EXPERIMENT_RISK_HIGH, 1800, 36000)
+
+	register_experiment(manager, "SCP-3008", EXPERIMENT_TYPE_BEHAVIORAL,
+		"Staff Entity Behavior",
+		"Document the behavior patterns of SCP-3008-2 Staff entities.",
+		EXPERIMENT_RISK_HIGH, 900, 24000)
+
+	register_experiment(manager, "SCP-3008", EXPERIMENT_TYPE_HAZARD,
+		"Day/Night Cycle Hazards",
+		"Document the dangers of SCP-3008's day/night transition events.",
+		EXPERIMENT_RISK_CRITICAL, 1200, 36000)

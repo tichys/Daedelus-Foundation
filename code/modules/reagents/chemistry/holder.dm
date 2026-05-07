@@ -49,13 +49,17 @@
 	flags = new_flags
 
 /datum/reagents/Destroy()
-	//We're about to delete all reagents, so lets cleanup
+	if(is_reacting)
+		force_stop_reacting()
+	for(var/datum/equilibrium/eq as anything in reaction_list)
+		eq.holder = null
+		eq.reaction = null
+	QDEL_LAZYLIST(reaction_list)
+	failed_but_capable_reactions = null
 	for(var/datum/reagent/reagent as anything in reagent_list)
+		reagent.holder = null
 		qdel(reagent)
 	reagent_list = null
-	if(is_reacting) //If false, reaction list should be cleaned up
-		force_stop_reacting()
-	QDEL_LAZYLIST(reaction_list)
 	previous_reagent_list = null
 	if(my_atom && my_atom.reagents == src)
 		my_atom.reagents = null
