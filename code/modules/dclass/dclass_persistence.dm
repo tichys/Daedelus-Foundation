@@ -451,14 +451,8 @@
 
 	qdel(query_load_all)
 
-	// Restore achievement states
-	for(var/ckey in persistent_data)
-		var/datum/dclass_persistence_data/data = persistent_data[ckey]
-		for(var/achievement_id in data.achievements)
-			if(achievement_id in achievements)
-				var/datum/dclass_achievement/achievement = achievements[achievement_id]
-				achievement.unlocked = TRUE
-				achievement.unlock_time = data.achievements[achievement_id]["unlock_time"] || 0
+	// Restore achievement states per-player from persistent data
+	// (unlock state is tracked in pdata.achievements, not on the global template)
 
 /datum/dclass_persistence_manager/proc/load_persistence_from_file()
 	if(!fexists(persistence_file))
@@ -494,12 +488,7 @@
 
 		persistent_data[ckey] = data
 
-		// Restore achievement states
-		for(var/achievement_id in data.achievements)
-			if(achievement_id in achievements)
-				var/datum/dclass_achievement/achievement = achievements[achievement_id]
-				achievement.unlocked = TRUE
-				achievement.unlock_time = data.achievements[achievement_id]["unlock_time"] || 0
+		// Achievement unlock state is tracked per-player in data.achievements
 
 /datum/dclass_persistence_manager/proc/get_player_leaderboard()
 	var/list/leaderboard = list()
@@ -608,14 +597,7 @@
 
 /datum/dclass_manager/New()
 	. = ..()
-	round_start_time = world.time
-	initialize_routines()
-	initialize_guard_patrols()
-	initialize_work_assignments()
-	initialize_contraband_locations()
-	initialize_escape_routes()
-	initialize_events()
-	initialize_persistence()
+	persistence_manager = new /datum/dclass_persistence_manager()
 
 /datum/dclass_manager/proc/initialize_persistence()
 	persistence_manager = new /datum/dclass_persistence_manager()

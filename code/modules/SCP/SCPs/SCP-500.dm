@@ -7,9 +7,6 @@
 /obj/item/storage/pill_bottle/scp500/Initialize()
 	. = ..()
 	SCP = new /datum/scp(src, "Panacea", SCP_SAFE, "500")
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-500"] = new /datum/scp_instance("SCP-500", src)
-
 /obj/item/storage/pill_bottle/scp500/PopulateContents()
 	for(var/i in 1 to 47)
 		new /obj/item/reagent_containers/pill/scp500(src)
@@ -31,9 +28,6 @@
 
 /obj/item/reagent_containers/pill/scp500/Initialize()
 	. = ..()
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-500-pill"] = new /datum/scp_instance("SCP-500-pill", src)
-
 /obj/item/reagent_containers/pill/scp500/on_consumption(mob/M, mob/user)
 	. = ..()
 
@@ -47,7 +41,8 @@
 	H.setToxLoss(0)
 	H.setOxyLoss(0)
 	H.setCloneLoss(0)
-	H.stamina.adjust(H.stamina.maximum)
+	if(H.stamina)
+		H.stamina.adjust(H.stamina.maximum - H.stamina.current)
 	H.setOrganLoss(ORGAN_SLOT_BRAIN, 0)
 	H.reagents?.remove_all()
 	H.SetUnconscious(0)

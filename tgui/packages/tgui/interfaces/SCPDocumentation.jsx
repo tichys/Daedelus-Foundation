@@ -14,8 +14,8 @@ import {
 } from '../components';
 import { Window } from '../layouts';
 
-export const SCPDocumentation = (props, context) => {
-  const { act, data } = useBackend(context);
+export const SCPDocumentation = (props) => {
+  const { act, data } = useBackend();
   const [activeTab, setActiveTab] = React.useState('overview');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedSection, setSelectedSection] = React.useState(null);

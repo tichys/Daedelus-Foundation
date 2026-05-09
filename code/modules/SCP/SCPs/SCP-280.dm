@@ -36,9 +36,6 @@
 	combat_system = new /datum/scp280_combat_system(src)
 	research_system = new /datum/scp280_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-280"] = new /datum/scp_instance("SCP-280", src)
-
 /mob/living/simple_animal/hostile/scp280/Destroy()
 	QDEL_NULL(shadow_system)
 	QDEL_NULL(combat_system)

@@ -144,7 +144,8 @@
 		to_chat(target, "<span class='warning'>The irregular heartbeat causes you chest pain!</span>")
 
 	if(prob(20))
-		target.stamina.adjust(-15)
+		if(target.stamina)
+			target.stamina.adjust(-15)
 		to_chat(target, "<span class='warning'>The arrhythmia leaves you feeling weak and lightheaded!</span>")
 
 	if(target.stat != DEAD && (target in infected_targets))

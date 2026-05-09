@@ -60,7 +60,8 @@
 	. = ..()
 	scp_health = max_scp_health
 	scp_armor = max_scp_armor
-	persistence_id = "[type]"
+	if(!persistence_id)
+		persistence_id = "[type]"
 
 	add_movespeed_modifier(/datum/movespeed_modifier/scp_base)
 

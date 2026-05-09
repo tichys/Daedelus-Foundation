@@ -5,6 +5,9 @@
 	icon_state = "scp999"
 	real_name = "SCP-999"
 	use_custom_sprite = TRUE
+	persistence_id = "SCP-999"
+	maxHealth = 150
+	health = 150
 
 	var/healing_power = 25
 	var/healing_cooldown = 0
@@ -33,8 +36,6 @@
 	SCP.min_playercount = 15
 	SCP.min_time = 20 MINUTES
 
-	max_scp_health = 150
-	scp_health = max_scp_health
 	max_scp_armor = 25
 	scp_armor = max_scp_armor
 
@@ -60,6 +61,11 @@
 		award_research_points("999", "behavior", 2, H.ckey)
 
 /mob/living/scp/scp999/proc/provide_comfort()
+	if(world.time < healing_cooldown)
+		return
+
+	healing_cooldown = world.time + 5 SECONDS
+
 	for(var/mob/living/carbon/human/H in range(comfort_radius, src))
 		if(H == src || H.SCP)
 			continue
@@ -70,8 +76,10 @@
 			H.adjustFireLoss(-heal_amount)
 			H.adjustToxLoss(-heal_amount)
 
-		if(!(H in mood_improved_targets))
-			mood_improved_targets += H
+		if(!(H.ckey in mood_improved_targets))
+			mood_improved_targets += H.ckey
+			if(length(mood_improved_targets) > 100)
+				mood_improved_targets.Cut(1, 51)
 			mood_improvements++
 			comfort_provided++
 			to_chat(H, "<span class='notice'>You feel a sense of calm and happiness from [src]'s presence.</span>")
@@ -115,8 +123,10 @@
 	target.adjustFireLoss(-heal_amount)
 	target.adjustToxLoss(-heal_amount)
 
-	if(!(target in healed_targets))
-		healed_targets += target
+	if(!(target.ckey in healed_targets))
+		healed_targets += target.ckey
+		if(length(healed_targets) > 100)
+			healed_targets.Cut(1, 51)
 		healing_sessions++
 
 	to_chat(target, "<span class='notice'>You feel completely healed and rejuvenated!</span>")
@@ -157,8 +167,8 @@
 			H.adjustBruteLoss(-heal_amount)
 			H.adjustFireLoss(-heal_amount)
 			H.adjustToxLoss(-heal_amount)
-			if(!(H in healed_targets))
-				healed_targets += H
+			if(!(H.ckey in healed_targets))
+				healed_targets += H.ckey
 				healing_sessions++
 			to_chat(H, "<span class='notice'>You feel a wave of healing energy from [src]!</span>")
 
@@ -231,8 +241,7 @@
 	message += "<b>Healing Power:</b> [healing_power]<br>"
 	message += "<b>Happiness Level:</b> [happiness_level]/[max_happiness]<br>"
 	message += "<b>Comfort Radius:</b> [comfort_radius]<br>"
-	message += "<b>SCP Health:</b> [scp_health]/[max_scp_health]<br>"
-	message += "<b>SCP Armor:</b> [scp_armor]/[max_scp_armor]<br>"
+	message += "<b>Health:</b> [health]/[maxHealth]<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]

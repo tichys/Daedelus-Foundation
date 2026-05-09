@@ -10,9 +10,6 @@
 /obj/item/material/twohanded/baseballbat/scp2398/Initialize()
 	. = ..()
 	SCP = new /datum/scp(src, "wooden bat", SCP_SAFE, "2398")
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-2398"] = new /datum/scp_instance("SCP-2398", src)
-
 /obj/item/material/twohanded/baseballbat/scp2398/attack(mob/living/M, mob/living/carbon/human/user, target_zone, animate)
 	if(!M || !user)
 		return

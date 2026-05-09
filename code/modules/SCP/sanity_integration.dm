@@ -7,7 +7,8 @@
 		return
 
 	// SCP-035 causes severe psychological trauma
-	host.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, severity)
+	if(host.sanity)
+		host.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, severity)
 	host.sanity.hallucination_level = min(host.sanity.hallucination_level + 20, host.sanity.max_hallucination)
 	host.sanity.insanity_level = min(host.sanity.insanity_level + 10, host.sanity.max_insanity)
 
@@ -19,8 +20,10 @@
 		return
 
 	// Seeing SCP-096 causes extreme trauma
-	viewer.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 25)
-	viewer.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, 20)
+	if(viewer.sanity)
+		viewer.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 25)
+	if(viewer.sanity)
+		viewer.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, 20)
 	viewer.sanity.hallucination_level = min(viewer.sanity.hallucination_level + 30, viewer.sanity.max_hallucination)
 	viewer.sanity.insanity_level = min(viewer.sanity.insanity_level + 15, viewer.sanity.max_insanity)
 
@@ -33,7 +36,8 @@
 			continue
 
 		// SCP-173 causes paranoia and anxiety
-		H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
+		if(H.sanity)
+			H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
 		H.sanity.insanity_level = min(H.sanity.insanity_level + 2, H.sanity.max_insanity)
 
 		if(prob(10))
@@ -45,8 +49,10 @@
 		return
 
 	// SCP-049's "treatment" is psychologically traumatic
-	patient.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 20)
-	patient.sanity.add_trauma(TRAUMA_PHYSICAL, 15)
+	if(patient.sanity)
+		patient.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 20)
+	if(patient.sanity)
+		patient.sanity.add_trauma(TRAUMA_PHYSICAL, 15)
 	patient.sanity.hallucination_level = min(patient.sanity.hallucination_level + 25, patient.sanity.max_hallucination)
 
 	to_chat(patient, "<span class='danger'>The doctor's 'treatment' has left you mentally scarred!</span>")
@@ -57,8 +63,10 @@
 		return
 
 	// SCP-106's pocket dimension is extremely traumatic
-	victim.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 30)
-	victim.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, 25)
+	if(victim.sanity)
+		victim.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 30)
+	if(victim.sanity)
+		victim.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, 25)
 	victim.sanity.hallucination_level = victim.sanity.max_hallucination
 	victim.sanity.insanity_level = min(victim.sanity.insanity_level + 20, victim.sanity.max_insanity)
 
@@ -70,7 +78,8 @@
 		return
 
 	// The infinite IKEA causes isolation trauma
-	occupant.sanity.add_trauma(TRAUMA_ISOLATION, 10)
+	if(occupant.sanity)
+		occupant.sanity.add_trauma(TRAUMA_ISOLATION, 10)
 	occupant.sanity.social_isolation = min(occupant.sanity.social_isolation + 5, occupant.sanity.max_social_isolation)
 
 	if(prob(5))
@@ -85,7 +94,8 @@
 	var/scp_number = "unknown"
 	if(designation)
 		scp_number = designation
-	target.sanity.add_scp_exposure(scp_number, severity)
+	if(target.sanity)
+		target.sanity.add_scp_exposure(scp_number, severity)
 
 	// Apply class-specific effects
 	var/scp_class_type = "unknown"
@@ -93,18 +103,23 @@
 		scp_class_type = classification
 	switch(scp_class_type)
 		if(SCP_SAFE)
-			target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 0.5)
+			if(target.sanity)
+				target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 0.5)
 		if(SCP_EUCLID)
-			target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity)
+			if(target.sanity)
+				target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity)
 			target.sanity.hallucination_level = min(target.sanity.hallucination_level + 10, target.sanity.max_hallucination)
 		if(SCP_KETER)
-			target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 1.5)
+			if(target.sanity)
+				target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 1.5)
 			target.sanity.hallucination_level = min(target.sanity.hallucination_level + 20, target.sanity.max_hallucination)
 			target.sanity.insanity_level = min(target.sanity.insanity_level + 10, target.sanity.max_insanity)
 		if(SCP_THAUMIEL)
-			target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 0.3)
+			if(target.sanity)
+				target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 0.3)
 		if(SCP_NEUTRALIZED)
-			target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 0.1)
+			if(target.sanity)
+				target.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, severity * 0.1)
 
 // Sanity-based SCP resistance
 /datum/sanity/proc/check_scp_resistance(scp_id)

@@ -18,9 +18,6 @@
 /obj/item/clothing/suit/scp5000/Initialize()
 	. = ..()
 	SCP = new /datum/scp(src, "Why?", SCP_KETER, "5000")
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-5000"] = new /datum/scp_instance("SCP-5000", src)
-
 /obj/item/clothing/suit/scp5000/equipped(mob/living/carbon/human/user, slot)
 	..()
 	if(slot == ITEM_SLOT_OCLOTHING)

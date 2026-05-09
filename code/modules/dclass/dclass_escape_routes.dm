@@ -72,8 +72,11 @@
 /datum/dclass_escape_route/proc/complete_escape(mob/living/carbon/human/H)
 	to_chat(H, "<span class='greenannounce big'>You escape through [name]!</span>")
 
+	hook_scp_interaction(H, "D-Class Escape", 9)
+	log_game("D-Class [H.name] escaped via [src.name]")
+
 	var/list/escape_turfs = list()
-	for(var/area/A in world)
+	for(var/area/A in get_sorted_areas())
 		if(istype(A, /area/scp/ez) || istype(A, /area/scp/surface))
 			for(var/turf/open/T in A)
 				if(!T.density)
@@ -284,7 +287,7 @@
 /obj/structure/dclass_maintenance_tunnel/Initialize()
 	. = ..()
 	if(tunnel_id)
-		for(var/obj/structure/dclass_maintenance_tunnel/T in world)
+		for(var/obj/structure/dclass_maintenance_tunnel/T as anything in INSTANCES_OF(/obj/structure/dclass_maintenance_tunnel))
 			if(T != src && T.tunnel_id == tunnel_id)
 				connected = T
 				T.connected = src

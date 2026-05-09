@@ -41,6 +41,8 @@ SUBSYSTEM_DEF(dclass)
 	initialize_contraband_locations()
 	initialize_escape_routes()
 	faction_manager = new /datum/dclass_faction_manager()
+	initialize_events()
+	initialize_persistence()
 
 /datum/dclass_manager/proc/process_dclass()
 	// Update current time slot

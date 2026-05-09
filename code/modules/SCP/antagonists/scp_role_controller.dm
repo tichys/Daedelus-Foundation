@@ -258,7 +258,7 @@
 	var/mob_type = get_mob_type(scp_type)
 	if(!mob_type)
 		return null
-	for(var/atom/A in GLOB.SCP_list)
+	for(var/mob/living/scp/A as anything in INSTANCES_OF(/mob/living/scp))
 		if(istype(A, mob_type) && A.SCP)
 			return A.SCP
 	return null

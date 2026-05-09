@@ -7,9 +7,6 @@
 /obj/item/storage/fancy/cigarettes/scp420j/Initialize()
 	. = ..()
 	SCP = new /datum/scp(src, "The Best ████ in the World", SCP_SAFE, "420-J")
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-420-J"] = new /datum/scp_instance("SCP-420-J", src)
-
 /obj/item/storage/fancy/cigarettes/scp420j/PopulateContents()
 	for(var/i in 1 to 6)
 		new /obj/item/clothing/mask/cigarette/scp420j(src)
@@ -47,7 +44,8 @@
 		smoker.say(pick(giggles))
 
 	if(prob(10))
-		smoker.stamina.adjust(-5)
+		if(smoker.stamina)
+			smoker.stamina.adjust(-5)
 		smoker.adjust_drugginess(15)
 
 	if(prob(8))

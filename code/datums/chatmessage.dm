@@ -193,12 +193,13 @@
 	if (owned_by.seen_messages)
 		var/idx = 1
 		var/combined_height = approx_lines
-		var/datum/chatmessage/old_message = owned_by.seen_messages?[message_loc]?[length(owned_by.seen_messages?[message_loc])]
+		var/list/loc_messages = owned_by.seen_messages?[message_loc]
+		var/datum/chatmessage/old_message = loc_messages?[length(loc_messages)]
 		if(old_message?.message.maptext == message.maptext)
 			old_message.message.transform *= 1.1
 			return
 
-		for(var/datum/chatmessage/m as anything in owned_by.seen_messages[message_loc])
+		for(var/datum/chatmessage/m as anything in loc_messages)
 			animate(m.message, maptext_y = m.message.maptext_y + mheight, time = CHAT_MESSAGE_BUMP_TIME)
 
 			combined_height += m.approx_lines

@@ -174,7 +174,7 @@ SUBSYSTEM_DEF(id_access)
 		),
 		"[ACCESS_SECURITY_LVL5]" = list(
 			"regions" = list(REGION_SECURITY),
-			"head" = JOB_SECURITY_DIRECTOR,
+			"head" = JOB_GUARD_COMMANDER,
 			"templates" = list(),
 			"pdas" = list(),
 		),

@@ -409,7 +409,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 	// Update SCP-049 specific metrics
 	if(istype(scp, /mob/living/scp/scp049))
 		var/mob/living/scp/scp049/scp049 = scp
-		metrics["cures_performed"] = scp049.cures_performed
+		metrics["cures_performed"] = scp049.cures_successful
 		metrics["containment_breaches"] = scp049.containment_breaches
 		metrics["research_progress"] = scp049.research_progress
 

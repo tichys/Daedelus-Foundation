@@ -64,11 +64,7 @@
 
 	grant_language(/datum/language/common, TRUE, TRUE)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-2020"] = new /datum/scp_instance("SCP-2020", src)
-
-
-/mob/living/scp/scp2020/Life()
+/mob/living/scp/scp2020/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
 	if(stat == DEAD)
 		return

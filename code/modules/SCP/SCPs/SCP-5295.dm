@@ -17,9 +17,6 @@
 /obj/machinery/computer/scp5295/Initialize()
 	. = ..()
 	SCP = new /datum/scp(src, "The Person-to-Personal Computer", SCP_EUCLID, "5295")
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-5295"] = new /datum/scp_instance("SCP-5295", src)
-
 /obj/machinery/computer/scp5295/attack_hand(mob/living/carbon/human/user)
 	if(!ishuman(user))
 		return
@@ -30,7 +27,7 @@
 
 	ui_interact(user)
 
-/obj/machinery/computer/scp5295/ui_interact(mob/user)
+/obj/machinery/computer/scp5295/ui_interact(mob/user, datum/tgui/ui)
 	. = ..()
 	var/list/dat = list()
 	dat += "<h2>Macintosh LC III — Anomalous Network</h2>"

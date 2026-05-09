@@ -34,7 +34,6 @@
 
 /mob/living/scp/scp082/Initialize()
 	. = ..()
-	set_species(/datum/species/scp082)
 	SCP = new /datum/scp(src, "Fernand", SCP_EUCLID, "082", SCP_PLAYABLE)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
@@ -46,9 +45,6 @@
 	health = maxHealth
 
 	grant_language(/datum/language/common, TRUE, TRUE)
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-082"] = new /datum/scp_instance("SCP-082", src)
 
 	START_PROCESSING(SSobj, src)
 

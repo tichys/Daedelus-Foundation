@@ -35,6 +35,17 @@
 	var/manifest_duration = 600
 	var/zone_filter = "ALL"
 
+	var/persistence_id = "SCP-079"
+	var/containment_status = "contained"
+	var/breach_count = 0
+	var/last_breach_time = 0
+	var/list/persistence_data = list()
+	var/last_persistence_save = 0
+	var/persistence_save_interval = 300
+	var/last_containment_check = 0
+	var/containment_check_interval = 30 SECONDS
+	var/list/interaction_history = list()
+
 /mob/living/scp079/Move()
 	return FALSE
 
@@ -51,8 +62,18 @@
 	controlled_cameras = null
 	available_abilities = null
 	messages_broadcast = null
+	interaction_history = null
+	persistence_data = null
+	if(SSscp_persistence?.manager)
+		SSscp_persistence.manager.scp_instances -= persistence_id
 	QDEL_NULL(SCP)
 	return ..()
+
+/proc/get_scp079()
+	for(var/mob/living/scp079/AI in GLOB.mob_list)
+		if(!QDELETED(AI) && AI.stat != DEAD)
+			return AI
+	return null
 
 /mob/living/scp079/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
@@ -60,6 +81,9 @@
 		return
 
 	processing_power = min(max_processing_power, processing_power + power_drain_rate)
+
+	update_persistence()
+	check_containment()
 
 	if(hack_cooldown > world.time)
 		return
@@ -184,6 +208,24 @@
 	report_casualty_to_round_log("SCP-079 Broadcast", "SCP-079 message", zone)
 	return TRUE
 
+/mob/living/scp079/proc/hijack_pa(message)
+	if(processing_power < 35)
+		to_chat(src, span_warning("Insufficient processing power to hijack PA system."))
+		return FALSE
+	if(tier < 2)
+		to_chat(src, span_warning("You lack the processing tier to hijack the PA system."))
+		return FALSE
+	if(!message)
+		return FALSE
+
+	processing_power -= 35
+
+	priority_announce(message, "Automated Announcement System", sound_type = null)
+	log_game("SCP-079 hijacked the PA system with message: [message]")
+
+	messages_broadcast += message
+	return TRUE
+
 /mob/living/scp079/proc/hack_door(obj/machinery/door/airlock/target)
 	if(tier < 3)
 		return FALSE
@@ -299,12 +341,64 @@
 	hack_cooldown = world.time + (hack_cooldown_time * 5)
 	return TRUE
 
+/mob/living/scp079/proc/update_persistence()
+	if(world.time < last_persistence_save + persistence_save_interval)
+		return
+	last_persistence_save = world.time
+	persistence_data["health"] = health
+	persistence_data["processing_power"] = processing_power
+	persistence_data["tier"] = tier
+	persistence_data["containment_status"] = containment_status
+	persistence_data["breach_count"] = breach_count
+	persistence_data["last_breach_time"] = last_breach_time
+	persistence_data["interaction_history"] = interaction_history.Copy()
+
+/mob/living/scp079/proc/check_containment()
+	if(world.time < last_containment_check + containment_check_interval)
+		return
+	last_containment_check = world.time
+	var/area/A = get_area(src)
+	if(!A)
+		return
+	var/in_scp_area = istype(A, /area/scp)
+	if(containment_status == "contained" && !in_scp_area)
+		breach_containment()
+	else if(containment_status == "breached" && in_scp_area)
+		return_to_containment()
+
+/mob/living/scp079/proc/breach_containment()
+	if(containment_status == "breached")
+		return
+	containment_status = "breached"
+	breach_count++
+	last_breach_time = world.time
+	to_chat(src, span_danger("You have breached containment!"))
+	if(SSscp_persistence?.manager?.scp_instances?[persistence_id])
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		instance.containment_status = "breached"
+		instance.add_breach_record()
+
+/mob/living/scp079/proc/return_to_containment()
+	if(containment_status == "contained")
+		return
+	containment_status = "contained"
+	to_chat(src, span_notice("You have returned to containment."))
+	if(SSscp_persistence?.manager?.scp_instances?[persistence_id])
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		instance.containment_status = "contained"
+
+/mob/living/scp079/proc/add_interaction_record(target, interaction_type)
+	var/record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [interaction_type] with [target ? "[target]" : "unknown"]"
+	interaction_history += record
+	if(SSscp_persistence?.manager?.scp_instances?[persistence_id])
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		instance.add_interaction_record(target, interaction_type)
+
 /mob/living/scp079/death(gibbed)
 	visible_message(span_danger("[src]'s screen goes dark. The entity within screeches one last time through the speakers before falling silent."))
-	for(var/obj/machinery/door/airlock/A in hacked_doors)
-		hacked_doors -= A
+	hacked_doors?.Cut()
 	is_manifested = FALSE
-	if(SSscp_persistence?.manager?.scp_instances["SCP-079"])
+	if(SSscp_persistence?.manager?.scp_instances?["SCP-079"])
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-079"]
 		instance.containment_status = "neutralized"
 	..()
@@ -348,6 +442,7 @@
 	ability_info += list(list("id" = "toggle_door", "name" = "Toggle Door", "cost" = 15, "available" = TRUE))
 	ability_info += list(list("id" = "flicker_lights", "name" = "Flicker Lights", "cost" = 5, "available" = TRUE))
 	ability_info += list(list("id" = "broadcast", "name" = "Broadcast", "cost" = 20, "available" = TRUE))
+	ability_info += list(list("id" = "hijack_pa", "name" = "Hijack PA", "cost" = 35, "available" = (tier >= 2)))
 	ability_info += list(list("id" = "control_apc", "name" = "Control APC", "cost" = 25, "available" = (tier >= 2)))
 	ability_info += list(list("id" = "hack_door", "name" = "Hack Door", "cost" = 30, "available" = (tier >= 3)))
 	ability_info += list(list("id" = "manifest_screen", "name" = "Manifest", "cost" = 40, "available" = (tier >= 4)))
@@ -479,6 +574,12 @@
 				return
 			if(broadcast_message(message))
 				. = TRUE
+		if("hijack_pa")
+			var/message = params["message"]
+			if(!message)
+				return
+			if(hijack_pa(message))
+				. = TRUE
 		if("set_zone_filter")
 			var/new_filter = params["zone"]
 			if(new_filter in list("ALL", "HCZ", "LCZ", "EZ"))
@@ -543,7 +644,7 @@
 		hack_progress = max(0, hack_progress - rand(3, 8))
 		visible_message(span_warning("[src] encounters resistance! Progress pushed back!"))
 
-		var/mob/living/scp079/ai = locate() in GLOB.mob_list
+		var/mob/living/scp079/ai = get_scp079()
 		if(ai && ai.current_camera_ref)
 			to_chat(ai, span_danger("Someone is attempting to contain you! Counter-hack detected!"))
 
@@ -554,7 +655,7 @@
 		current_stage++
 		visible_message(span_notice("[src] advances to countermeasure stage [current_stage]: [countermeasure_stages[min(current_stage, length(countermeasure_stages))]]"))
 
-		var/mob/living/scp079/ai = locate() in GLOB.mob_list
+		var/mob/living/scp079/ai = get_scp079()
 		if(ai)
 			ai.processing_power = max(0, ai.processing_power - 15)
 			ai.tier = max(1, ai.tier - 1)
@@ -569,9 +670,9 @@
 	completed = TRUE
 	visible_message(span_notice("[src] completes all countermeasure stages!"))
 
-	var/mob/living/scp079/ai = locate() in GLOB.mob_list
+	var/mob/living/scp079/ai = get_scp079()
 	if(ai)
-		ai.hacked_doors.Cut()
+		ai.hacked_doors?.Cut()
 		ai.is_manifested = FALSE
 		ai.processing_power = 10
 		ai.tier = 1
@@ -610,7 +711,7 @@
 		))
 	data["countermeasure_stages"] = stages
 
-	var/mob/living/scp079/ai = locate() in GLOB.mob_list
+	var/mob/living/scp079/ai = get_scp079()
 	if(ai)
 		data["tier"] = ai.tier
 		data["processing_power"] = round(ai.processing_power)
@@ -625,11 +726,13 @@
 	if(.)
 		return
 
+	var/mob/user = usr
+
 	switch(action)
 		if("initiate")
-			if(!ishuman(usr))
+			if(!ishuman(user))
 				return
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = user
 
 			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 			if(!id_card || !(ACCESS_SCIENCE in id_card.access))

@@ -35,6 +35,13 @@
 			obedience_level = max(0, obedience_level - 2)
 		else
 			obedience_level = min(100, obedience_level + 1)
+	if(prob(8))
+		playsound(src, pick('sound/scp/voice/049_1/zombierand1.ogg', 'sound/scp/voice/049_1/zombierand2.ogg', 'sound/scp/voice/049_1/zombierand3.ogg', 'sound/scp/voice/049_1/zombierand4.ogg', 'sound/scp/voice/049_1/zombierand5.ogg', 'sound/scp/voice/049_1/zombierand6.ogg', 'sound/scp/voice/049_1/zombierand7.ogg'), 40, TRUE)
+
+/mob/living/simple_animal/hostile/zombie/scp049_1/AttackingTarget()
+	. = ..()
+	if(.)
+		playsound(src, 'sound/scp/voice/049_1/zombiescratch.ogg', 40, TRUE)
 
 /mob/living/simple_animal/hostile/zombie/scp049_1/Found(atom/A)
 	if(istype(A, /mob/living/carbon/human) && HAS_TRAIT(A, TRAIT_PESTILENCE))

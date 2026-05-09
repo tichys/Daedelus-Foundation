@@ -15,6 +15,7 @@
 	var/facility_stability_peak = 100
 	var/facility_stability_low = 100
 	var/final_stability = 100
+	var/list/story_log = list()
 
 /datum/scp_round_report/proc/log_breach(scp_id, zone, time)
 	breach_log += list(list("scp_id" = scp_id, "zone" = zone, "time" = time))
@@ -46,7 +47,7 @@
 	final_stability = value
 
 /datum/scp_round_report/proc/generate_report()
-	round_duration = world.time - SSticker.round_start_time
+	round_duration = SSticker.round_start_time ? (world.time - SSticker.round_start_time) : 0
 
 	var/list/report = list()
 	report += "<div style='font-family: monospace; border: 2px solid #ff4444; padding: 15px; background: #1a1a1a; color: #cccccc;'>"
@@ -112,7 +113,8 @@
 	return jointext(report, "")
 
 /datum/scp_round_report/proc/get_classification()
-	var/score = get_containment_rate() - (total_casualties * 2) + (total_research_points / 100)
+	var/score = 100 - (total_casualties * 5) - (total_breaches * 10) + (total_recontainments * 5)
+	score = max(0, min(100, score))
 	if(score >= 80)
 		return "NOMINAL - Facility Operating Within Parameters"
 	if(score >= 50)
@@ -124,15 +126,16 @@
 /datum/scp_round_report/proc/get_containment_rate()
 	if(total_breaches == 0)
 		return 100
-	return round((total_recontainments / total_breaches) * 100)
+	var/rate = round((total_recontainments / total_breaches) * 100)
+	return min(100, rate)
 
 // Global report instance
-/var/datum/scp_round_report/GLOB_SCP_ROUND_REPORT
+GLOBAL_DATUM_INIT(scp_round_report, /datum/scp_round_report, new())
 
 // Hook into round end
 /proc/generate_scp_round_report()
-	if(!GLOB_SCP_ROUND_REPORT)
-		GLOB_SCP_ROUND_REPORT = new()
+	if(!GLOB.scp_round_report)
+		GLOB.scp_round_report = new()
 
 	for(var/mob/M in GLOB.player_list)
 		if(QDELETED(M))
@@ -143,26 +146,26 @@
 
 // Wire into existing breach/recontainment hooks
 /proc/report_breach_to_round_log(scp_id, zone)
-	if(!GLOB_SCP_ROUND_REPORT)
-		GLOB_SCP_ROUND_REPORT = new()
-	GLOB_SCP_ROUND_REPORT.log_breach(scp_id, zone, world.time)
+	if(!GLOB.scp_round_report)
+		return
+	GLOB.scp_round_report.log_breach(scp_id, zone, world.time)
 
 /proc/report_recontainment_to_round_log(scp_id, list/participants)
-	if(!GLOB_SCP_ROUND_REPORT)
-		GLOB_SCP_ROUND_REPORT = new()
-	GLOB_SCP_ROUND_REPORT.log_recontainment(scp_id, participants, world.time)
+	if(!GLOB.scp_round_report)
+		return
+	GLOB.scp_round_report.log_recontainment(scp_id, participants, world.time)
 
 /proc/report_casualty_to_round_log(victim_name, cause, zone)
-	if(!GLOB_SCP_ROUND_REPORT)
-		GLOB_SCP_ROUND_REPORT = new()
-	GLOB_SCP_ROUND_REPORT.log_casualty(victim_name, cause, zone, world.time)
+	if(!GLOB.scp_round_report)
+		return
+	GLOB.scp_round_report.log_casualty(victim_name, cause, zone, world.time)
 
 /proc/report_research_to_round_log(experiment_name, scp_id, points, researcher)
-	if(!GLOB_SCP_ROUND_REPORT)
-		GLOB_SCP_ROUND_REPORT = new()
-	GLOB_SCP_ROUND_REPORT.log_research(experiment_name, scp_id, points, researcher, world.time)
+	if(!GLOB.scp_round_report)
+		return
+	GLOB.scp_round_report.log_research(experiment_name, scp_id, points, researcher, world.time)
 
 /proc/report_lockdown_to_round_log(reason, duration)
-	if(!GLOB_SCP_ROUND_REPORT)
-		GLOB_SCP_ROUND_REPORT = new()
-	GLOB_SCP_ROUND_REPORT.log_lockdown(reason, duration, world.time)
+	if(!GLOB.scp_round_report)
+		return
+	GLOB.scp_round_report.log_lockdown(reason, duration, world.time)

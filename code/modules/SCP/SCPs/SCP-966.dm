@@ -31,9 +31,6 @@
 
 	grant_language(/datum/language/common, TRUE, TRUE)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-966"] = new /datum/scp_instance("SCP-966", src)
-
 /mob/living/scp/scp966/proc/initialize_systems()
 	sleep_system = new /datum/scp966_sleep_system(src)
 	stealth_system = new /datum/scp966_stealth_system(src)

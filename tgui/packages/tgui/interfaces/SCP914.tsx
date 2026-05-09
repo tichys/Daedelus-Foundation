@@ -8,12 +8,9 @@ type ItemData = {
 
 type SCP914Data = {
   active: boolean;
-  efficiency: number;
   has_input: boolean;
   has_output: boolean;
   input_items: ItemData[];
-  mastery: number;
-  max_mastery: number;
   max_progress: number;
   objects_destroyed: number;
   objects_enhanced: number;
@@ -51,9 +48,6 @@ export const SCP914 = (_props: unknown) => {
     active = false,
     progress = 0,
     max_progress = 100,
-    mastery = 0,
-    max_mastery = 100,
-    efficiency = 1,
     refinements_performed = 0,
     objects_destroyed = 0,
     objects_enhanced = 0,
@@ -101,36 +95,6 @@ export const SCP914 = (_props: unknown) => {
               flexWrap: 'wrap',
             }}
           >
-            <div
-              style={{
-                flex: '1',
-                minWidth: '100px',
-                padding: '8px',
-                border: `1px solid ${C.border}`,
-                background: C.headerBg,
-              }}
-            >
-              <div style={{ fontSize: '10px', color: C.textDim }}>MASTERY</div>
-              <div style={{ fontSize: '16px', color: C.text }}>
-                {mastery}/{max_mastery}
-              </div>
-            </div>
-            <div
-              style={{
-                flex: '1',
-                minWidth: '100px',
-                padding: '8px',
-                border: `1px solid ${C.border}`,
-                background: C.headerBg,
-              }}
-            >
-              <div style={{ fontSize: '10px', color: C.textDim }}>
-                EFFICIENCY
-              </div>
-              <div style={{ fontSize: '16px', color: C.text }}>
-                {efficiency}x
-              </div>
-            </div>
             <div
               style={{
                 flex: '1',
@@ -219,20 +183,22 @@ export const SCP914 = (_props: unknown) => {
             </div>
           )}
 
-          {!active && input_items.length > 0 && (
+          {!active && (
             <div style={{ marginBottom: '12px' }}>
               <button
                 type="button"
+                disabled={!input_items || input_items.length === 0}
                 style={{
-                  background: settingColors[setting] || C.text,
+                  background: (!input_items || input_items.length === 0) ? 'grey' : (settingColors[setting] || C.text),
                   border: 'none',
-                  color: '#000',
+                  color: (!input_items || input_items.length === 0) ? C.textDim : '#000',
                   padding: '10px 24px',
-                  cursor: 'pointer',
+                  cursor: (!input_items || input_items.length === 0) ? 'not-allowed' : 'pointer',
                   fontFamily: 'monospace',
                   fontWeight: 'bold',
                   fontSize: '14px',
                   width: '100%',
+                  opacity: (!input_items || input_items.length === 0) ? 0.5 : 1,
                 }}
                 onClick={() => act('start_refinement')}
               >

@@ -159,7 +159,7 @@ SUBSYSTEM_DEF(research_laboratory)
 	)
 
 /datum/research_laboratory_manager/proc/create_research_project(list/project_data)
-	var/project_id = "project_[world.time]_[rand(1000, 9999)]"
+	var/project_id = "project_[world.time]_[rand(10000, 99999)]"
 	project_data["id"] = project_id
 	project_data["creation_time"] = world.time
 	project_data["status"] = project_data["status"] || "proposed"
@@ -197,7 +197,7 @@ SUBSYSTEM_DEF(research_laboratory)
 	team["members"] += list(list(
 		"ckey" = researcher.ckey,
 		"name" = researcher.real_name,
-		"role" = researcher.mind?.assigned_role?.title || "Researcher",
+		"role" = researcher.job || "Researcher",
 		"join_time" = world.time,
 	))
 	return TRUE
@@ -292,11 +292,10 @@ SUBSYSTEM_DEF(research_laboratory)
 		"research_incidents" = research_incidents,
 	)
 
-	data["is_admin"] = check_rights(R_ADMIN, FALSE, user)
+	data["is_admin"] = check_rights_for(user?.client, R_ADMIN)
 	data["user_ckey"] = user?.ckey
 	data["user_name"] = user?.name
-	var/datum/job/user_job = ishuman(user) ? user?.job : null
-	data["user_job"] = istype(user_job) ? user_job.title : "Unknown"
+	data["user_job"] = ishuman(user) ? user.job : "Unknown"
 	data["user_access_level"] = get_user_access_level(user)
 
 	return data
@@ -444,9 +443,10 @@ SUBSYSTEM_DEF(research_laboratory)
 	if(!tech_tree.can_unlock(node_id, total_research_points))
 		return FALSE
 	var/cost = tech_tree.nodes[node_id].research_cost
-	if(!tech_tree.unlock_node(node_id, user?.ckey))
-		return FALSE
 	total_research_points -= cost
+	if(!tech_tree.unlock_node(node_id, user?.ckey))
+		total_research_points += cost
+		return FALSE
 	apply_tech_unlock(node_id, user)
 	return TRUE
 
@@ -483,6 +483,17 @@ SUBSYSTEM_DEF(research_laboratory)
 	icon_state = "research"
 	circuit = /obj/item/circuitboard/computer/scp_research
 	req_access = list(ACCESS_SCIENCE)
+	var/admin_virtual = FALSE
+
+/obj/machinery/computer/scp_research_console/ui_status(mob/user, datum/ui_state/state)
+	if(admin_virtual && check_rights_for(user?.client, R_ADMIN))
+		return UI_INTERACTIVE
+	return ..()
+
+/obj/machinery/computer/scp_research_console/ui_close(mob/user)
+	. = ..()
+	if(admin_virtual)
+		qdel(src)
 
 /obj/machinery/computer/scp_research_console/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
@@ -605,4 +616,5 @@ SUBSYSTEM_DEF(research_laboratory)
 		to_chat(src, "<span class='warning'>Research laboratory system not available.</span>")
 		return
 	var/obj/machinery/computer/scp_research_console/virtual_console = new()
+	virtual_console.admin_virtual = TRUE
 	virtual_console.ui_interact(mob)

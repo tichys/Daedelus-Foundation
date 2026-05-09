@@ -26,9 +26,6 @@
 	portal_system = new /datum/scp1102_portal_system(src)
 	research_system = new /datum/scp1102_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1102-RU"] = new /datum/scp_instance("SCP-1102-RU", src)
-
 /obj/item/storage/briefcase/scp1102ru/attack_hand(mob/user)
 	. = ..()
 	if(!enter_point)
@@ -90,9 +87,6 @@
 
 	depth_system = new /datum/scp1102ladder_depth_system(src)
 	effect_system = new /datum/scp1102ladder_effect_system(src)
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1102-RU-1"] = new /datum/scp_instance("SCP-1102-RU-1", src)
 
 /obj/structure/ladder/scp1102ladder/use(mob/living/carbon/human/user)
 	if(!linked_case)

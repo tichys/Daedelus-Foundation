@@ -11,6 +11,7 @@
 	icon = 'icons/scp/scp-682.dmi'
 	icon_state = "scp682"
 	real_name = "SCP-682"
+	persistence_id = "SCP-682"
 
 	// Core system datums
 	var/datum/scp682_evolution_system/evolution_system
@@ -27,6 +28,7 @@
 	var/movement_speed = SCP682_BASE_MOVEMENT_SPEED
 	var/area_attack_range = SCP682_BASE_AREA_ATTACK_RANGE
 	var/damage_modifier = 1.0
+	var/mob/living/last_attacker
 
 /mob/living/scp/scp682/Initialize(mapload)
 	. = ..()
@@ -58,11 +60,7 @@
 	update_fov_angles()
 	update_cone_show()
 
-	// Start processing
-	START_PROCESSING(SSobj, src)
-
 /mob/living/scp/scp682/Destroy()
-	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(evolution_system)
 	QDEL_NULL(regeneration_system)
 	QDEL_NULL(threat_system)
@@ -71,21 +69,18 @@
 	QDEL_NULL(research_integration)
 	return ..()
 
-/mob/living/scp/scp682/process(delta_time)
-	// Don't call parent - we're implementing our own process logic
+/mob/living/scp/scp682/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(.)
+		return
 
-	// Update all systems
 	evolution_system?.process_evolution()
 	regeneration_system?.process_regeneration()
 	threat_system?.process_threats()
 	containment_system?.process_containment()
 	combat_system?.process_combat()
 	research_integration?.process_research()
-
-	// Process SCP-682 specific effects
 	process_scp682_effects()
-
-	// Return nothing to continue processing (not PROCESS_KILL)
 
 /mob/living/scp/scp682/proc/process_scp682_effects()
 	for(var/mob/living/carbon/human/H in range(5, src))
@@ -93,29 +88,40 @@
 			continue
 
 		if(H.sanity)
-			H.sanity.adjust_sanity(-1)
 			H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
 
 	containment_status = containment_system?.breach_phase || "contained"
+
+	if(prob(3) && containment_status != "contained")
+		playsound(src, 'sound/effects/roar.ogg', 40, TRUE, extrarange = 15)
 
 // ============================================================================
 // DAMAGE HANDLING & ADAPTATION
 // ============================================================================
 
 /mob/living/scp/scp682/adjustBruteLoss(amount, updating_health = TRUE, forced = FALSE)
-	. = ..()
-	if(amount > 0)
+	if(amount > 0 && !forced)
+		if(evolution_system && ("damage_resistance_brute" in evolution_system.active_adaptations))
+			amount *= 0.5
+		amount *= SCP682_INITIAL_BRUTE_MOD
 		handle_damage_adaptation(amount, "brute")
+	return ..(amount, updating_health, forced)
 
 /mob/living/scp/scp682/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
-	. = ..()
-	if(amount > 0)
+	if(amount > 0 && !forced)
+		if(evolution_system && ("damage_resistance_burn" in evolution_system.active_adaptations))
+			amount *= 0.5
+		amount *= SCP682_INITIAL_BURN_MOD
 		handle_damage_adaptation(amount, "burn")
+	return ..(amount, updating_health, forced)
 
 /mob/living/scp/scp682/adjustToxLoss(amount, updating_health = TRUE, forced = FALSE)
-	. = ..()
-	if(amount > 0)
+	if(amount > 0 && !forced)
+		if(evolution_system && ("damage_resistance_toxin" in evolution_system.active_adaptations))
+			amount *= 0.5
+		amount *= SCP682_INITIAL_TOX_MOD
 		handle_damage_adaptation(amount, "toxin")
+	return ..(amount, updating_health, forced)
 
 /mob/living/scp/scp682/proc/handle_damage_adaptation(amount, damage_type)
 	// Record damage for regeneration system
@@ -132,9 +138,12 @@
 			threat_system.remember_threat(attacker, damage_type, amount)
 
 /mob/living/scp/scp682/proc/get_attacker()
-	// This is a simplified version - in a full implementation,
-	// you'd track the actual attacker from the damage event
-	return null
+	return last_attacker
+
+/mob/living/scp/scp682/attackby(obj/item/I, mob/living/user, params)
+	if(user && isliving(user))
+		last_attacker = user
+	return ..()
 
 // ============================================================================
 // COMBAT & ATTACKS
@@ -168,8 +177,7 @@
 
 			// Apply sanity effects
 			if(H.sanity)
-				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 30)
-				H.sanity.adjust_sanity(-20)
+				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 50)
 
 			return
 
@@ -212,8 +220,7 @@
 
 			// Apply fear effect to non-SCP humans
 			if(H.sanity)
-				H.sanity.adjust_sanity(-5)
-				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 15)
+				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 20)
 
 // ============================================================================
 // PERSISTENCE INTEGRATION
@@ -296,6 +303,8 @@
 	hook_scp_breach("SCP-682", src)
 	if(threat_system)
 		for(var/mob/living/carbon/human/H in threat_system.threat_memory)
+			if(QDELETED(H))
+				continue
 			hook_scp_combat(H, "SCP-682", 0, 0)
 
 /mob/living/scp/scp682/proc/on_adaptation(damage_type, amount)

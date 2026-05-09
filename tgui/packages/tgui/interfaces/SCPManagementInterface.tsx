@@ -7,10 +7,10 @@ import {
   Button,
   Dropdown,
   Input,
-  Modal,
   NumberInput,
 } from '../components';
 import { Window } from '../layouts';
+import { C, term, TermHeader, TermLabel, TermValue, TermRow, TermDivider, TermButton, TermProgressBar, TermModal } from './CharacterSetup/shared';
 
 interface SCPData {
   active_breaches: number;
@@ -140,190 +140,7 @@ interface SCPRoleType {
   type: string;
 }
 
-const C = {
-  bg: '#08080a',
-  panel: '#0c0c10',
-  border: '#1e1e24',
-  borderRed: '#6b0000',
-  accent: '#c2960e',
-  red: '#8b0000',
-  redBright: '#cc2222',
-  green: '#1a7a1a',
-  greenDim: '#0d4a0d',
-  text: '#b0b0b0',
-  textBright: '#e0e0e0',
-  textDim: '#555560',
-  amber: '#d4a017',
-  mono: '"Consolas", "Courier New", "Lucida Console", monospace',
-};
 
-const term = (overrides = {}) => ({
-  fontFamily: C.mono,
-  fontSize: '12px',
-  color: C.text,
-  ...overrides,
-});
-
-const TermHeader = (props) => (
-  <Box
-    style={term({
-      fontSize: '10px',
-      color: C.textDim,
-      letterSpacing: '0.18em',
-      textTransform: 'uppercase',
-      borderBottom: `1px solid ${C.border}`,
-      paddingBottom: '4px',
-      marginBottom: '8px',
-      ...props.style,
-    })}
-  >
-    {props.children}
-  </Box>
-);
-
-const TermLabel = (props) => (
-  <Box
-    as="span"
-    style={term({
-      color: C.textDim,
-      fontSize: '10px',
-      letterSpacing: '0.12em',
-      textTransform: 'uppercase',
-      marginRight: '8px',
-    })}
-  >
-    {props.children}
-  </Box>
-);
-
-const TermValue = (props) => (
-  <Box
-    as="span"
-    style={term({
-      color: props.color || C.textBright,
-      fontWeight: props.bold ? 'bold' : undefined,
-    })}
-  >
-    {props.children}
-  </Box>
-);
-
-const TermRow = (props) => (
-  <Box style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
-    {props.children}
-  </Box>
-);
-
-const TermDivider = () => (
-  <Box
-    style={{
-      color: C.borderRed,
-      fontSize: '10px',
-      letterSpacing: '0.3em',
-      margin: '10px 0',
-      userSelect: 'none',
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-    }}
-  >
-    {'─'.repeat(80)}
-  </Box>
-);
-
-const TermButton = (props) => {
-  const selected = props.selected;
-  const color = props.color;
-  const bg = selected
-    ? color === 'red'
-      ? 'rgba(139,0,0,0.35)'
-      : color === 'green'
-        ? 'rgba(26,122,26,0.35)'
-        : color === 'yellow'
-          ? 'rgba(180,160,20,0.25)'
-          : 'rgba(255,255,255,0.08)'
-    : 'transparent';
-  const borderColor = selected
-    ? color === 'red'
-      ? C.red
-      : color === 'green'
-        ? C.green
-        : color === 'yellow'
-          ? '#b0a020'
-          : C.border
-    : C.border;
-
-  return (
-    <Button
-      {...props}
-      style={{
-        fontFamily: C.mono,
-        fontSize: '10px',
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        background: bg,
-        border: `1px solid ${borderColor}`,
-        borderRadius: 0,
-        color: selected ? C.textBright : C.textDim,
-        padding: '3px 8px',
-        boxShadow: selected ? `0 0 6px ${borderColor}44` : 'none',
-      }}
-    >
-      {props.children}
-    </Button>
-  );
-};
-
-const TermProgressBar = (props) => (
-  <Box style={{ marginBottom: '6px' }}>
-    <Box
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: '2px',
-      }}
-    >
-      <TermLabel>{props.label}</TermLabel>
-      <TermValue color={props.color || C.amber}>
-        {props.value}
-        {props.suffix || ''}
-      </TermValue>
-    </Box>
-    <Box
-      style={{
-        height: '6px',
-        background: C.panel,
-        border: `1px solid ${C.border}`,
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        style={{
-          height: '100%',
-          width: `${Math.min(100, Math.max(0, (props.value / props.maxValue) * 100))}%`,
-          background: props.color || C.amber,
-          transition: 'width 0.3s',
-        }}
-      />
-    </Box>
-  </Box>
-);
-
-const TermModal = (props) => (
-  <Modal
-    {...props}
-    style={{
-      background: C.bg,
-      border: `1px solid ${C.borderRed}`,
-      borderRadius: 0,
-      fontFamily: C.mono,
-      color: C.text,
-      padding: '16px',
-    }}
-  >
-    {props.children}
-  </Modal>
-);
 
 const getSCPStatusColor = (status) => {
   switch (status) {
@@ -380,6 +197,10 @@ export const SCPManagementInterface = (props) => {
     'blacklistModalType',
     'scp',
   );
+
+  if (!data) {
+    return <Box color="red">Loading SCP terminal data...</Box>;
+  }
 
   const {
     scp_data: raw_scp_data,
@@ -906,7 +727,7 @@ export const SCPManagementInterface = (props) => {
                         </TermValue>
                       </TermRow>
                       <Box style={{ marginTop: '4px' }}>
-                        <TermButton onClick={() => {}}>MANAGE</TermButton>
+                        <TermButton onClick={() => act('set_player_permission', { ckey: player.key })}>MANAGE</TermButton>
                       </Box>
                     </Box>
                   ))
@@ -1159,9 +980,6 @@ export const SCPManagementInterface = (props) => {
                     onClick={() => act('export_scp_data')}
                   >
                     EXPORT ALL DATA
-                  </TermButton>
-                  <TermButton color="green" onClick={() => {}}>
-                    IMPORT DATA
                   </TermButton>
                 </Box>
               </Box>
@@ -1521,7 +1339,7 @@ const SCPConfigModal = (props) => {
 
       <Box style={{ display: 'flex', gap: '4px', marginTop: '12px' }}>
         <TermButton color="green" onClick={onClose}>
-          SAVE
+          DONE
         </TermButton>
         <TermButton color="red" onClick={onClose}>
           CANCEL

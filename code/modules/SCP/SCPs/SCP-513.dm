@@ -12,14 +12,12 @@
 /obj/item/scp513/Initialize()
 	. = ..()
 	SCP = new /datum/scp(src, "A Cowbell", SCP_EUCLID, "513")
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-513"] = new /datum/scp_instance("SCP-513", src)
-
 /obj/item/scp513/Destroy()
 	for(var/mob/living/carbon/human/H in affected_mobs)
 		if(H && !QDELETED(H))
 			H.RemoveElement(/datum/element/scp513_stalked)
 	affected_mobs = list()
+	QDEL_NULL(SCP)
 	return ..()
 
 /obj/item/scp513/proc/ring_bell(mob/user)
@@ -112,7 +110,8 @@
 	if(H.sanity)
 		H.sanity.adjust_sanity(-8, "scp513_sighting")
 	if(prob(30))
-		H.stamina.adjust(-15)
+		if(H.stamina)
+			H.stamina.adjust(-15)
 		to_chat(H, "<span class='warning'>You stumble in panic!</span>")
 	last_sighting = world.time
 	hook_scp_combat(H, "SCP-513", 0, 5)

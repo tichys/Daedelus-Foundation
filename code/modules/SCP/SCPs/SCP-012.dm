@@ -11,6 +11,7 @@
 	var/composition_cooldown = 0
 	var/composition_cooldown_time = 60 SECONDS
 	var/max_obsession = 100
+	var/persistence_cooldown = 0
 
 	// Persistence tracking
 	var/composers_affected = 0
@@ -35,19 +36,17 @@
 	SCP.min_playercount = 15
 	SCP.min_time = 20 MINUTES
 
-	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-012"] = new /datum/scp_instance("SCP-012", src)
+	START_PROCESSING(SSobj, src)
 
+	// Register with SCP persistence system
 /obj/item/paper/scp012/Destroy()
+	STOP_PROCESSING(SSobj, src)
 	affected_composers = list()
 	composition_notes = list()
 	return ..()
 
 // Core mechanics
 /obj/item/paper/scp012/process()
-	. = ..()
-
 	// Drain sanity from nearby targets
 	drain_nearby_sanity()
 
@@ -82,12 +81,14 @@
 	if(obsession_level >= 40)
 		to_chat(target, "<span class='danger'>The composition is calling to you! You must complete it!</span>")
 		target.adjustToxLoss(3)
-		target.stamina.adjust(-10)
+		if(target.stamina)
+			target.stamina.adjust(-10)
 
 	if(obsession_level >= 60)
 		to_chat(target, "<span class='danger'>The music is overwhelming! You can't think of anything else!</span>")
 		target.adjustToxLoss(5)
-		target.stamina.adjust(-20)
+		if(target.stamina)
+			target.stamina.adjust(-20)
 
 		// Random movement towards the composition
 		if(prob(30))
@@ -97,7 +98,8 @@
 	if(obsession_level >= 80)
 		to_chat(target, "<span class='danger'>You're completely obsessed! You must complete the composition with your blood!</span>")
 		target.adjustToxLoss(8)
-		target.stamina.adjust(-30)
+		if(target.stamina)
+			target.stamina.adjust(-30)
 
 		// Force attempt to complete
 		if(prob(50))
@@ -106,16 +108,18 @@
 	if(obsession_level >= 100)
 		to_chat(target, "<span class='danger'>The obsession has consumed you! You will complete the composition or die trying!</span>")
 		target.adjustToxLoss(15)
-		target.stamina.adjust(-50)
+		if(target.stamina)
+			target.stamina.adjust(-50)
 
 		// Immediate completion attempt
 		attempt_completion(target)
 
 	// Update persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
+	if(SSscp_persistence && SSscp_persistence.manager && world.time >= persistence_cooldown)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-012"]
 		if(instance)
 			instance.add_interaction_record(target, "sanity_drain")
+		persistence_cooldown = world.time + 30 SECONDS
 
 // Attempt to complete the composition
 /obj/item/paper/scp012/proc/attempt_completion(mob/living/carbon/human/composer)

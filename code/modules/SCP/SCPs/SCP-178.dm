@@ -29,13 +29,14 @@
 	entity_system = new /datum/scp178_entity_system(src)
 	research_system = new /datum/scp178_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-178"] = new /datum/scp_instance("SCP-178", src)
-
 /obj/item/clothing/glasses/scp178/Destroy()
 	QDEL_NULL(perception_system)
+	if(entity_system)
+		for(var/obj/effect/dimension_entity/E in entity_system.visible_entities)
+			QDEL_NULL(E)
 	QDEL_NULL(entity_system)
 	QDEL_NULL(research_system)
+	QDEL_NULL(SCP)
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
@@ -48,7 +49,7 @@
 		to_chat(user, "<span class='warning'>The world shifts as you put on the glasses...</span>")
 		START_PROCESSING(SSobj, src)
 
-/obj/item/clothing/glasses/scp178/dropped(mob/living/carbon/human/user)
+/obj/item/clothing/glasses/scp178/unequipped(mob/living/carbon/human/user, silent=FALSE)
 	..()
 	active = FALSE
 	STOP_PROCESSING(SSobj, src)
@@ -125,7 +126,7 @@
 /obj/effect/dimension_entity
 	name = "interdimensional entity"
 	desc = "A shadowy, vaguely humanoid figure visible only through SCP-178."
-	icon = 'icons/mob/shadows.dmi'
+	icon = 'icons/turf/shadows.dmi'
 	icon_state = "shadow"
 	density = FALSE
 	anchored = TRUE

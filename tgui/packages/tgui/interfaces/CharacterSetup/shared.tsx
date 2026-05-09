@@ -1,21 +1,22 @@
 import { useBackend, useSharedState } from '../../backend';
-import { Box, Button, Dropdown, Input, NoticeBox, Stack, Section, Flex, LabeledList, ColorBox, Icon, Tooltip, Table, Tabs } from '../../components';
+import { Box, Button, Dropdown, Input, Modal, NoticeBox, Stack, Section, Flex, LabeledList, ColorBox, Icon, Tooltip, Table, Tabs } from '../../components';
 import { Window } from '../../layouts';
 import { CharacterPreview } from '../PreferencesMenu/CharacterPreview';
 
 export const C = {
-  bg: '#08080a',
-  panel: '#0c0c10',
-  border: '#1e1e24',
+  bg: '#0a0a0c',
+  panel: '#111114',
+  border: '#2a2a30',
   borderRed: '#6b0000',
   accent: '#c2960e',
   red: '#8b0000',
   redBright: '#cc2222',
-  green: '#1a7a1a',
+  green: '#0a6e0a',
   greenDim: '#0d4a0d',
-  text: '#b0b0b0',
-  textBright: '#e0e0e0',
-  textDim: '#555560',
+  brightGreen: '#44ff44',
+  text: '#c8c8c8',
+  textBright: '#e8e8e8',
+  textDim: '#6a6a70',
   amber: '#d4a017',
   mono: '"Consolas", "Courier New", "Lucida Console", monospace',
 };
@@ -68,7 +69,7 @@ export const TermValue = (props: any) => (
     as="span"
     style={term({
       color: props.color || C.textBright,
-      fontWeight: props.bold ? 'bold' : undefined,
+      fontWeight: props.bold ? 'bold' : 'normal',
     })}
   >
     {props.children}
@@ -139,6 +140,58 @@ export const TermButton = (props: any) => {
     </Button>
   );
 };
+
+export const TermProgressBar = (props: any) => (
+  <Box style={{ marginBottom: '6px' }}>
+    <Box
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '2px',
+      }}
+    >
+      <TermLabel>{props.label}</TermLabel>
+      <TermValue color={props.color || C.amber}>
+        {props.value}
+        {props.suffix || ''}
+      </TermValue>
+    </Box>
+    <Box
+      style={{
+        height: '6px',
+        background: C.panel,
+        border: `1px solid ${C.border}`,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        style={{
+          height: '100%',
+          width: `${Math.min(100, Math.max(0, (props.value / props.maxValue) * 100))}%`,
+          background: props.color || C.amber,
+          transition: 'width 0.3s',
+        }}
+      />
+    </Box>
+  </Box>
+);
+
+export const TermModal = (props: any) => (
+  <Modal
+    {...props}
+    style={{
+      background: C.bg,
+      border: `1px solid ${C.borderRed}`,
+      borderRadius: 0,
+      fontFamily: C.mono,
+      color: C.text,
+      padding: '16px',
+    }}
+  >
+    {props.children}
+  </Modal>
+);
 
 export const PriorityButtons = ({ job, prefs, act }: any) => (
   <Box style={{ display: 'flex', gap: '2px' }}>

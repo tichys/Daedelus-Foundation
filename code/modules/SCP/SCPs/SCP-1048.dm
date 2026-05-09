@@ -56,9 +56,6 @@
 	behavior_system = new /datum/scp1048_behavior_system(src)
 	collection_system = new /datum/scp1048_collection_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1048"] = new /datum/scp_instance("SCP-1048", src)
-
 /mob/living/simple_animal/scp1048/Destroy()
 	copies_spawned = list()
 	QDEL_NULL(behavior_system)

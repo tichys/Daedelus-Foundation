@@ -230,7 +230,7 @@ export const SCPRoundReport = (_props: unknown) => {
                 letterSpacing: '0.12em',
               }}
             >
-              {/* SCP FOUNDATION — SITE-53 ROUND REPORT // */}
+              SCP FOUNDATION — SITE-53 ROUND REPORT
             </div>
             <div
               style={{

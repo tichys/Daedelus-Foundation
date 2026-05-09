@@ -75,8 +75,16 @@
 		if(!M.client)
 			continue
 		var/area/mob_area = get_area(M)
-		if(zone == "Facility-Wide" || (mob_area && (mob_area.type in target_area_types)))
+		if(zone == "Facility-Wide")
 			to_chat(M, broadcast_text)
+		else if(mob_area)
+			var/matches_zone = FALSE
+			for(var/T in target_area_types)
+				if(istype(mob_area, T))
+					matches_zone = TRUE
+					break
+			if(matches_zone)
+				to_chat(M, broadcast_text)
 
 	log_broadcast("[user] broadcast to [zone]: [message]")
 
@@ -106,8 +114,16 @@
 		if(!M.client)
 			continue
 		var/area/mob_area = get_area(M)
-		if(zone == "Facility-Wide" || (mob_area && (mob_area.type in target_area_types)))
+		if(zone == "Facility-Wide")
 			to_chat(M, broadcast_text)
+		else if(mob_area)
+			var/matches_zone = FALSE
+			for(var/T in target_area_types)
+				if(istype(mob_area, T))
+					matches_zone = TRUE
+					break
+			if(matches_zone)
+				to_chat(M, broadcast_text)
 
 	log_broadcast("[user] triggered [emergency_type] emergency in [zone]")
 

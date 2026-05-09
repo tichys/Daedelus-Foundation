@@ -17,7 +17,6 @@
 
 /mob/living/scp/scp527/Initialize(mapload)
 	. = ..()
-	set_species(/datum/species/scp527)
 	SCP = new /datum/scp(src, "Mr. Fish", SCP_SAFE, "527", SCP_PLAYABLE|SCP_ROLEPLAY)
 	SCP.min_playercount = 15
 	SCP.min_time = 5 MINUTES
@@ -27,10 +26,6 @@
 	research_system = new /datum/scp527_research_system(src)
 
 	grant_language(/datum/language/common, TRUE, TRUE)
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-527"] = new /datum/scp_instance("SCP-527", src)
-
 
 /mob/living/scp/scp527/Life()
 	. = ..()

@@ -2,6 +2,7 @@
 	var/list/active_contagions = list()
 	var/list/quarantine_zones = list()
 	var/list/exposed_personnel = list()
+	var/processing = FALSE
 
 /datum/contagion_tracker/proc/register_contagion(mob/living/carbon/human/carrier, contagion_type)
 	if(!carrier || !contagion_type)
@@ -16,6 +17,10 @@
 	)
 
 	active_contagions += list(entry)
+
+	if(!processing)
+		processing = TRUE
+		addtimer(CALLBACK(src, PROC_REF(tick)), 5 SECONDS)
 
 	if(!exposed_personnel[carrier.ckey])
 		exposed_personnel[carrier.ckey] = list()
@@ -125,10 +130,14 @@
 	for(var/i = length(active_contagions); i >= 1; i--)
 		var/list/contagion = active_contagions[i]
 		var/mob/living/carbon/human/carrier = contagion["carrier"]
-		if(!carrier || carrier.stat == DEAD)
+		if(!carrier || QDELETED(carrier) || carrier.stat == DEAD)
 			active_contagions.Cut(i, i + 1)
 			continue
 		check_contagion_spread(carrier, 3)
+	if(length(active_contagions) > 0)
+		addtimer(CALLBACK(src, PROC_REF(tick)), 5 SECONDS)
+	else
+		processing = FALSE
 
 GLOBAL_DATUM_INIT(contagion_tracker, /datum/contagion_tracker, new())
 
@@ -140,8 +149,6 @@ GLOBAL_DATUM_INIT(contagion_tracker, /datum/contagion_tracker, new())
 
 /obj/item/reagent_containers/pill/scp500/Initialize()
 	. = ..()
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-500-pill"] = new /datum/scp_instance("SCP-500-pill", src)
 
 /obj/item/reagent_containers/pill/scp500/on_consumption(mob/M, mob/user)
 	. = ..()
@@ -156,7 +163,8 @@ GLOBAL_DATUM_INIT(contagion_tracker, /datum/contagion_tracker, new())
 	H.setToxLoss(0)
 	H.setOxyLoss(0)
 	H.setCloneLoss(0)
-	H.stamina.adjust(H.stamina.maximum)
+	if(H.stamina)
+		H.stamina.adjust(H.stamina.maximum - H.stamina.current)
 	H.setOrganLoss(ORGAN_SLOT_BRAIN, 0)
 	H.reagents?.remove_all()
 	H.SetUnconscious(0)

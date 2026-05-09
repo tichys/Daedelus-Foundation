@@ -99,7 +99,8 @@
 
 		if(prob(5 * horror_intensity_factor))
 			to_chat(H, "<span class='danger'>The darkness seems to whisper unspeakable things...</span>")
-			H.stamina.adjust(-10)
+			if(H.stamina)
+				H.stamina.adjust(-10)
 
 /datum/scp087_horror_system/proc/intensify_horror()
 	if(world.time < horror_cooldown)
@@ -114,7 +115,8 @@
 			to_chat(H, "<span class='danger'>The psychological pressure becomes almost unbearable...</span>")
 			if(horror_intensity > 30)
 				H.adjustBruteLoss(5)
-				H.stamina.adjust(-15)
+				if(H.stamina)
+					H.stamina.adjust(-15)
 
 // Entity System - Manages the mysterious entity presence
 /datum/scp087_entity_system
@@ -179,13 +181,15 @@
 		if("presence")
 			for(var/mob/living/carbon/human/H in targets)
 				to_chat(H, "<span class='danger'>You feel the unmistakable presence of something malevolent...</span>")
-				H.stamina.adjust(-20)
+				if(H.stamina)
+					H.stamina.adjust(-20)
 
 		if("terror")
 			for(var/mob/living/carbon/human/H in targets)
 				to_chat(H, "<span class='danger'>A wave of pure terror washes over you!</span>")
 				H.adjustBruteLoss(5)
-				H.stamina.adjust(-15)
+				if(H.stamina)
+					H.stamina.adjust(-15)
 
 // Environmental System - Manages darkness and atmospheric effects
 /datum/scp087_environmental_system
@@ -233,7 +237,8 @@
 
 		if(prob(5 * darkness_factor))
 			to_chat(H, "<span class='danger'>The oppressive darkness makes it hard to breathe...</span>")
-			H.stamina.adjust(-8)
+			if(H.stamina)
+				H.stamina.adjust(-8)
 
 		if(prob(3 * darkness_factor))
 			to_chat(H, "<span class='danger'>The supernatural cold chills you to the bone...</span>")

@@ -15,8 +15,6 @@
 	SCP.min_time = 15 MINUTES
 
 	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-2343"] = new /datum/scp_instance("SCP-2343", src)
 	addtimer(CALLBACK(src, PROC_REF(initialize_systems)), 1)
 
 	// Remove bodypart overlays to prevent covering the SCP icon
@@ -30,7 +28,7 @@
 	QDEL_NULL(research_system)
 	return ..()
 
-/mob/living/scp/scp2343/Life(datum/controller/process/mobs/parent)
+/mob/living/scp/scp2343/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
 	if(stat == DEAD)
 		return

@@ -116,6 +116,7 @@
 	START_PROCESSING(SSobj, src)
 
 /datum/sanity/Destroy()
+	clear_all_visual_effects()
 	STOP_PROCESSING(SSobj, src)
 	owner = null
 	return ..()
@@ -143,6 +144,19 @@
 
 	// Check for sanity state changes
 	check_sanity_state_change()
+
+	// Update visual effects
+	update_visual_effects()
+
+	// Update behavioral effects
+	update_behavioral_effects()
+
+	// Check for episodes
+	if(!episode_active)
+		trigger_episode()
+
+	// Apply job profile modifiers
+	apply_job_sanity_profile()
 
 	// Return nothing to continue processing (not PROCESS_KILL)
 
@@ -177,7 +191,8 @@
 	else if(sanity_change < 0)
 		total_sanity_lost += abs(sanity_change)
 
-/datum/sanity/proc/adjust_sanity(amount)
+/datum/sanity/proc/adjust_sanity(amount, reason = "")
+	amount = get_conditioned_sanity_change(amount)
 	var/old_sanity = sanity_level
 	sanity_level = clamp(sanity_level + amount, min_sanity, max_sanity)
 
@@ -697,3 +712,129 @@
 		)
 		T.time_created = trauma_data["time_created"]
 		traumas += T
+
+// ── Job Sanity Profiles ──
+
+#define SANITY_PROFILE_DEFAULT "default"
+#define SANITY_PROFILE_DCLASS "dclass"
+#define SANITY_PROFILE_MTF "mtf"
+#define SANITY_PROFILE_RESEARCHER "researcher"
+#define SANITY_PROFILE_MEDICAL "medical"
+#define SANITY_PROFILE_SECURITY "security"
+#define SANITY_PROFILE_ENGINEERING "engineering"
+#define SANITY_PROFILE_COMMAND "command"
+
+/datum/sanity/proc/determine_job_profile()
+	if(!owner)
+		return SANITY_PROFILE_DEFAULT
+
+	var/job_title = owner.job
+
+	if(findtext(job_title, "D-Class"))
+		return SANITY_PROFILE_DCLASS
+	if(findtext(job_title, "MTF") || findtext(job_title, "Mobile Task Force"))
+		return SANITY_PROFILE_MTF
+	if(findtext(job_title, "Research") || findtext(job_title, "Scientist"))
+		return SANITY_PROFILE_RESEARCHER
+	if(findtext(job_title, "Medical") || findtext(job_title, "Doctor") || findtext(job_title, "Chemist"))
+		return SANITY_PROFILE_MEDICAL
+	if(findtext(job_title, "Security") || findtext(job_title, "Guard"))
+		return SANITY_PROFILE_SECURITY
+	if(findtext(job_title, "Engineer") || findtext(job_title, "Atmos"))
+		return SANITY_PROFILE_ENGINEERING
+	if(findtext(job_title, "Director") || findtext(job_title, "Command") || findtext(job_title, "Head"))
+		return SANITY_PROFILE_COMMAND
+
+	return SANITY_PROFILE_DEFAULT
+
+/datum/sanity/proc/apply_job_sanity_profile()
+	var/new_profile = determine_job_profile()
+	if(new_profile == job_sanity_profile)
+		return
+
+	job_sanity_profile = new_profile
+
+	switch(job_sanity_profile)
+		if(SANITY_PROFILE_DCLASS)
+			conditioning_resistance = 0.25
+			memetic_vulnerability = 0.9
+			combat_stress_resistance = 0.15
+			medical_horror_resistance = 0.1
+			isolation_tolerance = 1.5
+			trauma_resistances[TRAUMA_VIOLENCE] = 1.4
+			trauma_resistances[TRAUMA_ISOLATION] = 1.5
+
+		if(SANITY_PROFILE_MTF)
+			conditioning_resistance = 0.35
+			memetic_vulnerability = 0.8
+			combat_stress_resistance = 0.4
+			medical_horror_resistance = 0.15
+			isolation_tolerance = 1.2
+			trauma_resistances[TRAUMA_VIOLENCE] = 1.5
+			trauma_resistances[TRAUMA_DEATH] = 1.3
+
+		if(SANITY_PROFILE_RESEARCHER)
+			conditioning_resistance = 0.1
+			memetic_vulnerability = 1.4
+			combat_stress_resistance = 0.05
+			medical_horror_resistance = 0.1
+			isolation_tolerance = 0.8
+			trauma_resistances[TRAUMA_SCP_EXPOSURE] = 0.7
+			scp_exposure_multiplier = 1.3
+
+		if(SANITY_PROFILE_MEDICAL)
+			conditioning_resistance = 0.15
+			memetic_vulnerability = 1.0
+			combat_stress_resistance = 0.1
+			medical_horror_resistance = 0.45
+			isolation_tolerance = 0.9
+			trauma_resistances[TRAUMA_PHYSICAL] = 1.3
+			trauma_resistances[TRAUMA_DEATH] = 1.2
+
+		if(SANITY_PROFILE_SECURITY)
+			conditioning_resistance = 0.2
+			memetic_vulnerability = 1.0
+			combat_stress_resistance = 0.25
+			medical_horror_resistance = 0.1
+			isolation_tolerance = 1.0
+			trauma_resistances[TRAUMA_VIOLENCE] = 1.3
+
+		if(SANITY_PROFILE_ENGINEERING)
+			conditioning_resistance = 0.1
+			memetic_vulnerability = 1.0
+			combat_stress_resistance = 0.1
+			medical_horror_resistance = 0.1
+			isolation_tolerance = 1.0
+			trauma_resistances[TRAUMA_PHYSICAL] = 1.1
+
+		if(SANITY_PROFILE_COMMAND)
+			conditioning_resistance = 0.2
+			memetic_vulnerability = 1.0
+			combat_stress_resistance = 0.2
+			medical_horror_resistance = 0.15
+			isolation_tolerance = 1.1
+			trauma_resistances[TRAUMA_PSYCHOLOGICAL] = 1.3
+
+		else
+			conditioning_resistance = 0
+			memetic_vulnerability = 1.0
+			combat_stress_resistance = 0
+			medical_horror_resistance = 0
+			isolation_tolerance = 1.0
+
+/datum/sanity/proc/get_conditioned_sanity_change(amount)
+	if(amount >= 0)
+		return amount
+
+	var/resisted = abs(amount) * conditioning_resistance
+	return amount + resisted
+
+/datum/sanity/proc/get_profile_data()
+	return list(
+		"profile" = job_sanity_profile,
+		"conditioning_resistance" = conditioning_resistance,
+		"memetic_vulnerability" = memetic_vulnerability,
+		"combat_stress_resistance" = combat_stress_resistance,
+		"medical_horror_resistance" = medical_horror_resistance,
+		"isolation_tolerance" = isolation_tolerance,
+	)

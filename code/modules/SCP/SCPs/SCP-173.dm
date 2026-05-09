@@ -7,6 +7,7 @@
 	icon = 'icons/scp/scp-173.dmi'
 	icon_state = "173"
 	real_name = "SCP-173"
+	persistence_id = "SCP-173"
 
 	// SCP-173 specific variables
 	var/state = "idle" // idle, moving, attacking, contained
@@ -28,7 +29,6 @@
 
 /mob/living/scp/scp173/Initialize()
 	. = ..()
-	set_species(/datum/species/scp173)
 	SCP = new /datum/scp(src, "The Sculpture", SCP_EUCLID, "173", SCP_PLAYABLE)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
@@ -43,24 +43,8 @@
 	// Grant language and register for SCP persistence
 	grant_language(/datum/language/common, TRUE, TRUE)
 
-	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-173"] = new /datum/scp_instance("SCP-173", src)
-
-	// Start processing
-	START_PROCESSING(SSobj, src)
-
-	// Remove bodypart overlays to prevent covering the SCP icon
-
 	// Load persistence data
 	load_persistence_data()
-
-// Process method to prevent CPU waste warning
-/mob/living/scp/scp173/process(delta_time)
-	// Don't call parent - we're implementing our own process logic
-	// SCP-173 uses Life() for main processing, this is just to prevent CPU waste
-
-	// Return nothing to continue processing (not PROCESS_KILL)
 
 /mob/living/scp/scp173/Destroy()
 	QDEL_NULL(observation_system)
@@ -68,14 +52,13 @@
 	QDEL_NULL(containment_system)
 	QDEL_NULL(combat_system)
 	QDEL_NULL(research_system)
-	STOP_PROCESSING(SSobj, src)
 	return ..()
 
 // Enhanced life cycle integration
-/mob/living/scp/scp173/Life()
+/mob/living/scp/scp173/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
-
-	// Process all modular systems
+	if(.)
+		return
 	if(observation_system)
 		observation_system.process_observation()
 	if(movement_system)
@@ -107,15 +90,13 @@
 		return
 
 	var/list/data = list(
-		"kills_count" = kills_count,
-		"breach_events" = breach_events,
+		"kills_count" = combat_system ? combat_system.kills_count : kills_count,
+		"breach_events" = containment_system ? containment_system.breach_events : breach_events,
 		"total_damage_dealt" = total_damage_dealt,
 		"is_observed" = observation_system ? observation_system.is_being_observed : FALSE,
 		"observation_quality" = observation_system ? observation_system.observation_quality : 0,
 		"containment_integrity" = containment_system ? containment_system.containment_integrity : 100,
-		"is_contained" = containment_system ? containment_system.is_contained : TRUE,
-		"breach_events" = containment_system ? containment_system.breach_events : 0,
-		"kills_count" = combat_system ? combat_system.kills_count : 0
+		"is_contained" = containment_system ? containment_system.is_contained : TRUE
 	)
 
 	// Store data for research integration

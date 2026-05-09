@@ -322,10 +322,10 @@
 //		access |= list(ACCESS_ENGINEERING_LVL1)
 
 /datum/id_trim/job/security_director
-	assignment = JOB_SECURITY_DIRECTOR
-	intern_alt_name = "Intern " + JOB_SECURITY_DIRECTOR
+	assignment = JOB_GUARD_COMMANDER
+	intern_alt_name = "Intern " + JOB_GUARD_COMMANDER
 	trim_state = "securitylvl5"
-	sechud_icon_state = SECHUD_SECURITY_DIRECTOR
+	sechud_icon_state = SECHUD_GUARD_COMMANDER
 	extra_access = list()
 	minimal_access = list(
 		ACCESS_ADMIN_LVL1,
@@ -396,7 +396,7 @@
 
 //EZ
 /datum/id_trim/job/junior_ez_guard
-	assignment = "Junior EZ Guard"
+	assignment = JOB_JUNIOR_EZ_GUARD
 	trim_state = "securitylvl2"
 	sechud_icon_state = SECHUD_EZ_JUNIOR_GUARD
 	extra_access = list(ACCESS_MEDICAL_LVL1, ACCESS_SCIENCE_LVL1, ACCESS_ENGINEERING_LVL1)
@@ -412,7 +412,7 @@
 	job = /datum/job/junior_ez_guard
 
 /datum/id_trim/job/ez_guard
-	assignment = "EZ Guard"
+	assignment = JOB_EZ_GUARD
 	trim_state = "securitylvl2"
 	sechud_icon_state = SECHUD_EZ_GUARD
 	extra_access = list(ACCESS_SECURITY_LVL3)
@@ -433,7 +433,7 @@
 	job = /datum/job/ez_guard
 
 /datum/id_trim/job/senior_ez_guard
-	assignment = "Senior EZ Guard"
+	assignment = JOB_SENIOR_EZ_GUARD
 	trim_state = "securitylvl3"
 	sechud_icon_state = SECHUD_EZ_SENIOR_GUARD
 	extra_access = list()
@@ -460,7 +460,7 @@
 	job = /datum/job/senior_ez_guard
 
 /datum/id_trim/job/ez_commander
-	assignment = "EZ Commander"
+	assignment = JOB_EZ_ZONE_SUPERVISOR
 	trim_state = "securitylvl4"
 	sechud_icon_state = SECHUD_EZ_ZONE_COMMANDER
 	extra_access = list()
@@ -493,7 +493,7 @@
 
 //LCZ
 /datum/id_trim/job/junior_lcz_guard
-	assignment = "Junior LCZ Guard"
+	assignment = JOB_JUNIOR_LCZ_GUARD
 	trim_state = "securitylvl2"
 	sechud_icon_state = SECHUD_LCZ_JUNIOR_GUARD
 	extra_access = list(ACCESS_SECURITY_LVL3)
@@ -503,7 +503,7 @@
 	job = /datum/job/junior_lcz_guard
 
 /datum/id_trim/job/lcz_guard
-	assignment = "LCZ Guard"
+	assignment = JOB_LCZ_GUARD
 	trim_state = "securitylvl2"
 	sechud_icon_state = SECHUD_LCZ_GUARD
 	extra_access = list(ACCESS_SECURITY_LVL3)
@@ -513,7 +513,7 @@
 	job = /datum/job/lcz_guard
 
 /datum/id_trim/job/senior_lcz_guard
-	assignment = "Senior LCZ Guard"
+	assignment = JOB_SENIOR_LCZ_GUARD
 	trim_state = "securitylvl3"
 	sechud_icon_state = SECHUD_LCZ_SENIOR_GUARD
 	extra_access = list()
@@ -523,7 +523,7 @@
 	job = /datum/job/senior_lcz_guard
 
 /datum/id_trim/job/lcz_commander
-	assignment = "LCZ Commander"
+	assignment = JOB_LCZ_ZONE_JUNIOR_LIEUTENANT
 	trim_state = "securitylvl4"
 	sechud_icon_state = SECHUD_LCZ_ZONE_COMMANDER
 	extra_access = list()
@@ -542,7 +542,7 @@
 
 //HCZ
 /datum/id_trim/job/junior_hcz_guard
-	assignment = "Junior HCZ Guard"
+	assignment = JOB_JUNIOR_HCZ_GUARD
 	trim_state = "securitylvl3"
 	sechud_icon_state = SECHUD_HCZ_JUNIOR_GUARD
 	extra_access = list()
@@ -552,7 +552,7 @@
 	job = /datum/job/junior_hcz_guard
 
 /datum/id_trim/job/hcz_guard
-	assignment = "HCZ Guard"
+	assignment = JOB_HCZ_GUARD
 	trim_state = "securitylvl3"
 	sechud_icon_state = SECHUD_HCZ_GUARD
 	extra_access = list()
@@ -562,7 +562,7 @@
 	job = /datum/job/hcz_guard
 
 /datum/id_trim/job/senior_hcz_guard
-	assignment = "Senior HCZ Guard"
+	assignment = JOB_SENIOR_HCZ_GUARD
 	trim_state = "securitylvl3"
 	sechud_icon_state = SECHUD_HCZ_SENIOR_GUARD
 	extra_access = list()
@@ -572,7 +572,7 @@
 	job = /datum/job/senior_hcz_guard
 
 /datum/id_trim/job/hcz_commander
-	assignment = "HCZ Commander"
+	assignment = JOB_HCZ_ZONE_SENIOR_LIEUTENANT
 	trim_state = "securitylvl4"
 	sechud_icon_state = SECHUD_HCZ_ZONE_COMMANDER
 	extra_access = list()

@@ -18,9 +18,6 @@
 	. = ..()
 	SCP = new /datum/scp(src, "mechanical spider", SCP_EUCLID, "2427-3", SCP_PLAYABLE)
 	SCP.min_playercount = 30
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-2427-3"] = new /datum/scp_instance("SCP-2427-3", src)
-
 /mob/living/simple_animal/hostile/scp2427_3/Life()
 	. = ..()
 	if(stat == DEAD)

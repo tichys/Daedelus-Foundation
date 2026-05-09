@@ -24,6 +24,15 @@
 		var/area/A = get_area(scp_atom)
 		breach_zone = get_containment_zone(A) || "unknown"
 
+	log_game("SCP Breach: [scp_id] at [scp_atom ? get_area_name(scp_atom) : "unknown"]")
+
+	if(SSfacility_announcements)
+		SSfacility_announcements.announce_breach(scp_id, breach_zone)
+
+	if(breach_zone == "lcz" || breach_zone == "hcz")
+		set_zone_emergency_lighting(breach_zone, TRUE)
+		addtimer(CALLBACK(GLOBAL_PROC, /proc/set_zone_emergency_lighting, breach_zone, FALSE), 5 MINUTES)
+
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
 		if(instance)
@@ -88,6 +97,8 @@
 /proc/hook_scp_recontainment(scp_id, list/participants)
 	if(!scp_id)
 		return FALSE
+
+	log_game("SCP Recontained: [scp_id]")
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]

@@ -10,26 +10,67 @@
 	var/occupied = FALSE
 	var/activation_progress = 0
 	var/activation_threshold = 100
+	var/lure_active = FALSE
+	var/mob/living/carbon/human/victim
 
-/obj/machinery/scp_femur_breaker/attack_hand(mob/user)
+/obj/machinery/scp_femur_breaker/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "ScpFemurBreaker", "SCP-106 FEMUR BREAKER")
+		ui.set_autoupdate(TRUE)
+		ui.open()
+
+/obj/machinery/scp_femur_breaker/ui_state(mob/user)
+	return GLOB.default_state
+
+/obj/machinery/scp_femur_breaker/ui_data(mob/user)
+	var/list/data = list()
+	data["occupied"] = occupied
+	data["activation_progress"] = activation_progress
+	data["activation_threshold"] = activation_threshold
+	data["lure_active"] = lure_active
+	data["completed"] = (activation_progress >= activation_threshold)
+
+	data["victim_name"] = victim ? victim.real_name : "None"
+	data["victim_health"] = 0
+	if(victim)
+		data["victim_health"] = round((victim.health / victim.maxHealth) * 100)
+
+	var/scp106_status = "unknown"
+	if(SSscp_persistence?.manager?.scp_instances?["SCP-106"])
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-106"]
+		scp106_status = instance.containment_status
+	data["scp106_status"] = scp106_status
+
+	return data
+
+/obj/machinery/scp_femur_breaker/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+
+	var/mob/user = usr
 	if(!ishuman(user))
 		return
 	var/mob/living/carbon/human/H = user
 
-	if(occupied)
-		var/confirm = alert(H, "Activate the Femur Breaker? This will cause severe harm to the subject.", "Femur Breaker", "Activate", "Cancel")
-		if(confirm != "Activate")
-			return
-		activate(H)
-		return
+	switch(action)
+		if("enter")
+			if(occupied)
+				return
+			occupied = TRUE
+			victim = H
+			H.forceMove(src)
+			H.visible_message(span_danger("[H] enters the Femur Breaker!"))
+			. = TRUE
+		if("activate")
+			if(!occupied || !victim || lure_active)
+				return
+			activate(H)
+			. = TRUE
 
-	var/confirm = alert(H, "Enter the Femur Breaker? This is extremely dangerous.", "Femur Breaker", "Enter", "Cancel")
-	if(confirm != "Enter")
-		return
-
-	occupied = TRUE
-	H.forceMove(src)
-	H.visible_message("<span class='danger'>[H] enters the Femur Breaker!</span>")
+/obj/machinery/scp_femur_breaker/attack_hand(mob/user)
+	ui_interact(user)
 
 /obj/machinery/scp_femur_breaker/proc/activate(mob/activator)
 	if(!occupied)
@@ -58,11 +99,15 @@
 	if(instance)
 		instance.containment_status = "contained"
 		instance.containment_health = 100
-		instance.add_interaction_record(victim, "femur_breaker_recontainment")
+		if(!QDELETED(victim))
+			instance.add_interaction_record(victim, "femur_breaker_recontainment")
+		else
+			instance.add_interaction_record(null, "femur_breaker_recontainment")
 		SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
 		SSscp_persistence.manager.global_containment_stability = min(100, SSscp_persistence.manager.global_containment_stability + 5)
 
-	hook_scp_recontainment("SCP-106", list(victim))
+	var/list/recontain_list = !QDELETED(victim) ? list(victim) : list()
+	hook_scp_recontainment("SCP-106", recontain_list)
 	priority_announce("SCP-106 has been recontained via Femur Breaker protocol.", sound_type = ANNOUNCER_DEFAULT)
 
 /obj/item/scp096_bag
@@ -118,7 +163,8 @@
 
 	uses--
 	var/mob/living/carbon/human/H = user
-	H.stamina.adjust(30)
+	if(H.stamina)
+		H.stamina.adjust(30)
 	to_chat(H, "<span class='notice'>You apply the eye drops and stimulants. Your eyes feel refreshed!</span>")
 	H.set_drugginess(10)
 
@@ -175,6 +221,7 @@
 	anchored = TRUE
 	var/lure_active = FALSE
 	var/lure_duration = 300
+	var/lure_cooldown = 0
 
 /obj/machinery/scp049_cure_station/attack_hand(mob/user)
 	if(!ishuman(user))
@@ -182,6 +229,10 @@
 
 	if(lure_active)
 		to_chat(user, span_warning("The lure is already active."))
+		return
+
+	if(world.time < lure_cooldown)
+		to_chat(user, span_warning("The lure is recharging. Ready in [round((lure_cooldown - world.time) / 10)] seconds."))
 		return
 
 	if(!ishuman(user))
@@ -194,6 +245,7 @@
 		return
 
 	lure_active = TRUE
+	lure_cooldown = world.time + 600
 	visible_message(span_notice("[src] begins broadcasting the containment lure signal."))
 	priority_announce("SCP-049 containment lure protocol activated. The Doctor is being called back.", sound_type = ANNOUNCER_DEFAULT)
 
@@ -316,6 +368,7 @@
 	for(var/mob/living/simple_animal/hostile/retaliate/scp1507/F in range(10, src))
 		F.melee_damage_lower = initial(F.melee_damage_lower)
 		F.melee_damage_upper = initial(F.melee_damage_upper)
+		F.combat_mode = initial(F.combat_mode)
 
 /obj/machinery/scp263_remote_shutoff
 	name = "SCP-263 Remote Shutoff"
@@ -339,7 +392,7 @@
 	if(confirm != "Transmit")
 		return
 	cooldown = world.time + cooldown_time
-	for(var/obj/machinery/scp263/tv in world)
+	for(var/obj/machinery/scp263/tv in SSmachines.processing)
 		if(tv.active)
 			tv.deactivate()
 			hook_scp_recontainment("SCP-263", list(user))

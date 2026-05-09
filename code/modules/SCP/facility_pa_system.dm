@@ -103,59 +103,6 @@
 	. = ..()
 	set_frequency(FREQ_SCP_COMMAND)
 
-// SCP Radio Headset
-/obj/item/radio/headset/scp_command
-	name = "SCP command headset"
-	desc = "A headset with access to all SCP Foundation channels."
-	icon_state = "com_headset"
-
-/obj/item/radio/headset/scp_command/Initialize(mapload)
-	. = ..()
-	wires = new /datum/wires/radio(src)
-	set_frequency(FREQ_SCP_COMMAND)
-	listening += FREQ_SCP_SECURITY
-	listening += FREQ_SCP_SCIENCE
-	listening += FREQ_SCP_MEDICAL
-	listening += FREQ_SCP_CONTAINMENT
-	listening += FREQ_SCP_MTF
-
-/obj/item/radio/headset/scp_security
-	name = "SCP security headset"
-	desc = "A headset tuned to SCP Foundation security channels."
-	icon_state = "sec_headset"
-
-/obj/item/radio/headset/scp_security/Initialize(mapload)
-	. = ..()
-	wires = new /datum/wires/radio(src)
-	set_frequency(FREQ_SCP_SECURITY)
-	listening += FREQ_SCP_COMMAND
-	listening += FREQ_SCP_CONTAINMENT
-	listening += FREQ_SCP_MTF
-
-/obj/item/radio/headset/scp_science
-	name = "SCP science headset"
-	desc = "A headset tuned to SCP Foundation research channels."
-	icon_state = "sci_headset"
-
-/obj/item/radio/headset/scp_science/Initialize(mapload)
-	. = ..()
-	wires = new /datum/wires/radio(src)
-	set_frequency(FREQ_SCP_SCIENCE)
-	listening += FREQ_SCP_COMMAND
-	listening += FREQ_SCP_CONTAINMENT
-
-/obj/item/radio/headset/scp_medical
-	name = "SCP medical headset"
-	desc = "A headset tuned to SCP Foundation medical channels."
-	icon_state = "med_headset"
-
-/obj/item/radio/headset/scp_medical/Initialize(mapload)
-	. = ..()
-	wires = new /datum/wires/radio(src)
-	set_frequency(FREQ_SCP_MEDICAL)
-	listening += FREQ_SCP_COMMAND
-
-// SCP Radio Jammer
 /obj/item/scp_radio_jammer
 	name = "anomalous signal jammer"
 	desc = "A device that disrupts SCP Foundation radio frequencies within a certain range."

@@ -20,6 +20,14 @@
 	var/containment_progress = 0
 	var/containment_threshold = 100
 
+/obj/machinery/scp682_acid_bath/Initialize()
+	. = ..()
+	START_PROCESSING(SSobj, src)
+
+/obj/machinery/scp682_acid_bath/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
 /obj/machinery/scp682_acid_bath/process()
 	if(acid_level < max_acid)
 		acid_level = min(max_acid, acid_level + acid_recharge_rate)

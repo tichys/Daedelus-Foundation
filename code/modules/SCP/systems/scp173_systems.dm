@@ -10,6 +10,11 @@
 /datum/scp173_observation_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
 
+/datum/scp173_observation_system/Destroy()
+	observers = null
+	owner = null
+	return ..()
+
 /datum/scp173_observation_system/proc/process_observation()
 	if(!owner || owner.stat == DEAD)
 		return
@@ -23,9 +28,14 @@
 	for(var/mob/living/carbon/human/H in range(SCP173_OBSERVATION_RANGE, owner))
 		if(H.stat == DEAD || H == owner)
 			continue
-		if(H.client && istype(H, /mob/living/carbon/human))
-			current_observers += H
-			total_quality += get_observer_quality(H)
+		if(!H.client)
+			continue
+		if(!H.can_see_cone(owner))
+			continue
+		if(!can_see(H, owner, SCP173_OBSERVATION_RANGE))
+			continue
+		current_observers += H
+		total_quality += get_observer_quality(H)
 	observers = current_observers
 	observation_quality = total_quality
 	is_being_observed = length(current_observers) > 0
@@ -50,6 +60,10 @@
 /datum/scp173_movement_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
 
+/datum/scp173_movement_system/Destroy()
+	owner = null
+	return ..()
+
 /datum/scp173_movement_system/proc/process_movement()
 	if(!owner || owner.stat == DEAD)
 		return
@@ -61,6 +75,14 @@
 	if(nearest)
 		step_towards(owner, nearest)
 		movement_cooldown = world.time + SCP173_MOVEMENT_COOLDOWN
+		if(prob(40))
+			playsound(owner, 'sound/scp/173/rattle.ogg', 30, TRUE)
+	else
+		if(prob(10))
+			for(var/turf/closed/wall/scp_containment/C in range(1, owner))
+				C.damage_containment(15, "SCP-173 pressure")
+				owner.visible_message(span_danger("[owner] pushes against [C] with immense force!"))
+				break
 
 /datum/scp173_movement_system/proc/find_nearest_target()
 	var/mob/living/carbon/human/nearest
@@ -81,6 +103,13 @@
 	var/breach_threshold = SCP173_BREACH_THRESHOLD
 	var/is_contained = TRUE
 	var/breach_events = 0
+
+/datum/scp173_containment_system/New(mob/living/scp/scp173/new_owner)
+	owner = new_owner
+
+/datum/scp173_containment_system/Destroy()
+	owner = null
+	return ..()
 
 /datum/scp173_containment_system/proc/process_containment()
 	if(!owner || owner.stat == DEAD)
@@ -116,13 +145,18 @@
 // Combat System
 /datum/scp173_combat_system
 	var/mob/living/scp/scp173/owner
-	var/attack_cooldown = 0
+	var/attack_cooldown = 2 SECONDS
 	var/last_melee_attack = 0
 	var/kills_count = 0
 	var/list/current_targets = list()
 
 /datum/scp173_combat_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
+
+/datum/scp173_combat_system/Destroy()
+	current_targets = null
+	owner = null
+	return ..()
 
 /datum/scp173_combat_system/proc/process_combat()
 	if(!owner || owner.stat == DEAD)
@@ -149,6 +183,8 @@
 	last_melee_attack = world.time
 	if(target.stat == DEAD)
 		kills_count++
+		playsound(target, pick('sound/scp/spook/NeckSnap1.ogg', 'sound/scp/spook/NeckSnap3.ogg'), 80, FALSE, extrarange = 5)
+		playsound(target, pick('sound/scp/firstpersonsnap.ogg', 'sound/scp/firstpersonsnap2.ogg', 'sound/scp/firstpersonsnap3.ogg'), 60, FALSE)
 		owner?.on_kill(target)
 
 // Research System
@@ -160,6 +196,11 @@
 
 /datum/scp173_research_system/New(mob/living/scp/scp173/new_owner)
 	owner = new_owner
+
+/datum/scp173_research_system/Destroy()
+	research_data = null
+	owner = null
+	return ..()
 
 /datum/scp173_research_system/proc/process_research()
 	if(!owner || owner.stat == DEAD)

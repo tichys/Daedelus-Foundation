@@ -32,8 +32,9 @@
 	RegisterSignal(src, COMSIG_ITEM_PICKUP, PROC_REF(handle_item_pickup))
 	RegisterSignal(src, COMSIG_ITEM_UNEQUIPPED, PROC_REF(handle_item_unequipped))
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-113"] = new /datum/scp_instance("SCP-113", src)
+/obj/item/scp113/Destroy()
+	REMOVE_TRAIT(src, TRAIT_NODROP, SCP113_TRAIT)
+	return ..()
 
 /obj/item/scp113/proc/handle_item_pickup(datum/source, mob/living/user)
 	if(!ishuman(user))
@@ -71,6 +72,7 @@
 		return
 
 	var/mob/living/carbon/human/H = user
+	REMOVE_TRAIT(src, TRAIT_NODROP, SCP113_TRAIT)
 	qdel(H.GetComponent(/datum/component/scp113_effect_handler))
 	SEND_SIGNAL(H, COMSIG_SCP113_EFFECT_STAGE_1, H, 0)
 

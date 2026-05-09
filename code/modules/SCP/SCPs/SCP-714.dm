@@ -29,9 +29,6 @@
 	effect_system = new /datum/scp714_effect_system(src)
 	research_system = new /datum/scp714_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-714"] = new /datum/scp_instance("SCP-714", src)
-
 /obj/item/clothing/ring/scp714/Destroy()
 	QDEL_NULL(protection_system)
 	QDEL_NULL(effect_system)
@@ -48,7 +45,7 @@
 		to_chat(user, "<span class='notice'>The jade ring slides onto your finger, and you feel a protective presence.</span>")
 		START_PROCESSING(SSobj, src)
 
-/obj/item/clothing/ring/scp714/dropped(mob/living/carbon/human/user)
+/obj/item/clothing/ring/scp714/unequipped(mob/living/carbon/human/user, silent=FALSE)
 	..()
 	active = FALSE
 	wear_duration = 0
@@ -71,7 +68,8 @@
 		effect_system.process_effects(wearer)
 
 	if(wear_duration % 20 == 0)
-		wearer.stamina.adjust(-wearer_stamina_drain)
+		if(wearer.stamina)
+			wearer.stamina.adjust(-wearer_stamina_drain)
 		if(prob(10))
 			to_chat(wearer, "<span class='warning'>The ring's protection comes at a cost - you feel drained.</span>")
 
@@ -96,7 +94,7 @@
 		if(effect_type == "poison")
 			wearer.reagents?.remove_reagent("toxin", 1)
 		if(effect_type == "radiation")
-			wearer.radiation = max(0, wearer.radiation - 5)
+			REMOVE_TRAIT(wearer, TRAIT_IRRADIATED, "scp714")
 
 /datum/scp714_protection_system/proc/check_protection(mob/living/carbon/human/wearer, effect_type)
 	if(effect_type in blocked_effects)

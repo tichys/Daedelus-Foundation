@@ -34,9 +34,6 @@
 	SCP = new /datum/scp(src, "RONALD REAGAN CUT UP WHILE TALKING", SCP_EUCLID, "1981")
 
 	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1981"] = new /datum/scp_instance("SCP-1981", src)
-
 	// Start processing
 	START_PROCESSING(SSobj, src)
 
@@ -50,10 +47,10 @@
 	return ..()
 
 // Core automated processing
-/obj/item/scp1981/process()
-	. = ..()
+/obj/item/scp1981/process(delta_time)
+	if(!istype(loc, /turf))
+		return
 
-	// Process all modular systems
 	if(video_system)
 		video_system.process_video()
 	if(reality_system)
@@ -65,10 +62,8 @@
 	if(research_system)
 		research_system.process_research()
 
-	// Update tracking data
 	update_tracking_data()
 
-	// Automatic escalation based on prolonged exposure
 	check_escalation_conditions()
 
 /obj/item/scp1981/proc/update_tracking_data()
@@ -118,7 +113,8 @@
 	for(var/mob/living/carbon/human/H in targets)
 		to_chat(H, "<span class='danger'>You experience SCP-1981's ultimate video manipulation!</span>")
 		H.adjustBruteLoss(25)
-		H.stamina.adjust(-30)
+		if(H.stamina)
+			H.stamina.adjust(-30)
 		hook_scp_interaction(H, "SCP-1981", "ultimate_video_event")
 
 	// Reset activation counter to prevent spam

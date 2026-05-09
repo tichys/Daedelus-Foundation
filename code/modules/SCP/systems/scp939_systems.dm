@@ -14,14 +14,11 @@
 /datum/scp939_voice_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 
 /datum/scp939_voice_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	learned_voices = null
+	owner = null
 	return ..()
-
-/datum/scp939_voice_system/process()
-	process_voice()
 
 /datum/scp939_voice_system/proc/process_voice()
 	if(world.time >= last_voice_learning + voice_learning_interval)
@@ -107,15 +104,12 @@
 /datum/scp939_pack_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 	find_pack_members()
 
 /datum/scp939_pack_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	pack_members = null
+	owner = null
 	return ..()
-
-/datum/scp939_pack_system/process()
-	process_pack()
 
 /datum/scp939_pack_system/proc/process_pack()
 	if(world.time >= last_pack_update + pack_update_interval)
@@ -142,6 +136,8 @@
 		return FALSE
 
 	for(var/mob/living/scp/scp939/member in pack_members)
+		if(QDELETED(member))
+			continue
 		if(member.stat != DEAD && member.pack_system)
 			member.pack_system.receive_coordination(owner)
 
@@ -169,15 +165,12 @@
 /datum/scp939_psychology_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 	setup_manipulation_tactics()
 
 /datum/scp939_psychology_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	target_profiles = null
+	owner = null
 	return ..()
-
-/datum/scp939_psychology_system/process()
-	process_psychology()
 
 /datum/scp939_psychology_system/proc/process_psychology()
 	if(world.time >= last_psychology_update + psychology_update_interval)
@@ -195,7 +188,7 @@
 
 /datum/scp939_psychology_system/proc/update_psychological_profiles()
 	for(var/mob/living/carbon/human/H in view(10, owner))
-		if(owner.can_see_cone(H) && H.stat != DEAD)
+		if(H.stat != DEAD && H != owner)
 			analyze_target_psychology(H)
 
 /datum/scp939_psychology_system/proc/analyze_target_psychology(mob/living/carbon/human/target)
@@ -260,14 +253,11 @@
 /datum/scp939_territory_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 
 /datum/scp939_territory_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	controlled_areas = null
+	owner = null
 	return ..()
-
-/datum/scp939_territory_system/process()
-	process_territory()
 
 /datum/scp939_territory_system/proc/process_territory()
 	if(world.time >= last_territory_update + territory_update_interval)
@@ -312,15 +302,13 @@
 /datum/scp939_hunting_system/New(mob/living/scp/scp939/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 	setup_hunting_strategies()
 
 /datum/scp939_hunting_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	hunting_targets = null
+	current_target = null
+	owner = null
 	return ..()
-
-/datum/scp939_hunting_system/process()
-	process_hunting()
 
 /datum/scp939_hunting_system/proc/process_hunting()
 	if(world.time >= last_hunt_update + hunt_update_interval)
@@ -353,11 +341,9 @@
 	hunting_targets.Cut()
 
 	for(var/mob/living/carbon/human/H in view(10, owner))
-		if(owner.can_see_cone(H) && H.stat != DEAD && H != owner)
+		if(H.stat != DEAD && H != owner)
 			var/target_score = calculate_target_score(H)
 			hunting_targets[H] = target_score
-
-	hunting_targets = sort_list(hunting_targets, /proc/cmp_numeric_dsc)
 
 /datum/scp939_hunting_system/proc/calculate_target_score(mob/living/carbon/human/target)
 	var/score = 0
@@ -461,7 +447,11 @@
 			attack_target(current_target)
 
 /datum/scp939_hunting_system/proc/share_target(mob/living/carbon/human/target)
+	if(!owner.pack_system)
+		return
 	for(var/mob/living/scp/scp939/member in owner.pack_system.pack_members)
+		if(QDELETED(member))
+			continue
 		if(member.hunting_system && member != owner)
 			member.hunting_system.current_target = target
 			member.hunting_system.hunt_mode = TRUE

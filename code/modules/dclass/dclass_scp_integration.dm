@@ -28,7 +28,10 @@
 	if(!(player.ckey in SSdclass_experiments?.active_test_subjects))
 		return
 
-	var/danger_level = SSdclass_experiments.active_test_subjects[player.ckey]["danger_level"]
+	if(!SSdclass_experiments)
+		return
+
+	var/danger_level = SSdclass_experiments.active_test_subjects[player.ckey]["danger_level"] || 1
 
 	var/outcome = "failure"
 	switch(interaction_type)

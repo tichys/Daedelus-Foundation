@@ -448,7 +448,7 @@
 	id = /obj/item/card/id/advanced/gold
 	id_trim = /datum/id_trim/job/chief_engineer
 	uniform = /obj/item/clothing/under/rank/engineering/chief_engineer
-	suit = /obj/item/clothing/suit/hazardvest/white
+	suit = /obj/item/clothing/suit/hazardvest
 	head = /obj/item/clothing/head/hardhat/white
 	belt = /obj/item/modular_computer/tablet/pda/heads/ce
 	ears = /obj/item/radio/headset/heads/ce

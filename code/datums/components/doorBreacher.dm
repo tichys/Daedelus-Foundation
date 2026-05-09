@@ -63,7 +63,6 @@
 	// Update any persistence tracking
 	if(istype(breacher, /mob/living/scp/scp049))
 		var/mob/living/scp/scp049/scp = breacher
-		scp.doors_breached += length(doors_to_breach)
 		scp.save_persistence_data()
 
 /datum/component/doorBreacher/proc/breach_single_door(obj/machinery/door/door, mob/living/breacher)

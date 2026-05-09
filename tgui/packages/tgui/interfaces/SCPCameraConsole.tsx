@@ -2,7 +2,7 @@ import { BooleanLike } from 'common/react';
 import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
-import { Box, Button, Input, Section, Stack, Tabs } from '../components';
+import { Box, Button } from '../components';
 import { Window } from '../layouts';
 
 type CameraInfo = {

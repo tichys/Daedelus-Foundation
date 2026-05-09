@@ -2,7 +2,7 @@ import { BooleanLike } from 'common/react';
 import React from 'react';
 
 import { useBackend } from '../backend';
-import { Box, Button, Section, Stack } from '../components';
+import { Box, Button } from '../components';
 import { Window } from '../layouts';
 
 type ZoneState = {

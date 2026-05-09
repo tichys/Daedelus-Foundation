@@ -9,6 +9,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 /datum/controller/subsystem/scp_persistence/Initialize()
 	manager = new /datum/scp_persistence_manager()
+	initialize_chain_breaches()
 	world.log << "SCP Persistence Subsystem: Initialized"
 	return ..()
 
@@ -21,13 +22,16 @@ SUBSYSTEM_DEF(scp_persistence)
 /datum/controller/subsystem/scp_persistence/proc/rebuild_scp_cache()
 	cached_scp_atoms = list()
 	cached_scp_mobs = list()
+	for(var/mob/living/scp/S in GLOB.mob_list)
+		var/id = manager?.get_scp_id(S)
+		if(id)
+			cached_scp_atoms[id] = S
+			cached_scp_mobs[id] = S
 	for(var/obj/O in world)
 		if(findtext(O.name, "SCP-"))
 			var/id = manager?.get_scp_id(O)
-			if(id)
+			if(id && !(id in cached_scp_atoms))
 				cached_scp_atoms[id] = O
-				if(istype(O, /mob/living/scp))
-					cached_scp_mobs[id] = O
 	cache_dirty = FALSE
 
 /datum/controller/subsystem/scp_persistence/proc/mark_cache_dirty()
@@ -58,6 +62,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	var/scp_rotation_enabled = FALSE
 	var/rotation_interval = 18000 // 30 minutes
 	var/last_rotation_time = 0
+	var/last_auto_save = 0
 
 	// Player Performance System
 	var/list/player_performance_data = list() // ckey -> datum/player_performance
@@ -79,8 +84,9 @@ SUBSYSTEM_DEF(scp_persistence)
 
 	process_cross_scp_interactions(cached_atoms)
 
-	if(world.time % 6000 == 0)
+	if(world.time - last_auto_save >= 6000)
 		save_scp_data()
+		last_auto_save = world.time
 
 	for(var/client/C in GLOB.clients)
 		if(C.mob && istype(C.mob, /mob/living/scp))
@@ -94,7 +100,7 @@ SUBSYSTEM_DEF(scp_persistence)
 		process_player_performance()
 
 /datum/scp_persistence_manager/proc/update_scp_instances(list/cached_atoms, list/cached_mobs)
-	for(var/scp_id in cached_atoms)
+	for(var/scp_id in cached_atoms.Copy())
 		var/obj/O = cached_atoms[scp_id]
 		if(!O || QDELETED(O))
 			cached_atoms -= scp_id
@@ -149,27 +155,35 @@ SUBSYSTEM_DEF(scp_persistence)
 	return null
 
 /datum/scp_persistence_manager/proc/update_research_projects()
-	// Update ongoing research projects
-	for(var/project_id in research_projects)
+	for(var/project_id in research_projects.Copy())
 		var/datum/research_project/project = research_projects[project_id]
+		if(!istype(project))
+			research_projects -= project_id
+			continue
 		project.update_progress()
 
 /datum/scp_persistence_manager/proc/update_containment_protocols()
-	// Update containment protocol effectiveness
-	for(var/protocol_id in containment_protocols)
+	for(var/protocol_id in containment_protocols.Copy())
 		var/datum/containment_protocol/protocol = containment_protocols[protocol_id]
+		if(!istype(protocol))
+			containment_protocols -= protocol_id
+			continue
 		protocol.update_effectiveness()
 
 /datum/scp_persistence_manager/proc/update_anomaly_effects()
-	// Update persistent anomaly effects
-	for(var/effect_id in anomaly_effects)
+	for(var/effect_id in anomaly_effects.Copy())
 		var/datum/anomaly_effect/effect = anomaly_effects[effect_id]
+		if(!istype(effect))
+			anomaly_effects -= effect_id
+			continue
 		effect.update_effect()
 
 /datum/scp_persistence_manager/proc/update_environmental_changes()
-	// Update environmental changes caused by SCPs
-	for(var/change_id in environmental_changes)
+	for(var/change_id in environmental_changes.Copy())
 		var/datum/environmental_change/change = environmental_changes[change_id]
+		if(!istype(change))
+			environmental_changes -= change_id
+			continue
 		change.update_change()
 
 /datum/scp_persistence_manager/proc/calculate_global_metrics()
@@ -203,59 +217,62 @@ SUBSYSTEM_DEF(scp_persistence)
 		research_progress = total_progress / project_count
 
 /datum/scp_persistence_manager/proc/save_scp_data()
-	var/list/serializable_instances = list()
-	for(var/scp_id in scp_instances)
-		var/datum/scp_instance/instance = scp_instances[scp_id]
-		serializable_instances[scp_id] = instance.serialize()
+	try
+		var/list/serializable_instances = list()
+		for(var/scp_id in scp_instances)
+			var/datum/scp_instance/instance = scp_instances[scp_id]
+			serializable_instances[scp_id] = instance.serialize()
 
-	var/list/serializable_research = list()
-	for(var/project_id in research_projects)
-		var/datum/research_project/project = research_projects[project_id]
-		serializable_research[project_id] = list(
-			"project_id" = project.project_id,
-			"project_name" = project.project_name,
-			"progress" = project.progress,
-			"max_progress" = project.max_progress,
-			"research_status" = project.research_status,
-			"priority_level" = project.priority_level
+		var/list/serializable_research = list()
+		for(var/project_id in research_projects)
+			var/datum/research_project/project = research_projects[project_id]
+			serializable_research[project_id] = list(
+				"project_id" = project.project_id,
+				"project_name" = project.project_name,
+				"progress" = project.progress,
+				"max_progress" = project.max_progress,
+				"research_status" = project.research_status,
+				"priority_level" = project.priority_level
+			)
+
+		var/list/data = list(
+			"scp_instances" = serializable_instances,
+			"research_projects" = serializable_research,
+			"global_containment_stability" = global_containment_stability,
+			"active_breaches" = active_breaches,
+			"research_progress" = research_progress,
+			"containment_effectiveness" = containment_effectiveness,
+			"enabled_scps" = enabled_scps,
+			"disabled_scps" = disabled_scps,
+			"scp_configurations" = scp_configurations,
+			"scp_restrictions" = scp_restrictions,
+			"scp_permissions" = scp_permissions,
+			"global_scp_management_mode" = global_scp_management_mode,
+			"management_override" = management_override,
+			"auto_containment_enabled" = auto_containment_enabled,
+			"scp_rotation_enabled" = scp_rotation_enabled,
+			"rotation_interval" = rotation_interval,
+			"last_rotation_time" = last_rotation_time
 		)
 
-	var/list/data = list(
-		"scp_instances" = serializable_instances,
-		"research_projects" = serializable_research,
-		"global_containment_stability" = global_containment_stability,
-		"active_breaches" = active_breaches,
-		"research_progress" = research_progress,
-		"containment_effectiveness" = containment_effectiveness,
-		"enabled_scps" = enabled_scps,
-		"disabled_scps" = disabled_scps,
-		"scp_configurations" = scp_configurations,
-		"scp_restrictions" = scp_restrictions,
-		"scp_permissions" = scp_permissions,
-		"global_scp_management_mode" = global_scp_management_mode,
-		"management_override" = management_override,
-		"auto_containment_enabled" = auto_containment_enabled,
-		"scp_rotation_enabled" = scp_rotation_enabled,
-		"rotation_interval" = rotation_interval,
-		"last_rotation_time" = last_rotation_time
-	)
-
-	var/filename = "data/scp_persistence.json"
-	rustg_file_write(json_encode(data), filename)
+		var/filename = "data/scp_persistence.json"
+		rustg_file_write(json_encode(data), filename)
+	catch
+		world.log << "SCP Persistence: Error saving SCP data"
 
 /datum/scp_persistence_manager/proc/load_scp_data()
-	var/filename = "data/scp_persistence.json"
-	if(fexists(filename))
-		var/json_data = file2text(filename)
-		var/list/data = json_decode(json_data)
+	var/list/data = null
+	try
+		var/filename = "data/scp_persistence.json"
+		if(fexists(filename))
+			var/json_data = file2text(filename)
+			data = json_decode(json_data)
 
 		if(data)
 			var/list/raw_instances = data["scp_instances"] || list()
 			for(var/scp_id in raw_instances)
 				var/list/raw = raw_instances[scp_id]
-				if(istype(raw, /datum/scp_instance))
-					scp_instances[scp_id] = raw
-				else if(islist(raw))
+				if(islist(raw))
 					var/datum/scp_instance/instance = new /datum/scp_instance(scp_id, null)
 					if(raw["containment_status"])
 						instance.containment_status = raw["containment_status"]
@@ -278,11 +295,72 @@ SUBSYSTEM_DEF(scp_persistence)
 					scp_instances[scp_id] = instance
 				else
 					scp_instances[scp_id] = new /datum/scp_instance(scp_id, null)
-			research_projects = data["research_projects"] || list()
-			containment_protocols = data["containment_protocols"] || list()
-			anomaly_effects = data["anomaly_effects"] || list()
-			communication_logs = data["communication_logs"] || list()
-			environmental_changes = data["environmental_changes"] || list()
+
+			var/list/raw_research = data["research_projects"] || list()
+			for(var/project_id in raw_research)
+				try
+					var/list/rd = raw_research[project_id]
+					if(!islist(rd))
+						continue
+					var/datum/research_project/project = new /datum/research_project(project_id, rd["project_name"], null)
+					if(rd["progress"]) project.progress = rd["progress"]
+					if(rd["max_progress"]) project.max_progress = rd["max_progress"]
+					if(rd["research_status"]) project.research_status = rd["research_status"]
+					if(rd["priority_level"]) project.priority_level = rd["priority_level"]
+					research_projects[project_id] = project
+				catch
+					continue
+
+			var/list/raw_protocols = data["containment_protocols"] || list()
+			for(var/protocol_id in raw_protocols)
+				try
+					var/list/pd = raw_protocols[protocol_id]
+					if(!islist(pd))
+						continue
+					var/datum/containment_protocol/protocol = new /datum/containment_protocol(protocol_id, pd["protocol_name"], null)
+					if(pd["effectiveness"]) protocol.effectiveness = pd["effectiveness"]
+					if(pd["protocol_status"]) protocol.protocol_status = pd["protocol_status"]
+					if(pd["last_maintenance"]) protocol.last_maintenance = pd["last_maintenance"]
+					if(pd["next_maintenance"]) protocol.next_maintenance = pd["next_maintenance"]
+					containment_protocols[protocol_id] = protocol
+				catch
+					continue
+
+			var/list/raw_effects = data["anomaly_effects"] || list()
+			for(var/effect_id in raw_effects)
+				try
+					var/list/ed = raw_effects[effect_id]
+					if(!islist(ed))
+						continue
+					var/datum/anomaly_effect/effect = new /datum/anomaly_effect(effect_id, ed["effect_name"], null)
+					if(ed["effect_type"]) effect.effect_type = ed["effect_type"]
+					if(ed["effect_strength"]) effect.effect_strength = ed["effect_strength"]
+					if(ed["effect_radius"]) effect.effect_radius = ed["effect_radius"]
+					if(ed["duration"]) effect.duration = ed["duration"]
+					if(ed["effect_status"]) effect.effect_status = ed["effect_status"]
+					anomaly_effects[effect_id] = effect
+				catch
+					continue
+
+			var/list/raw_comms = data["communication_logs"] || list()
+			for(var/log_id in raw_comms)
+				if(islist(raw_comms[log_id]))
+					communication_logs[log_id] = raw_comms[log_id]
+
+			var/list/raw_env = data["environmental_changes"] || list()
+			for(var/change_id in raw_env)
+				try
+					var/list/cd = raw_env[change_id]
+					if(!islist(cd))
+						continue
+					var/datum/environmental_change/change = new /datum/environmental_change(change_id, cd["change_name"], null)
+					if(cd["change_type"]) change.change_type = cd["change_type"]
+					if(cd["change_strength"]) change.change_strength = cd["change_strength"]
+					if(cd["duration"]) change.duration = cd["duration"]
+					if(cd["change_status"]) change.change_status = cd["change_status"]
+					environmental_changes[change_id] = change
+				catch
+					continue
 			global_containment_stability = data["global_containment_stability"] || 100
 			active_breaches = data["active_breaches"] || 0
 			research_progress = data["research_progress"] || 0
@@ -298,6 +376,8 @@ SUBSYSTEM_DEF(scp_persistence)
 			scp_rotation_enabled = data["scp_rotation_enabled"] || FALSE
 			rotation_interval = data["rotation_interval"] || 18000
 			last_rotation_time = data["last_rotation_time"] || 0
+	catch
+		world.log << "SCP Persistence: Error loading SCP data"
 
 // SCP Instance Datum
 /datum/scp_instance
@@ -705,10 +785,6 @@ SUBSYSTEM_DEF(scp_persistence)
 	// Apply management mode effects
 	apply_management_mode_effects()
 
-	// Check for auto-containment
-	if(auto_containment_enabled)
-		check_auto_containment()
-
 // Enable an SCP
 /datum/scp_persistence_manager/proc/enable_scp(scp_id)
 	if(!scp_id)
@@ -837,11 +913,8 @@ SUBSYSTEM_DEF(scp_persistence)
 
 	// Get all available SCPs
 	var/list/all_scps = list()
-	for(var/obj/O in world)
-		if(findtext(O.name, "SCP-"))
-			var/scp_id = get_scp_id(O)
-			if(scp_id)
-				all_scps += scp_id
+	for(var/scp_id in scp_instances)
+		all_scps += scp_id
 
 	// Disable all SCPs
 	for(var/scp_id in all_scps)
@@ -856,29 +929,6 @@ SUBSYSTEM_DEF(scp_persistence)
 			all_scps -= selected_scp
 
 	world.log << "SCP Management: Rotation completed, [length(enabled_scps)] SCPs enabled"
-
-// Check for auto-containment
-/datum/scp_persistence_manager/proc/check_auto_containment()
-	if(!auto_containment_enabled)
-		return
-
-	for(var/scp_id in scp_instances)
-		var/datum/scp_instance/instance = scp_instances[scp_id]
-		if(instance.containment_status == "breached")
-			// Attempt auto-containment
-			attempt_auto_containment(scp_id)
-
-// Attempt auto-containment of breached SCP
-/datum/scp_persistence_manager/proc/attempt_auto_containment(scp_id)
-	var/datum/scp_instance/instance = scp_instances[scp_id]
-	if(!instance)
-		return
-
-	// Simple auto-containment logic
-	if(instance.containment_health < 30)
-		instance.containment_status = "contained"
-		instance.containment_health = 100
-		world.log << "SCP Management: Auto-containment successful for [scp_id]"
 
 // Force SCP rotation (admin command)
 /datum/scp_persistence_manager/proc/force_scp_rotation()
@@ -925,8 +975,8 @@ SUBSYSTEM_DEF(scp_persistence)
 				"key" = C.key,
 				"name" = H.real_name,
 				"job" = H.job,
-				"rank" = H.mind ? 1 : 1, // Placeholder for rank system
-				"clearance" = H.mind ? 1 : 1, // Placeholder for clearance system
+				"rank" = H.mind ? 1 : 0,
+				"clearance" = H.mind ? 1 : 0,
 				"online" = TRUE
 			)
 			player_data += list(player_info)
@@ -1170,8 +1220,8 @@ SUBSYSTEM_DEF(scp_persistence)
 	var/datum/player_performance/performance = player_performance_data[ckey]
 
 	// Update basic stats
-	performance.total_playtime += 5 // 5 seconds per fire cycle
-	performance.last_updated = 0
+	performance.total_playtime += 30
+	performance.last_updated = world.time
 
 /datum/scp_persistence_manager/proc/get_player_performance(var/ckey)
 	if(!(ckey in player_performance_data))

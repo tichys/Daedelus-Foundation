@@ -54,7 +54,7 @@
 	visible_message(span_warning("[src] activates! Decontamination in progress!"))
 
 	for(var/mob/living/carbon/human/H in range(detection_range, src))
-		for(var/datum/pathogen/P in H.diseases)
+		for(var/datum/pathogen/P in H.diseases.Copy())
 			if(istype(P, /datum/pathogen/foundation))
 				var/datum/pathogen/foundation/F = P
 				if(F.bsl_level == BSL_1 || F.bsl_level == BSL_2)
@@ -72,7 +72,7 @@
 
 /obj/machinery/decon_shower/proc/deactivate_decon()
 	active = FALSE
-	icon_state = "decon"
+	icon_state = "rdserver"
 
 /obj/machinery/decon_shower/attack_hand(mob/user)
 	. = ..()
@@ -126,11 +126,11 @@
 
 /obj/machinery/autoclave/proc/finish_sterilization()
 	processing = FALSE
-	icon_state = "autolathe"
+	icon_state = "autoclave"
 
 	for(var/obj/item/I in stored_items)
 		I.forceMove(get_turf(src))
-		for(var/datum/pathogen/P in I.reagents?.reagent_list)
+		for(var/datum/pathogen/P in I)
 			qdel(P)
 
 	stored_items.Cut()
@@ -146,13 +146,26 @@
 	req_access = list(ACCESS_SECURITY_LVL5)
 	var/inner_door = FALSE
 	var/lock_cooldown = 0
+	var/obj/machinery/door/airlock/double_bsl4/partner_door
 
 /obj/machinery/door/airlock/double_bsl4/Initialize()
 	. = ..()
+	find_partner_door()
 	RegisterSignal(src, COMSIG_AIRLOCK_OPEN, PROC_REF(on_partner_open))
 
+/obj/machinery/door/airlock/double_bsl4/proc/find_partner_door()
+	var/closest_dist = INFINITY
+	for(var/obj/machinery/door/airlock/double_bsl4/D in range(3, src))
+		if(D == src)
+			continue
+		var/dist = get_dist(src, D)
+		if(dist < closest_dist)
+			closest_dist = dist
+			partner_door = D
+			D.partner_door = src
+
 /obj/machinery/door/airlock/double_bsl4/proc/on_partner_open()
-	if(density)
+	if(!density)
 		return
 	if(world.time < lock_cooldown)
 		return
@@ -161,9 +174,12 @@
 
 /obj/machinery/door/airlock/double_bsl4/open()
 	if(inner_door)
-		for(var/obj/machinery/door/airlock/double_bsl4/D in range(3, src))
-			if(D != src && D.density == FALSE)
-				return FALSE
+		if(partner_door && !partner_door.density)
+			return FALSE
+		else if(!partner_door)
+			for(var/obj/machinery/door/airlock/double_bsl4/D in range(3, src))
+				if(D != src && D.density == FALSE)
+					return FALSE
 	return ..()
 
 /obj/effect/landmark/bsl4_lab

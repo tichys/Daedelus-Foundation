@@ -37,9 +37,14 @@ const PHASE_NAMES = {
   4: 'Conclusion',
 };
 
-export const ResearchLaboratory = (props, context) => {
-  const { act, data } = useBackend(context);
+export const ResearchLaboratory = (props) => {
+  const { act, data } = useBackend();
   const [activeTab, setActiveTab] = React.useState('overview');
+
+  if (!data) {
+    return <Box color="red">Loading SCP terminal data...</Box>;
+  }
+
   const { is_admin } = data;
 
   return (
@@ -72,7 +77,7 @@ export const ResearchLaboratory = (props, context) => {
                   </Button>
                 </Flex.Item>
               ))}
-              {is_admin && (
+              {!!is_admin && (
                 <Flex.Item mx={0.5}>
                   <Button
                     selected={activeTab === 'admin'}
@@ -94,7 +99,7 @@ export const ResearchLaboratory = (props, context) => {
             {activeTab === 'techtree' && <TechTreeTab />}
             {activeTab === 'teams' && <TeamsTab />}
             {activeTab === 'safety' && <SafetyTab />}
-            {activeTab === 'admin' && is_admin && <AdminTab />}
+            {activeTab === 'admin' && !!is_admin && <AdminTab />}
           </Stack.Item>
         </Stack>
       </Window.Content>
@@ -102,8 +107,8 @@ export const ResearchLaboratory = (props, context) => {
   );
 };
 
-const OverviewTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const OverviewTab = (props) => {
+  const { act, data } = useBackend();
   const { system_metrics, scp_research_data, user_name, user_job, user_access_level } = data;
 
   return (
@@ -179,8 +184,8 @@ const OverviewTab = (props, context) => {
   );
 };
 
-const ExperimentsTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const ExperimentsTab = (props) => {
+  const { act, data } = useBackend();
   const { active_experiments, scp_targets, user_access_level } = data;
   const [selectedSCP, setSelectedSCP] = React.useState(null);
 
@@ -311,8 +316,8 @@ const ExperimentsTab = (props, context) => {
   );
 };
 
-const ProjectsTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const ProjectsTab = (props) => {
+  const { act, data } = useBackend();
   const { research_projects } = data;
   const [showCreate, setShowCreate] = React.useState(false);
 
@@ -370,8 +375,8 @@ const ProjectsTab = (props, context) => {
   );
 };
 
-const TechTreeTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const TechTreeTab = (props) => {
+  const { act, data } = useBackend();
   const { tech_tree, available_tech, system_metrics } = data;
   const [selectedCategory, setSelectedCategory] = React.useState(null);
 
@@ -440,8 +445,8 @@ const TechTreeTab = (props, context) => {
   );
 };
 
-const TeamsTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const TeamsTab = (props) => {
+  const { act, data } = useBackend();
   const { research_teams, researcher_skills } = data;
 
   const teamList = research_teams ? Object.values(research_teams) : [];
@@ -510,8 +515,8 @@ const TeamsTab = (props, context) => {
   );
 };
 
-const SafetyTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const SafetyTab = (props) => {
+  const { act, data } = useBackend();
   const { safety_protocols, system_metrics } = data;
 
   const protocolList = safety_protocols ? Object.values(safety_protocols) : [];
@@ -557,8 +562,8 @@ const SafetyTab = (props, context) => {
   );
 };
 
-const AdminTab = (props, context) => {
-  const { act, data } = useBackend(context);
+const AdminTab = (props) => {
+  const { act, data } = useBackend();
   const { research_facilities, research_achievements } = data;
 
   return (

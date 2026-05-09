@@ -19,33 +19,37 @@
 
 	var/obj/item/clothing/mask/scp035/mask
 
+	var/persistence_id = "SCP-035"
+	var/list/persistence_data = list()
+	var/last_persistence_save = 0
+	var/persistence_save_interval = 300
+	var/containment_status = "contained"
+	var/breach_count = 0
+	var/last_breach_time = 0
+	var/list/interaction_history = list()
+	var/last_containment_check = 0
+	var/containment_check_interval = 30 SECONDS
+
 /mob/living/scp035/Move()
 	return FALSE
 
 /mob/living/scp035/Initialize(mapload)
 	. = ..()
-	SCP = new /datum/scp(src, "SCP-035", SCP_KETER, "035", SCP_PLAYABLE)
-	SCP.min_playercount = 20
-	SCP.min_time = 30 MINUTES
-	SCP.memeticFlags = MVISUAL|MAUDIBLE|MSYNCED
-
 	mask = new /obj/item/clothing/mask/scp035(get_turf(src))
 	mask.linked_mob = src
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-035"] = new /datum/scp_instance("SCP-035", src)
 
 /mob/living/scp035/Destroy()
 	if(mask)
 		mask.linked_mob = null
-		QDEL_NULL(mask)
-	QDEL_NULL(SCP)
+		mask = null
 	return ..()
 
 /mob/living/scp035/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
 	if(stat == DEAD)
 		return
+	update_persistence()
+	check_containment()
 	if(mask && mask.possession_system?.current_host)
 		var/mob/living/carbon/human/host = mask.possession_system.current_host
 		if(host.stat == DEAD)
@@ -80,6 +84,63 @@
 	forceMove(get_turf(host))
 	if(host.stat != DEAD)
 		host.death()
+
+/mob/living/scp035/proc/update_persistence()
+	if(world.time < last_persistence_save + persistence_save_interval)
+		return
+	last_persistence_save = world.time
+	persistence_data["containment_status"] = containment_status
+	persistence_data["breach_count"] = breach_count
+	persistence_data["last_breach_time"] = last_breach_time
+	persistence_data["interaction_history"] = interaction_history.Copy()
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		if(instance)
+			instance.containment_status = containment_status
+
+/mob/living/scp035/proc/check_containment()
+	if(world.time < last_containment_check + containment_check_interval)
+		return
+	last_containment_check = world.time
+	if(mask && mask.possession_system?.current_host)
+		if(containment_status != "breached")
+			breach_containment()
+	else if(!mask || !mask.possession_system?.current_host)
+		if(containment_status == "breached")
+			return_to_containment()
+
+/mob/living/scp035/proc/breach_containment()
+	if(containment_status == "breached")
+		return
+	containment_status = "breached"
+	breach_count++
+	last_breach_time = world.time
+	if(mask)
+		mask.containment_status = "breached"
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		if(instance)
+			instance.containment_status = "breached"
+			instance.add_breach_record()
+
+/mob/living/scp035/proc/return_to_containment()
+	if(containment_status == "contained")
+		return
+	containment_status = "contained"
+	if(mask)
+		mask.containment_status = "contained"
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		if(instance)
+			instance.containment_status = "contained"
+
+/mob/living/scp035/proc/add_interaction_record(target, interaction_type)
+	var/record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [interaction_type] with [target ? "[target]" : "unknown"]"
+	interaction_history += record
+	if(SSscp_persistence && SSscp_persistence.manager)
+		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		if(instance)
+			instance.add_interaction_record(target, interaction_type)
 
 // Core SCP-035 mask object
 /obj/item/clothing/mask/scp035
@@ -135,9 +196,6 @@
 	SCP.min_playercount = 20
 	SCP.min_time = 30 MINUTES
 	SCP.memeticFlags = MVISUAL|MAUDIBLE|MSYNCED //Memetic flags determine required factors for a human to be affected
-	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-035"] = new /datum/scp_instance("SCP-035", src)
 
 	// Don't start processing until we have a host
 	// START_PROCESSING(SSobj, src)
@@ -316,7 +374,8 @@
 
 	former_host.dropItemToGround(mask)
 	former_host.adjustBruteLoss(5)
-	former_host.stamina.adjust(-25)
+	if(former_host.stamina)
+		former_host.stamina.adjust(-25)
 	to_chat(former_host, "<span class='danger'>The mask's influence is removed! You feel weakened!</span>")
 
 	STOP_PROCESSING(SSobj, mask)
@@ -334,8 +393,9 @@
 	possession_strength = min(max_possession_strength, possession_strength + 1)
 
 	// Apply status effects
-	host.adjustBruteLoss(-10) // Temporary healing
-	host.stamina.adjust(50) // Energy boost
+	host.adjustBruteLoss(-10)
+	if(host.stamina)
+		host.stamina.adjust(50)
 
 	to_chat(host, "<span class='notice'>You feel the mask's consciousness merging with yours...</span>")
 	to_chat(host, "<span class='warning'>The mask's personality traits are influencing you: [jointext(personality_traits, ", ")]</span>")
@@ -490,27 +550,31 @@
 	var/mob/living/carbon/human/host = mask.possession_system.current_host
 
 	if(corruption_level >= 20)
-		host.stamina.adjust(-5)
+		if(host.stamina)
+			host.stamina.adjust(-5)
 		if(prob(5))
 			to_chat(host, "<span class='warning'>You feel the mask's influence growing stronger...</span>")
 
 	if(corruption_level >= 40)
 		host.adjustBruteLoss(1)
-		host.stamina.adjust(-10)
+		if(host.stamina)
+			host.stamina.adjust(-10)
 		if(prob(5))
 			to_chat(host, "<span class='danger'>The mask's corruption is affecting your body!</span>")
 
 	if(corruption_level >= 60)
 		host.adjustBruteLoss(2)
 		host.adjustToxLoss(1)
-		host.stamina.adjust(-15)
+		if(host.stamina)
+			host.stamina.adjust(-15)
 		if(prob(5))
 			to_chat(host, "<span class='danger'>Your consciousness is being consumed by the mask!</span>")
 
 	if(corruption_level >= 80)
 		host.adjustBruteLoss(3)
 		host.adjustToxLoss(2)
-		host.stamina.adjust(-25)
+		if(host.stamina)
+			host.stamina.adjust(-25)
 		if(prob(5))
 			to_chat(host, "<span class='danger'>The mask's corruption is nearly complete!</span>")
 
@@ -532,10 +596,17 @@
 	mask = mask_ref
 
 /datum/scp035_telepathy/proc/update()
+	cleanup_dead_mobs()
 	scan_for_targets()
 
 	for(var/mob/living/carbon/human/target in affected_targets)
 		apply_influence(target)
+
+/datum/scp035_telepathy/proc/cleanup_dead_mobs()
+	for(var/mob/living/carbon/human/H in influence_levels)
+		if(QDELETED(H))
+			influence_levels -= H
+			affected_targets -= H
 
 /datum/scp035_telepathy/proc/scan_for_targets()
 	var/list/new_targets = list()
@@ -619,12 +690,14 @@
 	if(influence_level >= 40)
 		if(prob(10))
 			to_chat(target, "<span class='danger'>The whispers are getting louder! You feel drawn to the mask!</span>")
-		target.stamina.adjust(-5)
+		if(target.stamina)
+			target.stamina.adjust(-5)
 
 	if(influence_level >= 60)
 		if(prob(10))
 			to_chat(target, "<span class='danger'>The mask is calling to you! You must wear it!</span>")
-		target.stamina.adjust(-10)
+		if(target.stamina)
+			target.stamina.adjust(-10)
 		target.adjustToxLoss(1)
 
 		if(prob(20))
@@ -633,7 +706,8 @@
 	if(influence_level >= 80)
 		if(prob(10))
 			to_chat(target, "<span class='danger'>The mask's influence is overwhelming! You need to wear it!</span>")
-		target.stamina.adjust(-15)
+		if(target.stamina)
+			target.stamina.adjust(-15)
 		target.adjustToxLoss(2)
 		mask.personality_changes_induced++
 
@@ -646,7 +720,8 @@
 			return
 		if(prob(10))
 			to_chat(target, "<span class='danger'>You can't resist anymore! You must wear the mask!</span>")
-		target.stamina.adjust(-25)
+		if(target.stamina)
+			target.stamina.adjust(-25)
 		target.adjustToxLoss(5)
 
 		force_possession(target)
@@ -824,15 +899,15 @@
 				to_chat(usr, "<span class='warning'>No injured targets nearby to heal.</span>")
 
 		if("Combat Training")
-			H.stamina.adjust(50)
+			if(H.stamina)
+				H.stamina.adjust(50)
 			H.SetStun(0)
 			H.SetKnockdown(0)
 			H.SetImmobilized(0)
 			H.SetParalyzed(0)
-			H.physiology.brute_mod *= 0.7
+			H.scp035_modify_physiology(0.7, 1, 30 SECONDS)
 			H.visible_message("<span class='warning'>[H] moves with unnatural combat precision!</span>", \
 				"<span class='notice'>You draw upon stolen combat training, shaking off incapacitation.</span>")
-			addtimer(CALLBACK(H, /mob/living/carbon/human/proc/reset_physiology), 30 SECONDS)
 			hook_scp_combat(H, "SCP-035", 0, possession_system.possession_strength)
 
 		if("Security Clearance")
@@ -930,7 +1005,8 @@
 			if(length(nearby_humans))
 				var/mob/living/carbon/human/target = input(usr, "Choose a target to command:", "SCP-035 Authority") as null|anything in nearby_humans
 				if(target)
-					target.sanity.adjust_sanity(-25, "scp035_command")
+					if(target.sanity)
+						target.sanity.adjust_sanity(-25, "scp035_command")
 					target.apply_status_effect(/datum/status_effect/incapacitating/stun, 3 SECONDS)
 					target.visible_message("<span class='warning'>[target] freezes under [H]'s commanding presence!</span>", \
 						"<span class='danger'>An overwhelming authority compels you to obey!</span>")
@@ -944,21 +1020,39 @@
 			addtimer(CALLBACK(H, /mob/proc/remove_movespeed_modifier, /datum/movespeed_modifier/scp035_speed), 30 SECONDS)
 
 		if("Enhanced Durability")
-			H.physiology.brute_mod *= 0.5
-			H.physiology.burn_mod *= 0.5
+			H.scp035_modify_physiology(0.5, 0.5, 30 SECONDS)
 			to_chat(usr, "<span class='notice'>You harden your stolen body against damage!</span>")
-			addtimer(CALLBACK(H, /mob/living/carbon/human/proc/reset_physiology), 30 SECONDS)
 
 		if("Heat Resistance")
-			H.physiology.burn_mod *= 0.3
+			H.scp035_modify_physiology(1, 0.3, 45 SECONDS)
 			to_chat(usr, "<span class='notice'>You suppress your stolen body's heat sensitivity!</span>")
-			addtimer(CALLBACK(H, /mob/living/carbon/human/proc/reset_physiology), 45 SECONDS)
 
 		else
 			to_chat(usr, "<span class='notice'>You use your [ability].</span>")
 
-/mob/living/carbon/human/proc/reset_physiology()
+/mob/living/carbon/human/proc/scp035_reset_physiology()
 	physiology.brute_mod = initial(physiology.brute_mod)
+	physiology.burn_mod = initial(physiology.burn_mod)
+
+/mob/living/carbon/human/var/scp035_brute_timer = null
+/mob/living/carbon/human/var/scp035_burn_timer = null
+
+/mob/living/carbon/human/proc/scp035_modify_physiology(brute_mult, burn_mult, duration)
+	if(brute_mult != 1)
+		physiology.brute_mod *= brute_mult
+		deltimer(scp035_brute_timer)
+		scp035_brute_timer = addtimer(CALLBACK(src, /mob/living/carbon/human/proc/scp035_reset_brute), duration, TIMER_STOPPABLE)
+	if(burn_mult != 1)
+		physiology.burn_mod *= burn_mult
+		deltimer(scp035_burn_timer)
+		scp035_burn_timer = addtimer(CALLBACK(src, /mob/living/carbon/human/proc/scp035_reset_burn), duration, TIMER_STOPPABLE)
+
+/mob/living/carbon/human/proc/scp035_reset_brute()
+	scp035_brute_timer = null
+	physiology.brute_mod = initial(physiology.brute_mod)
+
+/mob/living/carbon/human/proc/scp035_reset_burn()
+	scp035_burn_timer = null
 	physiology.burn_mod = initial(physiology.burn_mod)
 
 /datum/movespeed_modifier/scp035_speed

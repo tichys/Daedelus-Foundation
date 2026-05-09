@@ -176,6 +176,7 @@ SUBSYSTEM_DEF(scp_research)
 
 	if(project.research_level > old_level)
 		on_research_level_up(project, researcher_ckey)
+		check_cross_interaction_discoveries(project.scp_designation, researcher_ckey)
 
 	// Update researcher profile
 	var/datum/researcher_data/researcher = get_researcher_profile(researcher_ckey)

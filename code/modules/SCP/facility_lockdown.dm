@@ -18,6 +18,10 @@
 	var/comms_jammed = FALSE
 	var/elevators_disabled = FALSE
 	var/blast_doors_closed = FALSE
+	var/list/jammed_radios = list()
+	var/saved_security_level = 0
+	var/cached_airlock_iteration = 0
+	var/airlock_cache_cooldown = 30 SECONDS
 
 /obj/machinery/facility_lockdown_console/attack_hand(mob/user)
 	if(!ishuman(user))
@@ -66,12 +70,13 @@
 
 /obj/machinery/facility_lockdown_console/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
+	var/mob/user = usr
 	if(.)
 		return
 
-	if(!ishuman(usr))
+	if(!ishuman(user))
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = user
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_ADMIN in id_card.access))
 		to_chat(H, "<span class='warning'>Requires Command access to operate lockdown systems.</span>")
@@ -109,6 +114,8 @@
 	lockdown_reason = reason
 	lockdown_start_time = world.time
 
+	log_game("Facility lockdown initiated by [initiator ? key_name(initiator) : "automated system"]: [level == LOCKDOWN_FULL ? "FULL" : "PARTIAL"] - [reason]")
+
 	if(level >= LOCKDOWN_PARTIAL)
 		close_blast_doors()
 		lockdown_dclass_areas()
@@ -116,6 +123,9 @@
 	if(level >= LOCKDOWN_FULL)
 		disable_elevators()
 		jam_communications()
+
+	if(auto_lift_time > 0)
+		addtimer(CALLBACK(src, /obj/machinery/facility_lockdown_console/proc/lift_lockdown, null), auto_lift_time)
 
 	priority_announce(
 		"ATTENTION: [level == LOCKDOWN_FULL ? "FULL" : "PARTIAL"] FACILITY LOCKDOWN INITIATED. Reason: [reason]. [level == LOCKDOWN_FULL ? "All personnel remain at current posts. Blast doors sealed. Elevators disabled." : "D-Class areas secured. Blast doors closing."]",
@@ -170,7 +180,11 @@
 
 /obj/machinery/facility_lockdown_console/proc/lockdown_dclass_areas()
 	if(SSdclass && SSdclass.manager)
+		saved_security_level = SSdclass.manager.current_security_level
 		SSdclass.manager.current_security_level = 4
+	if(world.time < cached_airlock_iteration)
+		return
+	cached_airlock_iteration = world.time + airlock_cache_cooldown
 	for(var/obj/machinery/door/airlock/A in INSTANCES_OF(/obj/machinery/door/airlock))
 		var/area/area = get_area(A)
 		if(istype(area, /area/scp/dclass))
@@ -178,7 +192,10 @@
 
 /obj/machinery/facility_lockdown_console/proc/unlock_dclass_areas()
 	if(SSdclass && SSdclass.manager)
-		SSdclass.manager.current_security_level = 1
+		SSdclass.manager.current_security_level = saved_security_level ? saved_security_level : 1
+	if(world.time < cached_airlock_iteration)
+		return
+	cached_airlock_iteration = world.time + airlock_cache_cooldown
 	for(var/obj/machinery/door/airlock/A in INSTANCES_OF(/obj/machinery/door/airlock))
 		var/area/area = get_area(A)
 		if(istype(area, /area/scp/dclass))
@@ -186,22 +203,29 @@
 
 /obj/machinery/facility_lockdown_console/proc/disable_elevators()
 	elevators_disabled = TRUE
+	if(world.time < cached_airlock_iteration)
+		return
+	cached_airlock_iteration = world.time + airlock_cache_cooldown
 	for(var/obj/machinery/door/airlock/A in INSTANCES_OF(/obj/machinery/door/airlock))
 		var/area/area = get_area(A)
 		if(istype(area, /area/scp/surface) || istype(area, /area/scp/ez))
-			if(findtext(A.name, "elevator") || findtext(A.name, "lift"))
+			if(findtext(lowertext(A.name), "elevator") || findtext(lowertext(A.name), "lift"))
 				A.lock()
 
 /obj/machinery/facility_lockdown_console/proc/enable_elevators()
 	elevators_disabled = FALSE
+	if(world.time < cached_airlock_iteration)
+		return
+	cached_airlock_iteration = world.time + airlock_cache_cooldown
 	for(var/obj/machinery/door/airlock/A in INSTANCES_OF(/obj/machinery/door/airlock))
 		var/area/area = get_area(A)
 		if(istype(area, /area/scp/surface) || istype(area, /area/scp/ez))
-			if(findtext(A.name, "elevator") || findtext(A.name, "lift"))
+			if(findtext(lowertext(A.name), "elevator") || findtext(lowertext(A.name), "lift"))
 				A.unlock()
 
 /obj/machinery/facility_lockdown_console/proc/jam_communications()
 	comms_jammed = TRUE
+	jammed_radios = list()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(QDELETED(H))
 			continue
@@ -210,12 +234,17 @@
 		var/area/A = get_area(H)
 		if(istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz))
 			var/obj/item/radio/R = H.ears
-			if(istype(R))
+			if(istype(R) && R.on)
 				R.set_on(FALSE)
+				jammed_radios += R
 			to_chat(H, "<span class='warning'>Your radio crackles and goes silent. Communications are being jammed.</span>")
 
 /obj/machinery/facility_lockdown_console/proc/unjam_communications()
 	comms_jammed = FALSE
+	for(var/obj/item/radio/R in jammed_radios)
+		if(!QDELETED(R))
+			R.set_on(TRUE)
+	jammed_radios = list()
 	for(var/mob/living/carbon/human/H in GLOB.player_list)
 		if(QDELETED(H))
 			continue
@@ -223,9 +252,6 @@
 			continue
 		var/area/A = get_area(H)
 		if(istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz))
-			var/obj/item/radio/R = H.ears
-			if(istype(R))
-				R.set_on(TRUE)
 			to_chat(H, "<span class='notice'>Your radio crackles back to life. Communications restored.</span>")
 /proc/trigger_facility_lockdown(reason = "Cascade event detected")
 	var/list/consoles = list()

@@ -2,7 +2,7 @@ import { BooleanLike } from 'common/react';
 import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
-import { Box, Button, LabeledList, Section, Stack } from '../components';
+import { Box, Button, Section, Stack } from '../components';
 import { Window } from '../layouts';
 
 type Resource = {
@@ -185,6 +185,11 @@ const TermProgressBar = (props: {
 
 export const SCPContainmentTerminal = (props) => {
   const { act, data } = useBackend<ContainmentData>();
+
+  if (!data) {
+    return <Box color="red">Loading SCP terminal data...</Box>;
+  }
+
   const [selectedTab, setSelectedTab] = useLocalState<string>(
     'contTab',
     'status',

@@ -3,6 +3,7 @@
 	desc = "A living flame that moves with purpose and spreads with intent."
 	icon = 'icons/scp/scp-457.dmi'
 	icon_state = "fireguy"
+	persistence_id = "SCP-457"
 
 
 	var/datum/scp457_heat_system/heat_system
@@ -13,8 +14,6 @@
 
 /mob/living/scp/scp457/Initialize()
 	. = ..()
-
-	set_species(/datum/species/scp457)
 
 	SCP = new /datum/scp(
 		src,
@@ -42,15 +41,17 @@
 	update_cone_show()
 
 
-	START_PROCESSING(SSobj, src)
-
 	addtimer(CALLBACK(fire_system, TYPE_PROC_REF(/datum/scp457_fire_system, create_initial_fires)), 1)
 
 /mob/living/scp/scp457/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
-	return 0
+	return
+
+/mob/living/scp/scp457/adjustBruteLoss(amount, updating_health = TRUE, forced = FALSE)
+	if(amount > 0 && !forced)
+		amount *= SCP457_BRUTE_MOD
+	return ..(amount, updating_health, forced)
 
 /mob/living/scp/scp457/Destroy()
-	STOP_PROCESSING(SSobj, src)
 	QDEL_NULL(heat_system)
 	QDEL_NULL(fire_system)
 	QDEL_NULL(containment_system)
@@ -58,7 +59,11 @@
 	QDEL_NULL(research_integration)
 	return ..()
 
-/mob/living/scp/scp457/process(delta_time)
+/mob/living/scp/scp457/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(.)
+		return
+
 	heat_system?.process()
 	fire_system?.process()
 	containment_system?.process()
@@ -70,6 +75,8 @@
 	update_scp457_appearance()
 	process_movement_effects()
 	process_target_interaction()
+	if(prob(5))
+		playsound(src, 'sound/effects/comfyfire.ogg', 20, TRUE, extrarange = 5)
 
 /mob/living/scp/scp457/proc/update_scp457_appearance()
 	icon_state = "fireguy"
@@ -90,6 +97,7 @@
 		var/turf/current_turf = get_turf(src)
 		if(current_turf && !(locate(/obj/effect/scp457_fire) in current_turf))
 			fire_system.create_fire_at_turf(current_turf)
+			playsound(src, 'sound/items/modsuit/flamethrower.ogg', 25, TRUE)
 
 /mob/living/scp/scp457/proc/process_target_interaction()
 	for(var/mob/living/carbon/human/H in range(2, src))
@@ -111,6 +119,7 @@
 
 	if(target.stat == DEAD)
 		to_chat(src, "<span class='notice'>You consume [target] with your flames. Heat: [heat_system.current_heat]/[heat_system.max_heat]</span>")
+		playsound(src, 'sound/magic/fireball.ogg', 60, TRUE)
 
 /mob/living/scp/scp457/proc/is_spreading_fires()
 	return length(fire_system.active_fires) > 0
@@ -160,8 +169,7 @@
 			to_chat(user, "<span class='danger'>A living flame that moves with purpose. The heat radiating from it is intense and unnatural.</span>")
 
 			if(H.sanity)
-				H.sanity.adjust_sanity(-2)
-				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 3)
+				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
 
 /mob/living/scp/scp457/proc/get_persistence_data()
 	var/list/data = list()

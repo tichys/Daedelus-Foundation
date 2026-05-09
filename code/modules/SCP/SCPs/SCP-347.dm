@@ -23,15 +23,11 @@
 
 /mob/living/scp/scp347/Initialize()
 	. = ..()
-	set_species(/datum/species/human)
 	SCP = new /datum/scp(src, "The Invisible Woman", SCP_EUCLID, "347", SCP_PLAYABLE)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
 
 	grant_language(/datum/language/common, TRUE, TRUE)
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-347"] = new /datum/scp_instance("SCP-347", src)
 
 	apply_invisibility()
 
@@ -60,6 +56,10 @@
 	alpha = 255
 	invisibility = 0
 	remove_client_colour(/datum/client_colour/scp347_invisible)
+	for(var/obj/item/I in src)
+		if(I.loc == src)
+			I.alpha = initial(I.alpha)
+			I.invisibility = initial(I.invisibility)
 	if(reveal_timer)
 		deltimer(reveal_timer)
 	reveal_timer = null
@@ -180,3 +180,7 @@
 		0,0,1,0,
 		0,0,0,0.3
 	)
+
+/mob/living/scp/scp347/Destroy()
+	QDEL_NULL(SCP)
+	return ..()

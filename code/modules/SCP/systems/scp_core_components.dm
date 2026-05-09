@@ -292,8 +292,10 @@
 	// Set global category cooldown if applicable
 	var/category = skill_data["category"]
 	if(category in global_cooldowns)
-		var/global_cd = global_cooldowns[category] - global_cooldown_reduction
-		global_cooldowns[category] = world.time + max(0, global_cd)
+		var/remaining = max(0, global_cooldowns[category] - world.time)
+		global_cooldowns[category] = world.time + max(0, remaining - global_cooldown_reduction)
+	else
+		global_cooldowns[category] = world.time
 
 	// Execute skill effects
 	execute_skill_effects(skill_name, target, params)
@@ -391,7 +393,10 @@
 	var/required_health = requirement["value"]
 	var/comparison = requirement["comparison"] || "greater_equal"
 
-	var/current_health = 100 // Default health value - override in specific implementations
+	var/current_health = 0
+	if(parent_mob && isliving(parent_mob))
+		var/mob/living/L = parent_mob
+		current_health = round((L.health / L.maxHealth) * 100)
 
 	switch(comparison)
 		if("greater")
@@ -657,6 +662,8 @@
 	addtimer(CALLBACK(src, PROC_REF(restore_containment_integrity)), 0)
 
 /datum/scp_advanced_component/advanced_containment_system/proc/restore_containment_integrity()
+	if(QDELETED(src))
+		return
 	if(containment_integrity < max_containment_integrity)
 		adjust_containment_integrity(integrity_repair_rate)
 		addtimer(CALLBACK(src, PROC_REF(restore_containment_integrity)), 10 SECONDS)

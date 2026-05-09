@@ -21,15 +21,13 @@
 /datum/scp682_evolution_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 	setup_evolution_requirements()
 
 /datum/scp682_evolution_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	active_adaptations = null
+	owner = null
 	return ..()
 
-/datum/scp682_evolution_system/process()
-	process_evolution()
 /datum/scp682_evolution_system/proc/process_evolution()
 	if(world.time >= last_evolution_check + evolution_check_interval)
 		check_evolution_opportunities()
@@ -68,6 +66,7 @@
 	active_adaptations += adaptation_type
 
 	to_chat(owner, "<span class='notice'>You have adapted to [adaptation_type]!</span>")
+	playsound(owner, 'sound/effects/ghost2.ogg', 40, TRUE)
 
 /datum/scp682_evolution_system/proc/check_evolution_opportunities()
 	var/required_points = evolution_stage * 100
@@ -84,6 +83,7 @@
 	apply_evolution_effects()
 
 	to_chat(owner, "<span class='notice'>You have evolved to stage [evolution_stage]!</span>")
+	playsound(owner, 'sound/effects/roar.ogg', 80, FALSE, extrarange = 20)
 
 /datum/scp682_evolution_system/proc/apply_evolution_effects()
 	switch(evolution_stage)
@@ -135,14 +135,12 @@
 /datum/scp682_regeneration_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 
 /datum/scp682_regeneration_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	recent_damage = null
+	owner = null
 	return ..()
 
-/datum/scp682_regeneration_system/process()
-	process_regeneration()
 /datum/scp682_regeneration_system/proc/process_regeneration()
 	if(world.time < regeneration_cooldown)
 		return
@@ -161,7 +159,7 @@
 
 /datum/scp682_regeneration_system/proc/clean_damage_memory()
 	var/current_time = world.time
-	for(var/damage_record in recent_damage)
+	for(var/damage_record in recent_damage.Copy())
 		if(current_time - damage_record["time"] > damage_memory_duration)
 			recent_damage -= damage_record
 
@@ -221,14 +219,13 @@
 /datum/scp682_threat_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 
 /datum/scp682_threat_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	threat_priorities = null
+	threat_memory = null
+	owner = null
 	return ..()
 
-/datum/scp682_threat_system/process()
-	process_threats()
 /datum/scp682_threat_system/proc/process_threats()
 	if(world.time >= last_threat_scan + threat_scan_interval)
 		assess_threats()
@@ -262,8 +259,8 @@
 
 	// Security/MTF status
 	if(target.mind && target.mind.assigned_role)
-		var/role = target.mind.assigned_role
-		if(findtext(role, "security") || findtext(role, "mtf") || findtext(role, "guard"))
+		var/role = target.mind.assigned_role.title
+		if(findtext(role, "Security") || findtext(role, "MTF") || findtext(role, "Guard"))
 			score += 100
 
 	// Proximity penalty
@@ -290,7 +287,9 @@
 
 /datum/scp682_threat_system/proc/get_primary_target()
 	if(length(threat_priorities) > 0)
-		return threat_priorities[1]
+		for(var/mob/living/carbon/human/H in threat_priorities)
+			if(!QDELETED(H) && H.stat != DEAD)
+				return H
 	return null
 
 // ============================================================================
@@ -311,14 +310,11 @@
 /datum/scp682_containment_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 
 /datum/scp682_containment_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	owner = null
 	return ..()
 
-/datum/scp682_containment_system/process()
-	process_containment()
 /datum/scp682_containment_system/proc/process_containment()
 	if(world.time >= last_containment_check + containment_check_interval)
 		check_containment_status()
@@ -362,10 +358,12 @@
 			if(!owner.has_movespeed_modifier("scp682_full_breach"))
 				owner.add_movespeed_modifier("scp682_full_breach")
 			to_chat(owner, "<span class='danger'>You have fully breached containment!</span>")
+			playsound(owner, 'sound/effects/roar.ogg', 80, FALSE, extrarange = 25)
 		if("rampage")
 			if(!owner.has_movespeed_modifier("scp682_rage"))
 				owner.add_movespeed_modifier("scp682_rage")
 			to_chat(owner, "<span class='danger'>You are in a state of complete rampage!</span>")
+			playsound(owner, 'sound/effects/roar.ogg', 100, FALSE, extrarange = 40)
 
 /datum/scp682_containment_system/proc/reduce_containment_integrity(amount)
 	containment_integrity = max(0, containment_integrity - amount)
@@ -391,14 +389,11 @@
 /datum/scp682_combat_system/New(mob/living/scp/scp682/new_owner)
 	. = ..()
 	owner = new_owner
-	START_PROCESSING(SSobj, src)
 
 /datum/scp682_combat_system/Destroy()
-	STOP_PROCESSING(SSobj, src)
+	owner = null
 	return ..()
 
-/datum/scp682_combat_system/process()
-	process_combat()
 /datum/scp682_combat_system/proc/process_combat()
 	if(world.time < last_combat_action + combat_action_interval)
 		return
@@ -424,6 +419,7 @@
 		perform_charge_attack(target)
 	else
 		step_towards(owner, target)
+		try_breach_containment(target)
 
 /datum/scp682_combat_system/proc/perform_melee_attack(mob/living/carbon/human/target)
 	if(world.time < attack_cooldown)
@@ -437,7 +433,7 @@
 
 	// Visual and audio feedback
 	owner.visible_message("<span class='danger'>[owner] attacks [target] with devastating force!</span>")
-	playsound(owner, 'sound/weapons/punch1.ogg', 50, TRUE)
+	playsound(owner, 'sound/weapons/genhit.ogg', 50, TRUE)
 
 	// Record threat
 	if(owner.threat_system)
@@ -467,7 +463,7 @@
 
 	// Visual and audio feedback
 	owner.visible_message("<span class='danger'>[owner] performs a devastating area attack!</span>")
-	playsound(owner, 'sound/weapons/punch1.ogg', 50, TRUE)
+	playsound(owner, 'sound/effects/explosion1.ogg', 50, TRUE)
 
 /datum/scp682_combat_system/proc/perform_charge_attack(mob/living/carbon/human/target)
 	if(world.time < charge_cooldown)
@@ -484,7 +480,7 @@
 
 	// Visual and audio feedback
 	owner.visible_message("<span class='danger'>[owner] charges at [target] with incredible speed!</span>")
-	playsound(owner, 'sound/weapons/punch1.ogg', 50, TRUE)
+	playsound(owner, 'sound/effects/explosion2.ogg', 60, TRUE)
 
 	// Record threat
 	if(owner.threat_system)
@@ -548,3 +544,13 @@
 // ============================================================================
 // END OF SCP-682 SYSTEMS
 // ============================================================================
+
+/datum/scp682_combat_system/proc/try_breach_containment(target)
+	if(world.time < last_combat_action + 30 SECONDS)
+		return
+	var/breach_damage = 60 + (owner.evolution_system?.evolution_stage || 1) * 15
+	for(var/turf/closed/wall/scp_containment/C in range(1, owner))
+		if(get_dir(owner, C) == owner.dir)
+			try_scp_breach_wall(owner, C, breach_damage, "SCP-682")
+			last_combat_action = world.time
+			return

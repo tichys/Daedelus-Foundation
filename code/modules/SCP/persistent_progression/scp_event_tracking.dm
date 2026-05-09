@@ -34,7 +34,7 @@
 	// Update progression tracking
 	if(istype(scp, /mob/living/scp/scp049))
 		var/mob/living/scp/scp049/scp049 = scp
-		scp049.cures_performed++
+		scp049.cures_successful++
 
 /proc/track_scp049_containment_breach(mob/living/scp/scp, breach_type = "door")
 	if(!scp || !istype(scp, /mob/living/scp/scp049))

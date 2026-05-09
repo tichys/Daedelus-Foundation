@@ -50,9 +50,6 @@
 	behavior_system = new /datum/scp1507_behavior_system(src)
 	research_system = new /datum/scp1507_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1507"] = new /datum/scp_instance("SCP-1507", src)
-
 /mob/living/simple_animal/hostile/retaliate/scp1507/Destroy()
 	all_flamingos -= src
 	QDEL_NULL(flock_system)
@@ -94,7 +91,8 @@
 
 /mob/living/simple_animal/hostile/retaliate/scp1507/attack_hand(mob/living/carbon/human/M)
 	. = ..()
-	enrage()
+	if(M.combat_mode)
+		enrage()
 
 /mob/living/simple_animal/hostile/retaliate/scp1507/AttackingTarget()
 	. = ..()
@@ -194,7 +192,7 @@
 		if(F.stat != DEAD)
 			F.target = new_target
 			F.enrage()
-			F.melee_damage_upper = initial(F.melee_damage_upper) * coordination_bonus
+			F.melee_damage_upper = min(initial(F.melee_damage_upper) * 3, initial(F.melee_damage_upper) + coordination_bonus)
 
 /datum/scp1507_flock_system/proc/notify_flock_of_death()
 	if(!parent)

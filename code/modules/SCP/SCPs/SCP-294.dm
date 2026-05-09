@@ -26,9 +26,6 @@
 	effect_system = new /datum/scp294_effect_system(src)
 	research_system = new /datum/scp294_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-294"] = new /datum/scp_instance("SCP-294", src)
-
 /obj/machinery/scp294/attack_hand(mob/living/carbon/human/user)
 	..()
 

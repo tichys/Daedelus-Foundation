@@ -49,9 +49,6 @@
 	QDEL_NULL(research_system)
 	return ..()
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-529"] = new /datum/scp_instance("SCP-529", src)
-
 /mob/living/simple_animal/scp529/Life()
 	. = ..()
 	if(stat == DEAD)

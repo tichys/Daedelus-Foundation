@@ -133,8 +133,8 @@
 			H.sanity.adjust_sanity(-10, "decontamination")
 
 		var/cured = FALSE
-		for(var/datum/pathogen/P in H.diseases)
-			if(findtext("[P.type]", "scp") || findtext("[P.type]", "008") || findtext("[P.type]", "049"))
+		for(var/datum/pathogen/P in H.diseases.Copy())
+			if(istype(P, /datum/pathogen/foundation))
 				qdel(P)
 				cured = TRUE
 				break
@@ -175,7 +175,7 @@
 	var/list/infections = list()
 
 	for(var/datum/pathogen/P in H.diseases)
-		if(findtext("[P.type]", "scp") || findtext("[P.type]", "008") || findtext("[P.type]", "049"))
+		if(istype(P, /datum/pathogen/foundation))
 			infections += P.name
 
 	if(H.reagents)
@@ -185,7 +185,7 @@
 
 	var/pestilence_level = 0
 	for(var/datum/pathogen/P in H.diseases)
-		if(findtext("[P.type]", "049"))
+		if(istype(P, /datum/pathogen/foundation) && !istype(P, /datum/pathogen/foundation/scp008))
 			pestilence_level = 100
 
 	to_chat(H, "<span class='boldnotice'>=== Bio-Scan Results ===</span>")
@@ -224,8 +224,8 @@
 		if("Apply SCP-008 Countermeasure")
 			H.adjustToxLoss(-20)
 			H.adjustBruteLoss(-10)
-			for(var/datum/pathogen/P in H.diseases)
-				if(findtext("[P.type]", "008"))
+			for(var/datum/pathogen/P in H.diseases.Copy())
+				if(istype(P, /datum/pathogen/foundation/scp008))
 					if(prob(60))
 						qdel(P)
 						to_chat(H, "<span class='green'>SCP-008 infection successfully treated!</span>")
@@ -235,8 +235,8 @@
 		if("Apply SCP-049 Countermeasure")
 			H.adjustToxLoss(-15)
 			H.adjustBruteLoss(-10)
-			for(var/datum/pathogen/P in H.diseases)
-				if(findtext("[P.type]", "049"))
+			for(var/datum/pathogen/P in H.diseases.Copy())
+				if(istype(P, /datum/pathogen/foundation))
 					if(prob(40))
 						qdel(P)
 						to_chat(H, "<span class='green'>Pestilence successfully treated!</span>")

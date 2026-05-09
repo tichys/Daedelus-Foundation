@@ -15,7 +15,7 @@ export const NtosDclassMonitor = (props) => {
 
   if (!data.is_dclass) {
     return (
-      <NtosWindow width={500} height={600}>
+      <NtosWindow width={500} height={600} theme="scp_terminal">
         <NtosWindow.Content scrollable>
           <Section>
             <Box
@@ -35,7 +35,7 @@ export const NtosDclassMonitor = (props) => {
   }
 
   return (
-    <NtosWindow width={500} height={600}>
+    <NtosWindow width={500} height={600} theme="scp_terminal">
       <NtosWindow.Content scrollable>
         <Tabs>
           <Tabs.Tab

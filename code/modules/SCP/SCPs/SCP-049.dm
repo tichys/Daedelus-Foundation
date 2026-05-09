@@ -8,6 +8,7 @@
 	icon = 'icons/scp/scp-049.dmi'
 	icon_state = ""
 	real_name = "SCP-049"
+	persistence_id = "SCP-049"
 
 	// Core mechanics from Foundation-19
 	var/pestilence_level = 0
@@ -56,10 +57,8 @@
 	var/detections_performed = 0
 	var/cures_attempted = 0
 	var/cures_successful = 0
-	var/doors_breached = 0
 	var/research_breakthroughs = 0
 	var/evolution_events = 0
-	var/total_cures_performed = 0
 	var/session_start_time = 0
 	var/turf/lure_target = null
 	var/total_playtime = 0
@@ -68,7 +67,6 @@
 	var/datum/scp049_command_system/command_system
 
 	// Progression integration tracking
-	var/cures_performed = 0
 	var/containment_breaches = 0
 
 /mob/living/scp/scp049/Initialize()
@@ -77,8 +75,6 @@
 	faction |= "scp049"
 
 	// Set proper species (Foundation-19 approach)
-	set_species(/datum/species/scp049)
-
 	// Create SCP datum with proper flags
 	SCP = new /datum/scp(src, "Plague Doctor", SCP_EUCLID, "049", SCP_SENTIENT)
 
@@ -99,10 +95,6 @@
 
 	// Load persistence data
 	load_persistence_data()
-
-	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-049"] = new /datum/scp_instance("SCP-049", src)
 
 	// Remove bodypart overlays to prevent covering the SCP icon
 
@@ -157,6 +149,7 @@
 	for(var/mob/living/carbon/human/H in nearby_targets)
 		if(prob(pestilence_detect_chance + (pestilence_level / 10)))
 			mark_pestilence(H)
+			on_pestilence_detected(H)
 			detected_count++
 
 	detections_performed++
@@ -222,25 +215,27 @@
 
 	to_chat(target, "<span class='danger'>SCP-049's touch is cold beyond imagination... The 'cure' is agony beyond description...</span>")
 
+	on_cure_attempt(target)
+
 	if(target.sanity)
 		target.sanity.adjust_sanity(-30, "Touched by SCP-049 — the cure")
 
-	track_scp049_cure(src, target, FALSE)
+	track_scp049_cure(src, target, TRUE)
 
 	create_scp049_1(target)
 
 	cures_successful++
 	cure_potency = min(max_cure_potency, cure_potency + 1)
-	total_cures_performed++
+	playsound(src, 'sound/scp/scp049/SCP049_Cure2.ogg', 60, 0)
 
 	save_persistence_data()
 	return TRUE
 
 /mob/living/scp/scp049/proc/create_scp049_1(mob/living/carbon/human/target)
-	// Enhanced SCP-049-1 creation process
+	var/turf/T = get_turf(target)
 	target.dust(just_ash = FALSE, drop_items = TRUE, force = TRUE)
 
-	var/mob/living/simple_animal/hostile/zombie/scp049_1/zombie = new(target.loc)
+	var/mob/living/simple_animal/hostile/zombie/scp049_1/zombie = new(T)
 	zombie.name = "SCP-049-1"
 	zombie.real_name = "SCP-049-1"
 	zombie.maxHealth = target.maxHealth * 1.5
@@ -307,6 +302,7 @@
 			// Grant special end-game abilities
 
 	research_breakthroughs++
+	on_evolution()
 	announce_evolution()
 	save_persistence_data()
 
@@ -328,10 +324,8 @@
 		"detections_performed" = detections_performed,
 		"cures_attempted" = cures_attempted,
 		"cures_successful" = cures_successful,
-		"doors_breached" = doors_breached,
 		"research_breakthroughs" = research_breakthroughs,
 		"evolution_events" = evolution_events,
-		"total_cures_performed" = total_cures_performed,
 		"total_playtime" = total_playtime + (world.time - session_start_time)
 	)
 
@@ -349,10 +343,8 @@
 			detections_performed = persistence_data["detections_performed"] || 0
 			cures_attempted = persistence_data["cures_attempted"] || 0
 			cures_successful = persistence_data["cures_successful"] || 0
-			doors_breached = persistence_data["doors_breached"] || 0
 			research_breakthroughs = persistence_data["research_breakthroughs"] || 0
 			evolution_events = persistence_data["evolution_events"] || 0
-			total_cures_performed = persistence_data["total_cures_performed"] || 0
 			total_playtime = persistence_data["total_playtime"] || 0
 
 /mob/living/scp/scp049/proc/detect_pestilence_verb()
@@ -379,7 +371,6 @@
 	status_text += "<br><b>Statistics:</b><br>"
 	status_text += "Detections Performed: [detections_performed]<br>"
 	status_text += "Cures Attempted: [cures_attempted] (Successful: [cures_successful])<br>"
-	status_text += "Doors Breached: [doors_breached]<br>"
 	status_text += "Research Breakthroughs: [research_breakthroughs]<br>"
 	status_text += "Total Playtime: [round((total_playtime + (world.time - session_start_time))/600, 0.1)] minutes"
 
@@ -435,3 +426,10 @@
 
 /mob/living/scp/scp049/proc/on_recontainment()
 	hook_scp_recontainment("SCP-049", list("method" = "standard"))
+
+/mob/living/scp/scp049/Destroy()
+	QDEL_NULL(command_system)
+	QDEL_NULL(SCP)
+	announcement_messages = null
+	lure_target = null
+	return ..()

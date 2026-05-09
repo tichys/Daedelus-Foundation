@@ -56,6 +56,8 @@
 	SEND_SIGNAL(H, COMSIG_SCP151_EFFECT_APPLIED, src)
 
 	var/obj/item/organ/stomach/stomach_organ = H.getorganslot(ORGAN_SLOT_STOMACH)
+	if(!stomach_organ)
+		return
 
 	stomach_organ.reagents.add_reagent(/datum/reagent/water, water_ingest)
 

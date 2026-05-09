@@ -51,7 +51,8 @@
 
 		if(prob(5 * video_intensity))
 			to_chat(H, "<span class='danger'>The video recording shows impossible scenes that shouldn't exist...</span>")
-			H.stamina.adjust(-10)
+			if(H.stamina)
+				H.stamina.adjust(-10)
 
 /datum/scp1981_video_system/proc/evolve_video_stage()
 	video_evolution = min(max_video_evolution, video_evolution + 1)
@@ -119,7 +120,8 @@
 
 		if(prob(4 * distortion_factor))
 			to_chat(H, "<span class='danger'>The laws of physics seem to bend and break...</span>")
-			H.stamina.adjust(-15)
+			if(H.stamina)
+				H.stamina.adjust(-15)
 
 /datum/scp1981_reality_system/proc/increase_distortion_potency()
 	distortion_potency = min(max_distortion_potency, distortion_potency + 1)
@@ -178,7 +180,8 @@
 
 		if(prob(3 * temporal_factor))
 			to_chat(H, "<span class='danger'>You feel moments of temporal displacement...</span>")
-			H.stamina.adjust(-12)
+			if(H.stamina)
+				H.stamina.adjust(-12)
 
 /datum/scp1981_temporal_system/proc/increase_temporal_mastery()
 	temporal_mastery = min(max_temporal_mastery, temporal_mastery + 5)
@@ -219,7 +222,8 @@
 		if(H.stat != DEAD)
 			to_chat(H, "<span class='danger'>You experience overwhelming video distortion and reality warping!</span>")
 			H.adjustBruteLoss(15)
-			H.stamina.adjust(-25)
+			if(H.stamina)
+				H.stamina.adjust(-25)
 
 	owner.visible_message("<span class='danger'>SCP-1981 synthesizes all its effects in a powerful burst!</span>")
 

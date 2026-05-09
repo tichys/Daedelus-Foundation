@@ -36,9 +36,6 @@
 	SCP = new /datum/scp(src, "The Stairwell", SCP_EUCLID, "087")
 
 	// Register with SCP persistence system
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-087"] = new /datum/scp_instance("SCP-087", src)
-
 	// Start processing
 	START_PROCESSING(SSobj, src)
 
@@ -122,7 +119,8 @@
 	for(var/mob/living/carbon/human/H in targets)
 		to_chat(H, "<span class='danger'>You feel yourself being pulled into the infinite darkness of the stairwell...</span>")
 		H.adjustBruteLoss(10)
-		H.stamina.adjust(-30)
+		if(H.stamina)
+			H.stamina.adjust(-30)
 
 	// Reset activation counter to prevent spam
 	activation_events = 0

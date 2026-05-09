@@ -61,13 +61,12 @@
 	QDEL_NULL(containment_system)
 	QDEL_NULL(environmental_system)
 	QDEL_NULL(research_integration)
+	QDEL_NULL(SCP)
 	infected_targets.Cut()
 	zombified_targets.Cut()
 	return ..()
 
 /obj/item/reagent_containers/glass/bottle/scp008/process()
-	. = ..()
-
 	// Update all systems
 	infection_system?.process()
 	horde_system?.process()
@@ -300,8 +299,7 @@
 
 			// Apply fear effect to non-SCP humans
 			if(H.sanity)
-				H.sanity.adjust_sanity(-3)
-				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
+				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 8)
 
 // Persistence integration
 /obj/item/reagent_containers/glass/bottle/scp008/proc/get_persistence_data()
@@ -414,8 +412,6 @@
 	return ..()
 
 /mob/living/simple_animal/hostile/scp008_zombie/process()
-	. = ..()
-
 	// Process infection spread
 	if(can_infect && world.time >= infection_cooldown + infection_cooldown_time)
 		process_infection_spread()

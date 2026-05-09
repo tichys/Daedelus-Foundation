@@ -179,7 +179,7 @@
 			var/item_name = params["item"]
 			if(!item_name || !(item_name in player.contraband))
 				return
-			player.hidden_items[item_name] = player.contraband[item_name]
+			player.hidden_items[item_name] = 1
 			player.remove_contraband(item_name, 1)
 			return TRUE
 

@@ -132,7 +132,7 @@ export const GhostActions = (_props: unknown) => {
                 letterSpacing: '0.1em',
               }}
             >
-              {/* SCiPNet GHOST INTERFACE // */}
+              SCiPNet GHOST INTERFACE
             </div>
             <div style={{ fontSize: '10px', color: C.dim, marginTop: '2px' }}>
               DECEASED PERSONNEL TERMINAL
@@ -321,7 +321,7 @@ export const GhostActions = (_props: unknown) => {
                 letterSpacing: '0.05em',
               }}
             >
-              {/* SOUL DEPARTED — NO RESURRECTION // */}
+              SOUL DEPARTED — NO RESURRECTION
             </div>
           )}
         </div>

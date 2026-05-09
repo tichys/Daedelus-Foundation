@@ -55,11 +55,11 @@
 			H.add_alt_appearance(/datum/atom_hud/alternate_appearance/basic/one_person, "bluelady", get_bluelady_image(H), H)
 		if(3)
 			to_chat(H, span_boldnotice("Briefly, she fades from your mind. You miss her already."))
-			addtimer(CALLBACK(src, PROC_REF(update_013_status), H), 2 MINUTE)
+			addtimer(CALLBACK(src, PROC_REF(update_013_status), H), 2 MINUTES)
 			H.remove_alt_appearance("bluelady")
 		if(4)
 			to_chat(H, span_boldnotice("You put the blue dress on, that's all you can recall. How did you get here?"))
-			addtimer(CALLBACK(src, PROC_REF(update_013_status), H), 3 MINUTE)
+			addtimer(CALLBACK(src, PROC_REF(update_013_status), H), 3 MINUTES)
 			H.add_alt_appearance(/datum/atom_hud/alternate_appearance/basic/one_person, "bluelady", get_bluelady_image(H), H)
 		if(5)
 			to_chat(H, span_boldnotice("Who were you? You try to remember in more detail..."))
@@ -108,6 +108,13 @@
 	if(slot != ITEM_SLOT_MASK || !ishuman(user))
 		return
 	effect(user)
+
+/obj/item/clothing/mask/cigarette/scp013/unequipped(mob/user)
+	. = ..()
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	H.remove_alt_appearance("bluelady")
 
 /obj/item/clothing/mask/cigarette/scp013/use_reagents(mob/living/carbon/user, drag)
 	reagents.add_reagent_list(list_reagents)

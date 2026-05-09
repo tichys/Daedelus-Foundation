@@ -276,8 +276,9 @@
 
 	// Check if player is being observed by guards
 	var/list/nearby_guards = list()
+	var/list/guard_jobs = list("Security Officer", "MTF Commander", "MTF Operative", "MTF Medic", "MTF Heavy", "Warden", "Head of Security")
 	for(var/mob/living/carbon/human/H in view(7, mob))
-		if(H.job && findtext(H.job, "Guard"))
+		if(H.job && (H.job in guard_jobs))
 			nearby_guards += H
 
 	// If guards are nearby and player has contraband, risk detection
@@ -294,7 +295,7 @@
 		to_chat(mob, "<span class='danger'>A guard has discovered your contraband!</span>")
 
 	if(guard)
-		to_chat(guard, "<span class='warning'>You found contraband on [mob.name]!</span>")
+		to_chat(guard, "<span class='warning'>You found contraband on [mob?.name || "D-Class"]!</span>")
 
 	// Remove some contraband
 	var/items_to_remove = min(2, length(contraband))
@@ -319,7 +320,7 @@
 			to_chat(mob, "<span class='warning'>You don't have the required items for this escape route.</span>")
 		return FALSE
 
-	for(var/obj/structure/dclass_escape_point/EP in world)
+	for(var/obj/structure/dclass_escape_point/EP as anything in INSTANCES_OF(/obj/structure/dclass_escape_point))
 		if(EP.route_id == escape_type && EP.route && EP.discovered)
 			return EP.route.attempt_escape(mob)
 
@@ -565,8 +566,13 @@
 	)
 
 	var/filename = data_file_path
-	fdel(filename)
-	text2file(json_encode(data), filename)
+	var/temp_filename = "[filename].tmp"
+	text2file(json_encode(data), temp_filename)
+	if(fexists(filename))
+		fdel(filename)
+	fcopy(temp_filename, filename)
+	if(fexists(temp_filename))
+		fdel(temp_filename)
 
 /datum/dclass_player/proc/load_data()
 	if(!fexists(data_file_path))
@@ -595,7 +601,7 @@
 	research_contributions = data["research_contributions"] || 0
 	escape_attempts = data["escape_attempts"] || 0
 	successful_escapes = data["successful_escapes"] || 0
-	suspicion_level = data["suspicion_level"] || 0
+	suspicion_level = (data["suspicion_level"] != null) ? data["suspicion_level"] : 0
 	contraband = data["contraband"] || list()
 	skills = data["skills"] || skills
 	allies = data["allies"] || list()

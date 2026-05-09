@@ -16,6 +16,7 @@ const TABS = [
   { key: 'augments', label: 'AUGMENT' },
   { key: 'mods', label: 'MODS' },
   { key: 'antags', label: 'SCP' },
+  { key: 'keys', label: 'KEYS' },
   { key: 'game', label: 'SETTINGS' },
   { key: 'finalize', label: 'COMMIT' },
 ];
@@ -235,7 +236,7 @@ const CustomizationPage = () => {
 
       <TermDivider />
       <TermHeader>CLOTHING & FEATURES</TermHeader>
-      <Box style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+      <Box style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
         {Object.entries(clothing).map(([key, val]: [string, any]) => renderPrefRow(key, val))}
       </Box>
 
@@ -482,6 +483,41 @@ const GamePage = () => {
   );
 };
 
+// ── KEYBINDINGS PAGE ───────────────────────────────────────────
+const KeybindingsPage = () => {
+  const { act, data }: any = useBackend();
+  const keybindings: Record<string, string[]> = data.keybindings || {};
+  const entries = Object.entries(keybindings);
+  const [filter, setFilter] = useSharedState('CS.keyFilter', '');
+
+  const filtered = filter
+    ? entries.filter(([name]) => name.toLowerCase().includes(filter.toLowerCase()))
+    : entries;
+
+  return (
+    <TermBox>
+      <TermHeader>KEYBINDING CONFIGURATION</TermHeader>
+      <Box style={{ display: 'flex', gap: '6px', marginBottom: '10px', alignItems: 'center' }}>
+        <TermLabel>FILTER</TermLabel>
+        <Input fluid value={filter} onChange={(_: any, v: string) => setFilter(v)} style={inputStyle} placeholder="Search bindings..." />
+      </Box>
+      <Box style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+        <TermButton color="yellow" onClick={() => act('reset_all_keybinds')}>RESET ALL</TermButton>
+        <TermButton onClick={() => act('reset_keybinds_to_defaults', { keybind_name: 'ALL' })}>DEFAULTS</TermButton>
+      </Box>
+      {filtered.length === 0 ? (
+        <Box style={term({ color: C.textDim, fontStyle: 'italic' })}>NO KEYBINDINGS FOUND</Box>
+      ) : filtered.map(([name, keys]: [string, any]) => (
+        <TermRow key={name}>
+          <TermLabel style={{ flex: 1, fontSize: '10px' }}>{name.replace(/_/g, ' ')}</TermLabel>
+          <TermValue style={{ flex: 1, fontSize: '10px' }}>{Array.isArray(keys) ? keys.join(', ') || '—' : String(keys)}</TermValue>
+          <TermButton color="red" onClick={() => act('reset_keybinds_to_defaults', { keybind_name: name })}>RST</TermButton>
+        </TermRow>
+      ))}
+    </TermBox>
+  );
+};
+
 // ── FINALIZE PAGE ──────────────────────────────────────────────
 const FinalizePage = ({ data, act }: any) => (
   <TermBox>
@@ -558,6 +594,7 @@ export const CharacterSetup = () => {
               {active === 'augments' && <AugmentsPage />}
               {active === 'mods' && <AppearanceModsPage />}
               {active === 'antags' && <AntagonistsPage />}
+              {active === 'keys' && <KeybindingsPage />}
               {active === 'game' && <GamePage />}
               {active === 'finalize' && <FinalizePage data={data} act={act} />}
             </Box>

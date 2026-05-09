@@ -5,11 +5,12 @@
 /mob/living/scp/scp3199
 	name = "SCP-3199"
 	desc = "A hairless, 2.9-meter tall entity stained with albumen-like excretion. Its neck can twist 340° in either direction."
-	icon = 'icons/scp/scp-3199.dmi' // Placeholder icon
+	icon = 'icons/scp/scp-3199.dmi'
 	icon_state = "scp-3199-grown"
 	status_flags = 0
 	maxHealth = 100
 	health = 100
+	persistence_id = "SCP-3199"
 
 	// Modular systems
 	var/datum/scp3199_reproduction_system/reproduction_system

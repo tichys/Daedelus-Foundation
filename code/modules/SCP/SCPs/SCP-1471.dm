@@ -14,11 +14,11 @@
 	var/sanity_drain = 0.5
 
 	var/datum/scp1471_manifestation_system/manifestation_system
-	var/datum/scp1471_photo_system/photo_system
 	var/datum/scp1471_research_system/research_system
 
 	var/user_ckey
 	var/activation_time
+	var/list/spawned_entities = list()
 
 /obj/item/device/scp1471/Initialize()
 	. = ..()
@@ -26,16 +26,15 @@
 	SCP = new /datum/scp(src, "MalO ver1.0.0", SCP_EUCLID, "1471")
 
 	manifestation_system = new /datum/scp1471_manifestation_system(src)
-	photo_system = new /datum/scp1471_photo_system(src)
 	research_system = new /datum/scp1471_research_system(src)
-
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1471"] = new /datum/scp_instance("SCP-1471", src)
 
 /obj/item/device/scp1471/Destroy()
 	QDEL_NULL(manifestation_system)
-	QDEL_NULL(photo_system)
 	QDEL_NULL(research_system)
+	QDEL_NULL(SCP)
+	for(var/obj/effect/scp1471_entity/E in spawned_entities)
+		qdel(E)
+	spawned_entities = list()
 	return ..()
 
 /obj/item/device/scp1471/attack_self(mob/living/carbon/human/user)
@@ -101,33 +100,11 @@
 	var/turf/spawn_turf = get_edge_target_turf(target, pick(NORTH, SOUTH, EAST, WEST))
 	var/obj/effect/scp1471_entity/entity = new(spawn_turf ? spawn_turf : get_turf(target))
 	entity.target = target
+	var/obj/item/device/scp1471/phone = parent
+	if(istype(phone))
+		phone.spawned_entities += entity
 
 	target.visible_message("<span class='danger'>A shadowy entity manifests!</span>", "<span class='danger'>The entity from the app has found you!</span>")
-
-/datum/scp1471_photo_system
-	var/obj/item/parent
-	var/list/captured_photos = list()
-	var/photo_cooldown = 0
-
-/datum/scp1471_photo_system/New(obj/item/P)
-	parent = P
-
-/datum/scp1471_photo_system/proc/process_photo(mob/living/carbon/human/photographer)
-	if(!photographer || photo_cooldown > world.time)
-		return
-
-	photo_cooldown = world.time + 1 MINUTE
-
-	var/photo_data = list(
-		"location" = "[photographer.x], [photographer.y]",
-		"time" = world.time,
-		"entity_visible" = prob(30)
-	)
-	captured_photos += list(photo_data)
-
-	if(photo_data["entity_visible"])
-		to_chat(photographer, "<span class='warning'>You notice a shadowy figure in the photo...</span>")
-		photographer.adjust_drowsyness(1)
 
 /obj/effect/scp1471_entity
 	name = "shadowy entity"

@@ -6,6 +6,7 @@
 	var/research_stage = RESEARCH_STAGE_IDENTIFIED
 	var/is_anomalous = FALSE
 	var/list/cross_scp_interactions = list()
+	var/last_cross_scp_check = 0
 
 /datum/pathogen/foundation/on_infect_mob()
 	. = ..()
@@ -16,6 +17,14 @@
 	if(affected_mob)
 		SSfoundation_pathogens.register_cure(src)
 	return ..()
+
+/datum/pathogen/foundation/on_process(delta_time, times_fired)
+	. = ..()
+	if(!.)
+		return
+	if(length(cross_scp_interactions) && world.time > last_cross_scp_check + 30 SECONDS)
+		last_cross_scp_check = world.time
+		SSfoundation_pathogens.process_cross_scp_interactions(src)
 
 /datum/pathogen/foundation/proc/get_bsl_display()
 	switch(bsl_level)

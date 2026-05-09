@@ -2,7 +2,7 @@ import { BooleanLike } from 'common/react';
 import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
-import { Box, Button, Input, Section, Stack } from '../components';
+import { Box, Button, Input } from '../components';
 import { Window } from '../layouts';
 
 type Ability = {
@@ -94,6 +94,7 @@ export const SCP079CameraInterface = (props) => {
 
   const [tab, setTab] = useState('cameras');
   const [searchText, setSearchText] = useState('');
+  const [broadcastMsg, setBroadcastMsg] = useState('');
 
   const filteredCameras = (cameras || []).filter(
     (c) =>
@@ -719,8 +720,27 @@ export const SCP079CameraInterface = (props) => {
                 >
                   FLICKER LIGHTS [5]
                 </Button>
+                <Input
+                  value={broadcastMsg}
+                  onInput={(_, v) => setBroadcastMsg(v)}
+                  placeholder="Message..."
+                  style={{
+                    fontFamily: C.mono,
+                    fontSize: '9px',
+                    width: '160px',
+                    background: C.panel,
+                    border: `1px solid ${C.border}`,
+                    color: C.text,
+                    borderRadius: 0,
+                  }}
+                />
                 <Button
-                  onClick={() => act('broadcast', { message: '...' })}
+                  onClick={() => {
+                    if (broadcastMsg.trim()) {
+                      act('broadcast', { message: broadcastMsg.trim() });
+                      setBroadcastMsg('');
+                    }
+                  }}
                   style={{
                     fontFamily: C.mono,
                     fontSize: '9px',
@@ -734,6 +754,29 @@ export const SCP079CameraInterface = (props) => {
                 >
                   BROADCAST [20]
                 </Button>
+                {tier >= 2 && (
+                  <Button
+                    onClick={() => {
+                      if (broadcastMsg.trim()) {
+                        act('hijack_pa', { message: broadcastMsg.trim() });
+                        setBroadcastMsg('');
+                      }
+                    }}
+                    disabled={processing_power < 35}
+                    style={{
+                      fontFamily: C.mono,
+                      fontSize: '9px',
+                      letterSpacing: '0.1em',
+                      background: processing_power >= 35 ? 'rgba(139,0,0,0.2)' : 'transparent',
+                      border: `1px solid ${processing_power >= 35 ? C.red : C.border}`,
+                      borderRadius: 0,
+                      color: processing_power >= 35 ? C.redBright : C.textDim,
+                      padding: '4px 10px',
+                    }}
+                  >
+                    HIJACK PA [35]
+                  </Button>
+                )}
               </Box>
             </Box>
           )}

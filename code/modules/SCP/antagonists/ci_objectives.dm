@@ -62,6 +62,67 @@
 	explanation_text = data["desc"]
 
 /datum/objective/ci_sabotage/check_completion()
+	if(sabotage_count >= sabotage_required)
+		return TRUE
+	var/mob/living/carbon/human/H = owner.current
+	if(!istype(H))
+		return FALSE
+	var/list/containment_area_types = list(/area/scp/lcz, /area/scp/hcz)
+	var/destroyed_count = 0
+	switch(sabotage_type)
+		if("apc")
+			for(var/obj/machinery/power/apc/A as anything in INSTANCES_OF(/obj/machinery/power/apc))
+				if(QDELETED(A))
+					continue
+				var/area/A_area = get_area(A)
+				var/in_zone = FALSE
+				for(var/area_type in containment_area_types)
+					if(istype(A_area, area_type))
+						in_zone = TRUE
+						break
+				if(in_zone && (A.machine_stat & BROKEN))
+					destroyed_count++
+			sabotage_count = destroyed_count
+		if("camera")
+			for(var/obj/machinery/camera/C as anything in INSTANCES_OF(/obj/machinery/camera))
+				if(QDELETED(C))
+					continue
+				if(!C.status)
+					var/area/C_area = get_area(C)
+					var/in_zone = FALSE
+					for(var/area_type in containment_area_types)
+						if(istype(C_area, area_type))
+							in_zone = TRUE
+							break
+					if(in_zone)
+						destroyed_count++
+			sabotage_count = destroyed_count
+		if("door")
+			for(var/obj/machinery/door/airlock/D as anything in INSTANCES_OF(/obj/machinery/door/airlock))
+				if(QDELETED(D))
+					continue
+				var/area/D_area = get_area(D)
+				var/in_zone = FALSE
+				for(var/area_type in containment_area_types)
+					if(istype(D_area, area_type))
+						in_zone = TRUE
+						break
+				if(in_zone && D.welded)
+					destroyed_count++
+			sabotage_count = destroyed_count
+		if("power")
+			for(var/obj/machinery/power/apc/A as anything in INSTANCES_OF(/obj/machinery/power/apc))
+				if(QDELETED(A))
+					continue
+				var/area/A_area = get_area(A)
+				var/in_zone = FALSE
+				for(var/area_type in containment_area_types)
+					if(istype(A_area, area_type))
+						in_zone = TRUE
+						break
+				if(in_zone && (A.machine_stat & NOPOWER))
+					destroyed_count++
+			sabotage_count = destroyed_count
 	return sabotage_count >= sabotage_required
 
 /datum/objective/ci_breach_assist
@@ -83,6 +144,18 @@
 	explanation_text = "Extract [extract_required] D-Class personnel from the facility alive."
 
 /datum/objective/ci_extract_dclass/check_completion()
+	if(extracted_count >= extract_required)
+		return TRUE
+	var/found = 0
+	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(QDELETED(H) || H.stat == DEAD)
+			continue
+		if(!findtext(H.job, "D-Class"))
+			continue
+		var/area/A = get_area(H)
+		if(istype(A, /area/scp/surface/gate_a) || istype(A, /area/scp/surface/gate_b) || istype(A, /area/scp/surface))
+			found++
+	extracted_count = found
 	return extracted_count >= extract_required
 
 /datum/objective/ci_intel_gather

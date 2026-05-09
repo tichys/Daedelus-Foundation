@@ -311,7 +311,6 @@
 	var/scp_id = get_scp_id()
 	hook_scp_breach(scp_id, owner)
 	owner.visible_message(span_danger("[owner] breaks free from containment!"), span_userdanger("You have broken free!"))
-	check_chain_breaches()
 
 /datum/scp_containment_system/proc/spend_resource(resource_type, amount)
 	if(!resources[resource_type])

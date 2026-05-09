@@ -1,5 +1,5 @@
 /datum/game_mode/extended
-	name = "Extended"
+	name = "Standard Operations"
 	weight = GAMEMODE_WEIGHT_COMMON
 
 	min_pop = 0

@@ -157,27 +157,15 @@
 	equip_mtf_member(mtf_commander, team_key, TRUE)
 	deployed_members += mtf_commander
 
-	var/datum/mind/commander_mind = new /datum/mind(mtf_commander.key)
-	commander_mind.assigned_role = "MTF Commander"
-	commander_mind.special_role = "MTF Commander"
-	mtf_commander.mind = commander_mind
-	commander_mind.active = TRUE
-
 	for(var/i in 2 to team_size)
 		var/turf/member_loc = length(spawn_turfs) ? pick(spawn_turfs) : get_turf(src)
 		var/mob/living/carbon/human/mtf_member = new(member_loc)
 		equip_mtf_member(mtf_member, team_key, FALSE)
 		deployed_members += mtf_member
-		var/datum/mind/member_mind = new /datum/mind(mtf_member.key)
-		member_mind.assigned_role = "MTF Operative"
-		member_mind.special_role = "MTF Operative"
-		mtf_member.mind = member_mind
-		member_mind.active = TRUE
 
 	var/list/candidates = poll_candidates_for_mob("Do you want to play as MTF [team_data["name"]]?", ROLE_MTF, null, 10 SECONDS, mtf_commander)
 	if(length(candidates))
 		var/mob/dead/observer/candidate = candidates[1]
-		candidate.mind.transfer_to(mtf_commander)
 		mtf_commander.key = candidate.key
 
 	for(var/i in 2 to length(deployed_members))
@@ -185,7 +173,6 @@
 		var/list/more_candidates = poll_candidates_for_mob("Do you want to play as MTF [team_data["name"]]?", ROLE_MTF, null, 10 SECONDS, mtf_member)
 		if(length(more_candidates))
 			var/mob/dead/observer/candidate = more_candidates[1]
-			candidate.mind.transfer_to(mtf_member)
 			mtf_member.key = candidate.key
 
 	for(var/mob/living/carbon/human/H in deployed_members)

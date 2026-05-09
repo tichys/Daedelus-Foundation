@@ -114,7 +114,7 @@
 #define SECHUD_EZ_GUARD "hudezsenior"
 #define SECHUD_EZ_JUNIOR_GUARD "hudezguard"
 
-#define SECHUD_SECURITY_DIRECTOR "hudguardcommander"
+#define SECHUD_GUARD_COMMANDER "hudguardcommander"
 #define SECHUD_RAISA "hudraisa"
 #define SECHUD_DETECTIVE "huddetective"
 

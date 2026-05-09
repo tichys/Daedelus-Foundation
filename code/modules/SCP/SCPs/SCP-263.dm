@@ -14,6 +14,7 @@
 	var/game_active = FALSE
 	var/game_cooldown = 0
 	var/games_played = 0
+	var/interaction_cooldown = 0
 
 	var/datum/scp263_game_system/game_system
 	var/datum/scp263_effect_system/effect_system
@@ -28,15 +29,13 @@
 	effect_system = new /datum/scp263_effect_system(src)
 	research_system = new /datum/scp263_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-263"] = new /datum/scp_instance("SCP-263", src)
-
 	START_PROCESSING(SSobj, src)
 
 /obj/machinery/scp263/Destroy()
 	QDEL_NULL(game_system)
 	QDEL_NULL(effect_system)
 	QDEL_NULL(research_system)
+	QDEL_NULL(SCP)
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
@@ -70,7 +69,9 @@
 	for(var/mob/living/carbon/human/H in view(5, src))
 		if(H.stat != DEAD)
 			viewers += H
-			hook_scp_interaction(H, "SCP-263", INTERACTION_TYPE_OBSERVATION)
+			if(world.time >= interaction_cooldown)
+				hook_scp_interaction(H, "SCP-263", INTERACTION_TYPE_OBSERVATION)
+				interaction_cooldown = world.time + 30 SECONDS
 
 /obj/machinery/scp263/proc/start_game()
 	if(!active || game_active || game_cooldown > world.time)
@@ -141,44 +142,47 @@
 	)
 
 	var/question = pick(questions)
-	var/answer = input(contestant, question, "SCP-263 Quiz") as null|text
+	spawn()
+		var/answer = input(contestant, question, "SCP-263 Quiz") as null|text
 
-	if(!answer || lowertext(answer) != lowertext(questions[question]))
-		parent.audible_message("<span class='danger'>WRONG! You must be PUNISHED!</span>")
-		contestant.adjustBruteLoss(30)
-		hook_scp_combat(contestant, "SCP-263", 0, 30)
-	else
-		parent.audible_message("<span class='notice'>CORRECT! You live... for now.</span>")
+		if(!answer || lowertext(answer) != lowertext(questions[question]))
+			parent.audible_message("<span class='danger'>WRONG! You must be PUNISHED!</span>")
+			contestant.adjustBruteLoss(30)
+			hook_scp_combat(contestant, "SCP-263", 0, 30)
+		else
+			parent.audible_message("<span class='notice'>CORRECT! You live... for now.</span>")
 
-	end_game()
+		end_game()
 
 /datum/scp263_game_system/proc/run_lucky_number(mob/living/carbon/human/contestant)
 	var/lucky_number = rand(1, 10)
-	var/guess = input(contestant, "Pick a number between 1 and 10!", "SCP-263 Lucky Number") as null|num
+	spawn()
+		var/guess = input(contestant, "Pick a number between 1 and 10!", "SCP-263 Lucky Number") as null|num
 
-	if(!guess || guess != lucky_number)
-		parent.audible_message("<span class='danger'>The lucky number was [lucky_number]! TOO BAD!</span>")
-		contestant.adjustFireLoss(20)
-		hook_scp_combat(contestant, "SCP-263", 0, 20)
-	else
-		parent.audible_message("<span class='notice'>LUCKY YOU! Literally!</span>")
-		contestant.adjustBruteLoss(-20)
+		if(!guess || guess != lucky_number)
+			parent.audible_message("<span class='danger'>The lucky number was [lucky_number]! TOO BAD!</span>")
+			contestant.adjustFireLoss(20)
+			hook_scp_combat(contestant, "SCP-263", 0, 20)
+		else
+			parent.audible_message("<span class='notice'>LUCKY YOU! Literally!</span>")
+			contestant.adjustBruteLoss(-20)
 
-	end_game()
+		end_game()
 
 /datum/scp263_game_system/proc/run_truth_or_die(mob/living/carbon/human/contestant)
 	parent.audible_message("<span class='warning'>Tell me your DARKEST SECRET or SUFFER!</span>")
 
-	var/secret = input(contestant, "What is your darkest secret?", "SCP-263: Truth or Die") as null|text
+	spawn()
+		var/secret = input(contestant, "What is your darkest secret?", "SCP-263: Truth or Die") as null|text
 
-	if(!secret || length(secret) < 10)
-		parent.audible_message("<span class='danger'>LIES! SUFFER!</span>")
-		contestant.adjustBruteLoss(25)
-		hook_scp_combat(contestant, "SCP-263", 0, 25)
-	else
-		parent.audible_message("<span class='notice'>HOW ENTERTAINING! You may live.</span>")
+		if(!secret || length(secret) < 10)
+			parent.audible_message("<span class='danger'>LIES! SUFFER!</span>")
+			contestant.adjustBruteLoss(25)
+			hook_scp_combat(contestant, "SCP-263", 0, 25)
+		else
+			parent.audible_message("<span class='notice'>HOW ENTERTAINING! You may live.</span>")
 
-	end_game()
+		end_game()
 
 /datum/scp263_game_system/proc/end_game()
 	current_game = null

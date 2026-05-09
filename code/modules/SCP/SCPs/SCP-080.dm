@@ -27,9 +27,6 @@
 	absorption_system = new /datum/scp080_absorption_system(src)
 	research_system = new /datum/scp080_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-080"] = new /datum/scp_instance("SCP-080", src)
-
 	START_PROCESSING(SSobj, src)
 
 /obj/structure/closet/scp080/Destroy()
@@ -149,7 +146,7 @@
 
 	victim.visible_message("<span class='danger'>[victim] is pulled into the darkness of [scp080_parent]!</span>", "<span class='danger'>The darkness pulls you in!</span>")
 
-	if(do_after(victim, scp080_parent, 30))
+	if(do_after(victim, 30, scp080_parent))
 		if(prob(70))
 			scp080_parent.on_victim_absorbed(victim)
 			victim.forceMove(scp080_parent)

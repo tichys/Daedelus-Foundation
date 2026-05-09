@@ -10,9 +10,9 @@
 	var/list/ikea_interiors = list()
 	var/max_interiors = 10
 	var/current_interior_id = 0
-
 /obj/structure/scp3008/Initialize()
 	. = ..()
+	GLOB.scp3008_entrances += src
 
 	SCP = new /datum/scp(
 		src,
@@ -25,9 +25,6 @@
 	SCP.min_playercount = 25
 	SCP.min_time = 45 MINUTES
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-3008"] = new /datum/scp_instance("SCP-3008", src)
-
 	if(!entrance_landmark)
 		entrance_landmark = new /obj/effect/landmark/ikea_entrance(get_turf(src))
 
@@ -35,6 +32,7 @@
 	START_PROCESSING(SSobj, src)
 
 /obj/structure/scp3008/Destroy()
+	GLOB.scp3008_entrances -= src
 	STOP_PROCESSING(SSobj, src)
 	if(entrance_landmark)
 		qdel(entrance_landmark)
@@ -877,7 +875,7 @@
 	icon = 'icons/obj/closet.dmi'
 	icon_state = "wardrobe"
 
-/obj/structure/table/wood
+/obj/structure/table/wood/ikea
 	name = "Wooden Table"
 	desc = "A sturdy wooden table."
 	icon = 'icons/obj/structures.dmi'
@@ -897,7 +895,7 @@
 		name = "[section_name] Sign"
 		desc = "A sign indicating the [section_name]."
 
-/obj/structure/display_case
+/obj/structure/display_case/ikea
 	name = "Display Case"
 	desc = "A glass display case for showcasing products."
 	icon = 'icons/obj/structures.dmi'
@@ -938,7 +936,7 @@
 		to_chat(src, "<span class='warning'>You need to be closer to the entrance to escape. The IKEA seems to be shifting around you...</span>")
 
 /mob/living/carbon/human/proc/get_ikea_interior()
-	for(var/obj/structure/scp3008/entrance in world)
+	for(var/obj/structure/scp3008/entrance in GLOB.scp3008_entrances)
 		if(entrance.ikea_interiors)
 			for(var/datum/ikea_interior/interior in entrance.ikea_interiors)
 				if(src in interior.occupants)
@@ -1068,7 +1066,7 @@
 				T.ChangeTurf(/turf/closed/wall/mineral/wood)
 
 /mob/living/simple_animal/hostile/ikea_staff/proc/check_night_behavior()
-	for(var/obj/structure/scp3008/entrance in world)
+	for(var/obj/structure/scp3008/entrance in GLOB.scp3008_entrances)
 		for(var/datum/ikea_interior/interior in entrance.ikea_interiors)
 			if(src in interior.staff_entities)
 				if(interior.is_night)

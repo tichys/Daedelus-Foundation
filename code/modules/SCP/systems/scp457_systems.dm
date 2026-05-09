@@ -15,6 +15,7 @@
 	owner = new_owner
 
 /datum/scp457_heat_system/Destroy()
+	owner = null
 	return ..()
 
 /datum/scp457_heat_system/process()
@@ -72,6 +73,8 @@
 
 /datum/scp457_fire_system/Destroy()
 	cleanup_fires()
+	active_fires = null
+	owner = null
 	return ..()
 
 /datum/scp457_fire_system/process()
@@ -197,6 +200,7 @@
 	owner = new_owner
 
 /datum/scp457_containment_system/Destroy()
+	owner = null
 	return ..()
 
 /datum/scp457_containment_system/process()
@@ -285,6 +289,11 @@
 	setup_room_effects()
 
 /datum/scp457_environmental_system/Destroy()
+	controlled_room_types = null
+	room_effects = null
+	environmental_hazards = null
+	strategic_positions = null
+	owner = null
 	return ..()
 
 /datum/scp457_environmental_system/process()
@@ -342,6 +351,8 @@
 	setup_research_projects()
 
 /datum/scp457_research_integration/Destroy()
+	research_data = null
+	owner = null
 	return ..()
 
 /datum/scp457_research_integration/process()

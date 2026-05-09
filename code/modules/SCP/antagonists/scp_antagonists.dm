@@ -110,7 +110,7 @@
 /datum/objective/scp_breach/check_completion()
 	if(!scp_ref)
 		return FALSE
-	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_ref]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances?[scp_ref]
 	if(instance && instance.containment_status != "contained")
 		return TRUE
 	return FALSE
@@ -307,7 +307,7 @@
 	cooldown_time = 10 SECONDS
 
 /datum/action/innate/scp_ability/scp173_snap_neck/Activate()
-	var/mob/living/carbon/human/user = usr
+	var/mob/living/user = usr
 	if(!istype(user))
 		return
 	var/mob/living/scp/scp173/scp_mob = user
@@ -462,7 +462,8 @@
 		return
 	start_cooldown()
 	to_chat(scp_mob, span_notice("State: [scp_mob.state]"))
-	to_chat(scp_mob, span_notice("Current Target: [scp_mob.current_target ? scp_mob.current_target.name : "None"]"))
+	var/mob/living/current_target = length(scp_mob.target_queue) ? scp_mob.target_queue[1] : null
+	to_chat(scp_mob, span_notice("Current Target: [istype(current_target) ? current_target.name : "None"]"))
 	to_chat(scp_mob, span_notice("Kills: [scp_mob.kills_count]"))
 
 /datum/action/innate/scp_ability/scp096_cover_face
@@ -560,7 +561,7 @@
 	if(target.stat != DEAD && target.diseases != null)
 		to_chat(target, span_danger("You feel a terrible sickness spreading through your body..."))
 		var/datum/pathogen/scp008_plague = new()
-		target.diseases += scp008_plague
+		scp008_plague.force_infect(target, FALSE)
 		to_chat(target, span_userdanger("The zombie plague takes hold!"))
 
 /datum/action/innate/scp_ability/scp008_groan
@@ -730,7 +731,8 @@
 		to_chat(user, span_warning("You are not wearing SCP-035!"))
 		return
 	to_chat(user, span_notice("You assert dominance over [host]'s body."))
-	host.stamina.adjust(40)
+	if(host.stamina)
+		host.stamina.adjust(40)
 	host.SetStun(0)
 	host.SetKnockdown(0)
 
@@ -973,8 +975,8 @@
 	name = "SCP-106"
 	scp_id = "SCP-106"
 	scp_class = "Keter"
-	description = "You are SCP-106, The Old Man. Phase through walls, create pocket dimensions, and drag victims."
-	lore_text = "SCP-106 is an elderly humanoid that corrodes all matter it touches and can phase through solid surfaces. Use Phase Through to pass through walls and floors, Drag Victim to pull humans into your pocket dimension, Corrode to dissolve barriers, and Pocket Dimension to retreat to safety. You are patient — stalk from the shadows."
+	description = "You are SCP-106, The Old Man. Phase through walls, drag victims into your pocket dimension, and corrode all that you touch."
+	lore_text = "SCP-106 is an elderly humanoid covered in a dark, corrosive substance. It can phase through solid matter, leaving trails of decay. It hunts slowly but relentlessly, preferring to stalk isolated prey before dragging them into its pocket dimension. Fire and bright light are its weaknesses. Use Phase Through to pass through walls, Drag Victim to pull humans into your dimension, Corrode to dissolve structures, Enter Pocket Dimension to heal and evade, and Stalk to unsettle prey from a distance."
 
 /datum/antagonist/scp/scp106/forge_scp_objectives()
 	var/datum/objective/scp_drag_victims/obj1 = new()
@@ -987,20 +989,19 @@
 	var/datum/objective/scp_breach/obj3 = new()
 	obj3.owner = owner
 	obj3.scp_ref = scp_id
-	obj3.explanation_text = "Return to the facility from your pocket dimension and stalk the living."
+	obj3.explanation_text = "Stalk the facility from the shadows. The living fear your touch."
 	objectives += obj3
 
 /datum/antagonist/scp/scp106/greet_scp()
 	to_chat(owner.current, span_notice("<b>You are SCP-106, The Old Man.</b>"))
-	to_chat(owner.current, span_notice("Phase through solid walls, corrode objects, and drag victims into your pocket dimension."))
-	to_chat(owner.current, span_notice("Use your abilities to stalk prey and escape containment."))
-	to_chat(owner.current, span_warning("You are slow but relentless. Fire and bright light weaken you."))
+	to_chat(owner.current, span_notice("You are slow but patient. Phase through walls, corrode matter, and drag victims into your pocket dimension."))
+	to_chat(owner.current, span_notice("Leave corrosion in your wake. Stalk from the shadows. The darkness is your ally."))
+	to_chat(owner.current, span_warning("Fire and bright light weaken you. Avoid well-lit areas and open flames."))
 
 /datum/antagonist/scp/scp106/apply_scp_effects()
 	if(!owner.current)
 		return
 	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
@@ -1008,12 +1009,12 @@
 	grant_action(/datum/action/innate/scp_ability/scp106_drag_victim)
 	grant_action(/datum/action/innate/scp_ability/scp106_corrode)
 	grant_action(/datum/action/innate/scp_ability/scp106_pocket_dimension)
+	grant_action(/datum/action/innate/scp_ability/scp106_stalk)
 
 /datum/antagonist/scp/scp106/remove_scp_effects()
 	if(!owner.current)
 		return
 	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
@@ -1021,22 +1022,29 @@
 	remove_action(/datum/action/innate/scp_ability/scp106_drag_victim)
 	remove_action(/datum/action/innate/scp_ability/scp106_corrode)
 	remove_action(/datum/action/innate/scp_ability/scp106_pocket_dimension)
+	remove_action(/datum/action/innate/scp_ability/scp106_stalk)
 
 /datum/action/innate/scp_ability/scp106_phase_through
-	name = "Phase Through Wall"
-	desc = "Phase through a nearby wall or solid object."
+	name = "Phase Through"
+	desc = "Sink through solid matter and resurface at a target location. Costs dimensional energy."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "phase"
-	cooldown_time = 20 SECONDS
+	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp106_phase_through/Activate()
 	var/mob/living/scp/scp106/scp_mob = usr
 	if(!istype(scp_mob))
 		return
-	start_cooldown()
+	if(scp_mob.in_pocket_dimension)
+		to_chat(scp_mob, span_warning("You cannot phase while inside the pocket dimension."))
+		return
 	if(!scp_mob.phasing_system)
 		to_chat(scp_mob, span_warning("Your phasing system is not available!"))
 		return
+	if(scp_mob.phasing_system.phase_cooldown > 0)
+		to_chat(scp_mob, span_warning("You cannot phase again so soon."))
+		return
+	start_cooldown()
 	var/list/valid_turfs = list()
 	for(var/turf/open/T in view(scp_mob.phasing_system.phase_range, scp_mob))
 		if(scp_mob.phasing_system.can_phase_to(T))
@@ -1051,48 +1059,73 @@
 
 /datum/action/innate/scp_ability/scp106_drag_victim
 	name = "Drag to Pocket Dimension"
-	desc = "Drag an adjacent victim into your pocket dimension."
+	desc = "Drag an adjacent victim into your pocket dimension. They will suffer and decay within."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "neckbite"
-	cooldown_time = 30 SECONDS
+	cooldown_time = 60 SECONDS
 
 /datum/action/innate/scp_ability/scp106_drag_victim/Activate()
-	var/mob/living/carbon/human/user = usr
+	var/mob/living/user = usr
 	if(!istype(user))
 		return
-	start_cooldown()
 	var/mob/living/scp/scp106/scp_mob = user
+	if(!istype(scp_mob))
+		return
+	if(scp_mob.in_pocket_dimension)
+		to_chat(scp_mob, span_warning("You cannot drag victims while inside the pocket dimension."))
+		return
+	start_cooldown()
 	var/list/targets = list()
 	for(var/mob/living/carbon/human/H in range(1, user))
 		if(H != user && H.stat != DEAD)
 			targets += H
 	if(!length(targets))
-		to_chat(user, span_warning("No victims in range!"))
+		to_chat(user, span_warning("No victims within reach!"))
 		return
-	var/mob/living/carbon/human/target = input(user, "Choose a victim:", "Pocket Dimension") as null|anything in targets
+	var/mob/living/carbon/human/target = input(user, "Choose a victim to drag into the darkness:", "Pocket Dimension") as null|anything in targets
 	if(!target || QDELETED(target))
 		return
-	if(scp_mob.pocket_dimension_system)
-		scp_mob.pocket_dimension_system.drag_victim_to_dimension(target)
-		scp_mob.on_pocket_capture(target)
+	scp_mob.drag_victim(target)
 
 /datum/action/innate/scp_ability/scp106_corrode
 	name = "Corrode"
-	desc = "Release corrosive substance, damaging nearby structures and beings."
+	desc = "Release a burst of corrosive substance, damaging structures and beings nearby."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "acid"
+	cooldown_time = 45 SECONDS
 
 /datum/action/innate/scp_ability/scp106_corrode/Activate()
 	var/mob/living/scp/scp106/scp_mob = usr
 	if(!istype(scp_mob))
 		return
+	if(scp_mob.in_pocket_dimension)
+		to_chat(scp_mob, span_warning("You cannot corrode while inside the pocket dimension."))
+		return
 	start_cooldown()
-	if(scp_mob.corrosion_system)
-		scp_mob.corrosion_system.spread_corrosion(get_turf(scp_mob), 2)
+	var/turf/center = get_turf(scp_mob)
+	scp_mob.visible_message(span_danger("A wave of corrosive black ooze radiates from [scp_mob]!"))
+	playsound(scp_mob, 'sound/effects/phasein.ogg', 60, TRUE)
+	for(var/turf/T in range(2, center))
+		scp_mob.leave_corrosion_pool(T)
+		for(var/obj/structure/S in T)
+			if(prob(40))
+				S.take_damage(30)
+		for(var/obj/machinery/door/D in T)
+			if(prob(30))
+				spawn(10)
+					if(D && !QDELETED(D))
+						D.try_to_crowbar(null, scp_mob, TRUE)
+		for(var/mob/living/carbon/human/H in T)
+			if(H != scp_mob && H.stat != DEAD)
+				H.adjustBruteLoss(15)
+				H.adjustToxLoss(10)
+				if(H.sanity)
+					H.sanity.adjust_sanity(-10, "scp106_corrode")
+				to_chat(H, span_userdanger("Corrosive ooze burns your skin!"))
 
 /datum/action/innate/scp_ability/scp106_pocket_dimension
-	name = "Enter Pocket Dimension"
-	desc = "Retreat into your pocket dimension to heal and evade pursuers."
+	name = "Enter/Exit Pocket Dimension"
+	desc = "Sink into your pocket dimension to heal, or emerge back into the facility."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "void"
 	cooldown_time = 45 SECONDS
@@ -1102,8 +1135,37 @@
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
-	if(scp_mob.pocket_dimension_system)
-		scp_mob.pocket_dimension_system.create_pocket_dimension()
+	if(scp_mob.in_pocket_dimension)
+		scp_mob.exit_pocket_dimension()
+	else
+		scp_mob.enter_pocket_dimension()
+
+/datum/action/innate/scp_ability/scp106_stalk
+	name = "Stalk Prey"
+	desc = "Instill a sense of creeping dread in a nearby human, damaging their sanity."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "eye"
+	cooldown_time = 30 SECONDS
+
+/datum/action/innate/scp_ability/scp106_stalk/Activate()
+	var/mob/living/user = usr
+	if(!istype(user))
+		return
+	start_cooldown()
+	var/list/targets = list()
+	for(var/mob/living/carbon/human/H in view(10, user))
+		if(H != user && H.stat != DEAD)
+			targets += H
+	if(!length(targets))
+		to_chat(user, span_warning("No prey in sight."))
+		return
+	var/mob/living/carbon/human/target = input(user, "Choose a target to stalk:", "Stalk") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	if(target.sanity)
+		target.sanity.adjust_sanity(-15, "scp106_stalk")
+	to_chat(target, span_warning("You feel something ancient watching you from the shadows..."))
+	to_chat(user, span_notice("You fix your gaze upon [target.name]. They will know fear."))
 
 // ================================================================
 // SCP-457 - The Living Flame
@@ -1257,8 +1319,8 @@
 	name = "SCP-939"
 	scp_id = "SCP-939"
 	scp_class = "Keter"
-	description = "You are SCP-939, a pack hunter that mimics voices to lure prey."
-	lore_text = "SCP-939 is a pack-hunting predator that mimics the voices of its previous victims to lure new prey. Use Mimic Voice to imitate a human and draw targets closer, Hunt to track and attack with predatory precision, and Lure to draw prey into an ambush. Coordinate with your pack — a lone 939 is vulnerable, but a pack is lethal."
+	description = "You are SCP-939, a blind pack hunter that mimics voices to lure prey."
+	lore_text = "SCP-939 is a pack-hunting predator that is completely blind. It detects prey through sound and scent, and mimics the voices of its previous victims to lure new prey. Use Mimic Voice to imitate a human and draw targets closer, Hunt to track and attack using sound, and Lure to draw prey into an ambush. You cannot see — you navigate entirely by sound. Detected mobs appear as directional blips. Coordinate with your pack — a lone 939 is vulnerable, but a pack is lethal."
 
 /datum/antagonist/scp/scp939/forge_scp_objectives()
 	var/datum/objective/scp_mimic_voices/obj1 = new()
@@ -1267,7 +1329,7 @@
 	var/datum/objective/scp_breach/obj2 = new()
 	obj2.owner = owner
 	obj2.scp_ref = scp_id
-	obj2.explanation_text = "Break free and hunt the facility corridors using your pack's coordination."
+	obj2.explanation_text = "Break free and hunt the facility corridors using sound and mimicry."
 	objectives += obj2
 	var/datum/objective/scp_kill_count/obj3 = new()
 	obj3.owner = owner
@@ -1277,39 +1339,43 @@
 
 /datum/antagonist/scp/scp939/greet_scp()
 	to_chat(owner.current, span_notice("<b>You are SCP-939, With Many Voices.</b>"))
-	to_chat(owner.current, span_notice("You are blind but hunt by sound. Mimic the voices of others to lure prey."))
-	to_chat(owner.current, span_notice("Learn voices from victims — more voices means more deceptive options."))
-	to_chat(owner.current, span_warning("You cannot see — you navigate entirely by sound and smell."))
+	to_chat(owner.current, span_notice("You are BLIND. You cannot see anything — you hunt entirely by sound and smell."))
+	to_chat(owner.current, span_notice("Detected humans appear as directional blips. Moving humans and speakers are easier to detect."))
+	to_chat(owner.current, span_notice("Mimic the voices of victims to lure prey closer. Learn voices by attacking humans."))
+	to_chat(owner.current, span_warning("You cannot see. Stay alert to sounds and use your Lure ability to draw prey in."))
 
 /datum/antagonist/scp/scp939/apply_scp_effects()
 	if(!owner.current)
 		return
 	ADD_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-	ADD_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	ADD_TRAIT(owner.current, TRAIT_BLIND, SCP_TRAIT)
 	grant_action(/datum/action/innate/scp_ability/scp939_mimic_voice)
 	grant_action(/datum/action/innate/scp_ability/scp939_hunt)
 	grant_action(/datum/action/innate/scp_ability/scp939_lure)
+	grant_action(/datum/action/innate/scp_ability/scp939_detect_prey)
 
 /datum/antagonist/scp/scp939/remove_scp_effects()
 	if(!owner.current)
 		return
 	REMOVE_TRAIT(owner.current, TRAIT_NOBREATH, SCP_TRAIT)
-	REMOVE_TRAIT(owner.current, TRAIT_NOFIRE, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTCOLD, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
+	REMOVE_TRAIT(owner.current, TRAIT_BLIND, SCP_TRAIT)
 	remove_action(/datum/action/innate/scp_ability/scp939_mimic_voice)
 	remove_action(/datum/action/innate/scp_ability/scp939_hunt)
 	remove_action(/datum/action/innate/scp_ability/scp939_lure)
+	remove_action(/datum/action/innate/scp_ability/scp939_detect_prey)
 
 /datum/action/innate/scp_ability/scp939_mimic_voice
 	name = "Mimic Voice"
-	desc = "Mimic the voice of a learned victim to deceive others."
+	desc = "Mimic the voice of a learned victim to deceive others into approaching."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "mimic_voice"
+	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp939_mimic_voice/Activate()
 	var/mob/living/scp/scp939/scp_mob = usr
@@ -1333,10 +1399,10 @@
 
 /datum/action/innate/scp_ability/scp939_hunt
 	name = "Begin Hunt"
-	desc = "Enter hunting mode. You move faster and can track prey by sound."
+	desc = "Enter hunting mode. You move faster and detect prey more accurately by sound."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "hunt"
-	cooldown_time = 20 SECONDS
+	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp939_hunt/Activate()
 	var/mob/living/scp/scp939/scp_mob = usr
@@ -1345,13 +1411,19 @@
 	start_cooldown()
 	if(scp_mob.hunting_system)
 		scp_mob.hunting_system.update_hunting_status()
+		if(scp_mob.hunting_system.hunt_mode)
+			scp_mob.detection_range = initial(scp_mob.detection_range) + 4
+			to_chat(scp_mob, span_notice("You focus your senses. The sounds of prey become clearer."))
+		else
+			scp_mob.detection_range = initial(scp_mob.detection_range)
+			to_chat(scp_mob, span_notice("You relax your hunting focus."))
 
 /datum/action/innate/scp_ability/scp939_lure
 	name = "Lure Prey"
-	desc = "Emit a distress sound that draws nearby humans toward your position."
+	desc = "Emit a convincing distress sound that draws nearby humans toward your position."
 	button_icon = 'icons/mob/actions/actions_spells.dmi'
 	button_icon_state = "lure"
-	cooldown_time = 25 SECONDS
+	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp939_lure/Activate()
 	var/mob/living/user = usr
@@ -1366,6 +1438,32 @@
 				step_towards(H, user)
 			if(H.sanity)
 				H.sanity.adjust_sanity(-8, "Heard SCP-939 lure")
+
+/datum/action/innate/scp_ability/scp939_detect_prey
+	name = "Detect Prey"
+	desc = "Focus your hearing to detect all nearby humans. Shows their direction and distance."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "sonar"
+	cooldown_time = 10 SECONDS
+
+/datum/action/innate/scp_ability/scp939_detect_prey/Activate()
+	var/mob/living/scp/scp939/scp_mob = usr
+	if(!istype(scp_mob))
+		return
+	start_cooldown()
+	if(!length(scp_mob.detected_mobs))
+		to_chat(scp_mob, span_notice("You hear nothing nearby. The silence is your domain."))
+		return
+	to_chat(scp_mob, span_notice("<b>You focus your hearing —</b>"))
+	for(var/mob/living/carbon/human/H in scp_mob.detected_mobs)
+		var/list/data = scp_mob.detected_mobs[H]
+		if(QDELETED(H) || H.stat == DEAD)
+			continue
+		var/dir_name = dir2text(data["direction"])
+		var/distance = data["distance"]
+		var/moving = data["moving"]
+		var/text = "  [moving ? "<b>" : ""]Sound [dir_name], [distance]m[moving ? " (moving)" : ""]"
+		to_chat(scp_mob, span_notice(text))
 
 // ================================================================
 // SCP-682 - The Hard-to-Destroy Reptile

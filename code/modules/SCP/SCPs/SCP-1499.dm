@@ -30,9 +30,6 @@
 	entity_system = new /datum/scp1499_entity_system(src)
 	research_system = new /datum/scp1499_research_system(src)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances["SCP-1499"] = new /datum/scp_instance("SCP-1499", src)
-
 /obj/item/clothing/mask/gas/scp1499/Destroy()
 	QDEL_NULL(dimension_system)
 	QDEL_NULL(entity_system)
@@ -201,7 +198,7 @@
 
 /datum/scp1499_dimension_system/proc/spawned_entities_cleanup()
 	var/list/cleanup = list()
-	for(var/obj/effect/scp1499_entity/E in world)
+	for(var/obj/effect/scp1499_entity/E)
 		if(E.z == dimension_z)
 			cleanup += E
 	return cleanup
@@ -214,7 +211,7 @@
 		wearer.visible_message("<span class='notice'>[wearer] stares blankly into nothing.</span>")
 
 	if(duration > 1800)
-		wearer.adjust_drowsyness(1)
+		wearer.Sleeping(10)
 		hook_scp_combat(wearer, "SCP-1499", 0, 1)
 
 	if(wearer.sanity && prob(3))

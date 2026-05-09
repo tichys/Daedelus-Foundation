@@ -40,6 +40,8 @@
 
 /datum/character_setup_ui/ui_static_data(mob/user)
 	var/list/data = list()
+	if (!prefs)
+		return data
 	if (!faction_to_classes)
 		faction_to_classes = get_faction_to_classes()
 	if (!faction_lore)
@@ -69,6 +71,7 @@
 	var/list/assets = list(
 		get_asset_datum(/datum/asset/spritesheet/preferences),
 		get_asset_datum(/datum/asset/json/preferences),
+		get_asset_datum(/datum/asset/json/keybindings),
 	)
 	return assets
 
@@ -80,6 +83,8 @@
 
 /datum/character_setup_ui/ui_data(mob/user)
 	var/list/data = list()
+	if (!prefs)
+		return data
 	if (!faction_to_classes)
 		faction_to_classes = get_faction_to_classes()
 	if (!faction_lore)
@@ -101,14 +106,6 @@
 	data["active_slot"] = prefs.default_slot
 	data["name_to_use"] = prefs.read_preference(/datum/preference/name/real_name)
 	data["real_name"] = data["name_to_use"]
-	var/list/species_choices = list()
-	var/list/species_names = list()
-	for (var/species_id in get_selectable_species())
-		var/datum/species/S = GLOB.species_list[species_id]
-		species_choices += species_id
-		species_names[species_id] = initial(S.name)
-	data["species_choices"] = species_choices
-	data["species_names"] = species_names
 	var/species_type = prefs.read_preference(/datum/preference/choiced/species)
 	var/species_id
 	for (var/id in GLOB.species_list)
@@ -178,6 +175,7 @@
 	data["overflow_role"] = SSjob.GetJobType(SSjob.overflow_role).title
 	for (var/datum/preference_middleware/preference_middleware as anything in prefs.middleware)
 		data += preference_middleware.get_ui_data(user)
+	data["keybindings"] = prefs.key_bindings
 	return data
 
 /datum/character_setup_ui/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
@@ -185,6 +183,15 @@
 	if(.)
 		return
 	switch(action)
+		if ("reset_all_keybinds")
+			for (var/datum/preference_middleware/keybindings/kb_mw in prefs.middleware)
+				return kb_mw.reset_all_keybinds(params, usr)
+		if ("reset_keybinds_to_defaults")
+			for (var/datum/preference_middleware/keybindings/kb_mw2 in prefs.middleware)
+				return kb_mw2.reset_keybinds_to_defaults(params, usr)
+		if ("set_keybindings")
+			for (var/datum/preference_middleware/keybindings/kb_mw3 in prefs.middleware)
+				return kb_mw3.set_keybindings(params)
 		if ("loadout_toggle")
 			var/datum/preference/P = GLOB.preference_entries[/datum/preference/blob/loadout]
 			return P.button_act(usr, prefs, params)
@@ -207,6 +214,7 @@
 		if ("language_toggle_understand")
 			var/datum/language/path = text2path(params["language"])
 			if (!path) return FALSE
+			if (!(path in GLOB.preference_language_types)) return FALSE
 			var/list/user_languages = prefs.read_preference(/datum/preference/blob/languages) || list()
 			var/value = user_languages[path]
 			if (value & LANGUAGE_UNDERSTAND)
@@ -225,6 +233,7 @@
 		if ("language_toggle_speak")
 			var/datum/language/path2 = text2path(params["language"])
 			if (!path2) return FALSE
+			if (!(path2 in GLOB.preference_language_types)) return FALSE
 			var/list/user_languages2 = prefs.read_preference(/datum/preference/blob/languages) || list()
 			var/value2 = user_languages2[path2]
 			if (value2 & LANGUAGE_SPEAK)
@@ -352,10 +361,6 @@
 			if (applied && level == JP_HIGH)
 				SYNC_PERSONNEL_RECORD(job)
 			return applied
-		if ("rotate")
-			if (prefs?.character_preview_view)
-				prefs.character_preview_view.dir = turn(prefs.character_preview_view.dir, -90)
-				return TRUE
 		if ("close")
 			return TRUE
 		if ("change_slot")
@@ -464,7 +469,7 @@
 				if ("administrative")
 					jobs += list(JOB_SITE_DIRECTOR, JOB_HUMAN_RESOURCES_DIRECTOR, JOB_ETHICS_COMMITTEE_LIAISON, JOB_COMMUNICATIONS_DIRECTOR)
 				if ("security")
-					jobs += list(JOB_SECURITY_DIRECTOR, JOB_EZ_COMMANDER, JOB_SENIOR_EZ_GUARD, JOB_EZ_GUARD, JOB_JUNIOR_EZ_GUARD, JOB_LCZ_COMMANDER, JOB_SENIOR_LCZ_GUARD, JOB_LCZ_GUARD, JOB_JUNIOR_LCZ_GUARD, JOB_HCZ_COMMANDER, JOB_SENIOR_HCZ_GUARD, JOB_HCZ_GUARD, JOB_JUNIOR_HCZ_GUARD, JOB_INVESTIGATIONS_AGENT, JOB_RAISA_AGENT)
+					jobs += list(JOB_GUARD_COMMANDER, JOB_EZ_ZONE_SUPERVISOR, JOB_SENIOR_EZ_GUARD, JOB_EZ_GUARD, JOB_JUNIOR_EZ_GUARD, JOB_LCZ_ZONE_JUNIOR_LIEUTENANT, JOB_SENIOR_LCZ_GUARD, JOB_LCZ_GUARD, JOB_JUNIOR_LCZ_GUARD, JOB_HCZ_ZONE_SENIOR_LIEUTENANT, JOB_SENIOR_HCZ_GUARD, JOB_HCZ_GUARD, JOB_JUNIOR_HCZ_GUARD, JOB_INVESTIGATIONS_AGENT, JOB_RAISA_AGENT)
 				if ("research")
 					jobs += list(JOB_RESEARCH_DIRECTOR, JOB_ASSISTANT_RESEARCH_DIRECTOR, JOB_SENIOR_RESEARCHER, JOB_RESEARCHER, JOB_JUNIOR_RESEARCHER)
 				if ("medical")

@@ -26,6 +26,7 @@
 	desc = "A hastily assembled kit for altering one's appearance. Not very convincing up close."
 	icon_state = "id"
 	var/disguise_quality = 30
+	uses = 3
 
 /obj/item/dclass_contraband/disguise_kit/attack_self(mob/user)
 	if(!ishuman(user))

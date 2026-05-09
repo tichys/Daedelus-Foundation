@@ -182,7 +182,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	active_experiments[exp_id] = experiment
 	global_experiment_count++
 	
-	SSscp_persistence.manager?.scp_instances[scp_id]?.add_interaction_record(researcher, "experiment_started:[experiment_type]")
+	SSscp_persistence.manager?.scp_instances?[scp_id]?.add_interaction_record(researcher, "experiment_started:[experiment_type]")
 	
 	to_chat(researcher, "<span class='notice'>Experiment [experiment.name] has begun. Phase: Preparation.</span>")
 	
@@ -225,7 +225,7 @@ SUBSYSTEM_DEF(scp_experiments)
 			global_catastrophe_count++
 			trigger_catastrophe(exp, researcher)
 	
-	SSscp_persistence.manager?.scp_instances[exp.scp_id]?.add_interaction_record(researcher, "experiment_completed:[outcome]")
+	SSscp_persistence.manager?.scp_instances?[exp.scp_id]?.add_interaction_record(researcher, "experiment_completed:[outcome]")
 	
 	return TRUE
 
@@ -332,7 +332,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	if(!exp || !researcher)
 		return
 	
-	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[exp.scp_id]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances?[exp.scp_id]
 	if(instance)
 		instance.containment_status = "breached"
 		instance.add_breach_record()

@@ -49,6 +49,7 @@ SUBSYSTEM_DEF(persistent_progression)
 /datum/controller/subsystem/persistent_progression/proc/initialize_faction_integration()
 	if(!faction_integration)
 		faction_integration = new /datum/faction_integration()
+		GLOB.faction_integration = faction_integration
 		world.log << "Persistent Progression: Faction integration initialized"
 
 /datum/controller/subsystem/persistent_progression/proc/get_total_experience()

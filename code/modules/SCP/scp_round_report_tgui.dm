@@ -7,7 +7,7 @@
 
 /datum/scp_round_report_ui/New(mob/recipient)
 	src.recipient = recipient
-	src.report = GLOB_SCP_ROUND_REPORT || new()
+	src.report = GLOB.scp_round_report || new()
 
 /datum/scp_round_report_ui/ui_state(mob/user)
 	return GLOB.default_state

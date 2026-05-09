@@ -92,6 +92,10 @@
 	if(has_materials)
 		var/craft_xp = 15
 		var/craft_suspicion = 5
+		if(!prob(80))
+			to_chat(H, span_warning("Your crafting attempt fails! The materials are wasted."))
+			player.increase_suspicion(craft_suspicion)
+			return
 		var/obj/item/I
 		switch(item_id)
 			if("shiv")
