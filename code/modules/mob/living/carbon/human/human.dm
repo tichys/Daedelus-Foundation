@@ -41,6 +41,13 @@
 	GLOB.human_list += src
 	become_atmos_sensitive()
 
+	// Initialize vision cone system
+	fovangle = FOV_DEFAULT // Enable vision cone by default
+	update_fov_angles()
+	update_cone_show()
+
+	// Observer quality and blink management systems removed - now handled by SCP-specific systems
+
 /mob/living/carbon/human/proc/setup_human_dna()
 	//initialize dna. for spawned humans; overwritten by other code
 	create_dna(src)

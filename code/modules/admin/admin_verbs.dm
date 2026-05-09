@@ -24,6 +24,8 @@ GLOBAL_PROTECT(admin_verbs_default)
 	/client/proc/requests
 	)
 GLOBAL_LIST_INIT(admin_verbs_admin, world.AVerbsAdmin())
+
+
 GLOBAL_PROTECT(admin_verbs_admin)
 /world/proc/AVerbsAdmin()
 	return list(
@@ -86,15 +88,10 @@ GLOBAL_PROTECT(admin_verbs_admin)
 	/client/proc/set_player_rank,
 	/client/proc/reset_player_progress,
 	/client/proc/view_player_progress,
-	/client/proc/persistent_progression_panel,
 	/client/proc/master_persistence_panel,
-	/client/proc/facility_persistence_panel,
-	/client/proc/scp_persistence_panel,
-	/client/proc/technology_persistence_panel,
-	/client/proc/medical_persistence_panel,
-	/client/proc/security_persistence_panel,
-	/client/proc/research_persistence_panel,
-	/client/proc/personnel_persistence_panel,
+	/client/proc/open_error_monitor,
+	/client/proc/open_scp_documentation,
+	/client/proc/open_research_laboratory,
 	)
 GLOBAL_LIST_INIT(admin_verbs_ban, list(/client/proc/unban_panel, /client/proc/ban_panel, /client/proc/stickybanpanel))
 GLOBAL_PROTECT(admin_verbs_ban)
@@ -456,8 +453,9 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	set name = "Game Panel"
 	set category = "Admin.Game"
 	if(holder)
-		holder.Game()
-	SSblackbox.record_feedback("tally", "admin_verb", 1, "Game Panel") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+		var/datum/admin_game_panel_ui/panel = new(holder)
+		panel.ui_interact(usr)
+	SSblackbox.record_feedback("tally", "admin_verb", 1, "Game Panel")
 
 /client/proc/poll_panel()
 	set name = "Server Poll Management"
