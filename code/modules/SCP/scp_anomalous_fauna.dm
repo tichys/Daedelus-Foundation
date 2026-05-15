@@ -22,13 +22,7 @@
 	atmos_requirements = list("min_oxy" = 0, "max_oxy" = 0, "min_plas" = 0, "max_plas" = 0, "min_co2" = 0, "max_co2" = 0, "min_n2" = 0, "max_n2" = 0)
 	minbodytemp = 0
 	maxbodytemp = 1500
-	/// The SCP number this fauna is associated with, if any
 	var/scp_designation = ""
-
-/mob/living/simple_animal/hostile/anomalous_fauna/death(gibbed, cause_of_death = "Unknown")
-	..()
-	if(scp_designation)
-		GLOB.scp_admin_log.log_event("FAUNA_DEATH", scp_designation, "N/A", name, "Anomalous fauna killed", "LOW")
 
 /obj/item/food/meat/slab/anomalous
 	name = "anomalous meat"
@@ -168,6 +162,10 @@
 	move_to_delay = 2
 	butcher_results = list(/obj/item/food/meat/slab/anomalous = 3)
 
+/mob/living/simple_animal/hostile/anomalous_fauna/aberrant_hound/Initialize(mapload)
+	. = ..()
+	name = "[pick(list("Shadow", "Rot", "Blight", "Gnash", "Venom", "Fester", "Rift", "Grisk"))] [pick(list("Hound", "Maw", "Fang", "Lurker"))]"
+
 /mob/living/simple_animal/hostile/anomalous_fauna/mass_aberrant_hound
 	name = "massive aberrant hound"
 	desc = "An enormous version of the aberrant hound. Its three jaws snap independently and its many eyes track multiple targets."
@@ -190,10 +188,6 @@
 	butcher_results = list(/obj/item/food/meat/slab/anomalous = 5, /obj/item/stack/sheet/bone = 2)
 	armor = list(MELEE = 30, BULLET = 30, LASER = 0, ENERGY = 0, BOMB = 50, BIO = 100, RAD = 100, FIRE = 0, ACID = 0)
 
-/mob/living/simple_animal/hostile/anomalous_fauna/aberrant_hound/Initialize(mapload)
-	. = ..()
-	name = "[pick(list("Shadow", "Rot", "Blight", "Gnash", "Venom", "Fester", "Rift", "Grisk"))] [pick(list("Hound", "Maw", "Fang", "Lurker"))]"
-
 /obj/structure/spawner/anomalous_nest
 	name = "anomalous rift"
 	desc = "A shimmering tear in reality. Something keeps crawling out of it."
@@ -202,10 +196,6 @@
 	max_integrity = 150
 	max_mobs = 4
 	spawn_time = 300
-	mob_types = list(
-		/mob/living/simple_animal/hostile/anomalous_fauna/void_crawler = 3,
-		/mob/living/simple_animal/hostile/anomalous_fauna/aberrant_hound = 2,
-		/mob/living/simple_animal/hostile/anomalous_fauna/shadow_stalker = 1,
-	)
+	mob_types = list(/mob/living/simple_animal/hostile/anomalous_fauna/void_crawler)
 	spawn_text = "crawls out of"
 	faction = list("anomalous")
