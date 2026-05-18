@@ -80,7 +80,7 @@
 
 /obj/machinery/scranton_reality_anchor/update_icon()
 	if(active)
-		icon_state = "hub_on"
+		icon_state = "hub_o"
 		set_light(range, 2, LIGHT_COLOR_BLUE)
 	else
 		icon_state = "hub"
