@@ -164,6 +164,6 @@
 	name = "Foundation Holding Cell"
 	desc = "A reinforced holding cell for captured operatives."
 	icon = 'icons/obj/structures.dmi'
-	icon_state = "girder"
+	icon_state = "wall"
 	anchored = TRUE
 	density = TRUE

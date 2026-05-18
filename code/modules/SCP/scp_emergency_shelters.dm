@@ -9,7 +9,7 @@
 /obj/structure/shelter_beacon
 	name = "Emergency Shelter Beacon"
 	desc = "A beacon marking the location of an emergency shelter. Follow the red light."
-	icon = 'icons/obj/assemblies.dmi'
+	icon = 'icons/obj/assemblies/new_assemblies.dmi'
 	icon_state = "shock_kit"
 	density = FALSE
 	anchored = TRUE
@@ -23,7 +23,7 @@
 	name = "Emergency Supply Cache"
 	desc = "A sealed emergency supply cache. Pry it open to access the contents."
 	icon = 'icons/obj/storage.dmi'
-	icon_state = "deliverycrate"
+	icon_state = "crate"
 	density = FALSE
 	anchored = TRUE
 	var/opened = FALSE
@@ -34,7 +34,7 @@
 		return
 
 	opened = TRUE
-	icon_state = "sec"
+	icon_state = "crate_open"
 	to_chat(user, span_notice("You pry open the supply cache!"))
 
 	new /obj/item/storage/medkit/regular(get_turf(src))

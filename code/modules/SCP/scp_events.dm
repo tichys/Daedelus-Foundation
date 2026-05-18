@@ -17,7 +17,7 @@
 	zone_affected = pick(zones)
 
 /datum/round_event/scp_memetic_outbreak/announce(fake)
-	priority_announce("WARNING: Memetic hazard detected in [zone_affected]. All personnel avoid visual contact with unverified screens and documents. Research personnel deploy countermeasures.", "MEMETIC HAZARD", sound_type = ANNOUNCER_ALERT)
+	priority_announce("WARNING: Memetic hazard detected in [zone_affected]. All personnel avoid visual contact with unverified screens and documents. Research personnel deploy countermeasures.", "MEMETIC HAZARD", null, ANNOUNCER_ALERT)
 
 /datum/round_event/scp_memetic_outbreak/tick()
 	if(activeFor % 5 != 0)
@@ -51,11 +51,11 @@
 	endWhen = 20
 
 /datum/round_event/scp_containment_degradation/announce(fake)
-	priority_announce("NOTICE: Containment integrity monitoring detected degradation in structural elements. Engineering personnel inspect containment walls.", "CONTAINMENT WARNING", sound_type = ANNOUNCER_DEFAULT)
+	priority_announce("NOTICE: Containment integrity monitoring detected degradation in structural elements. Engineering personnel inspect containment walls.", "CONTAINMENT WARNING", null, ANNOUNCER_DEFAULT)
 
 /datum/round_event/scp_containment_degradation/start()
 	var/damaged = 0
-	for(var/turf/closed/wall/scp_containment/W in world)
+	for(var/turf/closed/wall/scp_containment/W in INSTANCES_OF(/turf/closed/wall/scp_containment))
 		if(prob(20))
 			W.damage_containment(rand(15, 40), "containment_degradation_event")
 			damaged++
@@ -78,7 +78,7 @@
 	endWhen = 25
 
 /datum/round_event/scp_cognito_hazard/announce(fake)
-	priority_announce("ALERT: Cognitohazardous signal detected in facility communication systems. Disable visual displays if symptoms occur.", "COGNIHAZARD", sound_type = ANNOUNCER_ALERT)
+	priority_announce("ALERT: Cognitohazardous signal detected in facility communication systems. Disable visual displays if symptoms occur.", "COGNIHAZARD", null, ANNOUNCER_ALERT)
 
 /datum/round_event/scp_cognito_hazard/tick()
 	if(activeFor % 8 != 0)
@@ -111,7 +111,7 @@
 	endWhen = 30
 
 /datum/round_event/scp_dclass_uprising/announce(fake)
-	priority_announce("ALERT: Unauthorized D-Class assembly detected. Security personnel respond to D-Class areas. Elevate security protocols.", "D-CLASS ALERT", sound_type = ANNOUNCER_ALERT)
+	priority_announce("ALERT: Unauthorized D-Class assembly detected. Security personnel respond to D-Class areas. Elevate security protocols.", "D-CLASS ALERT", null, ANNOUNCER_ALERT)
 
 /datum/round_event/scp_dclass_uprising/start()
 	if(SSdclass?.manager)
@@ -151,7 +151,7 @@
 	endWhen = 20
 
 /datum/round_event/scp_power_surge/announce(fake)
-	priority_announce("WARNING: Anomalous power surge detected in containment grid. Backup generators standing by.", "POWER SURGE", sound_type = ANNOUNCER_POWEROFF)
+	priority_announce("WARNING: Anomalous power surge detected in containment grid. Backup generators standing by.", "POWER SURGE", null, ANNOUNCER_POWEROFF)
 
 /datum/round_event/scp_power_surge/start()
 	var/list/surge_apcs = list()
@@ -191,7 +191,7 @@
 	contaminant_type = pick("unknown particulate", "anomalous gas", "biohazardous vapor")
 
 /datum/round_event/scp_vent_contamination/announce(fake)
-	priority_announce("WARNING: [capitalize(contaminant_type)] detected in ventilation system. Affected zones: LCZ corridors. Personnel don breathing protection.", "VENT CONTAMINATION", sound_type = ANNOUNCER_ALERT)
+	priority_announce("WARNING: [capitalize(contaminant_type)] detected in ventilation system. Affected zones: LCZ corridors. Personnel don breathing protection.", "VENT CONTAMINATION", null, ANNOUNCER_ALERT)
 
 /datum/round_event/scp_vent_contamination/tick()
 	if(activeFor % 6 != 0)
@@ -209,3 +209,50 @@
 			H.adjustOxyLoss(5)
 			to_chat(H, span_warning("You inhale [contaminant_type] from the vents! Your lungs burn!"))
 			H.emote("cough")
+
+/datum/round_event_control/scp_anomalous_fauna_migration
+	name = "Anomalous Fauna Incursion"
+	typepath = /datum/round_event/scp_anomalous_fauna_migration
+	weight = 10
+	min_players = 5
+	earliest_start = 15 MINUTES
+	max_occurrences = 3
+
+/datum/round_event/scp_anomalous_fauna_migration
+	announceWhen = 3
+	startWhen = 50
+	var/hasAnnounced = FALSE
+
+/datum/round_event/scp_anomalous_fauna_migration/setup()
+	startWhen = rand(40, 60)
+
+/datum/round_event/scp_anomalous_fauna_migration/announce(fake)
+	priority_announce("Anomalous biological entities detected in facility perimeter. Security personnel respond immediately.", "BREACH ALERT", sound_type = ANNOUNCER_ALERT)
+
+/datum/round_event/scp_anomalous_fauna_migration/start()
+	var/list/spawn_locs = list()
+	for(var/obj/effect/landmark/carpspawn/C in GLOB.landmarks_list)
+		spawn_locs += C.loc
+	if(!length(spawn_locs))
+		for(var/obj/effect/landmark/L in GLOB.landmarks_list)
+			if(istype(get_area(L), /area/scp/lcz) || istype(get_area(L), /area/scp/hcz))
+				spawn_locs += L.loc
+	if(!length(spawn_locs))
+		return
+	var/list/fauna_types = list(
+		/mob/living/simple_animal/hostile/anomalous_fauna/void_crawler,
+		/mob/living/simple_animal/hostile/anomalous_fauna/void_crawler,
+		/mob/living/simple_animal/hostile/anomalous_fauna/void_crawler,
+		/mob/living/simple_animal/hostile/anomalous_fauna/aberrant_hound,
+		/mob/living/simple_animal/hostile/anomalous_fauna/aberrant_hound,
+		/mob/living/simple_animal/hostile/anomalous_fauna/shadow_stalker,
+		/mob/living/simple_animal/hostile/anomalous_fauna/thermal_wraith,
+		/mob/living/simple_animal/hostile/anomalous_fauna/crystal_geode,
+	)
+	for(var/i in 1 to rand(3, 6))
+		var/turf/T = pick(spawn_locs)
+		var/fauna_type = pick(fauna_types)
+		var/mob/living/simple_animal/hostile/anomalous_fauna/F = new fauna_type(T)
+		if(!hasAnnounced)
+			announce_to_ghosts(F)
+			hasAnnounced = TRUE

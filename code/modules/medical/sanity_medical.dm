@@ -299,6 +299,7 @@
 	SStgui.update_uis(src)
 
 /obj/machinery/sanity_monitor/update_icon()
+	. = ..()
 	if(scanning && patient)
 		icon_state = "sanity_monitor_on"
 	else

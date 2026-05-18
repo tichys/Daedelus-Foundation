@@ -99,7 +99,7 @@
 	var/list/overlays = list()
 
 	for(var/obj/item/bodypart/iter_part as anything in bodyparts)
-		if(iter_part.is_stump)
+		if(QDELETED(iter_part) || !istype(iter_part) || iter_part.is_stump)
 			continue
 
 		if(iter_part.icon_dmg_overlay && !iter_part.is_husked)
@@ -245,9 +245,10 @@
 	var/list/needs_update = list()
 	var/limb_count_update = FALSE
 	for(var/obj/item/bodypart/limb as anything in bodyparts)
-		if(limb.is_stump)
+		if(QDELETED(limb) || !istype(limb) || limb.is_stump)
 			continue
-		limb.update_limb(is_creating = update_limb_data) //Update limb actually doesn't do much, get_limb_icon is the cpu eater.
+		if(!limb.update_limb(is_creating = update_limb_data))
+			continue
 
 		var/old_key = icon_render_keys?[limb.body_zone] //Checks the mob's icon render key list for the bodypart
 		icon_render_keys[limb.body_zone] = !limb.is_husked ? json_encode(limb.generate_icon_key()) : json_encode(limb.generate_husk_key()) //Generates a key for the current bodypart
@@ -268,7 +269,7 @@
 	remove_overlay(BODYPARTS_LAYER)
 	var/list/new_limbs = list()
 	for(var/obj/item/bodypart/limb as anything in bodyparts)
-		if(limb.is_stump)
+		if(QDELETED(limb) || !istype(limb) || limb.is_stump)
 			continue
 		if(limb in needs_update)
 			var/list/limb_overlays = limb.get_limb_overlays()

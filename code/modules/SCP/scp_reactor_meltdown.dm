@@ -2,7 +2,7 @@
 	name = "Foundation Fusion Reactor"
 	desc = "A compact fusion reactor that powers the entire facility. Handle with extreme care."
 	icon = 'icons/obj/machines/nuke.dmi'
-	icon_state = "nuclearbomb_base"
+	icon_state = "reactor"
 	density = TRUE
 	anchored = TRUE
 	use_power = NO_POWER_USE
@@ -144,14 +144,14 @@
 /obj/machinery/power/foundation_reactor/update_icon()
 	. = ..()
 	if(meltdown_active)
-		icon_state = "nuclearbomb_exploding"
+		icon_state = "reactor_meltdown"
 	else if(active)
 		if(temperature > meltdown_threshold)
-			icon_state = "nuclearbomb_timing"
+			icon_state = "reactor_critical"
 		else
-			icon_state = "nuclearbomb_safetyoff"
+			icon_state = "reactor_active"
 	else
-		icon_state = "nuclearbomb_base"
+		icon_state = "reactor"
 
 /obj/machinery/computer/reactor_control
 	name = "Reactor Control Console"

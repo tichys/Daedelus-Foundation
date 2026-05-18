@@ -1,7 +1,7 @@
 /obj/machinery/appliance/cooker/oven
 	name = "oven"
 	desc = "A temperature-controlled oven for baking and roasting."
-	icon_state = "grill"
+	icon_state = "oven"
 	appliance_flags = APPLIANCE_OVEN
 	cook_type = "baked"
 	min_temp = 100
@@ -84,7 +84,7 @@
 /obj/machinery/appliance/cooker/fryer
 	name = "deep fryer"
 	desc = "A deep fryer for cooking food in hot oil."
-	icon_state = "fryer_off"
+	icon_state = "fryer"
 	appliance_flags = APPLIANCE_FRYER
 	cook_type = "fried"
 	min_temp = 150
@@ -136,7 +136,7 @@
 /obj/machinery/appliance/cooker/microwave
 	name = "microwave"
 	desc = "A microwave for quick heating and cooking."
-	icon_state = "mw"
+	icon_state = "microwave"
 	appliance_flags = APPLIANCE_MICROWAVE
 	cook_type = "microwaved"
 	min_temp = 50
@@ -199,7 +199,7 @@
 /obj/machinery/appliance/cooker/stove
 	name = "stove"
 	desc = "A multi-burner stove for cooking with pots, pans, and skillets."
-	icon_state = "grill_open"
+	icon_state = "stove"
 	appliance_flags = APPLIANCE_SKILLET | APPLIANCE_SAUCEPAN | APPLIANCE_POT
 	cook_type = "cooked"
 	min_temp = 50
@@ -224,7 +224,7 @@
 /obj/machinery/appliance/cooker/griddle
 	name = "griddle"
 	desc = "A flat-top electric griddle for cooking multiple items at once."
-	icon_state = "gridle"
+	icon_state = "griddle"
 	appliance_flags = APPLIANCE_GRILL
 	cook_type = "griddled"
 	min_temp = 100
