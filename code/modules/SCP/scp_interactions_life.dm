@@ -34,13 +34,6 @@
 	if(tier >= 5 && prob(1))
 		SSscp_cross_interactions.execute_interaction("079_flicker_096_lights", src, src)
 
-/mob/living/scp079/Life(delta_time, times_fired)
-	. = ..()
-	if(stat == DEAD)
-		return
-	if(prob(2))
-		check_scp_interactions()
-
 /mob/living/scp/scp106/proc/check_scp_interactions()
 	if(stat == DEAD)
 		return
@@ -222,6 +215,229 @@
 	if(!SSscp_cross_interactions?.setup_complete)
 		return
 	SSscp_cross_interactions.try_discover_interaction(scp_designation, researcher_ckey)
+
+/mob/living/scp/scp073/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(3))
+		for(var/mob/living/scp/scp682/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("073_reflect_682", src, M)
+				break
+	if(prob(4))
+		for(var/mob/living/scp/scp457/M in range(6, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("073_reflect_457", src, M)
+				break
+
+/mob/living/scp/scp073/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp076/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(3))
+		for(var/mob/living/scp/scp682/M in range(6, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("076_dual_682", src, M)
+				break
+	if(prob(2))
+		for(var/mob/living/scp/scp096/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("076_dual_096", src, M)
+				break
+	if(prob(3))
+		for(var/mob/living/simple_animal/hostile/scp610_fleshman/M in range(10, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("076_hunt_610", src, M)
+				break
+
+/mob/living/scp/scp076/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp082/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(4))
+		for(var/mob/living/simple_animal/hostile/scp610_fleshman/M in range(5, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("082_feed_610", src, M)
+				break
+	if(prob(3))
+		for(var/mob/living/simple_animal/scp1048/M in range(6, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("082_feed_1048", src, M)
+				break
+
+/mob/living/scp/scp082/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp280/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(3))
+		for(var/mob/living/scp/scp106/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("280_shadow_106", src, M)
+				break
+	if(prob(2))
+		SSscp_cross_interactions.execute_interaction("280_shadow_017", src, src)
+
+/mob/living/scp/scp280/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp343/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(3))
+		for(var/mob/living/scp/scp682/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("343_god_682", src, M)
+				break
+	if(prob(4))
+		for(var/mob/living/scp/scp999/M in range(5, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("343_god_999", src, M)
+				break
+
+/mob/living/scp/scp343/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp408/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(3))
+		for(var/mob/living/scp/scp173/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("408_swarm_173", src, M)
+				break
+	if(prob(2))
+		for(var/mob/living/scp/scp096/M in range(10, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("408_swarm_096", src, M)
+				break
+
+/mob/living/scp/scp408/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp966/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(2))
+		for(var/mob/living/simple_animal/hostile/scp610_fleshman/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("966_stalk_610", src, M)
+				break
+	if(prob(2))
+		for(var/mob/living/scp/scp096/M in range(10, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("966_stalk_096", src, M)
+				break
+
+/mob/living/scp/scp966/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp3199/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(2))
+		var/turf/T = get_turf(src)
+		if(istype(T, /turf/open/flesh))
+			SSscp_cross_interactions.execute_interaction("3199_egg_610", src, src)
+	if(prob(2))
+		SSscp_cross_interactions.execute_interaction("3199_egg_008", src, src)
+
+/mob/living/scp/scp3199/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp2343/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(3))
+		for(var/mob/living/simple_animal/hostile/scp610_fleshman/M in range(6, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("2343_benevolence_610", src, M)
+				break
+	if(prob(3))
+		for(var/mob/living/scp/scp049/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("2343_benevolence_049", src, M)
+				break
+
+/mob/living/scp/scp2343/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
+
+/mob/living/scp/scp1128/proc/check_scp_interactions()
+	if(stat == DEAD)
+		return
+	if(!SSscp_cross_interactions?.setup_complete)
+		return
+	if(prob(2))
+		for(var/mob/living/simple_animal/hostile/scp610_fleshman/M in range(8, src))
+			if(M.stat != DEAD)
+				SSscp_cross_interactions.execute_interaction("1128_aquatic_610", src, M)
+				break
+
+/mob/living/scp/scp1128/Life(delta_time = SSMOBS_DT, times_fired)
+	. = ..()
+	if(stat == DEAD)
+		return
+	if(prob(2))
+		check_scp_interactions()
 
 /client/proc/view_cross_scp_interactions()
 	set name = "View Cross-SCP Interactions"

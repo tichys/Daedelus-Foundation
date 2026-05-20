@@ -432,6 +432,7 @@
 	. += "State: [state]"
 	. += "Targets Remaining: [length(target_queue)]"
 	. += "Total Kills: [kills_count]"
+	. += "Rage Activations: [rage_activations]"
 
 /mob/living/scp/scp096/proc/show_status_verb()
 	to_chat(src, "<span class='notice'>=== SCP-096 Status ===</span>")

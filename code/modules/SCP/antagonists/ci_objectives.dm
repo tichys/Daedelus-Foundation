@@ -188,13 +188,7 @@
 		objectives += O
 		O.update_explanation_text()
 
-/datum/antagonist/chaos_insurgency/on_gain()
-	. = ..()
-	generate_ci_objectives()
-	if(owner.current)
-		var/datum/action/innate/insurgency_equipment/equipment = new()
-		equipment.Grant(owner.current)
-		equip_ci_operative()
+
 
 /datum/antagonist/chaos_insurgency/proc/equip_ci_operative()
 	var/mob/living/carbon/human/H = owner.current

@@ -178,6 +178,25 @@
 	. += "Active Fires: [length(fire_system.active_fires)]"
 	. += "Containment Level: [containment_system.containment_level]"
 
+/mob/living/scp/scp457/verb/verb_hurl_fireball()
+	set name = "Hurl Fireball"
+	set category = "SCP-457"
+	var/list/targets = list()
+	for(var/mob/living/L in view(7, src))
+		if(L != src && L.stat != DEAD)
+			targets += L
+	if(!length(targets))
+		to_chat(src, span_warning("No targets in range!"))
+		return
+	var/mob/living/target = input(src, "Choose a target:", "Fireball") as null|anything in targets
+	if(!target || QDELETED(target))
+		return
+	target.adjustFireLoss(35)
+	target.visible_message(span_danger("A fireball from [src] strikes [target]!"), span_userdanger("A fireball hits you!"))
+	heat_system?.add_heat(10)
+	playsound(src, 'sound/effects/explosion1.ogg', 60, TRUE)
+	on_fire_spread(get_turf(target))
+
 /mob/living/scp/scp457/examine(mob/user)
 	. = ..()
 

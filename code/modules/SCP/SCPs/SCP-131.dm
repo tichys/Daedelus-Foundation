@@ -78,10 +78,10 @@
 
 /mob/living/simple_animal/scp131/proc/stare_down_scp173()
 	for(var/mob/living/scp/scp173/scp in view(observation_range, src))
-		if(scp.stat != DEAD && scp.observation_system)
-			if(!(src in scp.observation_system.observers))
-				scp.observation_system.observers += src
-			scp.observation_system.is_being_observed = TRUE
+		if(scp.stat != DEAD)
+			if(!(src in scp.scp173_observers))
+				scp.scp173_observers += src
+			scp.is_being_observed = TRUE
 			scp173_stared = TRUE
 			return
 	scp173_stared = FALSE

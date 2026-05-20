@@ -1,9 +1,3 @@
-#define INTERACTION_RISK_NONE 0
-#define INTERACTION_RISK_LOW 1
-#define INTERACTION_RISK_MEDIUM 2
-#define INTERACTION_RISK_HIGH 3
-#define INTERACTION_RISK_CRITICAL 4
-
 SUBSYSTEM_DEF(scp_interactions)
 	name = "SCP Interactions"
 	wait = 600

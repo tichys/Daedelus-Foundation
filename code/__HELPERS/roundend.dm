@@ -220,7 +220,7 @@
 	to_chat(world, span_big(systemtext("The round has ended.")))
 	log_game("The round has ended.")
 
-	if(SSscp_gameplay && length(SSscp_gameplay.event_log))
+	if(GLOB.scp_round_report)
 		var/report_text = generate_after_action_report()
 		var/obj/item/paper/aar = new(null)
 		aar.name = "After Action Report"

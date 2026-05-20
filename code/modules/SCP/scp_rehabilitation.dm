@@ -156,10 +156,6 @@
 	name = "Rehabilitation Console (Computer Board)"
 	build_path = /obj/machinery/computer/rehabilitation_console
 
-/obj/item/restraints/handcuffs/foundation
-	name = "Foundation restraints"
-	desc = "High-security restraints used by the Foundation for containing hostile operatives."
-
 /obj/structure/fluff/foundation_cell
 	name = "Foundation Holding Cell"
 	desc = "A reinforced holding cell for captured operatives."

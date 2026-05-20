@@ -1,24 +1,6 @@
 // D-Class Player Datum
 // Handles individual D-Class player data and progression
 
-#ifndef DCLASS_TRUST_HOSTILE
-#define DCLASS_TRUST_HOSTILE 0
-#define DCLASS_TRUST_SUSPICIOUS 1
-#define DCLASS_TRUST_NEUTRAL 2
-#define DCLASS_TRUST_COOPERATIVE 3
-#define DCLASS_TRUST_TRUSTED 4
-
-#define DCLASS_STATUS_GENERAL 0
-#define DCLASS_STATUS_TEST_SUBJECT 1
-#define DCLASS_STATUS_MEDICAL_SUBJECT 2
-#define DCLASS_STATUS_CONTAINMENT_ASSIST 3
-#endif
-
-#define DCLASS_FACTION_NONE 0
-#define DCLASS_FACTION_REBELS 1
-#define DCLASS_FACTION_COLLABORATORS 2
-#define DCLASS_FACTION_SURVIVORS 3
-
 /datum/dclass_player
 	var/ckey
 	var/name
@@ -95,12 +77,30 @@
 	var/save_interval = 300
 	var/data_file_path = ""
 
+	// Round Stats
+	var/round_start_time = 0
+	var/stealth_round_completed = FALSE
+	var/escaped_during_scp_event = FALSE
+	var/list/current_round_stats = list()
+
 /datum/dclass_player/New(var/player_ckey)
 	ckey = player_ckey
 	data_file_path = "data/dclass/[ckey].json"
+	round_start_time = world.time
 	generate_dclass_number()
 	initialize_skills()
 	load_data()
+
+	current_round_stats = list(
+		"start_time" = round_start_time,
+		"escape_attempts" = 0,
+		"contraband_found" = 0,
+		"alliances_formed" = 0,
+		"players_betrayed" = 0,
+		"work_assignments" = 0,
+		"guard_detections" = 0,
+		"stealth_time" = 0
+	)
 
 /datum/dclass_player/proc/generate_dclass_number()
 	dclass_number = "D-[rand(1000, 9999)]"

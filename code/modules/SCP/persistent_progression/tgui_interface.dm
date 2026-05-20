@@ -305,8 +305,8 @@
 				ach_data["category"] = achievement.achievement_category
 				ach_data["icon"] = achievement.achievement_icon
 				ach_data["points"] = achievement.achievement_points
-				ach_data["rarity"] = achievement.achievement_rarity
-				ach_data["secret"] = achievement.achievement_secret
+				ach_data["rarity"] = achievement.achievement_tier
+				ach_data["secret"] = achievement.achievement_hidden
 				ach_data["unlocked"] = (achievement_id in player_data.achievements)
 				ach_data["progress"] = player_data.achievement_progress[achievement_id] || 0
 				ach_data["max_progress"] = achievement.achievement_max_progress

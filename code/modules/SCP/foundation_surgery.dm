@@ -64,7 +64,7 @@
 		return FALSE
 	if(locate(/datum/element/scp513_stalked) in target.status_effects)
 		return TRUE
-	if(target.mind?.has_antag_datum(/datum/antagonist/sarkic))
+	if(target.mind?.has_antag_datum(/datum/antagonist/sarkic_cult))
 		return TRUE
 	if(target.mind?.has_antag_datum(/datum/antagonist/chaos_insurgency))
 		return TRUE
@@ -91,8 +91,8 @@
 		target.hallucination = max(0, target.hallucination - 50)
 		purged_something = TRUE
 
-	if(target.mind?.has_antag_datum(/datum/antagonist/sarkic))
-		target.mind.remove_antag_datum(/datum/antagonist/sarkic)
+	if(target.mind?.has_antag_datum(/datum/antagonist/sarkic_cult))
+		target.mind.remove_antag_datum(/datum/antagonist/sarkic_cult)
 		to_chat(target, span_warning("The alien thoughts in your mind dissolve. Your old self resurfaces."))
 		purged_something = TRUE
 

@@ -89,7 +89,7 @@
 	if(prob(15))
 		for(var/obj/machinery/door/airlock/D in range(1, src))
 			if(D.density && !D.welded && !D.locked)
-				if(observation_system && observation_system.is_being_observed)
+				if(is_being_observed)
 					continue
 				D.open()
 				visible_message(span_danger("[src] pries open [D]!"))

@@ -31,6 +31,8 @@ SUBSYSTEM_DEF(dclass)
 	var/last_routine_update = 0
 	var/routine_update_interval = 300 // 5 minutes
 	var/datum/dclass_faction_manager/faction_manager
+	var/datum/dclass_persistence_manager/persistence_manager
+	var/datum/dclass_event_manager/event_manager
 
 /datum/dclass_manager/New()
 	. = ..()
@@ -43,6 +45,9 @@ SUBSYSTEM_DEF(dclass)
 	faction_manager = new /datum/dclass_faction_manager()
 	initialize_events()
 	initialize_persistence()
+
+/datum/dclass_manager/proc/initialize_persistence()
+	persistence_manager = new /datum/dclass_persistence_manager()
 
 /datum/dclass_manager/proc/process_dclass()
 	// Update current time slot

@@ -234,6 +234,14 @@
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
+/mob/living/scp/scp2020/get_status_tab_items()
+	. = ..()
+	. += "Narrative Phase: [narrative_phase]"
+	. += "Cliches Identified: [cliche_count]"
+	. += "Plot Developments: [plot_developments]"
+	. += "Dramatic Speeches: [dramatic_speeches]"
+	. += "Conversations Held: [conversations_held]"
+
 /mob/living/scp/scp2020/death(gibbed, cause_of_death = "Unknown")
 	say("I... I don't think... this is how the story... was supposed to end...")
 	visible_message("<span class='danger'>[src] collapses, looking genuinely surprised!</span>")

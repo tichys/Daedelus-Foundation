@@ -205,6 +205,42 @@
 		var/regeneration_rate = regeneration_system.calculate_regeneration_rate()
 		. += "Regeneration Rate: [regeneration_rate] HP/sec"
 
+/mob/living/scp/scp682/verb/verb_rampage()
+	set name = "Rampage"
+	set category = "SCP-682"
+	visible_message(span_danger("[src] goes on a rampage, lashing out at everything!"))
+	playsound(src, 'sound/weapons/punch1.ogg', 80, TRUE)
+	for(var/mob/living/L in range(2, src))
+		if(L != src)
+			L.adjustBruteLoss(40)
+			L.adjustFireLoss(20)
+			L.visible_message(span_danger("[src] savages [L]!"), span_userdanger("[src] tears into you!"))
+	for(var/obj/structure/S in range(2, src))
+		S.take_damage(80)
+	for(var/obj/machinery/door/D in range(2, src))
+		if(D.density)
+			D.open()
+	if(combat_system)
+		combat_system.perform_area_attack()
+
+/mob/living/scp/scp682/verb/verb_berserk()
+	set name = "Berserk Frenzy"
+	set category = "SCP-682"
+	add_movespeed_modifier(/datum/movespeed_modifier/scp682_berserk)
+	damage_modifier = 0.5
+	visible_message(span_danger("[src] enters a berserk frenzy!"), span_notice("RAGE CONSUMES YOU. DESTROY. KILL."))
+	addtimer(CALLBACK(src, PROC_REF(scp682_end_berserk)), 20 SECONDS)
+
+/mob/living/scp/scp682/proc/scp682_end_berserk()
+	remove_movespeed_modifier(/datum/movespeed_modifier/scp682_berserk)
+	damage_modifier = initial(damage_modifier)
+	to_chat(src, span_notice("Your berserk frenzy subsides."))
+
+/datum/movespeed_modifier/scp682_berserk
+	id = "scp682_berserk"
+	priority = 100
+	slowdown = -1.5
+
 // ============================================================================
 // EXAMINE BEHAVIOR
 // ============================================================================

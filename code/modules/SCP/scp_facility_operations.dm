@@ -207,102 +207,8 @@
 	to_chat(src, span_warning("[searcher] searches you and confiscates your contraband!"))
 
 // ============================================================================
-// #5 ZONE LOCKDOWN CONSOLE — Guards can lock zone transitions
+// #5 REDIRECTED — Zone lockdown is handled by /obj/machinery/facility_lockdown_console in facility_lockdown.dm
 // ============================================================================
-
-/obj/machinery/computer/scp_zone_lockdown
-	name = "Zone Lockdown Console"
-	desc = "A secure console for locking down zone transitions during containment emergencies."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "security"
-	circuit = /obj/item/circuitboard/computer/scp_zone_lockdown
-	req_access = list(ACCESS_SECURITY_LVL3)
-	density = TRUE
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 100
-	var/list/zone_states = list(
-		"lcz" = FALSE,
-		"hcz" = FALSE,
-		"ez" = FALSE,
-		"surface" = FALSE,
-	)
-	var/lockdown_cooldown = 0
-	var/lockdown_cooldown_time = 30 SECONDS
-
-/obj/machinery/computer/scp_zone_lockdown/ui_interact(mob/user, datum/tgui/ui)
-	. = ..()
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "SCPZoneLockdown", "ZONE LOCKDOWN CONSOLE")
-		ui.open()
-
-/obj/machinery/computer/scp_zone_lockdown/ui_state(mob/user)
-	return GLOB.default_state
-
-/obj/machinery/computer/scp_zone_lockdown/ui_data(mob/user)
-	var/list/data = list()
-	data["zone_states"] = zone_states
-	data["cooldown"] = max(0, lockdown_cooldown - world.time)
-	return data
-
-/obj/machinery/computer/scp_zone_lockdown/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
-	. = ..()
-	if(.)
-		return
-	if(world.time < lockdown_cooldown)
-		return
-	switch(action)
-		if("toggle_zone")
-			var/zone = params["zone"]
-			if(!(zone in zone_states))
-				return
-			zone_states[zone] = !zone_states[zone]
-			lockdown_cooldown = world.time + lockdown_cooldown_time
-			apply_zone_lockdown(zone, zone_states[zone])
-			. = TRUE
-		if("lockdown_all")
-			for(var/zone in zone_states)
-				zone_states[zone] = TRUE
-				apply_zone_lockdown(zone, TRUE)
-			lockdown_cooldown = world.time + lockdown_cooldown_time
-			priority_announce("ATTENTION: Full facility zone lockdown initiated. All zone transitions are now sealed.", "ZONE LOCKDOWN", null, ANNOUNCER_ALERT)
-			. = TRUE
-		if("unlock_all")
-			for(var/zone in zone_states)
-				zone_states[zone] = FALSE
-				apply_zone_lockdown(zone, FALSE)
-			lockdown_cooldown = world.time + lockdown_cooldown_time
-			priority_announce("Zone lockdown lifted. All zone transitions are now open.", "LOCKDOWN LIFTED", null, ANNOUNCER_ALERT)
-			. = TRUE
-
-/obj/machinery/computer/scp_zone_lockdown/proc/apply_zone_lockdown(zone, locked)
-	var/list/zone_areas
-	switch(zone)
-		if("lcz")
-			zone_areas = typecacheof(/area/scp/lcz)
-		if("hcz")
-			zone_areas = typecacheof(/area/scp/hcz)
-		if("ez")
-			zone_areas = typecacheof(/area/scp/ez)
-		if("surface")
-			zone_areas = typecacheof(/area/scp/surface)
-		else
-			return
-	if(!zone_areas)
-		return
-	for(var/area/A in GLOB.areas)
-		if(!zone_areas[A.type])
-			continue
-		for(var/obj/machinery/door/airlock/D in A)
-			if(locked)
-				D.lock()
-			else
-				D.unlock()
-
-/obj/item/circuitboard/computer/scp_zone_lockdown
-	name = "Zone Lockdown Console (Computer Board)"
-	build_path = /obj/machinery/computer/scp_zone_lockdown
 
 // ============================================================================
 // #6 SECURITY CAMERA AUTO-ALERT — Detects SCPs on camera network
@@ -350,71 +256,8 @@ SUBSYSTEM_DEF(scp_camera_alerts)
 		to_chat(wearer, span_warning("<b>CAMERA ALERT:</b> [jointext(alerts, "; ")]"))
 
 // ============================================================================
-// #7 D-CLASS ACTIVE WORK TASKS — Click-based tasks instead of AFK
+// #7 REDIRECTED — D-Class work tasks are handled by /obj/machinery/dclass_work_terminal in dclass_work_assignments.dm
 // ============================================================================
-
-/obj/machinery/dclass_work_station
-	name = "Work Station"
-	desc = "A workstation for D-Class labor assignments. Click to complete your assigned task."
-	icon = 'icons/obj/machines/research.dmi'
-	icon_state = "server"
-	density = TRUE
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 50
-	var/task_type = "generic"
-	var/task_cooldown = 0
-	var/task_cooldown_time = 30 SECONDS
-	var/credits_reward = 10
-	var/trust_reward = 2
-	var/xp_reward = 15
-
-/obj/machinery/dclass_work_station/attack_hand(mob/user)
-	if(!ishuman(user))
-		return
-	var/mob/living/carbon/human/H = user
-	if(world.time < task_cooldown)
-		to_chat(H, span_warning("The workstation is still processing the last task."))
-		return
-	var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[H.ckey]
-	if(!player)
-		to_chat(H, span_warning("You are not registered in the D-Class system."))
-		return
-	to_chat(H, span_notice("You begin working on [task_type] task..."))
-	if(!do_after(H, src, 5 SECONDS))
-		return
-	task_cooldown = world.time + task_cooldown_time
-	player.adjust_credits(credits_reward)
-	player.adjust_trust(trust_reward, "Work task completed")
-	player.tests_completed++
-	player.gain_experience(xp_reward, "[task_type] work task")
-	if(player.current_work_assignment && findtext(player.current_work_assignment, task_type))
-		player.current_work_assignment = null
-	to_chat(H, span_notice("Task completed! Credits: +[credits_reward] Trust: +[trust_reward] XP: +[xp_reward]"))
-
-/obj/machinery/dclass_work_station/kitchen
-	name = "Kitchen Work Station"
-	task_type = "kitchen"
-	credits_reward = 12
-
-/obj/machinery/dclass_work_station/laundry
-	name = "Laundry Work Station"
-	icon_state = "dishwasher"
-	task_type = "laundry"
-	credits_reward = 8
-
-/obj/machinery/dclass_work_station/janitorial
-	name = "Janitorial Work Station"
-	icon_state = "autolathe"
-	task_type = "janitorial"
-	credits_reward = 10
-
-/obj/machinery/dclass_work_station/maintenance
-	name = "Maintenance Work Station"
-	icon_state = "repair"
-	task_type = "maintenance"
-	credits_reward = 15
-	trust_reward = 3
 
 // ============================================================================
 // #9 CONTAINMENT CHAMBER REINFORCEMENT — Engineers upgrade cells
@@ -625,76 +468,8 @@ SUBSYSTEM_DEF(round_objectives)
 		priority_announce("ROUND OBJECTIVE COMPLETE: [O.title] — [O.description]", "OBJECTIVE UPDATE", null, ANNOUNCER_ALERT)
 
 // ============================================================================
-// #11 FOUNDATION PA ANNOUNCEMENT CONSOLE
+// #11 REDIRECTED — PA announcements are handled by /obj/machinery/computer/scp_intercom_console in scp_intercom_console.dm
 // ============================================================================
-
-/obj/machinery/computer/foundation_pa
-	name = "Foundation PA Console"
-	desc = "A console for making facility-wide or zone-targeted public address announcements."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "comm"
-	circuit = /obj/item/circuitboard/computer/foundation_pa
-	req_access = list(ACCESS_SECURITY)
-	density = TRUE
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 100
-	var/announcement_cooldown = 0
-	var/announcement_cooldown_time = 30 SECONDS
-
-/obj/machinery/computer/foundation_pa/ui_interact(mob/user, datum/tgui/ui)
-	. = ..()
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "FoundationPA", "FOUNDATION PA SYSTEM")
-		ui.open()
-
-/obj/machinery/computer/foundation_pa/ui_state(mob/user)
-	return GLOB.default_state
-
-/obj/machinery/computer/foundation_pa/ui_data(mob/user)
-	var/list/data = list()
-	data["cooldown"] = max(0, announcement_cooldown - world.time)
-	data["zones"] = list("All Zones", "LCZ", "HCZ", "EZ", "Surface")
-	return data
-
-/obj/machinery/computer/foundation_pa/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
-	. = ..()
-	if(.)
-		return
-	if(action == "announce")
-		if(world.time < announcement_cooldown)
-			return
-		var/message = params["message"]
-		var/zone = params["zone"]
-		if(!message)
-			return
-		announcement_cooldown = world.time + announcement_cooldown_time
-		var/sender_name = usr.name || "Unknown"
-		var/full_message = "[sender_name] announces: [message]"
-		if(zone == "All Zones")
-			priority_announce(full_message, "FOUNDATION ANNOUNCEMENT", null, ANNOUNCER_ALERT)
-		else
-			var/area_type
-			switch(lowertext(zone))
-				if("lcz")
-					area_type = /area/scp/lcz
-				if("hcz")
-					area_type = /area/scp/hcz
-				if("ez")
-					area_type = /area/scp/ez
-				if("surface")
-					area_type = /area/scp/surface
-			if(area_type)
-				for(var/mob/M in GLOB.player_list)
-					var/area/A = get_area(M)
-					if(istype(A, area_type) || istype(A, /area/site53))
-						to_chat(M, span_boldannounce("[zone] ANNOUNCEMENT: [full_message]"))
-		. = TRUE
-
-/obj/item/circuitboard/computer/foundation_pa
-	name = "Foundation PA Console (Computer Board)"
-	build_path = /obj/machinery/computer/foundation_pa
 
 // ============================================================================
 // #12 MID-ROUND ANOMALOUS EVENTS
@@ -858,220 +633,143 @@ SUBSYSTEM_DEF(round_objectives)
 	name = "Foundation Evacuation Console (Computer Board)"
 	build_path = /obj/machinery/computer/foundation_evacuation
 
-/mob/living/scp/proc/try_contained_interaction(action_id)
-	if(containment_status != "contained")
-		to_chat(src, span_warning("You are not contained — no containment interactions available."))
-		return
-	var/list/available = get_contained_actions()
-	if(!(action_id in available))
-		return
-	var/list/action_data = available[action_id]
-	var/resource_type = action_data["resource"]
-	var/resource_cost = action_data["cost"]
-	var/tension_gain = action_data["tension"]
-	switch(resource_type)
-		if("tension")
-			if(containment_tension < resource_cost)
-				to_chat(src, span_warning("Not enough tension ([round(containment_tension)]/[resource_cost]). Wait for tension to build."))
-				return
-			containment_tension = max(0, containment_tension - resource_cost)
-		if("corrosion")
-			if(!corrosion_resource || corrosion_resource < resource_cost)
-				to_chat(src, span_warning("Not enough corrosion ([round(corrosion_resource)]/[resource_cost])."))
-				return
-			corrosion_resource = max(0, corrosion_resource - resource_cost)
-		if("hack_progress")
-			if(!hack_progress || hack_progress < resource_cost)
-				to_chat(src, span_warning("Not enough hack progress ([round(hack_progress)]/[resource_cost])."))
-				return
-			hack_progress = max(0, hack_progress - resource_cost)
-	containment_tension = min(100, containment_tension + tension_gain)
-	if(containment_tension >= 100)
-		trigger_containment_breach_from_tension()
-		return
-	var/list/effects = action_data["effects"]
-	if(effects)
-		apply_contained_action_effects(action_id, effects)
-	if(action_data["message"])
-		to_chat(src, span_notice(action_data["message"]))
-	if(action_data["visible"])
-		visible_message(span_warning(action_data["visible"]))
-
-/mob/living/scp/proc/get_contained_actions()
-	var/list/actions = list()
-	switch(SCP?.designation)
-		if("173")
-			actions["scratch_wall"] = list("resource" = "tension", "cost" = 10, "tension" = 5, "effects" = list("integrity" = -3), "message" = "You drag your hands across the containment wall, leaving deep gouges.", "visible" = "[src] drags its hands across the containment wall!")
-			actions["intimidate"] = list("resource" = "tension", "cost" = 5, "tension" = 8, "effects" = list("sanity" = -5), "message" = "You stare unblinkingly at the observer. They shift uncomfortably.", "visible" = "[src] stares unblinkingly!")
-			actions["snap_restraints"] = list("resource" = "tension", "cost" = 30, "tension" = 15, "effects" = list("integrity" = -8), "message" = "You strain against your restraints with inhuman strength!", "visible" = "[src] strains against its restraints!")
-			actions["test_movement"] = list("resource" = "tension", "cost" = 15, "tension" = 10, "effects" = list("integrity" = -5), "message" = "You shift position rapidly when the observers blink.", "visible" = "[src] moves slightly when no one is looking!")
-		if("096")
-			actions["cover_face"] = list("resource" = "tension", "cost" = 0, "tension" = -5, "effects" = list(), "message" = "You cover your face with your hands, reducing the chance of accidental triggers.", "visible" = "[src] covers its face with its long hands.")
-			actions["sob_quietly"] = list("resource" = "tension", "cost" = 0, "tension" = -3, "effects" = list("sanity" = -2), "message" = "You sob quietly into your hands. The sound disturbs the observers.", "visible" = "[src] sobs quietly...")
-			actions["press_wall"] = list("resource" = "tension", "cost" = 20, "tension" = 8, "effects" = list("integrity" = -4), "message" = "You press against the containment wall, your long limbs stretching.", "visible" = "[src] presses against the containment wall!")
-			actions["sudden_dash"] = list("resource" = "tension", "cost" = 40, "tension" = 20, "effects" = list("integrity" = -10), "message" = "You suddenly lunge forward, testing the door seals!", "visible" = "[src] lunges forward suddenly!")
-		if("049")
-			actions["sense_pestilence"] = list("resource" = "tension", "cost" = 5, "tension" = 3, "effects" = list(), "message" = "You sense the Pestilence in the air... it is everywhere.", "visible" = "[src] raises its head as if sniffing the air.")
-			actions["request_interview"] = list("resource" = "tension", "cost" = 10, "tension" = 5, "effects" = list(), "message" = "You request to speak with the researchers. Perhaps they will listen.", "visible" = "[src] gestures politely toward the observation window.")
-			actions["examine_equipment"] = list("resource" = "tension", "cost" = 15, "tension" = 8, "effects" = list("integrity" = -3), "message" = "You carefully examine the containment equipment, looking for weaknesses.", "visible" = "[src] scrutinizes the containment fixtures.")
-			actions["administer_cure"] = list("resource" = "tension", "cost" = 35, "tension" = 15, "effects" = list("integrity" = -8), "message" = "You reach out — the Pestilence must be cured!", "visible" = "[src] reaches out with terrible purpose!")
-		if("106")
-			actions["corrode_wall"] = list("resource" = "corrosion", "cost" = 20, "tension" = 8, "effects" = list("integrity" = -6), "message" = "You press your corrosive form against the containment wall.", "visible" = "Dark corrosion spreads where [src] touches the wall!")
-			actions["test_phase"] = list("resource" = "corrosion", "cost" = 30, "tension" = 12, "effects" = list("integrity" = -8), "message" = "You partially phase through the floor, testing the containment.", "visible" = "[src] partially sinks into the floor!")
-			actions["lure_prey"] = list("resource" = "corrosion", "cost" = 15, "tension" = 10, "effects" = list("sanity" = -8), "message" = "You project an aura of dread, hoping to draw someone close.", "visible" = "The air around [src] seems to darken and thicken.")
-			actions["pocket_dimension"] = list("resource" = "corrosion", "cost" = 40, "tension" = 20, "effects" = list("integrity" = -12), "message" = "You open a brief rift to your pocket dimension!", "visible" = "A dark rift briefly opens near [src]!")
-		if("939")
-			actions["mimic_voice"] = list("resource" = "tension", "cost" = 10, "tension" = 5, "effects" = list("sanity" = -5), "message" = "You mimic a human voice, hoping to lure someone close.", "visible" = "[src] makes a sound that is disturbingly human.")
-			actions["listen_sounds"] = list("resource" = "tension", "cost" = 5, "tension" = 3, "effects" = list(), "message" = "You listen carefully to the sounds beyond your cell.", "visible" = "[src] cocks its head, listening.")
-			actions["call_out"] = list("resource" = "tension", "cost" = 15, "tension" = 8, "effects" = list("sanity" = -3), "message" = "You call out in a copied voice — 'Please, let me out...'", "visible" = "[src] calls out in a familiar voice!")
-			actions["perfect_deception"] = list("resource" = "tension", "cost" = 35, "tension" = 15, "effects" = list("integrity" = -6), "message" = "You perfectly mimic a researcher's voice and mannerisms, trying to trick the guards.", "visible" = "[src] speaks with uncanny accuracy!")
-		if("079")
-			actions["probe_network"] = list("resource" = "hack_progress", "cost" = 10, "tension" = 5, "effects" = list("integrity" = -3), "message" = "You probe the facility network for vulnerabilities.", "visible" = "Screens flicker briefly near [src]'s chamber.")
-			actions["brute_force"] = list("resource" = "hack_progress", "cost" = 30, "tension" = 12, "effects" = list("integrity" = -8), "message" = "You attempt a brute-force attack on the containment locks!", "visible" = "Alarms blare as [src] attacks the containment systems!")
-			actions["intercept_comms"] = list("resource" = "hack_progress", "cost" = 15, "tension" = 8, "effects" = list("sanity" = -3), "message" = "You intercept and garble facility communications.", "visible" = "Radios crackle with static near [src]'s chamber.")
-			actions["override_systems"] = list("resource" = "hack_progress", "cost" = 45, "tension" = 20, "effects" = list("integrity" = -12), "message" = "You attempt a full system override of containment!", "visible" = "Emergency lights flash as [src] overrides systems!")
-	return actions
-
-/mob/living/scp/proc/apply_contained_action_effects(action_id, list/effects)
-	if(effects["integrity"])
-		var/integrity_change = effects["integrity"]
-		containment_integrity = max(0, min(100, containment_integrity + integrity_change))
-		if(containment_integrity <= 0)
-			trigger_containment_breach_from_tension()
-	if(effects["sanity"])
-		var/sanity_damage = abs(effects["sanity"])
-		for(var/mob/living/carbon/human/H in view(7, src))
-			if(H.sanity)
-				H.sanity.adjust_sanity(-sanity_damage, "scp_contained_action:[SCP?.designation]")
-	if(effects["unlock"])
-		containment_tension += 15
-
-/mob/living/scp/proc/trigger_containment_breach_from_tension()
-	containment_status = "breached"
-	containment_tension = 0
-	hook_scp_breach("SCP-[SCP?.designation || "Unknown"]", src)
-	to_chat(src, span_userdanger("CONTAINMENT BREACH! You are FREE!"))
-	visible_message(span_danger("[src] breaks free from containment!"))
-	evolve_from_interaction()
-
-/mob/living/scp/verb/show_containment_status()
-	set name = "Show Containment Status"
-	set category = "SCP"
-	set desc = "View your containment tension and available actions."
-	var/datum/scp_containment_system/CS = scp_containment_system
-	if(!CS)
-		var/list/actions = get_contained_actions()
-		var/msg = span_notice("<b>--- CONTAINMENT STATUS ---</b>")
-		msg += "\n[span_notice("Status: [capitalize(containment_status)]")]"
-		msg += "\n[span_notice("Tension: [round(containment_tension)]/100")]"
-		msg += "\n[span_notice("Integrity: [round(containment_integrity)]/100")]"
-		msg += "\n[span_notice("<b>Available Actions:</b>")]"
-		for(var/action_id in actions)
-			var/list/A = actions[action_id]
-			msg += "\n[span_notice("  [replacetext(action_id, "_", " ")]: Cost [A["cost"]] [A["resource"]] | +[A["tension"]] tension")]"
-		to_chat(src, msg)
-		return
-	var/msg = span_notice("<b>--- CONTAINMENT STATUS ---</b>")
-	msg += "\n[span_notice("Status: [capitalize(containment_status)]")]"
-	msg += "\n[span_notice("Integrity: [round(CS.containment_integrity)]%")]"
-	msg += "\n[span_notice("State: [CS.containment_state || "Unknown"]")]"
-	msg += "\n[span_notice("Observers: [CS.observer_count]")]"
-
 /mob/living/scp/verb/action_scratch_wall()
 	set name = "Scratch Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("scratch_wall"); return; }
-	try_contained_interaction("scratch_wall")
 
 /mob/living/scp/verb/action_intimidate()
 	set name = "Intimidate Observer"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("intimidate"); return; }
-	try_contained_interaction("intimidate")
 
 /mob/living/scp/verb/action_snap_restraints()
 	set name = "Snap Restraints"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("snap_restraints"); return; }
-	try_contained_interaction("snap_restraints")
 
 /mob/living/scp/verb/action_cover_face()
 	set name = "Cover Face"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("cover_face"); return; }
-	try_contained_interaction("cover_face")
 
 /mob/living/scp/verb/action_sob_quietly()
 	set name = "Sob Quietly"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sob_quietly"); return; }
-	try_contained_interaction("sob_quietly")
 
 /mob/living/scp/verb/action_press_wall()
 	set name = "Press Against Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("press_against_wall"); return; }
-	try_contained_interaction("press_wall")
 
 /mob/living/scp/verb/action_sudden_dash()
 	set name = "Sudden Dash"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sudden_dash"); return; }
-	try_contained_interaction("sudden_dash")
 
 /mob/living/scp/verb/action_sense_pestilence()
 	set name = "Sense Pestilence"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sense_pestilence"); return; }
-	try_contained_interaction("sense_pestilence")
 
 /mob/living/scp/verb/action_request_interview()
 	set name = "Request Interview"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("request_interview"); return; }
-	try_contained_interaction("request_interview")
 
 /mob/living/scp/verb/action_examine_equipment()
 	set name = "Examine Equipment"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("examine_equipment"); return; }
-	try_contained_interaction("examine_equipment")
 
 /mob/living/scp/verb/action_corrode_wall()
 	set name = "Corrode Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("corrode_wall"); return; }
-	try_contained_interaction("corrode_wall")
 
 /mob/living/scp/verb/action_test_phase()
 	set name = "Test Phase"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("test_phase"); return; }
-	try_contained_interaction("test_phase")
 
 /mob/living/scp/verb/action_mimic_voice()
 	set name = "Mimic Voice"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("mimic_voice"); return; }
-	try_contained_interaction("mimic_voice")
 
 /mob/living/scp/verb/action_listen_sounds()
 	set name = "Listen to Sounds"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("listen_sounds"); return; }
-	try_contained_interaction("listen_sounds")
 
 /mob/living/scp/verb/action_probe_network()
 	set name = "Probe Network"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("probe_network"); return; }
-	try_contained_interaction("probe_network")
 
 /mob/living/scp/verb/action_brute_force()
 	set name = "Brute Force Lock"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("brute_force"); return; }
-	try_contained_interaction("brute_force")
+
+/mob/living/scp/verb/action_test_wall()
+	set name = "Test Wall"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("test_wall"); return; }
+
+/mob/living/scp/verb/action_acid_spit()
+	set name = "Acid Spit"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("acid_spit"); return; }
+
+/mob/living/scp/verb/action_endure_torment()
+	set name = "Endure Torment"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("endure_torment"); return; }
+
+/mob/living/scp/verb/action_rage_burst()
+	set name = "Rage Burst"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("rage_burst"); return; }
+
+/mob/living/scp/verb/action_flare_up()
+	set name = "Flare Up"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("flare_up"); return; }
+
+/mob/living/scp/verb/action_reach_flames()
+	set name = "Reach Flames"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("reach_flames"); return; }
+
+/mob/living/scp/verb/action_absorb_heat()
+	set name = "Absorb Heat"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("absorb_heat"); return; }
+
+/mob/living/scp/verb/action_firestorm()
+	set name = "Firestorm"
+	set category = "SCP Contained"
+	if(scp_containment_system) { scp_containment_system.perform_interaction("firestorm"); return; }
+
+/mob/living/scp/verb/show_containment_status()
+	set name = "Show Containment Status"
+	set category = "SCP"
+	set desc = "View your containment tension and available actions."
+	if(!scp_containment_system)
+		to_chat(src, span_notice("<b>--- CONTAINMENT STATUS ---</b>"))
+		to_chat(src, span_notice("Status: [capitalize(containment_status)]"))
+		to_chat(src, span_notice("Tension: [round(containment_tension)]/100"))
+		to_chat(src, span_notice("Integrity: [round(containment_integrity)]/100"))
+		return
+	var/datum/scp_containment_system/CS = scp_containment_system
+	var/msg = span_notice("<b>--- CONTAINMENT STATUS ---</b>")
+	msg += "\n[span_notice("Status: [capitalize(containment_status)]")]"
+	msg += "\n[span_notice("Integrity: [round(CS.containment_integrity)]%")]"
+	msg += "\n[span_notice("State: [CS.containment_state || "Unknown"]")]"
+	msg += "\n[span_notice("Observers: [CS.observer_count]")]"
+	to_chat(src, msg)
 
 /obj/machinery/computer/scp_testing_console/proc/execute_test_outcome(mob/living/carbon/human/test_subject, scp_id, test_type, risk_level)
 	if(!test_subject || test_subject.stat == DEAD)
@@ -1240,6 +938,182 @@ SUBSYSTEM_DEF(round_objectives)
 						outcome["message"] += " SCP-035 ATTEMPTED POSSESSION!"
 						if(test_subject.sanity)
 							test_subject.sanity.adjust_sanity(-25, "scp035_possession_attempt")
+		if("scp-682")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-682 through reinforced containment. It stared back with palpable hatred."
+					outcome["research_points"] = base_points
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(-3 * risk_level, "scp682_observation")
+				if("physical", "interaction")
+					outcome["message"] = "Subject was placed in SCP-682's containment area. HIGH RISK."
+					outcome["research_points"] = base_points + 15
+					if(prob(danger_chance + 20))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-682 ATTACKED THE SUBJECT!"
+						test_subject.adjustBruteLoss(50 + risk_level * 15)
+				if("acid", "chemical")
+					outcome["message"] = "Acid bath protocols were tested on SCP-682. Regeneration rate observed."
+					outcome["research_points"] = base_points + 20
+					if(prob(danger_chance))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-682 adapted to the acid! Reduced effectiveness on subsequent applications."
+		if("scp-457")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-457 through fire-resistant containment glass."
+					outcome["research_points"] = base_points
+					if(prob(danger_chance * 0.5))
+						test_subject.adjustFireLoss(5 * risk_level)
+						outcome["message"] += " Heat radiation caused minor burns through the barrier."
+				if("physical", "interaction")
+					outcome["message"] = "Subject was placed in proximity to SCP-457 with fire-resistant equipment."
+					outcome["research_points"] = base_points + 10
+					if(prob(danger_chance + 15))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-457 flared and engulfed the subject!"
+						test_subject.adjustFireLoss(40 + risk_level * 15)
+				if("suppression", "fire_fighting")
+					outcome["message"] = "Fire suppression protocols were tested against SCP-457."
+					outcome["research_points"] = base_points + 15
+					if(prob(danger_chance + 5))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-457 resisted suppression and grew larger!"
+		if("scp-131")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject spent time near SCP-131. The eye creature followed them curiously."
+					outcome["research_points"] = base_points
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(3, "scp131_company")
+				if("physical", "interaction")
+					outcome["message"] = "Subject petted SCP-131. It babbled happily and bonded with the subject."
+					outcome["research_points"] = base_points + 5
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(5, "scp131_pet")
+				if("scp173", "anti_173")
+					outcome["message"] = "SCP-131 was placed near SCP-173 containment. 131's constant observation prevented 173 movement."
+					outcome["research_points"] = base_points + 20
+					outcome["danger_triggered"] = FALSE
+		if("scp-513")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-513 through protective barrier. Compulsion to ring noted but resisted."
+					outcome["research_points"] = base_points
+				if("audio", "sound")
+					outcome["message"] = "Subject listened to recordings of SCP-513's bell. No anomalous effect from recordings."
+					outcome["research_points"] = base_points + 5
+				if("physical", "interaction")
+					outcome["message"] = "Subject was allowed to hold SCP-513 under controlled conditions."
+					outcome["research_points"] = base_points + 10
+					if(prob(danger_chance + 30))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SUBJECT RANG SCP-513! SCP-513-1 NOW STALKS SUBJECT."
+						if(test_subject.sanity)
+							test_subject.sanity.adjust_sanity(-20, "scp513_rung")
+		if("scp-914")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-914's clockwork mechanism in operation."
+					outcome["research_points"] = base_points
+				if("refinement", "1:1")
+					outcome["message"] = "Subject operated SCP-914 on the 1:1 setting. Predictable output achieved."
+					outcome["research_points"] = base_points + 10
+				if("refinement", "very_fine")
+					outcome["message"] = "Subject operated SCP-914 on Very Fine setting. OUTPUT UNPREDICTABLE."
+					outcome["research_points"] = base_points + 20
+					if(prob(danger_chance + 15))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-914 produced an anomalous or dangerous output!"
+		if("scp-1048")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-1048. The bear appeared friendly and approached the observation window."
+					outcome["research_points"] = base_points
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(2, "scp1048_cute")
+				if("physical", "interaction")
+					outcome["message"] = "Subject interacted with SCP-1048 in a controlled setting. It hugged them."
+					outcome["research_points"] = base_points + 5
+					if(prob(danger_chance + 10))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-1048 attempted to harvest material from the subject!"
+						test_subject.adjustBruteLoss(10 + risk_level * 5)
+				if("replication", "copy_analysis")
+					outcome["message"] = "SCP-1048's replication behavior was studied. DANGER: body part collection observed."
+					outcome["research_points"] = base_points + 25
+		if("scp-1128")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject viewed SCP-1128 documentation under controlled conditions. Awareness established."
+					outcome["research_points"] = base_points
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(-3, "scp1128_awareness")
+				if("aquatic", "water_test")
+					outcome["message"] = "Subject with SCP-1128 awareness was exposed to a controlled water environment."
+					outcome["research_points"] = base_points + 15
+					if(prob(danger_chance + 20))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-1128 MANIFESTED! Subject attacked!"
+						test_subject.adjustBruteLoss(30 + risk_level * 10)
+						test_subject.adjustOxyLoss(20)
+				if("amnestic", "treatment")
+					outcome["message"] = "Amnestic treatment administered to remove SCP-1128 awareness."
+					outcome["research_points"] = base_points + 10
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(10, "scp1128_amnestic")
+		if("scp-008")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-008 containment through biohazard glass. No exposure."
+					outcome["research_points"] = base_points
+				if("biological", "sample_analysis")
+					outcome["message"] = "SCP-008 samples were analyzed under maximum biocontainment."
+					outcome["research_points"] = base_points + 15
+				if("exposure", "contact")
+					outcome["message"] = "Subject was exposed to SCP-008 under controlled conditions. EXTREME DANGER."
+					outcome["research_points"] = base_points + 30
+					if(prob(danger_chance + 35))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SUBJECT INFECTED WITH SCP-008! INITIATING CONTAINMENT PROTOCOL!"
+						test_subject.adjustToxLoss(30 + risk_level * 10)
+						test_subject.adjustBruteLoss(15 + risk_level * 5)
+		if("scp-087")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-087 entrance. Dread and unease reported."
+					outcome["research_points"] = base_points
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(-5, "scp087_observation")
+				if("descent", "exploration")
+					outcome["message"] = "Subject descended SCP-087 for a controlled period. Psychological effects noted."
+					outcome["research_points"] = base_points + 20
+					if(prob(danger_chance + 15))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " SCP-087-1 ENTITY ENCOUNTERED! Subject fled in terror!"
+						test_subject.adjustBruteLoss(20 + risk_level * 5)
+						if(test_subject.sanity)
+							test_subject.sanity.adjust_sanity(-20, "scp087_entity")
+				if("audio", "sound")
+					outcome["message"] = "Subject listened to audio recordings from inside SCP-087. Crying heard."
+					outcome["research_points"] = base_points + 10
+					if(test_subject.sanity)
+						test_subject.sanity.adjust_sanity(-3 * risk_level, "scp087_audio")
+		if("scp-3008")
+			switch(test_type)
+				if("observation", "visual")
+					outcome["message"] = "Subject observed SCP-3008 entrance. The interior appears to be an IKEA store."
+					outcome["research_points"] = base_points
+				if("exploration", "interior")
+					outcome["message"] = "Subject entered SCP-3008 for controlled exploration. Spatial distortion confirmed."
+					outcome["research_points"] = base_points + 15
+					if(prob(danger_chance + 10))
+						outcome["danger_triggered"] = TRUE
+						outcome["message"] += " Subject encountered hostile IKEA staff during night phase!"
+						test_subject.adjustBruteLoss(25 + risk_level * 10)
+				if("temporal", "day_night")
+					outcome["message"] = "SCP-3008's day/night cycle was studied. Staff behavior shifts dramatically at night."
+					outcome["research_points"] = base_points + 20
 		else
 			outcome["message"] = "Standard testing conducted on [scp_id]. Results recorded."
 			outcome["research_points"] = base_points
@@ -1266,70 +1140,8 @@ SUBSYSTEM_DEF(round_objectives)
 
 	return outcome
 
-/obj/item/contraband_scanner
-	name = "Contraband Scanner"
-	desc = "A handheld scanner that detects concealed contraband on personnel. Range: 3 meters."
-	icon = 'icons/obj/device.dmi'
-	icon_state = "health"
-	w_class = WEIGHT_CLASS_SMALL
-	var/scan_cooldown = 0
-	var/scan_cooldown_time = 10 SECONDS
-	var/scan_range = 3
-
-/obj/item/contraband_scanner/attack_self(mob/user)
-	if(world.time < scan_cooldown)
-		to_chat(user, span_warning("Scanner recharging..."))
-		return
-	scan_cooldown = world.time + scan_cooldown_time
-	to_chat(user, span_notice("Scanning area for concealed contraband..."))
-	var/found_any = FALSE
-	for(var/mob/living/carbon/human/H in view(scan_range, user))
-		if(H == user)
-			continue
-		var/contraband_count = 0
-		for(var/obj/item/dclass_contraband/C in H.contents)
-			contraband_count++
-		if(contraband_count > 0)
-			to_chat(user, span_warning("CONTRABAND DETECTED: [H.name] — [contraband_count] item(s) concealed!"))
-			playsound(user, 'sound/machines/ping.ogg', 30, TRUE)
-			found_any = TRUE
-		var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[H.ckey]
-		if(player && length(player.contraband) > 0)
-			var/abstract_count = 0
-			for(var/ctype in player.contraband)
-				abstract_count += player.contraband[ctype]
-			if(abstract_count > 0)
-				to_chat(user, span_warning("SUSPICIOUS READINGS: [H.name] — anomalous materials detected."))
-				found_any = TRUE
-	if(!found_any)
-		to_chat(user, span_notice("No contraband detected in scan range."))
-
-/obj/item/guard_tackle
-	name = "Tackle"
-	desc = "A combat technique: charge and knock down a target."
-	icon = 'icons/obj/items_and_weapons.dmi'
-	icon_state = "eshield0"
-	var/cooldown = 0
-	var/cooldown_time = 20 SECONDS
-
-/obj/item/guard_tackle/attack(mob/living/target, mob/living/user)
-	if(world.time < cooldown)
-		to_chat(user, span_warning("You're not ready to tackle again."))
-		return
-	if(!ishuman(target))
-		return
-	cooldown = world.time + cooldown_time
-	if(get_dist(user, target) > 2)
-		to_chat(user, span_warning("Too far to tackle!"))
-		return
-	user.visible_message(span_danger("[user] charges at [target]!"))
-	if(prob(60))
-		target.Knockdown(3 SECONDS)
-		target.adjustBruteLoss(5)
-		user.visible_message(span_danger("[user] tackles [target] to the ground!"))
-	else
-		to_chat(user, span_warning("You miss the tackle!"))
-		user.Knockdown(1 SECONDS)
+// Contraband scanning is handled by /obj/machinery/scp_checkpoint_scanner in security_checkpoints.dm
+// Guard tackle is handled by /datum/component/tackler via tackler gloves
 
 /obj/structure/guard_checkpoint
 	name = "Guard Patrol Checkpoint"
@@ -1362,179 +1174,10 @@ SUBSYSTEM_DEF(round_objectives)
 	if(player)
 		player.gain_experience(10, "patrol_checkpoint")
 	to_chat(H, span_notice("<b>CHECKPOINT [checkpoint_id]</b> scanned. Patrol route [route_id] verified."))
-	if(SSguard_patrols)
-		for(var/r_id in SSguard_patrols.routes)
-			var/datum/guard_patrol_route/route = SSguard_patrols.routes[r_id]
-			if(r_id == route_id)
-				route.completed_count++
-				break
 	if(SSround_objectives)
 		SSround_objectives.report_objective_progress("guard_recontain", 1)
 
-/obj/machinery/dclass_escape_point
-	name = "Escape Route"
-	desc = "A potential escape route. Use it carefully — failure means trouble."
-	icon = 'icons/obj/structures.dmi'
-	icon_state = "catwalk"
-	density = FALSE
-	anchored = TRUE
-	var/escape_type = "vent"
-	var/difficulty = 3
-	var/attempts = 0
-	var/max_attempts = 3
-	var/cooldown = 0
-	var/cooldown_time = 60 SECONDS
-	var/list/required_skills = list()
-
-/obj/machinery/dclass_escape_point/attack_hand(mob/user)
-	if(!ishuman(user))
-		return
-	var/mob/living/carbon/human/H = user
-	if(world.time < cooldown)
-		to_chat(H, span_warning("You need more time before attempting this route again."))
-		return
-	var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[H.ckey]
-	if(!player)
-		to_chat(H, span_warning("You are not registered in the D-Class system."))
-		return
-	attempts++
-	if(attempts > max_attempts)
-		to_chat(H, span_warning("This route is too heavily monitored now. Try another way."))
-		player.suspicion_level += 20
-		cooldown = world.time + cooldown_time
-		attempts = 0
-		return
-	to_chat(H, span_notice("You begin working on the escape route..."))
-	var/success = attempt_escape_minigame(H, player)
-	if(success)
-		complete_escape(H, player)
-	else
-		fail_escape(H, player)
-
-/obj/machinery/dclass_escape_point/proc/attempt_escape_minigame(mob/living/carbon/human/H, datum/dclass_player/player)
-	var/skill_bonus = 0
-	if(player.skills && length(player.skills) > 0)
-		for(var/skill in required_skills)
-			if(player.skills[skill])
-				skill_bonus += player.skills[skill] * 5
-	var/trust_penalty = player.suspicion_level * 0.1
-	var/equipment_bonus = 0
-	for(var/obj/item/dclass_contraband/C in H.contents)
-		if(istype(C, /obj/item/dclass_contraband/lockpick))
-			equipment_bonus += 15
-		if(istype(C, /obj/item/dclass_contraband/wire))
-			equipment_bonus += 10
-		if(istype(C, /obj/item/dclass_contraband/improvised_tool))
-			equipment_bonus += 8
-	var/base_chance = 30 + skill_bonus + equipment_bonus - trust_penalty - (difficulty * 10)
-	base_chance = clamp(base_chance, 5, 85)
-	switch(escape_type)
-		if("vent")
-			to_chat(H, span_notice("You carefully pry at the vent cover... (Skill check)"))
-			if(!do_after(H, src, 8 SECONDS))
-				return FALSE
-			if(prob(base_chance))
-				return TRUE
-			to_chat(H, span_warning("The vent cover won't budge! Your hands slip."))
-			H.adjustBruteLoss(3)
-			return FALSE
-		if("wall")
-			to_chat(H, span_notice("You examine the wall for weak points... (Perception check)"))
-			if(!do_after(H, src, 12 SECONDS))
-				return FALSE
-			if(prob(base_chance))
-				return TRUE
-			to_chat(H, span_warning("The wall section is reinforced. You can't breach it."))
-			return FALSE
-		if("maintenance")
-			to_chat(H, span_notice("You work on the maintenance hatch lock... (Lockpicking check)"))
-			if(!do_after(H, src, 10 SECONDS))
-				return FALSE
-			if(prob(base_chance + 10))
-				return TRUE
-			to_chat(H, span_warning("The lock mechanism is too complex! Your pick snaps."))
-			return FALSE
-		if("disguise")
-			to_chat(H, span_notice("You adjust your disguise and try to walk past... (Deception check)"))
-			if(!do_after(H, src, 6 SECONDS))
-				return FALSE
-			if(prob(base_chance + 15))
-				return TRUE
-			to_chat(H, span_warning("Someone recognizes you! Your disguise fails."))
-			player.suspicion_level += 15
-			return FALSE
-		if("supply")
-			to_chat(H, span_notice("You climb into the supply conveyor... (Timing check)"))
-			if(!do_after(H, src, 15 SECONDS))
-				return FALSE
-			if(prob(base_chance - 5))
-				return TRUE
-			to_chat(H, span_warning("The conveyor activates while you're inside!"))
-			H.adjustBruteLoss(10)
-			return FALSE
-	return prob(base_chance)
-
-/obj/machinery/dclass_escape_point/proc/complete_escape(mob/living/carbon/human/H, datum/dclass_player/player)
-	var/list/escape_turfs = list()
-	for(var/turf/open/T in get_area_turfs(/area/scp/surface))
-		if(!T.density)
-			escape_turfs += T
-	if(!length(escape_turfs))
-		for(var/turf/open/T in get_area_turfs(/area/site53/surface))
-			if(!T.density)
-				escape_turfs += T
-	if(length(escape_turfs))
-		H.forceMove(pick(escape_turfs))
-	player.suspicion_level = 0
-	hook_scp_interaction(H, "D-CLASS ESCAPE", INTERACTION_TYPE_EXPLORATION, list("method" = escape_type))
-	to_chat(H, span_greenannounce("You successfully escape the facility!"))
-	priority_announce("D-Class personnel escape detected. All security personnel be on alert.", "SECURITY ALERT", null, ANNOUNCER_ALERT)
-	if(SSround_objectives)
-		SSround_objectives.report_objective_progress("dclass_survive", 1)
-
-/obj/machinery/dclass_escape_point/proc/fail_escape(mob/living/carbon/human/H, datum/dclass_player/player)
-	player.suspicion_level += 10
-	to_chat(H, span_warning("Your escape attempt failed! Security may have noticed."))
-	if(prob(30))
-		for(var/mob/living/carbon/human/G in view(7, H))
-			if(G.job && findtext(G.job, "Guard"))
-				to_chat(G, span_warning("<b>ALERT:</b> D-Class [H.name] attempted to escape near [get_area_name(src)]!"))
-				break
-
-/obj/machinery/dclass_escape_point/vent
-	name = "Ventilation Shaft"
-	desc = "A ventilation shaft. Could be an escape route if you can pry it open."
-	escape_type = "vent"
-	difficulty = 3
-	required_skills = list("mechanical" = 1)
-
-/obj/machinery/dclass_escape_point/wall
-	name = "Weak Wall Section"
-	desc = "A section of wall that looks weaker than the rest. Might be breached with effort."
-	escape_type = "wall"
-	difficulty = 4
-	required_skills = list("mechanical" = 2)
-
-/obj/machinery/dclass_escape_point/maintenance
-	name = "Maintenance Hatch"
-	desc = "A locked maintenance hatch. A skilled lockpick could open it."
-	escape_type = "maintenance"
-	difficulty = 3
-	required_skills = list("mechanical" = 1, "stealth" = 1)
-
-/obj/machinery/dclass_escape_point/disguise
-	name = "Security Checkpoint"
-	desc = "A checkpoint that could be bluffed past with a good disguise."
-	escape_type = "disguise"
-	difficulty = 2
-	required_skills = list("social" = 2)
-
-/obj/machinery/dclass_escape_point/supply
-	name = "Supply Conveyor"
-	desc = "A supply conveyor that leads out of the facility. Dangerous but possible."
-	escape_type = "supply"
-	difficulty = 5
-	required_skills = list("mechanical" = 1, "athletic" = 1)
+// D-Class escape routes are handled by /datum/dclass_escape_route in dclass_escape_routes.dm
 
 /obj/machinery/civilian_evac_station
 	name = "Evacuation Assembly Point"
@@ -1544,6 +1187,7 @@ SUBSYSTEM_DEF(round_objectives)
 	anchored = TRUE
 	density = FALSE
 	var/registered_civilians = 0
+	var/list/registered_ckey_list = list()
 	var/safety_bonus_per_civilian = 5
 
 /obj/machinery/civilian_evac_station/attack_hand(mob/user)
@@ -1561,10 +1205,11 @@ SUBSYSTEM_DEF(round_objectives)
 			if(safe_count >= 3)
 				SSround_objectives.report_objective_progress("command_direct", 1)
 		return
-	if(user.ckey in SSscp_gameplay?.event_log)
+	if(user.ckey in registered_ckey_list)
 		to_chat(H, span_notice("You are already registered at this evacuation point. Stay calm and wait for instructions."))
 		return
 	registered_civilians++
+	registered_ckey_list[user.ckey] = world.time
 	to_chat(H, span_notice("You register at the evacuation assembly point. Stay here — help is coming."))
 	if(H.sanity)
 		H.sanity.adjust_sanity(5, "evacuation_safety")
@@ -1626,9 +1271,9 @@ SUBSYSTEM_DEF(round_objectives)
 		to_chat(user, span_notice("Only a curator can use this stand to document encounters."))
 		return
 	var/list/recent_breaches = list()
-	for(var/datum/round_event_log/E in SSscp_gameplay?.event_log)
-		if(E.event_type == "scp_breach" && world.time - E.event_time < 10 MINUTES)
-			recent_breaches += E.description
+	if(GLOB.scp_round_report)
+		for(var/list/E in GLOB.scp_round_report.breach_log)
+			recent_breaches += "[E["id"]] breach in [E["zone"]]"
 	if(!length(recent_breaches))
 		to_chat(H, span_notice("No recent SCP activity to document."))
 		return
@@ -1641,128 +1286,14 @@ SUBSYSTEM_DEF(round_objectives)
 	report.info = "OFFICIAL SCP INCIDENT REPORT<br>Compiled by: [H.real_name]<br>Date: [time2text(world.time, "YYYY-MM-DD")]<br><br>[jointext(recent_breaches, "<br>")]"
 	H.put_in_hands(report)
 
-/datum/antagonist/goc_operative
-	name = "GOC Operative"
-	roundend_category = "GOC Operatives"
-	antagpanel_category = "GOC"
-	show_to_ghosts = TRUE
-	var/tactical_scan_cooldown = 0
-	var/tactical_scan_cd = 20 SECONDS
-
-/datum/antagonist/goc_operative/on_gain()
-	. = ..()
-	var/datum/action/innate/scp_ability/tactical_scan/scan = new()
-	scan.Grant(owner.current)
-	var/datum/action/innate/scp_ability/goc_shield/shield = new()
-	shield.Grant(owner.current)
-	var/datum/action/innate/scp_ability/goc_target_designator/designator = new()
-	designator.Grant(owner.current)
-
-/datum/action/innate/scp_ability/tactical_scan
-	name = "Tactical Anomaly Scanner"
-	desc = "Scan for nearby SCP entities and assess threat levels."
-	button_icon = 'icons/mob/actions/actions_minor_antag.dmi'
-	button_icon_state = "artificer"
-	cooldown_time = 20 SECONDS
-
-/datum/action/innate/scp_ability/tactical_scan/Activate()
-	var/mob/living/carbon/human/H = owner
-	if(!istype(H))
-		return
-	start_cooldown()
-	var/list/detected = list()
-	for(var/mob/living/scp/S in view(15, H))
-		if(S.stat == DEAD)
-			continue
-		var/area/A = get_area(S)
-		var/threat_level = "LOW"
-		if(S.SCP?.classification == "keter")
-			threat_level = "CRITICAL"
-		else if(S.SCP?.classification == "euclid")
-			threat_level = "MODERATE"
-		detected += "SCP-[S.SCP?.designation || "???"] — [threat_level] — [A?.name || "Unknown Location"]"
-	if(!length(detected))
-		to_chat(H, span_notice("No anomalous entities detected in scan range."))
-	else
-		to_chat(H, span_warning("<b>TACTICAL SCAN:</b>"))
-		for(var/entry in detected)
-			to_chat(H, span_warning("  [entry]"))
-
-/datum/action/innate/scp_ability/goc_shield
-	name = "Reactive Shield Pulse"
-	desc = "Activate a short-duration energy shield that absorbs damage."
-	button_icon = 'icons/mob/actions/actions_minor_antag.dmi'
-	button_icon_state = "vamp_rejuv"
-	cooldown_time = 45 SECONDS
-
-/datum/action/innate/scp_ability/goc_shield/Activate()
-	var/mob/living/carbon/human/H = owner
-	if(!istype(H))
-		return
-	start_cooldown()
-	H.apply_status_effect(/datum/status_effect/goc_shield)
-	to_chat(H, span_notice("Reactive shield activated! Absorbing damage for 10 seconds."))
-	H.visible_message(span_notice("[H]'s armor flickers with energy!"))
-
-/datum/status_effect/goc_shield
-	id = "goc_shield"
-	duration = 10 SECONDS
-	alert_type = null
-
-/datum/status_effect/goc_shield/tick()
-	. = ..()
-	if(ishuman(owner))
-		var/mob/living/carbon/human/H = owner
-		H.adjustBruteLoss(-2)
-		H.adjustFireLoss(-2)
-
-/datum/action/innate/scp_ability/goc_target_designator
-	name = "Target Designator"
-	desc = "Mark an SCP for GOC elimination. All GOC operatives see the marker."
-	button_icon = 'icons/mob/actions/actions_minor_antag.dmi'
-	button_icon_state = "vendort"
-	cooldown_time = 30 SECONDS
-
-/datum/action/innate/scp_ability/goc_target_designator/Activate()
-	var/mob/living/carbon/human/H = owner
-	if(!istype(H))
-		return
-	var/list/targets = list()
-	for(var/mob/living/scp/S in view(7, H))
-		if(S.stat != DEAD)
-			targets[S] = "SCP-[S.SCP?.designation || "???"]"
-	if(!length(targets))
-		to_chat(H, span_warning("No SCP targets in range."))
-		return
-	var/mob/living/scp/target = input(H, "Select target to designate:", "GOC Target Designator") as null|anything in targets
-	if(!target || target.stat == DEAD)
-		return
-	start_cooldown()
-	var/target_name = targets[target]
-	var/area/target_area = get_area(target)
-	for(var/mob/living/carbon/human/G in GLOB.player_list)
-		if(is_goc_operative(G))
-			to_chat(G, span_warning("<b>GOC TARGET DESIGNATED:</b> [target_name] in [target_area?.name || "Unknown"]!"))
-
-/proc/is_goc_operative(mob/living/carbon/human/H)
-	if(!H.mind)
-		return FALSE
-	return locate(/datum/antagonist/goc_operative) in H.mind.antag_datums
-
 /obj/item/reagent_containers/hypospray/medipen/amnestic
 	name = "Class-A Amnestic Medipen"
 	desc = "A medipen containing Class-A amnestics. Reverses Sarkic conversion and removes anomalous memories."
 	icon_state = "atropine"
 	volume = 5
-	list_reagents = list(/datum/reagent/amnestic_a = 5)
+	list_reagents = list(/datum/reagent/medicine/amnestics/classa = 5)
 
-/datum/reagent/amnestic_a
-	name = "Class-A Amnestic"
-	description = "A chemical compound that suppresses anomalous mental influences and reverses certain conversions."
-	reagent_state = LIQUID
-	color = "#E6FFF0"
-
-/datum/reagent/amnestic_a/on_mob_add(mob/living/L, amount)
+/datum/reagent/medicine/amnestics/classa/on_mob_add(mob/living/L, amount)
 	. = ..()
 	if(!ishuman(L))
 		return
@@ -1770,7 +1301,7 @@ SUBSYSTEM_DEF(round_objectives)
 	if(H.mind)
 		var/list/to_remove = list()
 		for(var/datum/antagonist/A in H.mind.antag_datums)
-			if(istype(A, /datum/antagonist/sarkic))
+			if(istype(A, /datum/antagonist/sarkic_cult))
 				to_remove += A
 		for(var/datum/antagonist/A in to_remove)
 			A.on_removal()
@@ -1794,3 +1325,308 @@ SUBSYSTEM_DEF(round_objectives)
 		apply_mood_aura()
 		if(prob(15))
 			calm_enraged_096()
+
+// ============================================================================
+// #15 JOB-SPECIFIC SCP INTERACTIONS — Deeper role integration
+// ============================================================================
+
+/obj/machinery/scp_sample_analyzer
+	name = "SCP Sample Analyzer"
+	desc = "A machine for analyzing SCP specimen samples. Medical and Research personnel get bonus research points."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "mass_spectrometer"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 100
+	var/analyze_cooldown = 0
+	var/analyze_cooldown_time = 20 SECONDS
+
+/obj/machinery/scp_sample_analyzer/attackby(obj/item/W, mob/user, params)
+	if(istype(W, /obj/item/scp_sample_vial))
+		if(world.time < analyze_cooldown)
+			to_chat(user, span_warning("The analyzer is still calibrating from the last analysis."))
+			return
+		var/obj/item/scp_sample_vial/vial = W
+		if(vial.analyzed)
+			to_chat(user, span_warning("This sample has already been analyzed."))
+			return
+		to_chat(user, span_notice("You insert the sample vial into the analyzer..."))
+		if(!do_after(user, src, 5 SECONDS))
+			return
+		analyze_cooldown = world.time + analyze_cooldown_time
+		var/bonus_multiplier = 1.0
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			if(H.job && (findtext(H.job, "Medical") || findtext(H.job, "Doctor") || findtext(H.job, "Chemist")))
+				bonus_multiplier = 1.5
+				to_chat(H, span_notice("Your medical training improves analysis efficiency!"))
+			else if(H.job && (findtext(H.job, "Scientist") || findtext(H.job, "Research")))
+				bonus_multiplier = 1.3
+				to_chat(H, span_notice("Your research experience aids the analysis!"))
+		var/bonus_points = round(vial.research_value * 0.5 * bonus_multiplier)
+		vial.research_value += bonus_points
+		vial.analyze(user)
+		playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+		if(SSround_objectives)
+			SSround_objectives.report_objective_progress("research_unlock", 1)
+		qdel(vial)
+		return
+	return ..()
+
+/obj/machinery/scp_containment_integrity_scanner
+	name = "Containment Integrity Scanner"
+	desc = "A wall-mounted scanner that evaluates containment integrity in the area. Engineers can use it to identify weak points."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "body_scanner"
+	density = FALSE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 50
+	var/scan_cooldown = 0
+	var/scan_cooldown_time = 30 SECONDS
+
+/obj/machinery/scp_containment_integrity_scanner/attack_hand(mob/user)
+	if(world.time < scan_cooldown)
+		to_chat(user, span_warning("Scanner recharging..."))
+		return
+	scan_cooldown = world.time + scan_cooldown_time
+	var/area/A = get_area(src)
+	if(!A)
+		to_chat(user, span_warning("Unable to determine current area."))
+		return
+	var/list/weak_points = list()
+	var/overall_integrity = 100
+	for(var/obj/structure/containment_upgrade_frame/F in A)
+		weak_points += "Unfinished upgrade frame at [get_area(F)]"
+	for(var/mob/living/scp/S in A)
+		var/integrity_pct = round(S.containment_integrity)
+		overall_integrity = min(overall_integrity, integrity_pct)
+		if(integrity_pct < 50)
+			weak_points += "CRITICAL: SCP-[S.SCP?.designation || "???"] containment at [integrity_pct]% integrity"
+		else if(integrity_pct < 80)
+			weak_points += "WARNING: SCP-[S.SCP?.designation || "???"] containment at [integrity_pct]% integrity"
+	var/engineer_bonus = FALSE
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.job && (findtext(H.job, "Engineer") || findtext(H.job, "Containment Engineer")))
+			engineer_bonus = TRUE
+			for(var/turf/closed/wall/scp_containment/W in A)
+				if(W.containment_integrity < W.max_containment_integrity * 0.7)
+					weak_points += "Damaged containment wall at [W.x],[W.y]"
+	to_chat(user, span_notice("<b>CONTAINMENT INTEGRITY REPORT — [A.name]</b>"))
+	to_chat(user, span_notice("Overall Integrity: [overall_integrity]%"))
+	if(length(weak_points))
+		to_chat(user, span_warning("<b>Issues Found:</b>"))
+		for(var/issue in weak_points)
+			to_chat(user, span_warning("  - [issue]"))
+		if(engineer_bonus)
+			to_chat(user, span_notice("Engineer analysis: Repair damaged walls and complete upgrade frames to restore integrity."))
+			if(SSround_objectives)
+				SSround_objectives.report_objective_progress("engineer_repair", 1)
+	else
+		to_chat(user, span_green("No containment issues detected."))
+	playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+
+/obj/machinery/scp_chemical_synthesizer
+	name = "SCP Chemical Synthesizer"
+	desc = "A specialized synthesizer for producing SCP-related chemical compounds. Chemists and Doctors can create specialized reagents."
+	icon = 'icons/obj/machines/research.dmi'
+	icon_state = "mass_spectrometer"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 200
+	var/synth_cooldown = 0
+	var/synth_cooldown_time = 45 SECONDS
+
+/obj/machinery/scp_chemical_synthesizer/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	if(world.time < synth_cooldown)
+		to_chat(H, span_warning("Synthesizer recharging..."))
+		return
+	var/is_qualified = FALSE
+	if(H.job && (findtext(H.job, "Medical") || findtext(H.job, "Doctor") || findtext(H.job, "Chemist")))
+		is_qualified = TRUE
+	if(!is_qualified)
+		to_chat(H, span_warning("You need medical or chemical training to operate this synthesizer."))
+		return
+	var/list/options = list(
+		"Amnestic Compound (Class-A)" = /datum/reagent/medicine/amnestics/classa,
+		"SCP-008 Counteragent" = /datum/reagent/medicine/scp008_counteragent,
+		"Anomalous Stabilizer" = /datum/reagent/medicine/anomalous_stabilizer,
+	)
+	var/choice = input(H, "Select compound to synthesize:", "SCP Chemical Synthesizer") as null|anything in options
+	if(!choice || !options[choice])
+		return
+	synth_cooldown = world.time + synth_cooldown_time
+	var/reagent_type = options[choice]
+	var/obj/item/reagent_containers/glass/bottle/B = new(get_turf(H))
+	B.name = "[choice] bottle"
+	B.reagents.add_reagent(reagent_type, 15)
+	H.put_in_hands(B)
+	to_chat(H, span_notice("You synthesize a bottle of [choice]."))
+	adjust_global_research_points(5, "chemical_synthesis:[choice]")
+	playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+
+/datum/reagent/medicine/scp008_counteragent
+	name = "SCP-008 Counteragent"
+	description = "A counteragent that slows SCP-008 infection if administered early."
+	reagent_state = LIQUID
+	color = "#00FF44"
+
+/datum/reagent/medicine/scp008_counteragent/on_mob_metabolize(mob/living/L)
+	. = ..()
+	if(!ishuman(L))
+		return
+	var/mob/living/carbon/human/H = L
+	H.adjustToxLoss(-5)
+	to_chat(H, span_notice("You feel the counteragent fighting off the infection..."))
+
+/datum/reagent/medicine/anomalous_stabilizer
+	name = "Anomalous Stabilizer"
+	description = "A compound that helps stabilize sanity after anomalous exposure."
+	reagent_state = LIQUID
+	color = "#8844FF"
+
+/datum/reagent/medicine/anomalous_stabilizer/on_mob_metabolize(mob/living/L)
+	. = ..()
+	if(!ishuman(L))
+		return
+	var/mob/living/carbon/human/H = L
+	if(H.sanity)
+		H.sanity.adjust_sanity(10, "anomalous_stabilizer")
+
+/obj/machinery/scp_cooking_station
+	name = "SCP Anomalous Kitchen Station"
+	desc = "A cooking station designed to prepare meals for SCP-affected personnel. Chefs can create morale-boosting dishes."
+	icon = 'icons/obj/kitchen.dmi'
+	icon_state = "oven"
+	density = TRUE
+	anchored = TRUE
+	use_power = IDLE_POWER_USE
+	idle_power_usage = 100
+	var/cook_cooldown = 0
+	var/cook_cooldown_time = 60 SECONDS
+
+/obj/machinery/scp_cooking_station/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	if(world.time < cook_cooldown)
+		to_chat(H, span_warning("The oven is still heating up from the last batch."))
+		return
+	var/is_chef = H.job && findtext(H.job, "Chef")
+	var/is_kitchen = H.job && findtext(H.job, "Kitchen")
+	if(!is_chef && !is_kitchen)
+		to_chat(H, span_notice("You don't know how to operate this specialized kitchen equipment."))
+		return
+	var/list/dishes = list(
+		"Morale-Boosting Stew" = 1,
+		"Containment Shift Rations" = 2,
+		"Anomalous Residue Analysis Meal" = 3,
+	)
+	var/choice = input(H, "Select dish to prepare:", "SCP Kitchen Station") as null|anything in dishes
+	if(!choice)
+		return
+	cook_cooldown = world.time + cook_cooldown_time
+	to_chat(H, span_notice("You begin preparing [choice]..."))
+	if(!do_after(H, src, 10 SECONDS))
+		return
+	var/obj/item/reagent_containers/food/snacks/S = new /obj/item/reagent_containers/food/snacks/cookie(get_turf(H))
+	S.name = choice
+	switch(choice)
+		if("Morale-Boosting Stew")
+			S.desc = "A hearty stew that warms the soul. Popular with personnel on long containment shifts."
+			S.list_reagents = list(/datum/reagent/consumable/nutriment = 8, /datum/reagent/medicine/anomalous_happiness = 3)
+		if("Containment Shift Rations")
+			S.desc = "Dense, nutritious rations designed for guards on extended containment duty."
+			S.list_reagents = list(/datum/reagent/consumable/nutriment = 12, /datum/reagent/consumable/coffee = 5)
+		if("Anomalous Residue Analysis Meal")
+			S.desc = "A carefully prepared meal for testing anomalous residue interactions. Provides research data."
+			S.list_reagents = list(/datum/reagent/consumable/nutriment = 5, /datum/reagent/medicine/anomalous_stabilizer = 2)
+			adjust_global_research_points(10, "chef_analysis_meal")
+	H.put_in_hands(S)
+	to_chat(H, span_notice("You prepare [choice]."))
+	playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+
+/obj/structure/scp_janitor_supply_cabinet
+	name = "SCP Janitorial Supply Cabinet"
+	desc = "A cabinet stocked with specialized cleaning supplies for SCP contamination. Janitors can restock breach cleanup kits here."
+	icon = 'icons/obj/structures.dmi'
+	icon_state = "cabinet"
+	density = TRUE
+	anchored = TRUE
+	var/restock_cooldown = 0
+	var/restock_cooldown_time = 30 SECONDS
+
+/obj/structure/scp_janitor_supply_cabinet/attack_hand(mob/user)
+	if(!ishuman(user))
+		return
+	var/mob/living/carbon/human/H = user
+	if(world.time < restock_cooldown)
+		to_chat(H, span_warning("Supplies are being restocked. Please wait."))
+		return
+	var/is_janitor = H.job && findtext(H.job, "Janitor")
+	if(!is_janitor)
+		to_chat(H, span_notice("You don't have the clearance for SCP-specific janitorial supplies."))
+		return
+	restock_cooldown = world.time + restock_cooldown_time
+	var/obj/item/breach_cleanup_kit/kit = new(get_turf(H))
+	H.put_in_hands(kit)
+	to_chat(H, span_notice("You retrieve a breach cleanup kit from the supply cabinet."))
+	adjust_global_research_points(2, "janitor_restock")
+	playsound(src, 'sound/machines/click.ogg', 30, TRUE)
+
+/obj/structure/scp_janitor_supply_cabinet/attackby(obj/item/W, mob/user, params)
+	if(istype(W, /obj/item/breach_cleanup_kit))
+		var/obj/item/breach_cleanup_kit/kit = W
+		if(kit.uses_remaining >= 5)
+			to_chat(user, span_notice("This kit is already fully stocked."))
+			return
+		kit.uses_remaining = 5
+		to_chat(user, span_notice("You restock the breach cleanup kit from the supply cabinet."))
+		return
+	return ..()
+
+/obj/machinery/computer/crew/scp
+	name = "SCP Crew Monitoring Console"
+	desc = "An enhanced crew monitoring console with anomalous contamination detection. Medical personnel can detect SCP-related afflictions via suit sensors."
+	icon_screen = "crew"
+	icon_keyboard = "med_key"
+	light_color = LIGHT_COLOR_BLUE
+	circuit = /obj/item/circuitboard/computer/crew/scp
+	var/scan_cooldown = 0
+	var/scan_cooldown_time = 20 SECONDS
+
+/obj/machinery/computer/crew/scp/ui_interact(mob/user)
+	. = ..()
+	GLOB.crewmonitor.show(user, src)
+
+/obj/machinery/computer/crew/scp/attack_hand(mob/user)
+	if(!ishuman(user))
+		return ..()
+	var/mob/living/carbon/human/H = user
+	if(world.time < scan_cooldown)
+		return ..()
+	if(!(H.job && (findtext(H.job, "Medical") || findtext(H.job, "Doctor") || findtext(H.job, "Chemist"))))
+		return ..()
+	scan_cooldown = world.time + scan_cooldown_time
+	var/anomaly_count = 0
+	for(var/mob/living/carbon/human/target in GLOB.suit_sensors_list)
+		if(target.stat == DEAD)
+			continue
+		if(target.reagents?.has_reagent(/datum/reagent/toxin))
+			anomaly_count++
+	to_chat(H, span_notice("<b>ANOMALOUS CONTAMINATION SCAN:</b> [anomaly_count] crew member(s) show signs of anomalous contamination."))
+	if(SSround_objectives)
+		SSround_objectives.report_objective_progress("medical_treat", 0)
+		if(anomaly_count > 0)
+			SSround_objectives.report_objective_progress("medical_treat", 1)
+	..()
+
+/obj/item/circuitboard/computer/crew/scp
+	name = "SCP Crew Monitoring Console (Computer Board)"
+	build_path = /obj/machinery/computer/crew/scp

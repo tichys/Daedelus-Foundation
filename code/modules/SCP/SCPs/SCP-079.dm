@@ -101,6 +101,9 @@
 	if(tier >= 3 && containment_status == "breached" && prob(3))
 		assist_breached_scp()
 
+	if(prob(2))
+		check_scp_interactions()
+
 /mob/living/scp079/proc/advance_tier()
 	tier++
 	tier_progress = 0

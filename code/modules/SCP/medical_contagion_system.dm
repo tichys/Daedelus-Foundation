@@ -141,52 +141,6 @@
 
 GLOBAL_DATUM_INIT(contagion_tracker, /datum/contagion_tracker, new())
 
-/obj/item/reagent_containers/pill/scp500
-	name = "SCP-500 pill"
-	desc = "A small red pill. It is said to cure any disease, poison, or affliction when consumed."
-	icon_state = "pill4"
-	color = "#ff0000"
-
-/obj/item/reagent_containers/pill/scp500/Initialize()
-	. = ..()
-
-/obj/item/reagent_containers/pill/scp500/on_consumption(mob/M, mob/user)
-	. = ..()
-
-	if(!ishuman(M))
-		return
-
-	var/mob/living/carbon/human/H = M
-
-	H.adjustBruteLoss(-H.getBruteLoss())
-	H.adjustFireLoss(-H.getFireLoss())
-	H.setToxLoss(0)
-	H.setOxyLoss(0)
-	H.setCloneLoss(0)
-	if(H.stamina)
-		H.stamina.adjust(H.stamina.maximum - H.stamina.current)
-	H.setOrganLoss(ORGAN_SLOT_BRAIN, 0)
-	H.reagents?.remove_all()
-	H.SetUnconscious(0)
-	H.SetStun(0)
-	H.SetParalyzed(0)
-	H.SetImmobilized(0)
-	H.SetSleeping(0)
-	H.hallucination = 0
-
-	if(HAS_TRAIT(H, TRAIT_PESTILENCE))
-		REMOVE_TRAIT(H, TRAIT_PESTILENCE, "scp049")
-
-	H.adjustBruteLoss(-50)
-	if(H.sanity)
-		H.sanity.adjust_sanity(30, "scp500_cure")
-
-	H.visible_message(span_notice("[H] swallows a small red pill and immediately looks completely revitalized!"), span_notice("You swallow the red pill. Every ache, every illness, every affliction vanishes instantly. You feel perfect."))
-
-/obj/item/reagent_containers/pill/scp500/examine(mob/user)
-	. = ..()
-	to_chat(user, span_notice("A small red pill from SCP-500. One dose cures any disease or affliction. There are only 47 of these in existence."))
-
 /obj/item/healthanalyzer/scp_medical_scanner
 	name = "SCP medical scanner"
 	desc = "An advanced health analyzer capable of detecting anomalous diseases, pestilence, and contagion risk."

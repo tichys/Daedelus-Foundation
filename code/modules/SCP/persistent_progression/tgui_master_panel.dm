@@ -40,13 +40,13 @@
 		for(var/equipment_type in facility_manager.equipment_status)
 			var/datum/equipment_status/status = facility_manager.equipment_status[equipment_type]
 			facility_data["equipment_status"][equipment_type] = list(
-				"equipment_type" = status.equipment_type,
-				"health" = status.health,
-				"operational" = status.operational,
-				"efficiency" = status.efficiency,
-				"maintenance_required" = status.maintenance_required,
-				"power_consumption" = status.power_consumption,
-				"heat_generation" = status.heat_generation
+				"equipment_type" = status.infrastructure_equipment_type,
+				"health" = status.health_percentage,
+				"operational" = status.operational_status == "OPERATIONAL",
+				"efficiency" = status.energy_efficiency,
+				"maintenance_required" = status.health_percentage < 50,
+				"power_consumption" = 0,
+				"heat_generation" = 0
 			)
 
 		// Add security systems data for System Management interface
@@ -80,24 +80,23 @@
 		var/task_id_counter = 1
 		for(var/equipment_type in facility_manager.equipment_status)
 			var/datum/equipment_status/status = facility_manager.equipment_status[equipment_type]
-			if(status && status.maintenance_required)
-				// Determine appropriate team based on equipment type
+			if(status && status.health_percentage < 50)
 				var/assigned_team = "Engineering Team"
-				if(findtext(lowertext(status.equipment_type), "security") || findtext(lowertext(status.equipment_type), "containment"))
+				if(findtext(lowertext(status.infrastructure_equipment_type), "security") || findtext(lowertext(status.infrastructure_equipment_type), "containment"))
 					assigned_team = "Security Team"
-				else if(findtext(lowertext(status.equipment_type), "medical") || findtext(lowertext(status.equipment_type), "life support"))
+				else if(findtext(lowertext(status.infrastructure_equipment_type), "medical") || findtext(lowertext(status.infrastructure_equipment_type), "life support"))
 					assigned_team = "Medical Team"
-				else if(findtext(lowertext(status.equipment_type), "research") || findtext(lowertext(status.equipment_type), "lab"))
+				else if(findtext(lowertext(status.infrastructure_equipment_type), "research") || findtext(lowertext(status.infrastructure_equipment_type), "lab"))
 					assigned_team = "Research Team"
 
 				facility_data["maintenance_tasks"] += list(list(
 					"task_id" = "TASK-[num2text(task_id_counter, 3)]",
-					"task_name" = "[status.equipment_type] Maintenance",
-					"priority" = status.health < 50 ? "high" : (status.health < 75 ? "medium" : "low"),
+					"task_name" = "[status.infrastructure_equipment_type] Maintenance",
+					"priority" = status.health_percentage < 50 ? "high" : (status.health_percentage < 75 ? "medium" : "low"),
 					"assigned_to" = assigned_team,
-					"due_date" = "Next [status.health < 50 ? 12 : 24] hours",
+					"due_date" = "Next [status.health_percentage < 50 ? 12 : 24] hours",
 					"status" = "pending",
-					"equipment_health" = status.health
+					"equipment_health" = status.health_percentage
 				))
 				task_id_counter++
 
@@ -604,7 +603,7 @@
 						"description" = achievement.achievement_description,
 						"unlocked_by" = "[unlocked_count] players",
 						"category" = achievement.achievement_category,
-						"rarity" = achievement.achievement_rarity
+						"rarity" = achievement.achievement_tier
 					))
 					achievement_id_counter++
 	data["player_data"] = player_data

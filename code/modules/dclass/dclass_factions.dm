@@ -209,7 +209,7 @@
 		if(!player || !player.mob || player.mob.stat == DEAD)
 			continue
 		var/mob/living/carbon/human/H = player.mob
-		for(var/obj/machinery/dclass_escape_point/E in range(5, H))
+		for(var/obj/structure/dclass_escape_point/E in range(5, H))
 			E.difficulty = max(1, E.difficulty - 1)
 			to_chat(H, span_notice("Your rebel training makes this escape route easier!"))
 			break

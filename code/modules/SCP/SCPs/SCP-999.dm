@@ -371,6 +371,13 @@
 	. += "Happiness Level: [happiness_level]/[max_happiness]"
 	. += "Comfort Radius: [comfort_radius]"
 	. += "Healed Targets: [length(healed_targets)]"
+	. += "Healing Sessions: [healing_sessions]"
+	. += "Mood Improved: [mood_improvements]"
+
+/mob/living/scp/scp999/verb/verb_comfort_zone()
+	set name = "Comfort Zone"
+	set category = "SCP-999"
+	comfort_zone_ability()
 
 /mob/living/scp/scp999/examine(mob/user)
 	. = ..()
