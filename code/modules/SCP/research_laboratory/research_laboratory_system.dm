@@ -318,6 +318,42 @@ SUBSYSTEM_DEF(research_laboratory)
 	for(var/project_id in research_projects)
 		var/list/project = research_projects[project_id]
 		result[project_id] = project
+	if(SSscp_persistence?.manager)
+		for(var/project_id in SSscp_persistence.manager.research_projects)
+			if(result[project_id])
+				continue
+			var/datum/research_project/scp_proj = SSscp_persistence.manager.research_projects[project_id]
+			if(!scp_proj)
+				continue
+			result[project_id] = list(
+				"id" = project_id,
+				"name" = scp_proj.project_name || "Unknown",
+				"description" = scp_proj.description || "",
+				"scp_target" = "",
+				"status" = scp_proj.research_status || "approved",
+				"progress" = scp_proj.progress || 0,
+				"risk_level" = scp_proj.priority_level || 1,
+				"research_points" = scp_proj.research_funding || 100,
+				"source" = "scp_persistence",
+			)
+	if(SSresearch_persistence?.manager)
+		for(var/project_id in SSresearch_persistence.manager.research_projects)
+			if(result[project_id])
+				continue
+			var/datum/research_persistence_project/rp_proj = SSresearch_persistence.manager.research_projects[project_id]
+			if(!rp_proj)
+				continue
+			result[project_id] = list(
+				"id" = project_id,
+				"name" = rp_proj.project_name || "Unknown",
+				"description" = rp_proj.project_description || "",
+				"scp_target" = rp_proj.research_field || "",
+				"status" = rp_proj.status || "approved",
+				"progress" = rp_proj.progress || 0,
+				"risk_level" = 1,
+				"research_points" = rp_proj.budget_allocated || 100,
+				"source" = "research_persistence",
+			)
 	return result
 
 /datum/research_laboratory_manager/proc/get_experiments_data()

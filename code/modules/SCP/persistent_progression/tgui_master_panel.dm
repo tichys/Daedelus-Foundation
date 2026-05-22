@@ -189,6 +189,7 @@
 			"active_outbreaks" = medical_manager.active_outbreaks,
 			"research_projects" = length(medical_manager.research_projects),
 			"medical_budget" = medical_manager.medical_budget,
+			"total_personnel" = count_department_personnel("Medical"),
 			"containment_effectiveness" = medical_manager.containment_effectiveness,
 		)
 
@@ -317,6 +318,18 @@
 		// Add budget trends
 		var/list/trends = budget_manager.get_budget_trends()
 		budget_data["budget_trends"] = trends
+	else
+		budget_data = list(
+			"total_budget" = 0,
+			"current_balance" = 0,
+			"monthly_expenses" = 0,
+			"monthly_revenue" = 0,
+			"budget_cycle" = 0,
+			"departments" = list(),
+			"recent_transactions" = list(),
+			"pending_requests" = list(),
+			"budget_alerts" = list(),
+		)
 	data["budget_data"] = budget_data
 
 	// Progression Data
@@ -420,6 +433,7 @@
 			"publications" = research_manager.publication_count,
 			"research_budget" = research_manager.research_budget,
 			"research_efficiency" = research_manager.research_efficiency,
+			"total_personnel" = count_department_personnel("Research"),
 		)
 
 		// Add research projects
@@ -607,6 +621,34 @@
 					))
 					achievement_id_counter++
 	data["player_data"] = player_data
+
+	// Fallback: if no persistent player data, populate from connected clients
+	if(length(player_data) == 0 || (player_data["players"] && length(player_data["players"]) == 0))
+		var/list/fallback_players = list()
+		var/fallback_id = 1
+		for(var/client/C in GLOB.clients)
+			var/display_name = C.mob ? C.mob.name : C.key
+			var/current_job = "Unknown"
+			var/status = "ONLINE"
+			if(C.mob && ishuman(C.mob))
+				var/mob/living/carbon/human/H = C.mob
+				display_name = H.real_name ? H.real_name : H.name
+				current_job = H.job ? H.job : "Unknown"
+			fallback_players += list(list(
+				"player_id" = "PLAYER-[num2text(fallback_id, 3)]",
+				"username" = display_name,
+				"ckey" = C.ckey,
+				"rank" = current_job,
+				"faction" = "Foundation",
+				"status" = status,
+				"experience" = 0,
+				"achievements" = 0,
+				"rounds_played" = 0,
+			))
+			fallback_id++
+		player_data["players"] = fallback_players
+		player_data["active_players"] = length(fallback_players)
+		data["player_data"] = player_data
 
 	// Real-time analytics data from actual game systems
 	data["analytics"] = list()
@@ -886,6 +928,18 @@
 	data["system_status"] = "operational"
 
 	return data
+
+/datum/persistent_progression_master_ui/proc/count_department_personnel(department)
+	var/count = 0
+	for(var/client/C in GLOB.clients)
+		if(C.mob && ishuman(C.mob))
+			var/mob/living/carbon/human/H = C.mob
+			var/job_name = H.job || ""
+			if(department == "Medical" && findtext(job_name, "Medical") || findtext(job_name, "Doctor") || findtext(job_name, "Chemist") || findtext(job_name, "Virologist") || findtext(job_name, "Paramedic") || findtext(job_name, "Psychiatrist"))
+				count++
+			else if(department == "Research" && (findtext(job_name, "Scientist") || findtext(job_name, "Research") || findtext(job_name, "Roboticist") || findtext(job_name, "Geneticist")))
+				count++
+	return count
 
 /datum/persistent_progression_master_ui/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()

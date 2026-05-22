@@ -161,9 +161,15 @@
 	simulated = FALSE
 	invisibility = INVISIBILITY_ABSTRACT
 
-/obj/scp106_random/Crossed(mob/living/L)
-	if(!istype(L) || istype(L, /mob/living/scp/scp106))
-		return ..()
+/obj/scp106_random/Initialize()
+	. = ..()
+	RegisterSignal(src, COMSIG_ATOM_ENTERED, PROC_REF(on_entered))
+
+/obj/scp106_random/proc/on_entered(datum/source, atom/movable/arrived, atom/old_loc, list/atom/old_locs)
+	SIGNAL_HANDLER
+	if(!istype(arrived, /mob/living) || istype(arrived, /mob/living/scp/scp106))
+		return
+	var/mob/living/L = arrived
 	if(prob(15))
 		L.adjustOrganLoss(ORGAN_SLOT_BRAIN, 1000)
 		animate(L, color = "#999999", time = 10 SECONDS)

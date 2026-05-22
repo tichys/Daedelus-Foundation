@@ -771,7 +771,7 @@ SUBSYSTEM_DEF(round_objectives)
 	msg += "\n[span_notice("Observers: [CS.observer_count]")]"
 	to_chat(src, msg)
 
-/obj/machinery/computer/scp_testing_console/proc/execute_test_outcome(mob/living/carbon/human/test_subject, scp_id, test_type, risk_level)
+/proc/scp_execute_test_outcome(mob/living/carbon/human/test_subject, scp_id, test_type, risk_level)
 	if(!test_subject || test_subject.stat == DEAD)
 		return list("success" = FALSE, "message" = "Test subject unavailable or deceased.")
 
@@ -1591,42 +1591,4 @@ SUBSYSTEM_DEF(round_objectives)
 		return
 	return ..()
 
-/obj/machinery/computer/crew/scp
-	name = "SCP Crew Monitoring Console"
-	desc = "An enhanced crew monitoring console with anomalous contamination detection. Medical personnel can detect SCP-related afflictions via suit sensors."
-	icon_screen = "crew"
-	icon_keyboard = "med_key"
-	light_color = LIGHT_COLOR_BLUE
-	circuit = /obj/item/circuitboard/computer/crew/scp
-	var/scan_cooldown = 0
-	var/scan_cooldown_time = 20 SECONDS
 
-/obj/machinery/computer/crew/scp/ui_interact(mob/user)
-	. = ..()
-	GLOB.crewmonitor.show(user, src)
-
-/obj/machinery/computer/crew/scp/attack_hand(mob/user)
-	if(!ishuman(user))
-		return ..()
-	var/mob/living/carbon/human/H = user
-	if(world.time < scan_cooldown)
-		return ..()
-	if(!(H.job && (findtext(H.job, "Medical") || findtext(H.job, "Doctor") || findtext(H.job, "Chemist"))))
-		return ..()
-	scan_cooldown = world.time + scan_cooldown_time
-	var/anomaly_count = 0
-	for(var/mob/living/carbon/human/target in GLOB.suit_sensors_list)
-		if(target.stat == DEAD)
-			continue
-		if(target.reagents?.has_reagent(/datum/reagent/toxin))
-			anomaly_count++
-	to_chat(H, span_notice("<b>ANOMALOUS CONTAMINATION SCAN:</b> [anomaly_count] crew member(s) show signs of anomalous contamination."))
-	if(SSround_objectives)
-		SSround_objectives.report_objective_progress("medical_treat", 0)
-		if(anomaly_count > 0)
-			SSround_objectives.report_objective_progress("medical_treat", 1)
-	..()
-
-/obj/item/circuitboard/computer/crew/scp
-	name = "SCP Crew Monitoring Console (Computer Board)"
-	build_path = /obj/machinery/computer/crew/scp

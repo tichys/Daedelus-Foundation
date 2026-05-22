@@ -33,6 +33,11 @@
 				break
 	if(tier >= 5 && prob(1))
 		SSscp_cross_interactions.execute_interaction("079_flicker_096_lights", src, src)
+	if(SSit_network && prob(3))
+		SSit_network.scp079_network_presence = min(100, SSit_network.scp079_network_presence + 2)
+		for(var/datum/network_node/N in SSit_network.nodes)
+			if(get_area(src) && findtext(N.area_name, "Server"))
+				N.apply_scp079_influence(3)
 
 /mob/living/scp/scp106/proc/check_scp_interactions()
 	if(stat == DEAD)
@@ -63,6 +68,12 @@
 			if(M.stat != DEAD)
 				SSscp_cross_interactions.execute_interaction("106_pocket_939_prey", src, M)
 				break
+	if(SSit_network && prob(3))
+		for(var/datum/network_node/N in SSit_network.nodes)
+			var/area/node_area = get_area(src)
+			if(node_area && findtext(N.area_name, "Server") && get_dist(src, locate(/area/station) in range(10, src)) < 15)
+				N.degrade(5)
+				break
 
 /mob/living/scp/scp049/proc/check_scp_interactions()
 	if(stat == DEAD)
@@ -80,6 +91,11 @@
 				break
 	if(prob(1))
 		SSscp_cross_interactions.execute_interaction("049_cure_008_zombie", src, src)
+	if(SSpsychology && prob(5))
+		for(var/mob/living/carbon/human/H in range(7, src))
+			if(H.stat != DEAD && !HAS_TRAIT(H, TRAIT_PESTILENCE))
+				SSpsychology.record_exposure(H, "SCP-049", "proximity", "In proximity to SCP-049; potential Pestilence carrier detection")
+				break
 
 /mob/living/scp/scp999/proc/check_scp_interactions()
 	if(stat == DEAD)

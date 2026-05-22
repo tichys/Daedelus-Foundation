@@ -1098,9 +1098,6 @@
 /obj/gun
 	name = "gun"
 
-/obj/scp106_random
-	name = "SCP-106 anomaly"
-
 /obj/scp263
 	name = "SCP-263"
 	desc = "A cognitohazardous television set."

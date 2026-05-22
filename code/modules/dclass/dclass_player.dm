@@ -178,14 +178,16 @@
 	if(!work_data)
 		return
 
-	// Check if player is in the correct work area
 	if(mob && is_in_work_area())
-		// Gain experience for working
-		gain_experience(work_data["reward"] / 10, "working") // Divide by 10 for continuous gain
-
-		// Chance to find contraband
-		if(prob(5)) // 5% chance per process cycle
+		gain_experience(work_data["reward"] / 10, "working")
+		if(prob(5))
 			find_contraband_at_work()
+		if(current_work_assignment == "specimen_handling" && prob(3) && SSscp_research?.manager)
+			SSscp_research.manager.adjust_research_points(5, "dclass_specimen_work")
+		if(current_work_assignment == "document_archival" && prob(3) && SSscp_research?.manager)
+			SSscp_research.manager.adjust_research_points(3, "dclass_archival_work")
+		if(current_work_assignment == "testing_subject" && prob(2) && SSpsychology)
+			SSpsychology.record_exposure(mob, "D-Class Testing", "experimental", "D-Class participated in SCP testing as work assignment")
 
 /datum/dclass_player/proc/is_in_work_area()
 	if(!mob || !current_work_assignment)
@@ -208,6 +210,20 @@
 			work_area_found = (findtext(A.name, "medical") || findtext(A.name, "clinic") || findtext(A.name, "medbay") || istype(A, /area/station/medical))
 		if("science")
 			work_area_found = (findtext(A.name, "research") || findtext(A.name, "laboratory") || findtext(A.name, "science") || istype(A, /area/station/science) || istype(A, /area/scp/lcz/testing_lab) || istype(A, /area/scp/lcz/observation))
+		if("janitorial")
+			work_area_found = (findtext(A.name, "janitor") || findtext(A.name, "custodial") || istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz))
+		if("specimen_handling")
+			work_area_found = (findtext(A.name, "research") || findtext(A.name, "specimen") || istype(A, /area/station/science) || istype(A, /area/scp/lcz))
+		if("laundry_decon")
+			work_area_found = (findtext(A.name, "laundry") || findtext(A.name, "decon") || findtext(A.name, "cleaning"))
+		if("construction")
+			work_area_found = (findtext(A.name, "construction") || findtext(A.name, "engineering") || istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz))
+		if("testing_subject")
+			work_area_found = (findtext(A.name, "testing") || findtext(A.name, "observation") || istype(A, /area/scp/lcz/testing_lab) || istype(A, /area/scp/lcz/observation))
+		if("document_archival")
+			work_area_found = (findtext(A.name, "archive") || findtext(A.name, "library") || findtext(A.name, "records"))
+		if("botany_sample")
+			work_area_found = (findtext(A.name, "hydroponics") || findtext(A.name, "botany") || istype(A, /area/station/service/hydroponics))
 
 	return work_area_found
 
@@ -512,6 +528,10 @@
 	informant = TRUE
 	adjust_trust(20, "Became informant")
 	adjust_credits(500, "Informant signup bonus")
+	if(SSraisa && mob)
+		SSraisa.record_observation(mob)
+		var/datum/intel_report/R = new(mob, "surveillance", mob.real_name, mob.job, "CONFIDENTIAL", "D-Class [dclass_number] has been recruited as a Foundation informant.", "Monitor reliability, adjust surveillance as needed.")
+		SSraisa.file_report(R)
 	return TRUE
 
 /datum/dclass_player/proc/report_escape_plan(plan_name, participants_count)
@@ -521,6 +541,9 @@
 	var/reward = 200 + (participants_count * 50)
 	adjust_credits(reward, "Reported escape plan")
 	adjust_trust(10, "Reported escape plan")
+	if(SSraisa && mob)
+		var/datum/intel_report/R = new(mob, "threat_assessment", mob.real_name, mob.job, "SECRET", "D-Class informant [dclass_number] reports escape plan: [plan_name]. [participants_count] participants involved.", "Deploy security, increase perimeter patrols.")
+		SSraisa.file_report(R)
 	return TRUE
 
 // Sentence Management

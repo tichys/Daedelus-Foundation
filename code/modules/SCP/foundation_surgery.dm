@@ -176,13 +176,17 @@
 	var/list/available_surgeries = list(
 		/datum/surgery_step/anomalous_purge,
 		/datum/surgery_step/memetic_shielding,
+		/datum/surgery_step/scp008_excision,
+		/datum/surgery_step/scp049_cure_reversal,
+		/datum/surgery_step/containment_implant_install,
+		/datum/surgery_step/amnestic_implant_install,
 	)
 
 /obj/item/surgical_disk/foundation/attack_self(mob/user)
 	if(!ishuman(user))
 		return
 	var/mob/living/carbon/human/H = user
-	var/list/options = list("Anomalous Purge", "Memetic Shielding")
+	var/list/options = list("Anomalous Purge", "Memetic Shielding", "SCP-008 Excision", "Pestilence Extraction", "Containment Tracker", "Amnestic Implant")
 	var/choice = input(H, "Select a surgical program to learn:", "Foundation Surgery") as null|anything in options
 	if(!choice)
 		return
@@ -192,6 +196,14 @@
 			learned_step = /datum/surgery_step/anomalous_purge
 		if("Memetic Shielding")
 			learned_step = /datum/surgery_step/memetic_shielding
+		if("SCP-008 Excision")
+			learned_step = /datum/surgery_step/scp008_excision
+		if("Pestilence Extraction")
+			learned_step = /datum/surgery_step/scp049_cure_reversal
+		if("Containment Tracker")
+			learned_step = /datum/surgery_step/containment_implant_install
+		if("Amnestic Implant")
+			learned_step = /datum/surgery_step/amnestic_implant_install
 	if(learned_step)
 		to_chat(H, span_notice("You study the [choice] surgical procedure from the disk."))
 		hook_scp_interaction(H, "Foundation Surgery", INTERACTION_TYPE_MEDICAL)

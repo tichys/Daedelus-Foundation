@@ -4,7 +4,6 @@
 	var/mob/living/carbon/human/subject
 	var/mob/living/carbon/human/escort_guard
 	var/mob/living/carbon/human/researcher
-	var/obj/machinery/computer/scp_testing_console/source_console
 	var/scp_name = ""
 	var/test_type = ""
 	var/risk_level = 1
@@ -12,11 +11,10 @@
 	var/created_time = 0
 	var/escort_timeout = 5 MINUTES
 
-/datum/escort_task/New(mob/living/carbon/human/dclass_subject, mob/living/carbon/human/requesting_researcher, scp_ref, t_type, risk, obj/machinery/computer/scp_testing_console/console)
+/datum/escort_task/New(mob/living/carbon/human/dclass_subject, mob/living/carbon/human/requesting_researcher, scp_ref, t_type, risk)
 	task_id = "escort_[world.time]_[rand(100,999)]"
 	subject = dclass_subject
 	researcher = requesting_researcher
-	source_console = console
 	test_type = t_type
 	risk_level = risk
 	created_time = world.time
@@ -39,7 +37,7 @@
 		return FALSE
 	escort_guard = guard
 	status = "escorting"
-	to_chat(guard, span_notice("<b>ESCORT TASK:</b> Retrieve [subject.real_name] and bring them to [source_console ? get_area_name(source_console) : "the testing area"] for [scp_name] testing."))
+	to_chat(guard, span_notice("<b>ESCORT TASK:</b> Retrieve [subject.real_name] and bring them to the testing area for [scp_name] testing."))
 	to_chat(subject, span_notice("<b>ESCORT:</b> Guard [guard.real_name] has been assigned to escort you. Cooperate."))
 	if(researcher)
 		to_chat(researcher, span_notice("Guard [guard.real_name] is escorting [subject.real_name] to the testing area."))
@@ -53,22 +51,9 @@
 	to_chat(subject, span_notice("You have been delivered to the testing area."))
 	if(researcher)
 		to_chat(researcher, span_notice("<b>SUBJECT DELIVERED:</b> [subject.real_name] is at the testing console. You may now begin the test."))
-	if(source_console)
-		source_console.test_active = FALSE
-		source_console.current_scp = null
-		source_console.current_subject = REF(subject)
 	if(SSround_objectives)
 		SSround_objectives.report_objective_progress("guard_recontain", 1)
 	return TRUE
-
-/obj/machinery/computer/scp_testing_console/proc/create_escort_task(mob/living/carbon/human/H, mob/living/carbon/human/R, scp_ref)
-	var/datum/escort_task/escort = new(H, R, scp_ref, test_type, risk_level, src)
-	SSscp_gameplay.escort_tasks[escort.task_id] = escort
-	for(var/mob/living/carbon/human/G in GLOB.player_list)
-		if(G.stat == DEAD)
-			continue
-		if(G.job && (findtext(G.job, "Guard") || findtext(G.job, "Security")))
-			to_chat(G, span_warning("<b>ESCORT REQUEST:</b> Research needs [H.real_name] escorted for [escort.scp_name] testing. Report to the guard patrol console."))
 
 /datum/scp_recontainment_guide
 	var/static/list/guide_entries = list()
@@ -430,50 +415,7 @@
 		"warning" = "SCP-066 is unpredictable. It might do nothing, or it might blind everyone in the room. Never say 'Eric' near it. Ever.",
 	)
 
-/obj/machinery/computer/scp_recontainment_guide
-	name = "SCP Recontainment Terminal"
-	desc = "A reference terminal containing classified recontainment protocols for Foundation personnel."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "medlaptop"
-	circuit = /obj/item/circuitboard/computer/scp_recontainment_guide
-	density = TRUE
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 50
-	var/datum/scp_recontainment_guide/guide_system = new()
 
-/obj/machinery/computer/scp_recontainment_guide/ui_interact(mob/user, datum/tgui/ui)
-	. = ..()
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "SCPRecontainmentGuide", "RECONTAINMENT PROTOCOLS")
-		ui.open()
-
-/obj/machinery/computer/scp_recontainment_guide/ui_state(mob/user)
-	return GLOB.default_state
-
-/obj/machinery/computer/scp_recontainment_guide/ui_data(mob/user)
-	var/list/data = list()
-	var/list/all_guides = list()
-	for(var/key in guide_system.guide_entries)
-		var/list/entry = guide_system.guide_entries[key]
-		all_guides += list(list(
-			"designation" = entry["designation"],
-			"class" = entry["class"],
-			"threat" = entry["threat"],
-			"procedures" = entry["procedures"],
-			"warning" = entry["warning"],
-		))
-	data["guides"] = all_guides
-	return data
-
-/obj/machinery/computer/scp_recontainment_guide/ui_act(action, params)
-	. = ..()
-	return
-
-/obj/item/circuitboard/computer/scp_recontainment_guide
-	name = "SCP Recontainment Terminal (Computer Board)"
-	build_path = /obj/machinery/computer/scp_recontainment_guide
 
 SUBSYSTEM_DEF(scp_gameplay)
 	name = "SCP Gameplay"
@@ -485,6 +427,8 @@ SUBSYSTEM_DEF(scp_gameplay)
 /datum/controller/subsystem/scp_gameplay/fire()
 	process_escort_tasks()
 	process_breach_door_seals()
+	process_zone_sanity_effects()
+	process_emergency_shelter_sanity()
 
 /datum/controller/subsystem/scp_gameplay/proc/process_escort_tasks()
 	var/list/to_remove = list()
@@ -558,6 +502,31 @@ SUBSYSTEM_DEF(scp_gameplay)
 			S.open()
 	priority_announce("Emergency shutters opening in [uppertext(zone)]. Area may still be hazardous.", "SEAL LIFTED", null, ANNOUNCER_ALERT)
 
+/datum/controller/subsystem/scp_gameplay/proc/process_zone_sanity_effects()
+	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(H.stat == DEAD || !H.sanity)
+			continue
+		var/area/A = get_area(H)
+		if(!A)
+			continue
+		if(istype(A, /area/scp/lcz))
+			if(prob(3))
+				H.sanity.adjust_sanity(-1, "lcz_exposure")
+				if(prob(10))
+					to_chat(H, "<span class='warning'>The sterile containment zone atmosphere weighs on your mind...</span>")
+		else if(istype(A, /area/scp/hcz))
+			if(prob(5))
+				H.sanity.adjust_sanity(-2, "hcz_exposure")
+				if(prob(15))
+					to_chat(H, "<span class='warning'>The heavy containment zone feels oppressive and dangerous...</span>")
+		else if(istype(A, /area/scp/ez))
+			if(prob(2))
+				H.sanity.adjust_sanity(1, "ez_safety")
+		if(SSscp_persistence?.manager)
+			var/breach_count = SSscp_persistence.manager.active_breaches
+			if(breach_count > 0 && (istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz)) && prob(breach_count * 2))
+				H.sanity.adjust_sanity(-1, "breach_proximity")
+
 /proc/log_round_event(etype, desc, parts = "")
 	if(!GLOB.scp_round_report)
 		return
@@ -630,5 +599,41 @@ SUBSYSTEM_DEF(scp_gameplay)
 		for(var/obj_id in SSround_objectives.objectives)
 			var/datum/round_objective/O = SSround_objectives.objectives[obj_id]
 			report += "- [O.title]: [O.completed ? "COMPLETE" : "[O.current_progress]/[O.target_progress]"]"
+	report += "<hr>"
+
+	report += "<b>FACILITY OPERATIONS</b>"
+	if(SSfoundation_comms)
+		report += "Threat Level: [SSfoundation_comms.facility_threat_level] | Active Dispatches: [SSfoundation_comms.active_dispatches] | Announcements: [SSfoundation_comms.total_announcements]"
+	if(SSfoundation_budget)
+		report += "Budget Spent: [SSfoundation_budget.total_spent] / [SSfoundation_budget.total_budget] credits"
+	if(SSpsychology)
+		report += "Psych Evaluations: [SSpsychology.completed_evals] | Counseling Sessions: [SSpsychology.counseling_sessions] | Amnestics Recommended: [SSpsychology.amnestics_recommended]"
+	if(SSraisa)
+		report += "Intel Reports: [SSraisa.total_reports] | Info Breaches: [SSraisa.active_breaches] active / [SSraisa.contained_breaches] contained"
+	if(SSanomalous_investigations)
+		report += "Evidence Collected: [SSanomalous_investigations.total_evidence] | Analyzed: [SSanomalous_investigations.analyzed_evidence]"
+	if(SSit_network)
+		report += "Network Integrity: [SSit_network.overall_integrity]% | SCP-079 Presence: [SSit_network.scp079_network_presence]"
+	report += "<hr>"
+
+	report += "<b>LEGAL AND ETHICS</b>"
+	if(SSethics_committee)
+		report += "Ethics Violations: [SSethics_committee.violations.len] | Tests Reviewed: [SSethics_committee.total_reviews]"
+	if(SSinternal_tribunal)
+		report += "Tribunal Cases: [SSinternal_tribunal.total_cases]"
+	if(SSlegal_system)
+		report += "Legal Cases: [SSlegal_system.total_cases]"
+	report += "<hr>"
+
+	report += "<b>COMMAND AND COORDINATION</b>"
+	if(SSsite_command)
+		report += "Directives Issued: [SSsite_command.total_directives]"
+	if(SSdepartment_coordination)
+		report += "Coordination Tasks: [SSdepartment_coordination.completed_tasks]/[SSdepartment_coordination.total_tasks] completed | Memos: [SSdepartment_coordination.interdepartmental_memos.len]"
+	if(SSgoi_relations)
+		var/list/standing_summary = list()
+		for(var/goi_name in SSgoi_relations.goi_standing)
+			standing_summary += "[goi_name]: [SSgoi_relations.goi_standing[goi_name]]"
+		report += "GOI Standings: [jointext(standing_summary, ", ")]"
 
 	return jointext(report, "<br>")

@@ -1,7 +1,8 @@
 /datum/job/investigations_agent
 	title = JOB_INVESTIGATIONS_AGENT
-	description = "Help security solve crimes or take on private cases for wealthy clients. \
-		Look badass and abuse every substance."
+	description = "Investigate crimes and anomalous incidents on site. Collect evidence using \
+		anomalous evidence bags, analyze findings at the Investigations Terminal, and manage \
+		investigation cases for SCP-related incidents. Standard detective duties also apply."
 	faction = FACTION_STATION
 	total_positions = 1
 	spawn_positions = 1
@@ -53,7 +54,7 @@
 	id_trim = /datum/id_trim/job/investigations_agent
 	uniform = /obj/item/clothing/under/rank/security/detective
 	suit = /obj/item/clothing/suit/det_suit
-	belt = /obj/item/modular_computer/tablet/pda/detective
+	belt = /obj/item/modular_computer/tablet/pda/foundation_investigations
 	gloves = /obj/item/clothing/gloves/forensic
 	head = /obj/item/clothing/head/fedora/det_hat
 	neck = /obj/item/clothing/neck/tie/detective
@@ -62,6 +63,10 @@
 	r_pocket = /obj/item/storage/fancy/cigarettes/dromedaryco
 
 	l_hand = /obj/item/storage/briefcase/crimekit
+
+	backpack_contents = list(
+		/obj/item/anomalous_evidence_bag = 3,
+	)
 
 	chameleon_extras = list(
 		/obj/item/clothing/glasses/sunglasses,

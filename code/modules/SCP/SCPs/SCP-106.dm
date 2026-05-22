@@ -81,7 +81,7 @@
 	target = null
 	return ..()
 
-/mob/living/scp/scp106/say(message, datum/language/speaking, whispering)
+/mob/living/scp/scp106/say(message, bubble_type, list/spans, sanitize, datum/language/language, ignore_spam, forced, filterproof, range)
 	to_chat(src, span_notice("You cannot speak."))
 	return FALSE
 

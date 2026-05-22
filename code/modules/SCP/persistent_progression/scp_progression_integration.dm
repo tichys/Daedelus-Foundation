@@ -432,8 +432,8 @@ SUBSYSTEM_DEF(scp_progression_integration)
 /datum/scp_progression_data/proc/update_scp457_metrics(mob/living/scp/scp)
 	if(istype(scp, /mob/living/scp/scp457))
 		var/mob/living/scp/scp457/scp457 = scp
-		metrics["current_heat"] = scp457.heat_system.current_heat
-		metrics["active_fires"] = length(scp457.fire_system.active_fires)
+		metrics["current_heat"] = scp457.current_heat
+		metrics["active_fires"] = length(scp457.active_fires)
 
 /datum/scp_progression_data/proc/update_scp939_metrics(mob/living/scp/scp)
 	// Update SCP-939 specific metrics

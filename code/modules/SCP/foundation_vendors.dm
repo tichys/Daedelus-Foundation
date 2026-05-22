@@ -11,9 +11,16 @@
 		/obj/item/food/candy = 5,
 		/obj/item/food/donut/plain = 5,
 		/obj/item/food/cheesiehonkers = 5,
+		/obj/item/reagent_containers/food/drinks/ice = 3,
+		/obj/item/reagent_containers/food/drinks/soda_cans/cola = 5,
+		/obj/item/reagent_containers/food/snacks/dclass_ration/premade = 10,
 	)
 	contraband = list(
 		/obj/item/reagent_containers/food/drinks/bottle/beer = 2,
+		/obj/item/reagent_containers/food/snacks/dclass_ration/improved = 3,
+	)
+	premium = list(
+		/obj/item/reagent_containers/food/snacks/dclass_ration/premium = 2,
 	)
 	refill_canister = /obj/item/vending_refill/foundation_cafe
 
@@ -48,10 +55,15 @@
 		/obj/item/reagent_containers/glass/bottle/morphine = 2,
 		/obj/item/reagent_containers/pill/amnestics/classb = 3,
 		/obj/item/reagent_containers/syringe/amnesticsg = 2,
+		/obj/item/storage/medkit/scp_emergency = 2,
+		/obj/item/scp_decontamination_wand = 2,
 	)
 	premium = list(
 		/obj/item/reagent_containers/ivbag/amnesticsf = 1,
 		/obj/item/reagent_containers/pill/amnestics/classh = 3,
+		/obj/item/surgical_disk/foundation = 2,
+		/obj/item/implantcase/amnestic = 3,
+		/obj/item/implantcase/containment = 3,
 	)
 	refill_canister = /obj/item/vending_refill/foundation_medical
 
@@ -79,6 +91,10 @@
 	)
 	contraband = list(
 		/obj/item/weldingtool/hugetank = 1,
+		/obj/item/janitor_decon_kit = 2,
+	)
+	premium = list(
+		/obj/item/tank/internals/oxygen = 3,
 	)
 	refill_canister = /obj/item/vending_refill/foundation_tools
 
@@ -130,6 +146,19 @@
 		/obj/item/clipboard = 3,
 		/obj/item/camera = 3,
 		/obj/item/taperecorder = 3,
+		/obj/item/scp_specimen_kit = 3,
+		/obj/item/anomaly_scanner = 2,
+		/obj/item/anomalous_evidence_bag = 3,
+		/obj/item/botany_scp_sample_kit = 2,
+		/obj/item/paper/foundation/budget_request = 5,
+		/obj/item/paper/foundation/investigation_report = 5,
+	)
+	contraband = list(
+		/obj/item/scp_decontamination_wand = 1,
+	)
+	premium = list(
+		/obj/item/surgical_disk/foundation = 1,
+		/obj/item/scp_calming_incense = 2,
 	)
 	refill_canister = /obj/item/vending_refill/foundation_science
 

@@ -6,12 +6,31 @@
 	icon_state = "fireguy"
 	persistence_id = "SCP-457"
 
+	var/current_heat = SCP457_INITIAL_HEAT
+	var/max_heat = SCP457_MAX_HEAT
+	var/heat_generation_rate = SCP457_HEAT_GENERATION_RATE
+	var/heat_decay_rate = SCP457_HEAT_DECAY_RATE
+	var/heat_gain_multiplier = 1.0
+	var/heat_decay_multiplier = 1.0
+	var/containment_heat_penalty = 0
+	var/last_heat_update = 0
 
-	var/datum/scp457_heat_system/heat_system
-	var/datum/scp457_fire_system/fire_system
-	var/datum/scp457_containment_system/containment_system
-	var/datum/scp457_environmental_system/environmental_system
-	var/datum/scp457_research_integration/research_integration
+	var/list/active_fires = list()
+	var/spread_cooldown = 0
+	var/current_fire_type = "basic"
+	var/spread_range = 1
+	var/max_spread_range = 5
+	var/fire_creation_cooldown = 0
+
+	var/containment_successes = 0
+	var/containment_failures = 0
+	var/list/fire_thresholds = list(3, 8, 15, 25)
+
+	var/list/controlled_room_types = list()
+	var/list/room_effects = list()
+	var/last_environment_check = 0
+
+	var/last_research_update = 0
 
 /mob/living/scp/scp457/Initialize()
 	. = ..()
@@ -30,19 +49,13 @@
 	maxHealth = SCP457_MAX_HEALTH
 	health = maxHealth
 
-
-	heat_system = new /datum/scp457_heat_system(src)
-	fire_system = new /datum/scp457_fire_system(src)
-	containment_system = new /datum/scp457_containment_system(src)
-	environmental_system = new /datum/scp457_environmental_system(src)
-	research_integration = new /datum/scp457_research_integration(src)
-
 	fovangle = FOV_DEFAULT
 	update_fov_angles()
 	update_cone_show()
 
+	SetupRoomEffects()
 
-	addtimer(CALLBACK(fire_system, TYPE_PROC_REF(/datum/scp457_fire_system, create_initial_fires)), 1)
+	addtimer(CALLBACK(src, PROC_REF(CreateInitialFires)), 1)
 	RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(on_move_absorb_fires))
 
 /mob/living/scp/scp457/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
@@ -61,7 +74,7 @@
 	return
 
 /mob/living/scp/scp457/fire_act(exposed_temperature, exposed_volume)
-	heat_system?.add_heat(exposed_temperature * 0.01)
+	AddHeat(exposed_temperature * 0.01)
 
 /mob/living/scp/scp457/adjustBruteLoss(amount, updating_health = TRUE, forced = FALSE)
 	if(amount > 0 && !forced)
@@ -69,11 +82,10 @@
 	return ..(amount, updating_health, forced)
 
 /mob/living/scp/scp457/Destroy()
-	QDEL_NULL(heat_system)
-	QDEL_NULL(fire_system)
-	QDEL_NULL(containment_system)
-	QDEL_NULL(environmental_system)
-	QDEL_NULL(research_integration)
+	CleanupFires()
+	active_fires = null
+	room_effects = null
+	controlled_room_types = null
 	return ..()
 
 /mob/living/scp/scp457/Life(delta_time = SSMOBS_DT, times_fired)
@@ -81,11 +93,11 @@
 	if(.)
 		return
 
-	heat_system?.process()
-	fire_system?.process()
-	containment_system?.process()
-	environmental_system?.process()
-	research_integration?.process()
+	ProcessHeat()
+	ProcessFireSpreading()
+	ProcessContainment()
+	ProcessEnvironmental()
+	ProcessResearch()
 	process_scp457_effects()
 
 	if(prob(15))
@@ -98,9 +110,222 @@
 	if(prob(5))
 		playsound(src, 'sound/effects/comfyfire.ogg', 20, TRUE, extrarange = 5)
 
+/mob/living/scp/scp457/proc/ProcessHeat()
+	if(world.time >= last_heat_update + 30 SECONDS)
+		UpdateHeat()
+		last_heat_update = world.time
+
+/mob/living/scp/scp457/proc/UpdateHeat()
+	if(!is_spreading_fires())
+		current_heat = min(max_heat, current_heat + (heat_generation_rate * heat_gain_multiplier))
+
+	current_heat = max(0, current_heat - (heat_decay_rate * heat_decay_multiplier))
+
+	if(containment_heat_penalty > 0)
+		current_heat = max(0, current_heat - containment_heat_penalty)
+		containment_heat_penalty = max(0, containment_heat_penalty - 1)
+
+/mob/living/scp/scp457/proc/AddHeat(amount)
+	current_heat = min(max_heat, current_heat + amount)
+
+/mob/living/scp/scp457/proc/ConsumeHeat(amount)
+	current_heat = max(0, current_heat - amount)
+
+/mob/living/scp/scp457/proc/GetHeatPercentage()
+	return (current_heat / max_heat) * 100
+
+/mob/living/scp/scp457/proc/GetFireType()
+	if(current_heat <= SCP457_HEAT_THRESHOLD_BASIC)
+		return "basic"
+	else if(current_heat <= SCP457_HEAT_THRESHOLD_INTENSE)
+		return "intense"
+	else if(current_heat <= SCP457_HEAT_THRESHOLD_BLUE)
+		return "blue"
+	else
+		return "white"
+
+/mob/living/scp/scp457/proc/ProcessFireSpreading()
+	if(world.time >= spread_cooldown + 10 SECONDS)
+		ProcessFireSpread()
+		spread_cooldown = world.time
+
+	if(world.time >= fire_creation_cooldown + 5 SECONDS)
+		CreateInitialFires()
+		fire_creation_cooldown = world.time
+
+/mob/living/scp/scp457/proc/ProcessFireSpread()
+	var/fire_type = GetFireType()
+	current_fire_type = fire_type
+	var/spread_chance = (current_heat / 100) * 0.3
+
+	for(var/obj/effect/scp457_fire/fire in active_fires)
+		if(!fire || fire.loc == null)
+			active_fires -= fire
+			continue
+
+		if(prob(spread_chance * 100))
+			AttemptFireSpread(fire)
+
+/mob/living/scp/scp457/proc/AttemptFireSpread(obj/effect/scp457_fire/source_fire)
+	var/list/adjacent_turfs = list()
+
+	for(var/turf/T in range(1, source_fire))
+		if(CanSpreadToTurf(T))
+			adjacent_turfs += T
+
+	if(length(adjacent_turfs))
+		var/turf/spread_turf = pick(adjacent_turfs)
+		CreateFireAtTurf(spread_turf)
+		ConsumeHeat(2)
+
+/mob/living/scp/scp457/proc/CanSpreadToTurf(turf/T)
+	if(!T || T.density)
+		return FALSE
+	if(locate(/obj/effect/scp457_fire) in T)
+		return FALSE
+	if(istype(T, /turf/closed))
+		return FALSE
+	return TRUE
+
+/mob/living/scp/scp457/proc/CreateFireAtTurf(turf/T)
+	if(!CanSpreadToTurf(T))
+		return
+
+	var/obj/effect/scp457_fire/new_fire = new /obj/effect/scp457_fire(T)
+	new_fire.fire_type = current_fire_type
+	new_fire.owner = src
+	new_fire.setup_fire_properties()
+
+	active_fires += new_fire
+
+	track_scp457_fire_creation(src, current_fire_type, T)
+
+	ApplyFireDamage(T)
+
+/mob/living/scp/scp457/proc/ApplyFireDamage(turf/fire_turf)
+	var/damage = GetFireDamage()
+
+	for(var/mob/living/L in range(1, fire_turf))
+		if(L != src && !L.SCP && !QDELETED(L))
+			if(!QDELETED(L) && L.stat != DEAD)
+				L.adjustFireLoss(damage)
+				L.adjustBruteLoss(damage / 2)
+
+/mob/living/scp/scp457/proc/GetFireDamage()
+	switch(current_fire_type)
+		if("basic")
+			return 5
+		if("intense")
+			return 15
+		if("blue")
+			return 30
+		if("white")
+			return 50
+		else
+			return 5
+
+/mob/living/scp/scp457/proc/CreateInitialFires()
+	if(length(active_fires) < 3)
+		var/list/adjacent_turfs = list()
+		for(var/turf/T in range(1, src))
+			if(CanSpreadToTurf(T))
+				adjacent_turfs += T
+
+		if(length(adjacent_turfs))
+			var/turf/chosen_turf = pick(adjacent_turfs)
+			CreateFireAtTurf(chosen_turf)
+
+/mob/living/scp/scp457/proc/CleanupFires()
+	for(var/obj/effect/scp457_fire/fire in active_fires)
+		if(fire)
+			qdel(fire)
+	active_fires.Cut()
+
+/mob/living/scp/scp457/proc/ProcessContainment()
+	if(world.time >= last_containment_check + 15 SECONDS)
+		last_containment_check = world.time
+		CheckContainmentResponse()
+
+/mob/living/scp/scp457/proc/CheckContainmentResponse()
+	var/active_fire_count = length(active_fires)
+	var/fire_type = GetFireType()
+	var/new_containment_level = 0
+
+	for(var/i = 1; i <= length(fire_thresholds); i++)
+		if(active_fire_count >= fire_thresholds[i])
+			new_containment_level = i
+
+	if(fire_type == "blue" && new_containment_level < 3)
+		new_containment_level = 3
+	if(fire_type == "white" && new_containment_level < 4)
+		new_containment_level = 4
+
+	if(new_containment_level != containment_level)
+		UpdateContainmentLevel(new_containment_level)
+
+/mob/living/scp/scp457/proc/UpdateContainmentLevel(new_level)
+	var/old_level = containment_level
+	containment_level = new_level
+
+	ApplyContainmentEffects(new_level)
+
+	if(new_level > old_level)
+		to_chat(src, span_warning("Containment level increased to [new_level]!"))
+		containment_failures++
+	else if(new_level < old_level)
+		to_chat(src, span_notice("Containment level decreased to [new_level]."))
+		containment_successes++
+		if(new_level == 0)
+			hook_scp_recontainment("SCP-457", list("method" = "fire_suppression", "fires_remaining" = length(active_fires)))
+
+/mob/living/scp/scp457/proc/ApplyContainmentEffects(level)
+	switch(level)
+		if(1)
+			containment_heat_penalty = 1
+		if(2)
+			containment_heat_penalty = 2
+		if(3)
+			containment_heat_penalty = 3
+			log_game("SCP-457 triggered evacuation protocol")
+		if(4)
+			containment_heat_penalty = 5
+			log_game("SCP-457 triggered breach protocol")
+
+/mob/living/scp/scp457/proc/ProcessEnvironmental()
+	if(world.time >= last_environment_check + 20 SECONDS)
+		CheckEnvironmentalControl()
+		last_environment_check = world.time
+
+/mob/living/scp/scp457/proc/SetupRoomEffects()
+	room_effects = list(
+		"laboratory" = list("flammability" = 1.5, "containment" = 0.8, "hazard" = "chemicals"),
+		"security" = list("flammability" = 0.75, "containment" = 1.2, "hazard" = "equipment"),
+		"maintenance" = list("flammability" = 1.2, "containment" = 0.6, "hazard" = "machinery"),
+		"command" = list("flammability" = 1.0, "containment" = 1.5, "hazard" = "critical"),
+		"medical" = list("flammability" = 0.8, "containment" = 1.3, "hazard" = "oxygen"),
+		"standard" = list("flammability" = 1.0, "containment" = 1.0, "hazard" = "none")
+	)
+
+/mob/living/scp/scp457/proc/CheckEnvironmentalControl()
+	var/list/controlled_areas = list()
+
+	for(var/obj/effect/scp457_fire/fire in active_fires)
+		var/area/fire_area = get_area(fire)
+		if(fire_area)
+			controlled_areas[fire_area.type] = TRUE
+
+	controlled_room_types = controlled_areas
+
+/mob/living/scp/scp457/proc/ProcessResearch()
+	if(world.time >= last_research_update + 120 SECONDS)
+		last_research_update = world.time
+		if(!SSresearch_persistence || !SSresearch_persistence.manager)
+			return
+		log_game("SCP-457 research data: fires=[length(active_fires)] heat=[current_heat] containment=[containment_level] rooms=[length(controlled_room_types)]")
+
 /mob/living/scp/scp457/proc/update_scp457_appearance()
 	icon_state = "fireguy"
-	var/heat_level = heat_system.get_heat_percentage()
+	var/heat_level = GetHeatPercentage()
 
 	switch(heat_level)
 		if(0 to 25)
@@ -113,10 +338,10 @@
 			add_atom_colour("#FFFFFF", FIXED_COLOUR_PRIORITY)
 
 /mob/living/scp/scp457/proc/process_movement_effects()
-	if(heat_system.current_heat > 25)
+	if(current_heat > 25)
 		var/turf/current_turf = get_turf(src)
 		if(current_turf && !(locate(/obj/effect/scp457_fire) in current_turf))
-			fire_system.create_fire_at_turf(current_turf)
+			CreateFireAtTurf(current_turf)
 			playsound(src, 'sound/items/modsuit/flamethrower.ogg', 25, TRUE)
 
 /mob/living/scp/scp457/proc/process_target_interaction()
@@ -129,20 +354,20 @@
 	if(target.stat == DEAD || QDELETED(target))
 		return
 
-	var/damage = heat_system.get_fire_type() == "white" ? 25 : 15
+	var/damage = GetFireType() == "white" ? 25 : 15
 
 	if(!QDELETED(target) && target.stat != DEAD)
 		target.adjustFireLoss(damage)
 		target.adjustBruteLoss(damage / 2)
 
-	heat_system.add_heat(5)
+	AddHeat(5)
 
 	if(target.stat == DEAD)
-		to_chat(src, "<span class='notice'>You consume [target] with your flames. Heat: [heat_system.current_heat]/[heat_system.max_heat]</span>")
+		to_chat(src, span_notice("You consume [target] with your flames. Heat: [current_heat]/[max_heat]"))
 		playsound(src, 'sound/magic/fireball.ogg', 60, TRUE)
 
 /mob/living/scp/scp457/proc/is_spreading_fires()
-	return length(fire_system.active_fires) > 0
+	return length(active_fires) > 0
 
 /mob/living/scp/scp457/UnarmedAttack(atom/A)
 	if(isliving(A))
@@ -151,32 +376,28 @@
 		if(QDELETED(L))
 			return
 
-		var/damage = 20 + (heat_system.current_heat / 10)
+		var/damage = 20 + (current_heat / 10)
 
 		if(!QDELETED(L) && L.stat != DEAD)
-			visible_message("<span class='danger'>[src] engulfs [L] in intense flames!</span>")
+			visible_message(span_danger("[src] engulfs [L] in intense flames!"))
 		playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
 
 		L.adjustBruteLoss(damage)
 		L.adjustFireLoss(damage)
 
-		heat_system.add_heat(3)
+		AddHeat(3)
 		if(L.stat == DEAD && istype(L, /mob/living/carbon/human))
-			to_chat(src, "<span class='notice'>Your flames consume [L].</span>")
+			to_chat(src, span_notice("Your flames consume [L]."))
 		return
 
 	return ..()
 
-/mob/living/scp/scp457/proc/create_fire()
-	if(fire_system)
-		fire_system.create_initial_fires()
-
 /mob/living/scp/scp457/get_status_tab_items()
 	. = ..()
-	. += "Heat Level: [heat_system.current_heat]/[heat_system.max_heat]"
-	. += "Fire Type: [heat_system.get_fire_type()]"
-	. += "Active Fires: [length(fire_system.active_fires)]"
-	. += "Containment Level: [containment_system.containment_level]"
+	. += "Heat Level: [current_heat]/[max_heat]"
+	. += "Fire Type: [GetFireType()]"
+	. += "Active Fires: [length(active_fires)]"
+	. += "Containment Level: [containment_level]"
 
 /mob/living/scp/scp457/verb/verb_hurl_fireball()
 	set name = "Hurl Fireball"
@@ -193,7 +414,7 @@
 		return
 	target.adjustFireLoss(35)
 	target.visible_message(span_danger("A fireball from [src] strikes [target]!"), span_userdanger("A fireball hits you!"))
-	heat_system?.add_heat(10)
+	AddHeat(10)
 	playsound(src, 'sound/effects/explosion1.ogg', 60, TRUE)
 	on_fire_spread(get_turf(target))
 
@@ -203,17 +424,16 @@
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
 		if(H.SCP)
-			to_chat(user, "<span class='warning'>This is SCP-457, a living flame that spreads and consumes.</span>")
+			to_chat(user, span_warning("This is SCP-457, a living flame that spreads and consumes."))
 		else
-			to_chat(user, "<span class='danger'>A living flame that moves with purpose. The heat radiating from it is intense and unnatural.</span>")
-
+			to_chat(user, span_danger("A living flame that moves with purpose. The heat radiating from it is intense and unnatural."))
 			if(H.sanity)
 				H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)
 
 /mob/living/scp/scp457/proc/get_persistence_data()
 	var/list/data = list()
-	data["current_heat"] = heat_system.current_heat
-	data["current_containment_level"] = containment_system.containment_level
+	data["current_heat"] = current_heat
+	data["current_containment_level"] = containment_level
 	return data
 
 /mob/living/scp/scp457/proc/load_persistence_data(list/data)
@@ -239,7 +459,7 @@
 	)
 
 	if(project)
-		project.progress = min(100, length(fire_system.active_fires) + (heat_system.current_heat / 10))
+		project.progress = min(100, length(active_fires) + (current_heat / 10))
 
 		if(project.progress >= 100)
 			project.status = "COMPLETED"
@@ -277,13 +497,13 @@
 
 	for(var/obj/effect/hotspot/HS in range(range_val, T))
 		var/heat_gain = max(1, HS.temperature ? HS.temperature * 0.005 : 2)
-		heat_system?.add_heat(heat_gain)
+		AddHeat(heat_gain)
 		qdel(HS)
 		absorbed++
 
 	for(var/obj/structure/bonfire/B in range(range_val, T))
 		if(B.burning)
-			heat_system?.add_heat(8)
+			AddHeat(8)
 			B.extinguish()
 			absorbed++
 
@@ -292,14 +512,81 @@
 			continue
 		if(L.on_fire)
 			var/stolen = L.fire_stacks
-			heat_system?.add_heat(max(1, stolen * 2))
+			AddHeat(max(1, stolen * 2))
 			L.extinguish_mob()
 			L.adjust_fire_stacks(-stolen)
 			absorbed++
 
 	if(absorbed > 0)
-		heat_system?.add_heat(absorbed * 2)
+		AddHeat(absorbed * 2)
 		visible_message(span_danger("[src] absorbs the nearby flames into itself!"))
 		playsound(src, 'sound/items/modsuit/flamethrower.ogg', 40, TRUE)
 
+/obj/effect/scp457_fire
+	name = "Living Flame"
+	desc = "A flame created by SCP-457"
+	icon = 'icons/effects/fire.dmi'
+	icon_state = "1"
+	layer = 3
+	anchored = TRUE
+	var/fire_type = "basic"
+	var/mob/living/scp/scp457/owner
+	var/fire_duration = 60 SECONDS
+	var/creation_time = 0
+	var/damage_tick = 0
+	var/damage_interval = 1 SECONDS
 
+/obj/effect/scp457_fire/Initialize()
+	. = ..()
+	creation_time = world.time
+	START_PROCESSING(SSobj, src)
+	setup_fire_properties()
+
+/obj/effect/scp457_fire/Destroy()
+	STOP_PROCESSING(SSobj, src)
+	return ..()
+
+/obj/effect/scp457_fire/process()
+	if(world.time >= damage_tick + damage_interval)
+		apply_damage()
+		damage_tick = world.time
+
+	if(world.time >= creation_time + fire_duration)
+		qdel(src)
+
+/obj/effect/scp457_fire/proc/setup_fire_properties()
+	switch(fire_type)
+		if("basic")
+			icon_state = "1"
+			fire_duration = 60 SECONDS
+		if("intense")
+			icon_state = "2"
+			fire_duration = 120 SECONDS
+		if("blue")
+			icon_state = "3"
+			fire_duration = 180 SECONDS
+		if("white")
+			icon_state = "3"
+			fire_duration = 300 SECONDS
+
+/obj/effect/scp457_fire/proc/apply_damage()
+	var/damage = get_damage_amount()
+
+	for(var/mob/living/L in range(1, src))
+		if(L != owner && !L.SCP && !QDELETED(L))
+			if(!QDELETED(L) && L.stat != DEAD)
+				L.adjustFireLoss(damage)
+				L.adjustBruteLoss(damage / 2)
+
+/obj/effect/scp457_fire/proc/get_damage_amount()
+	switch(fire_type)
+		if("basic")
+			return 5
+		if("intense")
+			return 15
+		if("blue")
+			return 30
+		if("white")
+			return 50
+		else
+			return 5

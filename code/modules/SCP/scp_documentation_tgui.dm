@@ -183,35 +183,65 @@
 	var/list/scps = list()
 	var/active_count = 0
 	var/component_count = 0
+	var/list/seen_ids = list()
 
-	for(var/mob/living/M in GLOB.mob_list)
-		if(QDELETED(M))
+	for(var/mob/living/scp/S in GLOB.mob_list)
+		if(QDELETED(S))
 			continue
-		if(!M.SCP)
+		var/scp_id = SSscp_persistence?.manager?.get_scp_id(S)
+		if(!scp_id)
+			scp_id = S.SCP?.designation || "UNKNOWN"
+		if(scp_id in seen_ids)
 			continue
+		seen_ids[scp_id] = TRUE
 
 		active_count++
-		var/uses_components = M.SCP.uses_advanced_components
+		var/uses_components = S.SCP?.uses_advanced_components
 		if(uses_components)
 			component_count++
 
 		var/list/scp_data = list(
-			"id" = M.SCP.designation,
-			"name" = M.SCP.name,
-			"classification" = M.SCP.classification,
-			"type" = "[M.type]",
+			"id" = scp_id,
+			"name" = S.SCP?.name || S.name,
+			"classification" = S.SCP?.classification || "Unknown",
+			"type" = "[S.type]",
 			"uses_components" = uses_components,
-			"player_controlled" = !!M.ckey,
-			"player_name" = M.ckey || "NPC",
-			"health" = M.health,
-			"max_health" = M.maxHealth,
-			"location" = "[get_area_name(M)]",
-			"status" = M.stat == DEAD ? "Dead" : (M.stat == UNCONSCIOUS ? "Unconscious" : "Alive")
+			"player_controlled" = !!S.ckey,
+			"player_name" = S.ckey || "NPC",
+			"health" = S.health,
+			"max_health" = S.maxHealth,
+			"location" = "[get_area_name(S)]",
+			"status" = S.stat == DEAD ? "Dead" : (S.stat == UNCONSCIOUS ? "Unconscious" : "Alive")
 		)
 
-		// Add component information if available
-		if(uses_components && M.SCP.advanced_components)
-			scp_data["components"] = get_scp_components_data(M)
+		if(uses_components && S.SCP.advanced_components)
+			scp_data["components"] = get_scp_components_data(S)
+
+		scps += list(scp_data)
+
+	for(var/obj/O in GLOB.SCP_list)
+		if(QDELETED(O))
+			continue
+		var/scp_id = SSscp_persistence?.manager?.get_scp_id(O)
+		if(!scp_id || (scp_id in seen_ids))
+			continue
+		seen_ids[scp_id] = TRUE
+
+		active_count++
+
+		var/list/scp_data = list(
+			"id" = scp_id,
+			"name" = O.name,
+			"classification" = "Unknown",
+			"type" = "[O.type]",
+			"uses_components" = FALSE,
+			"player_controlled" = FALSE,
+			"player_name" = "NPC",
+			"health" = 0,
+			"max_health" = 0,
+			"location" = "[get_area_name(O)]",
+			"status" = "Active"
+		)
 
 		scps += list(scp_data)
 

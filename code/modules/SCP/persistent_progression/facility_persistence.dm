@@ -26,11 +26,11 @@ SUBSYSTEM_DEF(facility_persistence)
 	var/list/engineering_systems = list()
 	var/last_round_id = ""
 	var/facility_age = 0
-	var/facility_health = 100
-	var/maintenance_level = 50
+	var/facility_health = 0
+	var/maintenance_level = 0
 	var/security_level = 1
-	var/power_efficiency = 1.0
-	var/containment_stability = 100
+	var/power_efficiency = 0
+	var/containment_stability = 0
 
 /datum/facility_persistence_manager/proc/process_facility()
 	facility_age++

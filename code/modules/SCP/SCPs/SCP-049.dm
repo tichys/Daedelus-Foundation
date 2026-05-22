@@ -466,7 +466,7 @@
 
 /mob/living/scp/scp049/proc/announce_evolution()
 	var/announcement = "SCP-049 has evolved to stage [evolution_stage]! The Great Work progresses..."
-	priority_announce(announcement, title = "SCP-049 Alert", sound = 'sound/scp/scp049/SCP049_5.ogg')
+	priority_announce(announcement, "SCP-049 Alert", , ANNOUNCER_ALERT)
 
 /mob/living/scp/scp049/proc/announce_presence()
 	if(world.time < last_announcement + announcement_cooldown)

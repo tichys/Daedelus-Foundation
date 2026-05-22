@@ -846,7 +846,7 @@
 		return
 	target.adjustFireLoss(35)
 	target.visible_message(span_danger("A fireball from [scp_mob] strikes [target]!"), span_userdanger("A fireball hits you!"))
-	scp_mob.heat_system?.add_heat(10)
+	scp_mob.AddHeat(10)
 	playsound(scp_mob, 'sound/effects/explosion1.ogg', 60, TRUE)
 	scp_mob.on_fire_spread(get_turf(target))
 

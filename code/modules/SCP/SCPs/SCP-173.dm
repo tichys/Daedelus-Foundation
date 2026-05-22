@@ -156,8 +156,9 @@
 	last_observation_check = world.time
 
 	var/list/current_observers = list()
+	var/atom/observe_source = istype(loc, /obj/structure/scp173_cage) ? loc : src
 
-	for(var/mob/living/L in dview(9, src))
+	for(var/mob/living/L in dview(9, observe_source))
 		if(L == src || L.stat == DEAD)
 			continue
 
@@ -165,7 +166,7 @@
 			var/mob/living/carbon/human/H = L
 			if(H.is_blind() || H.eye_blind > 0)
 				continue
-			if(!can_see(H, src, 9))
+			if(!can_see(H, observe_source, 9))
 				continue
 			current_observers += H
 
@@ -180,7 +181,8 @@
 		for(var/mob/living/carbon/human/H in observers)
 			on_observation_end(H)
 
-	for(var/mob/living/carbon/human/H in range(9, src))
+	var/atom/blink_source = istype(loc, /obj/structure/scp173_cage) ? loc : src
+	for(var/mob/living/carbon/human/H in range(9, blink_source))
 		if(H.stat != DEAD && H.client)
 			if(is_being_observed && !(H in current_observers))
 				H.enable_blink_173(src)
@@ -192,10 +194,10 @@
 	if(!is_being_observed)
 		blink_warning_shown = FALSE
 		return
-	if(!blink_warning_shown && length(observers))
-		to_chat(src, span_warning("You are being observed by [length(observers)] person[length(observers) > 1 ? "s" : ""]. You cannot move!"))
+	if(!blink_warning_shown && length(scp173_observers))
+		to_chat(src, span_warning("You are being observed by [length(scp173_observers)] person[length(scp173_observers) > 1 ? "s" : ""]. You cannot move!"))
 		blink_warning_shown = TRUE
-	else if(blink_warning_shown && !length(observers))
+	else if(blink_warning_shown && !length(scp173_observers))
 		blink_warning_shown = FALSE
 
 /mob/living/scp/scp173/proc/OpenDoor(obj/machinery/door/D)
@@ -278,7 +280,7 @@
 /mob/living/scp/scp173/get_status_tab_items()
 	var/list/status_items = ..()
 	status_items += "Observed: [is_being_observed ? "YES" : "NO"]"
-	status_items += "Observers: [length(observers)]"
+	status_items += "Observers: [length(scp173_observers)]"
 	status_items += "Kills: [kills_count]"
 	status_items += "Breaches: [breach_count]"
 	status_items += "Feces: [feces_count][feces_count >= 40 ? " (CRITICAL)" : ""]"
@@ -287,6 +289,37 @@
 /mob/living/scp/scp173/death(gibbed)
 	hook_scp_breach("SCP-173", src)
 	return ..()
+
+/mob/living/scp/scp173/proc/scp914_refine(setting, obj/machinery/scp914/machine)
+	if(!machine)
+		return
+	switch(setting)
+		if(SCP914_ROUGH, SCP914_COARSE)
+			snap_cooldown_time = max(8 SECONDS, snap_cooldown_time + 2 SECONDS)
+			remove_movespeed_modifier(/datum/movespeed_modifier/scp173_fast)
+			add_movespeed_modifier(/datum/movespeed_modifier/scp173_slow)
+			visible_message(span_danger("[src] is degraded by SCP-914! It moves more slowly."))
+			to_chat(src, span_warning("The refinement damages your structure. You feel slower."))
+		if(SCP914_ONE_TO_ONE)
+			defecate_interval = max(20 SECONDS, defecate_interval + 10 SECONDS)
+			visible_message(span_notice("[src] is transmuted by SCP-914. Its surface changes slightly."))
+			to_chat(src, span_notice("You feel... different. Your defecation rate has changed."))
+		if(SCP914_FINE, SCP914_VERY_FINE)
+			snap_cooldown_time = max(2 SECONDS, snap_cooldown_time - 1 SECONDS)
+			remove_movespeed_modifier(/datum/movespeed_modifier/scp173_fast)
+			add_movespeed_modifier(/datum/movespeed_modifier/scp173_enhanced)
+			if(setting == SCP914_VERY_FINE)
+				maxHealth += 100
+				health = min(health + 100, maxHealth)
+				to_chat(src, span_danger("The refinement empowers you immensely! You are faster, stronger, and more resilient!"))
+			else
+				to_chat(src, span_notice("The refinement sharpens you. You feel faster and more lethal."))
+			visible_message(span_danger("[src] is enhanced by SCP-914! It seems more dangerous!"))
+	hook_scp_interaction(src, "SCP-914", INTERACTION_TYPE_EXPERIMENT, list("type" = "173_refinement", "setting" = setting))
+	if(machine.output_booth)
+		var/turf/output_turf = get_turf(machine.output_booth)
+		if(output_turf)
+			forceMove(output_turf)
 
 /mob/living/scp/scp173/proc/on_kill(mob/living/carbon/human/victim)
 	if(victim && victim.ckey)
@@ -406,3 +439,151 @@
 	id = "scp173_fast"
 	priority = 100
 	slowdown = -6.6
+
+/obj/structure/scp173_cage
+	name = "SCP-173 Containment Cage"
+	desc = "A reinforced steel cage designed to contain SCP-173 during transport and cleaning."
+	icon = 'icons/scp/cage.dmi'
+	icon_state = "open"
+	density = TRUE
+	layer = ABOVE_MOB_LAYER
+	var/resist_cooldown = 0
+	var/damage_state = 0
+	var/damage_state_max = 5
+
+/obj/structure/scp173_cage/MouseDroppedOn(atom/movable/dropping, mob/user)
+	if(locate(/mob/living) in contents)
+		to_chat(user, span_warning("\The [src] is already full!"))
+		return FALSE
+	if(damage_state >= damage_state_max)
+		to_chat(user, span_warning("\The [src] is too damaged to operate!"))
+		return FALSE
+	if(istype(dropping, /mob/living/scp/scp173))
+		visible_message(span_warning("[user] starts to put [dropping] into the cage."))
+		var/oloc = loc
+		if(do_after(user, dropping, 13 SECONDS) && loc == oloc)
+			dropping.forceMove(src)
+			update_icon()
+			visible_message(span_notice("[user] puts [dropping] in the cage."))
+			playsound(loc, 'sound/machines/boltsdown.ogg', 50, TRUE)
+			return TRUE
+		return FALSE
+	if(isliving(dropping))
+		to_chat(user, span_warning("\The [dropping] won't fit in the cage."))
+	return FALSE
+
+/obj/structure/scp173_cage/attack_hand(mob/living/L)
+	if(!length(contents))
+		return ..()
+	visible_message(span_warning("[L] attempts to open \the [src]."))
+	if(do_after(L, src, 7 SECONDS))
+		visible_message(span_danger("[L] opens \the [src]!"))
+		ReleaseContents()
+
+/obj/structure/scp173_cage/relaymove(mob/living/scp/scp173/user, direction)
+	if(resist_cooldown > world.time)
+		return
+	if(user.IsBeingWatched())
+		to_chat(user, span_warning("Someone is looking at you!"))
+		return
+	resist_cooldown = world.time + 5 SECONDS
+	if(!do_after(user, src, 1 SECOND))
+		return
+	if(user.IsBeingWatched())
+		to_chat(user, span_warning("Someone is looking at you!"))
+		return
+	damage_state += 1
+	update_icon()
+	if(damage_state < damage_state_max)
+		visible_message(span_warning("[user] damages \the [src]!"))
+		playsound(src, 'sound/effects/grillehit.ogg', 35, TRUE)
+		return
+	visible_message(span_danger("[user] opens \the [src] from the inside!"))
+	ReleaseContents()
+
+/obj/structure/scp173_cage/examine(mob/user)
+	. = ..()
+	for(var/mob/M in contents)
+		to_chat(user, "[icon2html(M, user)] It has [M] inside of it!")
+	switch(damage_state)
+		if(1 to 2)
+			to_chat(user, span_notice("It looks slightly damaged."))
+		if(3 to 4)
+			to_chat(user, span_warning("It is seriously damaged!"))
+		if(5 to INFINITY)
+			to_chat(user, span_danger("It is completely broken!"))
+
+/obj/structure/scp173_cage/update_icon()
+	. = ..()
+	underlays.Cut()
+
+	if(!length(contents))
+		plane = initial(plane)
+		icon_state = "open"
+	else
+		plane = GAME_PLANE
+		icon_state = "closed"
+
+	switch(damage_state)
+		if(1 to 2)
+			icon_state = "damage_1"
+		if(3 to 4)
+			icon_state = "damage_2"
+		if(5 to INFINITY)
+			icon_state = "damage_3"
+
+	for(var/mob/M in contents)
+		underlays += image(M)
+
+/obj/structure/scp173_cage/attackby(obj/item/I, mob/user)
+	if(!istype(I, /obj/item/weldingtool))
+		return ..()
+	if(length(contents))
+		to_chat(user, span_warning("\The [src] must be empty to complete this task!"))
+		return
+	if(damage_state <= 0)
+		to_chat(user, span_notice("\The [src] is not damaged."))
+		return
+
+	var/obj/item/weldingtool/WT = I
+	if(!WT.isOn())
+		to_chat(user, span_warning("\The [WT] must be on to complete this task."))
+		return
+	if(WT.get_fuel() < damage_state)
+		to_chat(user, span_warning("You will need more fuel to repair [src]."))
+		return
+	playsound(src, 'sound/items/Welder2.ogg', 30, TRUE)
+	user.visible_message(span_notice("\The [user] starts repairing sections of \the [src]."))
+	if(!do_after(user, src, 6 SECONDS + damage_state SECONDS))
+		return
+	if(!WT.use(damage_state))
+		return
+	user.visible_message(span_notice("\The [user] successfully repairs a section of \the [src]."))
+	damage_state -= 1
+	update_icon()
+	if(damage_state <= 0)
+		visible_message(span_notice("\The [src] is completely repaired!"))
+	playsound(loc, 'sound/items/Welder.ogg', 30, TRUE)
+
+/obj/structure/scp173_cage/proc/ReleaseContents()
+	if(!length(contents))
+		return FALSE
+	playsound(loc, 'sound/machines/boltsup.ogg', 50, TRUE)
+	for(var/mob/living/L in contents)
+		L.forceMove(get_turf(src))
+	update_icon()
+	return TRUE
+
+/obj/structure/scp173_cage/Destroy()
+	ReleaseContents()
+	return ..()
+
+/datum/movespeed_modifier/scp173_slow
+	id = "scp173_slow"
+	priority = 100
+	slowdown = -3.0
+
+/datum/movespeed_modifier/scp173_enhanced
+	id = "scp173_enhanced"
+	priority = 100
+	slowdown = -8.0

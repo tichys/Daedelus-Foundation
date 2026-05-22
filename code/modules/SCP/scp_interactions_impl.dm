@@ -262,8 +262,7 @@
 	reptile.adjustFireLoss(-50, updating_health = TRUE, forced = TRUE)
 	if(reptile.evolution_system)
 		reptile.evolution_system.add_adaptation("fire_resistance", 0.5)
-	if(flame.heat_system)
-		flame.heat_system.add_heat(30)
+	flame.AddHeat(30)
 	reptile.visible_message(span_danger("SCP-682 and SCP-457 clash! Fire and fury! 682 begins adapting; 457 feeds on the destruction!"))
 	return TRUE
 
@@ -285,8 +284,7 @@
 	var/obj/structure/coffin/scp895/coffin = istype(scp1, /obj/structure/coffin/scp895) ? scp1 : scp2
 	if(!flame || !coffin)
 		return FALSE
-	if(flame.heat_system)
-		flame.heat_system.add_heat(20)
+	flame.AddHeat(20)
 	coffin.hallucination_range_camera = min(30, coffin.hallucination_range_camera + 5)
 	coffin.hallucination_range_direct = min(6, coffin.hallucination_range_direct + 1)
 	flame.visible_message(span_danger("SCP-457 burns near SCP-895! Corrupted smoke billows through the vents!"))
