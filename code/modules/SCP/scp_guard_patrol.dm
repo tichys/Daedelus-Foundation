@@ -159,6 +159,19 @@ SUBSYSTEM_DEF(guard_patrols)
 		SSround_objectives.report_objective_progress("guard_recontain", 0)
 	if(SSpersistent_progression)
 		SSpersistent_progression.award_experience(guard.ckey, "scp_patrol", 0, "Patrol Route Completed")
+	if(SSfoundation_budget)
+		var/budget_bonus = 50 + (route.zone == "hcz" ? 75 : 0)
+		var/datum/department_budget/B = SSfoundation_budget.department_budgets["security"]
+		if(B)
+			B.allocate(budget_bonus)
+			SSfoundation_budget.total_budget += budget_bonus
+	if(SSscp_research?.manager)
+		var/research_bonus = 5
+		if(route.zone == "hcz")
+			research_bonus = 15
+		else if(route.zone == "lcz")
+			research_bonus = 10
+		SSscp_research.manager.adjust_research_points(research_bonus, "guard_patrol:[route.route_id]")
 
 /datum/controller/subsystem/guard_patrols/proc/assign_guard_to_route(mob/living/carbon/human/guard, route_id)
 	var/datum/guard_patrol_route/route = routes[route_id]
@@ -189,176 +202,4 @@ SUBSYSTEM_DEF(guard_patrols)
 	to_chat(guard, span_notice("You have been released from patrol duty."))
 	return TRUE
 
-/obj/machinery/computer/guard_patrol_console
-	name = "Guard Patrol Console"
-	desc = "A console for assigning and managing guard patrol routes throughout the facility."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "security"
-	circuit = /obj/item/circuitboard/computer/guard_patrol_console
-	req_access = list(ACCESS_SECURITY)
-	density = TRUE
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 100
 
-/obj/machinery/computer/guard_patrol_console/ui_interact(mob/user, datum/tgui/ui)
-	. = ..()
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "GuardPatrolConsole", "GUARD PATROL SYSTEM")
-		ui.open()
-
-/obj/machinery/computer/guard_patrol_console/ui_state(mob/user)
-	return GLOB.default_state
-
-/obj/machinery/computer/guard_patrol_console/ui_data(mob/user)
-	var/list/data = list()
-	var/list/route_data = list()
-	if(SSguard_patrols)
-		for(var/route_id in SSguard_patrols.routes)
-			var/datum/guard_patrol_route/route = SSguard_patrols.routes[route_id]
-			var/guard_name = "Unassigned"
-			if(route.active_guard_ckey)
-				var/mob/living/carbon/human/H
-				for(var/mob/living/carbon/human/M in GLOB.player_list)
-					if(M.ckey == route.active_guard_ckey && M.stat != DEAD)
-						H = M
-						break
-				guard_name = H ? H.real_name : "Missing"
-			route_data += list(list(
-				"route_id" = route.route_id,
-				"route_name" = route.route_name,
-				"zone" = route.zone,
-				"waypoint_count" = length(route.waypoint_ids),
-				"guard_name" = guard_name,
-				"completed_count" = route.completed_count,
-				"on_cooldown" = (world.time < route.last_patrol_time + route.patrol_cooldown),
-			))
-	data["routes"] = route_data
-
-	var/list/guard_data = list()
-	for(var/mob/living/carbon/human/H in GLOB.player_list)
-		if(H.stat == DEAD)
-			continue
-		if(H.job && (findtext(H.job, "Guard") || findtext(H.job, "Security") || findtext(H.job, "MTF")))
-			var/assigned_route = ""
-			if(SSguard_patrols)
-				for(var/r_id in SSguard_patrols.routes)
-					var/datum/guard_patrol_route/r = SSguard_patrols.routes[r_id]
-					if(r.active_guard_ckey == H.ckey)
-						assigned_route = r.route_name
-						break
-			guard_data += list(list(
-				"name" = H.real_name,
-				"ckey" = H.ckey,
-				"job" = H.job,
-				"assigned_route" = assigned_route,
-			))
-	data["guards"] = guard_data
-
-	var/list/escort_data = list()
-	if(SSscp_gameplay)
-		for(var/task_id in SSscp_gameplay.escort_tasks)
-			var/datum/escort_task/task = SSscp_gameplay.escort_tasks[task_id]
-			if(task.status == "expired" || task.status == "delivered" || task.status == "cancelled")
-				continue
-			escort_data += list(list(
-				"task_id" = task.task_id,
-				"subject_name" = task.subject ? task.subject.real_name : "Unknown",
-				"scp_name" = task.scp_name,
-				"test_type" = task.test_type,
-				"risk_level" = task.risk_level,
-				"status" = task.status,
-				"guard_name" = task.escort_guard ? task.escort_guard.real_name : "Unassigned",
-			))
-	data["escorts"] = escort_data
-	return data
-
-/obj/machinery/computer/guard_patrol_console/ui_act(action, params)
-	. = ..()
-	if(.)
-		return
-	if(!allowed(usr))
-		to_chat(usr, span_warning("Access denied."))
-		return
-	if(!SSguard_patrols)
-		return
-
-	switch(action)
-		if("assign_guard")
-			var/guard_ckey = params["ckey"]
-			var/route_id = params["route_id"]
-			var/mob/living/carbon/human/guard
-			for(var/mob/living/carbon/human/H in GLOB.player_list)
-				if(H.ckey == guard_ckey && H.stat != DEAD)
-					guard = H
-					break
-			if(!guard)
-				to_chat(usr, span_warning("Guard not found or dead."))
-				return
-			if(SSguard_patrols.assign_guard_to_route(guard, route_id))
-				to_chat(usr, span_notice("[guard.real_name] assigned to patrol route."))
-			. = TRUE
-		if("release_guard")
-			var/guard_ckey = params["ckey"]
-			var/route_id = params["route_id"]
-			var/mob/living/carbon/human/guard
-			for(var/mob/living/carbon/human/H in GLOB.player_list)
-				if(H.ckey == guard_ckey && H.stat != DEAD)
-					guard = H
-					break
-			if(!guard)
-				return
-			if(SSguard_patrols.release_guard_from_route(guard, route_id))
-				to_chat(usr, span_notice("[guard.real_name] released from patrol."))
-			. = TRUE
-		if("self_assign")
-			if(!ishuman(usr))
-				return
-			var/mob/living/carbon/human/H = usr
-			var/route_id = params["route_id"]
-			if(SSguard_patrols.assign_guard_to_route(H, route_id))
-				to_chat(usr, span_notice("You have been assigned to patrol. Check your HUD for directions."))
-			. = TRUE
-		if("self_release")
-			if(!ishuman(usr))
-				return
-			var/mob/living/carbon/human/H = usr
-			for(var/r_id in SSguard_patrols.routes)
-				var/datum/guard_patrol_route/route = SSguard_patrols.routes[r_id]
-				if(route.active_guard_ckey == H.ckey)
-					SSguard_patrols.release_guard_from_route(H, r_id)
-					break
-			. = TRUE
-		if("accept_escort")
-			if(!ishuman(usr))
-				return
-			var/mob/living/carbon/human/H = usr
-			var/task_id = params["task_id"]
-			if(!SSscp_gameplay)
-				return
-			var/datum/escort_task/task = SSscp_gameplay.escort_tasks[task_id]
-			if(!task)
-				return
-			if(task.assign_guard(H))
-				to_chat(usr, span_notice("You have accepted the escort task. Retrieve [task.subject.real_name] and bring them to the testing area."))
-			. = TRUE
-		if("complete_escort")
-			if(!ishuman(usr))
-				return
-			var/task_id = params["task_id"]
-			if(!SSscp_gameplay)
-				return
-			var/datum/escort_task/task = SSscp_gameplay.escort_tasks[task_id]
-			if(!task || task.escort_guard != usr)
-				return
-			if(!task.subject || get_dist(usr, task.subject) > 3)
-				to_chat(usr, span_warning("Subject must be nearby to complete delivery."))
-				return
-			if(task.complete_delivery())
-				to_chat(usr, span_notice("Subject delivered successfully."))
-			. = TRUE
-
-/obj/item/circuitboard/computer/guard_patrol_console
-	name = "Guard Patrol Console (Computer Board)"
-	build_path = /obj/machinery/computer/guard_patrol_console

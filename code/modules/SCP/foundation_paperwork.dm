@@ -258,3 +258,192 @@ ___________________________________________________________________________<br><
 	name = "Top Secret Folder"
 	desc = "A black folder marked 'TOP SECRET - O5 EYES ONLY'."
 	icon_state = "folder_black"
+
+/obj/item/paper/foundation/budget_request
+	name = "Budget Funding Request"
+	desc = "A Foundation form for requesting departmental budget allocation."
+
+/obj/item/paper/foundation/budget_request/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - BUDGET FUNDING REQUEST</h2><hr>
+<b>Request ID:</b> ________<br>
+<b>Date:</b> ________<br><hr>
+<b>Requesting Personnel:</b> ________________________<br>
+<b>Department:</b> Command / Security / Science / Medical / Engineering / Logistics / Service<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br><hr>
+<b>Amount Requested (credits):</b> ________<br>
+<b>Purpose:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Justification:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Expected Outcome:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Alternative Funding Sources Considered:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Requesting Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>Department Head Approval:</b> ________________________ <b>Date:</b> ________<br>
+<b>Bureaucrat Review:</b> ________________________ <b>Date:</b> ________<br>"}, FALSE)
+
+/obj/item/paper/foundation/ethics_violation
+	name = "Ethics Committee Violation Report"
+	desc = "A Foundation form for reporting ethics violations in SCP testing or personnel treatment."
+
+/obj/item/paper/foundation/ethics_violation/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - ETHICS COMMITTEE VIOLATION REPORT</h2><hr>
+<b>Report ID:</b> ________<br>
+<b>Date:</b> ________<br><hr>
+<b>Reporting Personnel:</b> ________________________<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br><hr>
+<b>Violation Severity:</b> Minor / Moderate / Major / Critical<br>
+<b>Violation Type:</b><br>
+(_) Unnecessary D-Class Suffering<br>
+(_) Testing Without Approval<br>
+(_) Cruel and Unusual Procedures<br>
+(_) Withholding Medical Treatment<br>
+(_) Unauthorized Amnestic Use<br>
+(_) SCP Mistreatment<br>
+(_) Other: ________________________<br><hr>
+<b>SCP Designation (if applicable):</b> SCP-________<br>
+<b>Personnel Involved in Violation:</b><br>
+1. ________________________ (Role: ________)<br>
+2. ________________________ (Role: ________)<br><hr>
+<b>Description of Violation:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Witnesses:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Recommended Action:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Reporting Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>ECL Review:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - ETHICS COMMITTEE EYES ONLY</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/psych_evaluation
+	name = "Psychological Evaluation Form"
+	desc = "A Foundation form for documenting psychological evaluations of personnel."
+
+/obj/item/paper/foundation/psych_evaluation/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - PSYCHOLOGICAL EVALUATION</h2><hr>
+<b>Evaluation ID:</b> ________<br>
+<b>Date:</b> ________<br><hr>
+<b>Subject Name:</b> ________________________<br>
+<b>Subject Role:</b> ________________________<br>
+<b>Evaluating Psychologist:</b> ________________________<br><hr>
+<b>Evaluation Type:</b> Routine / Post-Incident / Pre-Employment / SCP Exposure Follow-up<br><hr>
+<b>Current Sanity Assessment:</b> Stable / Mild Distress / Moderate Distress / Severe Distress / Critical<br>
+<b>SCP Exposure Level:</b> None / Low / Moderate / Severe / Critical<br><hr>
+<b>Behavioral Observations:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Cognitive Function:</b> Intact / Mildly Impaired / Moderately Impaired / Severely Impaired<br>
+<b>Emotional State:</b> Stable / Anxious / Depressed / Agitated / Unstable<br>
+<b>Social Functioning:</b> Normal / Withdrawn / Hostile / Paranoid<br><hr>
+<b>Diagnosis:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Recommendations:</b><br>
+(_) No Action Required<br>
+(_) Counseling Sessions Recommended<br>
+(_) Amnestic Treatment Recommended (Class: ________)<br>
+(_) Temporary Duty Restriction<br>
+(_) Permanent Reassignment<br>
+(_) Medical Leave<br><hr>
+<b>Amnestic Recommendation Justification (if applicable):</b><br>
+___________________________________________________________________________<br><hr>
+<b>Evaluating Psychologist Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>Medical Director Review:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CONFIDENTIAL - MEDICAL CLEARANCE REQUIRED</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/investigation_report
+	name = "Anomalous Investigation Report"
+	desc = "A Foundation form for reporting findings from anomalous investigations."
+
+/obj/item/paper/foundation/investigation_report/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - ANOMALOUS INVESTIGATION REPORT</h2><hr>
+<b>Report ID:</b> ________<br>
+<b>Date:</b> ________<br><hr>
+<b>Investigating Agent:</b> ________________________<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br><hr>
+<b>Case Name:</b> ________________________<br>
+<b>Investigation Type:</b> Anomalous Evidence / SCP-Related / Personnel / Unknown Phenomenon<br><hr>
+<b>Location of Investigation:</b> ________________________<br>
+<b>SCP Designation (if applicable):</b> SCP-________<br><hr>
+<b>Evidence Collected:</b><br>
+1. ________________________ (Type: ________ ID: ________)<br>
+2. ________________________ (Type: ________ ID: ________)<br>
+3. ________________________ (Type: ________ ID: ________)<br><hr>
+<b>Findings:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Analysis Summary:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Recommended Actions:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Investigating Agent Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>RAISA Review:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - RAISA CLEARANCE REQUIRED</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/intel_report
+	name = "Intelligence Report"
+	desc = "A Foundation form for RAISA intelligence reports."
+
+/obj/item/paper/foundation/intel_report/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - INTELLIGENCE REPORT</h2><hr>
+<b>Report ID:</b> RAISA-________<br>
+<b>Date:</b> ________<br>
+<b>Classification:</b> UNCLASSIFIED / CONFIDENTIAL / SECRET / TOP SECRET<br><hr>
+<b>Analyst:</b> ________________________<br>
+<b>Report Type:</b> Surveillance / Threat Assessment / GOI Activity / Information Security / Personnel<br><hr>
+<b>Target/Subject:</b> ________________________<br>
+<b>Threat Assessment (0-100):</b> ________<br><hr>
+<b>Summary:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Detailed Findings:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Recommendations:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Attachments:</b> ________<br>
+<b>Analyst Signature:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - RAISA CLEARANCE REQUIRED</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/goi_communique
+	name = "GOI Communique"
+	desc = "A Foundation form for recording communications with Groups of Interest."
+
+/obj/item/paper/foundation/goi_communique/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - GOI COMMUNIQUE</h2><hr>
+<b>Communique ID:</b> ________<br>
+<b>Date:</b> ________<br>
+<b>Classification:</b> CONFIDENTIAL / SECRET / TOP SECRET<br><hr>
+<b>GOI Name:</b> ________________________<br>
+<b>Current Standing:</b> Hostile / Unfriendly / Neutral / Friendly / Allied<br><hr>
+<b>Foundation Representative:</b> ________________________<br>
+<b>GOI Representative:</b> ________________________<br>
+<b>Meeting Location:</b> ________________________<br><hr>
+<b>Purpose of Communication:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Summary of Discussion:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Agreements Reached:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Standing Impact Assessment:</b><br>
+(_) No Change (_) Improved (_) Deteriorated<br><hr>
+<b>Follow-up Actions Required:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Foundation Representative Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>GOI Relations Director Review:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - GOI RELATIONS CLEARANCE REQUIRED</i><br>"}, FALSE)

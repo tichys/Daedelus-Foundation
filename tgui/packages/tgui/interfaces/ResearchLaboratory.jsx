@@ -4,9 +4,12 @@ import { useBackend } from '../backend';
 import {
   Box,
   Button,
+  Dropdown,
   Flex,
   Icon,
+  Input,
   LabeledList,
+  NumberInput,
   ProgressBar,
   Section,
   Table,
@@ -318,10 +321,40 @@ const ExperimentsTab = (props) => {
 
 const ProjectsTab = (props) => {
   const { act, data } = useBackend();
-  const { research_projects } = data;
+  const { research_projects, scp_targets, is_admin } = data;
   const [showCreate, setShowCreate] = React.useState(false);
+  const [projectName, setProjectName] = React.useState('');
+  const [projectDesc, setProjectDesc] = React.useState('');
+  const [scpTarget, setScpTarget] = React.useState('');
+  const [riskLevel, setRiskLevel] = React.useState(1);
+  const [researchPoints, setResearchPoints] = React.useState(100);
 
-  const projectList = research_projects ? Object.values(research_projects) : [];
+  const projectList = Object.entries(research_projects || {}).map(([id, p]) => ({ ...p, id }));
+  const scpOptions = (scp_targets || []).map((s) => s.id);
+  const riskOptions = [
+    { level: 1, name: '1 - Minimal' },
+    { level: 2, name: '2 - Low' },
+    { level: 3, name: '3 - Medium' },
+    { level: 4, name: '4 - High' },
+    { level: 5, name: '5 - Critical' },
+  ];
+
+  const handleCreate = () => {
+    if (!projectName) return;
+    act('create_project', {
+      name: projectName,
+      description: projectDesc || 'SCP research project.',
+      scp_target: scpTarget,
+      risk_level: riskLevel,
+      research_points: researchPoints,
+    });
+    setProjectName('');
+    setProjectDesc('');
+    setScpTarget('');
+    setRiskLevel(1);
+    setResearchPoints(100);
+    setShowCreate(false);
+  };
 
   return (
     <Section title="Research Projects" buttons={
@@ -333,8 +366,56 @@ const ProjectsTab = (props) => {
         <Section title="Create Project" level={2} mb={1}>
           <LabeledList>
             <LabeledList.Item label="Project Name">
-              <Button icon="edit" onClick={() => act('create_project', { name: 'New Research Project', description: 'SCP research project.', risk_level: 1, research_points: 100 })}>
-                Create Default
+              <Input
+                value={projectName}
+                placeholder="Enter project name..."
+                onChange={(e, value) => setProjectName(value)}
+                fluid
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Description">
+              <Input
+                value={projectDesc}
+                placeholder="Project description..."
+                onChange={(e, value) => setProjectDesc(value)}
+                fluid
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="SCP Target">
+              <Dropdown
+                options={scpOptions.length > 0 ? scpOptions : ['None Available']}
+                selected={scpTarget}
+                onSelected={(value) => setScpTarget(value)}
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Risk Level">
+              {riskOptions.map((r) => (
+                <Button
+                  key={r.level}
+                  selected={riskLevel === r.level}
+                  color={EXPERIMENT_RISK_COLORS[r.level]}
+                  onClick={() => setRiskLevel(r.level)}
+                  size="tiny"
+                >
+                  {r.name}
+                </Button>
+              ))}
+            </LabeledList.Item>
+            <LabeledList.Item label="Research Points">
+              <NumberInput
+                value={researchPoints}
+                minValue={10}
+                maxValue={5000}
+                step={10}
+                onChange={(value) => setResearchPoints(value)}
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Actions">
+              <Button icon="check" color="good" onClick={handleCreate} disabled={!projectName}>
+                Create
+              </Button>
+              <Button onClick={() => setShowCreate(false)}>
+                Cancel
               </Button>
             </LabeledList.Item>
           </LabeledList>
@@ -571,7 +652,7 @@ const AdminTab = (props) => {
       <Flex wrap="wrap">
         <Flex.Item width="48%" m={0.5}>
           <Section title="Quick Actions" level={2}>
-            <Button icon="plus" fluid mb={0.5} onClick={() => act('create_project', { name: 'Admin Research Project', description: 'Admin-created project.', risk_level: 3, research_points: 500 })}>
+            <Button icon="plus" fluid mb={0.5} onClick={() => act('create_project', { name: 'Admin Research Project', description: 'Admin-created project.', risk_level: 3, research_points: 500, scp_target: '' })}>
               Create Research Project
             </Button>
             <Button icon="users" fluid mb={0.5} onClick={() => act('create_team', { name: 'Admin Team' })}>

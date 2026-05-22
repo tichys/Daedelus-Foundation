@@ -181,6 +181,29 @@
 		0,0,0,0.3
 	)
 
+/mob/living/scp/scp347/UnarmedAttack(atom/A)
+	if(ishuman(A) && !combat_mode)
+		var/mob/living/carbon/human/target = A
+		if(target.stat != DEAD && !is_revealed)
+			stealth_pickpocket(target)
+			return
+	return ..()
+
+/mob/living/scp/scp347/verb/verb_stealth_sprint()
+	set name = "Stealth Sprint"
+	set category = "SCP-347"
+	stealth_sprint()
+
+/mob/living/scp/scp347/verb/verb_toggle_visibility()
+	set name = "Toggle Visibility"
+	set category = "SCP-347"
+	if(is_revealed)
+		apply_invisibility()
+		to_chat(src, span_notice("You fade from sight."))
+	else
+		remove_invisibility()
+		to_chat(src, span_warning("You become visible!"))
+
 /mob/living/scp/scp347/Destroy()
 	QDEL_NULL(SCP)
 	return ..()

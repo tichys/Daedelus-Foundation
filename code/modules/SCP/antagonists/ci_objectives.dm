@@ -179,6 +179,11 @@
 		/datum/objective/ci_breach_assist,
 		/datum/objective/ci_extract_dclass,
 		/datum/objective/ci_intel_gather,
+		/datum/objective/ci_budget_drain,
+		/datum/objective/ci_info_breach,
+		/datum/objective/ci_network_sabotage,
+		/datum/objective/ci_ethics_undermine,
+		/datum/objective/ci_goi_contact,
 	)
 
 	for(var/i in 1 to num_objectives)
@@ -188,13 +193,7 @@
 		objectives += O
 		O.update_explanation_text()
 
-/datum/antagonist/chaos_insurgency/on_gain()
-	. = ..()
-	generate_ci_objectives()
-	if(owner.current)
-		var/datum/action/innate/insurgency_equipment/equipment = new()
-		equipment.Grant(owner.current)
-		equip_ci_operative()
+
 
 /datum/antagonist/chaos_insurgency/proc/equip_ci_operative()
 	var/mob/living/carbon/human/H = owner.current
@@ -288,3 +287,86 @@
 /obj/item/ci_breach_device/examine(mob/user)
 	. = ..()
 	. += "<span class='notice'>[uses] uses remaining.</span>"
+
+/datum/objective/ci_budget_drain
+	name = "drain department budget"
+	var/target_department = "science"
+	var/drain_required = 2000
+	var/initial_budget = 0
+
+/datum/objective/ci_budget_drain/New()
+	..()
+	var/list/depts = list("security", "science", "medical", "engineering")
+	target_department = pick(depts)
+	explanation_text = "Drain the [target_department] department's budget by at least [drain_required] credits through sabotage, resource waste, or misappropriation."
+	if(SSfoundation_budget)
+		var/datum/department_budget/B = SSfoundation_budget.department_budgets[target_department]
+		if(B)
+			initial_budget = B.remaining
+
+/datum/objective/ci_budget_drain/check_completion()
+	if(!SSfoundation_budget)
+		return FALSE
+	var/datum/department_budget/B = SSfoundation_budget.department_budgets[target_department]
+	if(!B)
+		return FALSE
+	var/drain = initial_budget - B.remaining
+	return drain >= drain_required
+
+/datum/objective/ci_info_breach
+	name = "cause information breach"
+	var/breaches_required = 2
+
+/datum/objective/ci_info_breach/New()
+	..()
+	explanation_text = "Cause [breaches_required] information security breaches by compromising RAISA systems, stealing classified documents, or exploiting network vulnerabilities."
+
+/datum/objective/ci_info_breach/check_completion()
+	if(!SSraisa)
+		return FALSE
+	return SSraisa.active_breaches >= breaches_required
+
+/datum/objective/ci_network_sabotage
+	name = "sabotage facility network"
+	var/target_integrity = 40
+
+/datum/objective/ci_network_sabotage/New()
+	..()
+	explanation_text = "Reduce facility network integrity below [target_integrity]% by sabotaging server racks, compromising nodes, or allowing SCP-079 unchecked network access."
+
+/datum/objective/ci_network_sabotage/check_completion()
+	if(!SSit_network)
+		return FALSE
+	return SSit_network.overall_integrity <= target_integrity
+
+/datum/objective/ci_ethics_undermine
+	name = "undermine ethics committee"
+	var/violations_required = 3
+
+/datum/objective/ci_ethics_undermine/New()
+	..()
+	explanation_text = "Generate [violations_required] ethics violations against Foundation personnel through framing, entrapment, or provoking genuine violations."
+
+/datum/objective/ci_ethics_undermine/check_completion()
+	if(!SSethics_committee)
+		return FALSE
+	return SSethics_committee.violations.len >= violations_required
+
+/datum/objective/ci_goi_contact
+	name = "establish GOI contact"
+	var/target_goi = "Chaos Insurgency"
+	var/target_standing = 60
+
+/datum/objective/ci_goi_contact/New()
+	..()
+	var/list/gois = list("MCD", "Sarkic Cult", "Church of the Broken God", "Serpent's Hand")
+	target_goi = pick(gois)
+	explanation_text = "Improve standing with [target_goi] to [target_standing] or above by filing favorable intel, sending communiques, or completing tasks that benefit their interests."
+
+/datum/objective/ci_goi_contact/check_completion()
+	if(!SSgoi_relations)
+		return FALSE
+	var/standing = SSgoi_relations.goi_standing[target_goi]
+	if(isnull(standing))
+		return FALSE
+	return standing >= target_standing

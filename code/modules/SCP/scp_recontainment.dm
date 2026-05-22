@@ -209,7 +209,7 @@
 				H.extinguish_mob()
 		else if(istype(L, /mob/living/scp/scp457))
 			var/mob/living/scp/scp457/scp = L
-			if(scp.heat_system) scp.heat_system.current_heat = max(0, scp.heat_system.current_heat - 50)
+			if(scp) scp.current_heat = max(0, scp.current_heat - 50)
 			scp.Stun(60)
 			scp.visible_message(span_danger("The retardant blasts SCP-457, suppressing its flames!"))
 			var/turf/target_turf = get_turf(src)

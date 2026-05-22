@@ -389,7 +389,7 @@
 		if("security_baton_advanced")
 			return new /obj/item/melee/baton()
 		if("medical_kit_advanced")
-			return new /obj/item/storage/firstaid/
+			return new /obj/item/storage/medkit/advanced
 		if("badge_golden")
 			return new /obj/item/clothing/accessory/medal/gold()
 		if("pin_foundation")

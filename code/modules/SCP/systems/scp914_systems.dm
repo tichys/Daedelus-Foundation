@@ -118,6 +118,11 @@
 		if(item)
 			process_refinement_item(item)
 
+	// Process mobs in input booth
+	if(owner?.input_booth)
+		for(var/mob/living/scp/scp173/S in get_turf(owner.input_booth))
+			S.scp914_refine(refinement_setting, owner)
+
 	input_objects.Cut()
 
 	// Update persistence

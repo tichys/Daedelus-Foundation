@@ -238,11 +238,11 @@
 
 /atom/movable/screen/fullscreen/sanity_vignette/light
 	icon_state = "passage3"
-	alpha = 120
+	alpha = 80
 
 /atom/movable/screen/fullscreen/sanity_vignette/medium
 	icon_state = "passage5"
-	alpha = 160
+	alpha = 130
 
 /atom/movable/screen/fullscreen/sanity_vignette/heavy
 	icon_state = "passage8"
@@ -562,27 +562,6 @@
 	priority = 10
 	fade_in = 20
 	fade_out = 40
-
-// ── Sanity Vignette Overlays ──
-// Uses the existing passage overlay from the codebase as a vignette effect
-
-/atom/movable/screen/fullscreen/sanity_vignette
-	icon = 'icons/hud/screen_full.dmi'
-	screen_loc = "CENTER-7,CENTER-7"
-	layer = FULLSCREEN_LAYER
-	plane = FULLSCREEN_PLANE
-
-/atom/movable/screen/fullscreen/sanity_vignette/light
-	icon_state = "passage3"
-	alpha = 80
-
-/atom/movable/screen/fullscreen/sanity_vignette/medium
-	icon_state = "passage5"
-	alpha = 130
-
-/atom/movable/screen/fullscreen/sanity_vignette/heavy
-	icon_state = "passage8"
-	alpha = 200
 
 // ── Movespeed Modifiers for Episodes ──
 

@@ -118,6 +118,19 @@
 /mob/living/scp/scp343/proc/divine_zone_verb()
 	divine_zone_ability()
 
+/mob/living/scp/scp343/UnarmedAttack(atom/A)
+	if(ishuman(A) && !combat_mode)
+		var/mob/living/carbon/human/target = A
+		if(target.stat != DEAD && target != src)
+			divine_heal_ability(target)
+			return
+	return ..()
+
+/mob/living/scp/scp343/verb/verb_divine_zone()
+	set name = "Divine Zone"
+	set category = "SCP-343"
+	divine_zone_ability()
+
 /mob/living/scp/scp343/examine(mob/user)
 	. = ..()
 

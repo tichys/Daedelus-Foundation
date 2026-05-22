@@ -217,7 +217,6 @@ const NAV_ITEMS = [
   { key: 'budget', label: 'BUDGET' },
   { key: 'progression', label: 'PROGRESS' },
   { key: 'skill_progression', label: 'SKILLS' },
-  { key: 'scp_management', label: 'SCP MGMT' },
 ];
 
 const SubTabBar = ({ tabs, active, onChange }) => (
@@ -270,7 +269,11 @@ const GenericSection = ({ title, data, act, actions }) => (
     >
       {actions &&
         actions.map((a, i) => (
-          <TermButton key={i} color={a.color} onClick={() => act(a.action)}>
+          <TermButton
+            key={i}
+            color={a.color}
+            onClick={() => act(a.action, a.params || undefined)}
+          >
             {a.label}
           </TermButton>
         ))}
@@ -650,9 +653,6 @@ export const PersistenceMasterPanel = (props, context) => {
                     <TermButton onClick={() => act('scp_save_data')}>
                       SAVE
                     </TermButton>
-                    <TermButton onClick={() => act('scp_add_research')}>
-                      ADD RESEARCH
-                    </TermButton>
                     <TermButton color="red" onClick={() => act('test_systems')}>
                       CONTAINMENT CHECK
                     </TermButton>
@@ -734,7 +734,24 @@ export const PersistenceMasterPanel = (props, context) => {
                       action: 'security_save_data',
                     },
                     { label: 'LOAD', action: 'security_load_data' },
-                    { label: 'SCAN', action: 'security_scan' },
+                    {
+                      label: 'SCAN',
+                      color: 'yellow',
+                      action: 'security_scan',
+                      params: {
+                        scan_data: {
+                          scan_type: 'comprehensive',
+                          target_systems: {
+                            access_control: true,
+                            surveillance: true,
+                            communications: true,
+                            databases: true,
+                            networks: true,
+                            physical_security: true,
+                          },
+                        },
+                      },
+                    },
                   ]}
                 />
               )}
@@ -753,6 +770,11 @@ export const PersistenceMasterPanel = (props, context) => {
                     },
                     { label: 'LOAD', action: 'research_load_data' },
                     { label: 'VIEW', action: 'research_view_status' },
+                    {
+                      label: 'ADD PROJECT',
+                      color: 'green',
+                      action: 'research_add_project',
+                    },
                   ]}
                 />
               )}
@@ -906,16 +928,47 @@ export const PersistenceMasterPanel = (props, context) => {
                   >
                     <TermButton
                       color="green"
-                      onClick={() => act('budget_request_increase')}
+                      onClick={() =>
+                        act('budget_request_increase', {
+                          request_data: {
+                            department_id: 'general',
+                            requested_amount: 50000,
+                            requested_category: 'operational',
+                            justification: 'Admin emergency request',
+                            priority: 1,
+                          },
+                        })
+                      }
                     >
                       REQUEST
                     </TermButton>
-                    <TermButton onClick={() => act('budget_add_transaction')}>
+                    <TermButton
+                      onClick={() =>
+                        act('budget_add_transaction', {
+                          transaction_data: {
+                            department_id: 'general',
+                            transaction_type: 'EXPENSE',
+                            amount: 10000,
+                            category: 'miscellaneous',
+                            description: 'Admin logged transaction',
+                          },
+                        })
+                      }
+                    >
                       TRANSACTION
                     </TermButton>
                     <TermButton
                       color="yellow"
-                      onClick={() => act('budget_transfer')}
+                      onClick={() =>
+                        act('budget_transfer', {
+                          transfer_data: {
+                            from_department: 'general',
+                            to_department: 'security',
+                            amount: 25000,
+                            reason: 'Admin budget transfer',
+                          },
+                        })
+                      }
                     >
                       TRANSFER
                     </TermButton>
@@ -934,10 +987,95 @@ export const PersistenceMasterPanel = (props, context) => {
                                   : C.textBright
                               }
                             >
-                              {String(value)}
+                              {typeof value === 'number'
+                                ? String(value).replace(
+                                    /\B(?=(\d{3})+(?!\d))/g,
+                                    ',',
+                                  )
+                                : String(value)}
                             </TermValue>
                           </TermRow>
                         ))}
+                      {budget_data.departments &&
+                        Object.keys(budget_data.departments).length > 0 && (
+                          <Box>
+                            <TermDivider />
+                            <TermHeader>DEPARTMENT BUDGETS</TermHeader>
+                            {Object.entries(budget_data.departments).map(
+                              ([deptId, dept]) => (
+                                <Box
+                                  key={deptId}
+                                  style={{
+                                    marginBottom: '6px',
+                                    padding: '6px 8px',
+                                    borderLeft: `2px solid ${C.borderRed}`,
+                                    background: C.panel,
+                                  }}
+                                >
+                                  <TermRow>
+                                    <TermValue bold color={C.amber}>
+                                      {(dept.name || deptId).toUpperCase()}
+                                    </TermValue>
+                                  </TermRow>
+                                  <TermRow>
+                                    <TermLabel>ALLOCATED</TermLabel>
+                                    <TermValue color={C.amber}>
+                                      {String(dept.allocated || 0).replace(
+                                        /\B(?=(\d{3})+(?!\d))/g,
+                                        ',',
+                                      )}
+                                    </TermValue>
+                                    <TermLabel style={{ marginLeft: '8px' }}>
+                                      SPENT
+                                    </TermLabel>
+                                    <TermValue color={C.redBright}>
+                                      {String(dept.spent || 0).replace(
+                                        /\B(?=(\d{3})+(?!\d))/g,
+                                        ',',
+                                      )}
+                                    </TermValue>
+                                    <TermLabel style={{ marginLeft: '8px' }}>
+                                      REMAINING
+                                    </TermLabel>
+                                    <TermValue color={C.green}>
+                                      {String(dept.remaining || 0).replace(
+                                        /\B(?=(\d{3})+(?!\d))/g,
+                                        ',',
+                                      )}
+                                    </TermValue>
+                                  </TermRow>
+                                </Box>
+                              ),
+                            )}
+                          </Box>
+                        )}
+                      {budget_data.pending_requests &&
+                        budget_data.pending_requests.length > 0 && (
+                          <Box>
+                            <TermDivider />
+                            <TermHeader>PENDING REQUESTS</TermHeader>
+                            {budget_data.pending_requests.map((req, idx) => (
+                              <TermRow key={idx}>
+                                <TermValue bold color={C.amber}>
+                                  {req.id}
+                                </TermValue>
+                                <TermLabel style={{ marginLeft: '8px' }}>
+                                  DEPT
+                                </TermLabel>
+                                <TermValue>{req.department}</TermValue>
+                                <TermLabel style={{ marginLeft: '8px' }}>
+                                  AMOUNT
+                                </TermLabel>
+                                <TermValue color={C.amber}>
+                                  {String(req.amount).replace(
+                                    /\B(?=(\d{3})+(?!\d))/g,
+                                    ',',
+                                  )}
+                                </TermValue>
+                              </TermRow>
+                            ))}
+                          </Box>
+                        )}
                     </Box>
                   ) : (
                     <Box
@@ -973,25 +1111,6 @@ export const PersistenceMasterPanel = (props, context) => {
 
               {/* SKILL PROGRESSION */}
               {activeTab === 'skill_progression' && <SkillProgression />}
-
-              {/* SCP MANAGEMENT */}
-              {activeTab === 'scp_management' && (
-                <GenericSection
-                  title="SCP MANAGEMENT INTERFACE"
-                  data={scp_data}
-                  act={act}
-                  actions={[
-                    {
-                      label: 'VIEW STATUS',
-                      color: 'green',
-                      action: 'scp_view_status',
-                    },
-                    { label: 'SAVE', action: 'scp_save_data' },
-                    { label: 'ADD INSTANCE', action: 'scp_add_instance' },
-                    { label: 'TEST', color: 'yellow', action: 'test_systems' },
-                  ]}
-                />
-              )}
             </Box>
 
             {/* RIGHT: SCIPNET Sidebar */}

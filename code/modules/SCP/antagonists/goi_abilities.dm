@@ -203,6 +203,9 @@
 		var/datum/action/innate/scp_ability/sarkic_flesh_mold/mold = locate() in owner.current.actions
 		if(mold)
 			mold.Remove(owner.current)
+		var/datum/action/innate/scp_ability/sarkic_corrupt_containment/corrupt = locate() in owner.current.actions
+		if(corrupt)
+			corrupt.Remove(owner.current)
 
 // ================================================================
 // CHAOS INSURGENCY — Equipment Request & Sabotage Tools

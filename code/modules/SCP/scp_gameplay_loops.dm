@@ -4,7 +4,6 @@
 	var/mob/living/carbon/human/subject
 	var/mob/living/carbon/human/escort_guard
 	var/mob/living/carbon/human/researcher
-	var/obj/machinery/computer/scp_testing_console/source_console
 	var/scp_name = ""
 	var/test_type = ""
 	var/risk_level = 1
@@ -12,11 +11,10 @@
 	var/created_time = 0
 	var/escort_timeout = 5 MINUTES
 
-/datum/escort_task/New(mob/living/carbon/human/dclass_subject, mob/living/carbon/human/requesting_researcher, scp_ref, t_type, risk, obj/machinery/computer/scp_testing_console/console)
+/datum/escort_task/New(mob/living/carbon/human/dclass_subject, mob/living/carbon/human/requesting_researcher, scp_ref, t_type, risk)
 	task_id = "escort_[world.time]_[rand(100,999)]"
 	subject = dclass_subject
 	researcher = requesting_researcher
-	source_console = console
 	test_type = t_type
 	risk_level = risk
 	created_time = world.time
@@ -39,7 +37,7 @@
 		return FALSE
 	escort_guard = guard
 	status = "escorting"
-	to_chat(guard, span_notice("<b>ESCORT TASK:</b> Retrieve [subject.real_name] and bring them to [source_console ? get_area_name(source_console) : "the testing area"] for [scp_name] testing."))
+	to_chat(guard, span_notice("<b>ESCORT TASK:</b> Retrieve [subject.real_name] and bring them to the testing area for [scp_name] testing."))
 	to_chat(subject, span_notice("<b>ESCORT:</b> Guard [guard.real_name] has been assigned to escort you. Cooperate."))
 	if(researcher)
 		to_chat(researcher, span_notice("Guard [guard.real_name] is escorting [subject.real_name] to the testing area."))
@@ -53,22 +51,9 @@
 	to_chat(subject, span_notice("You have been delivered to the testing area."))
 	if(researcher)
 		to_chat(researcher, span_notice("<b>SUBJECT DELIVERED:</b> [subject.real_name] is at the testing console. You may now begin the test."))
-	if(source_console)
-		source_console.test_active = FALSE
-		source_console.current_scp = null
-		source_console.current_subject = REF(subject)
 	if(SSround_objectives)
 		SSround_objectives.report_objective_progress("guard_recontain", 1)
 	return TRUE
-
-/obj/machinery/computer/scp_testing_console/proc/create_escort_task(mob/living/carbon/human/H, mob/living/carbon/human/R, scp_ref)
-	var/datum/escort_task/escort = new(H, R, scp_ref, test_type, risk_level, src)
-	SSscp_gameplay.escort_tasks[escort.task_id] = escort
-	for(var/mob/living/carbon/human/G in GLOB.player_list)
-		if(G.stat == DEAD)
-			continue
-		if(G.job && (findtext(G.job, "Guard") || findtext(G.job, "Security")))
-			to_chat(G, span_warning("<b>ESCORT REQUEST:</b> Research needs [H.real_name] escorted for [escort.scp_name] testing. Report to the guard patrol console."))
 
 /datum/scp_recontainment_guide
 	var/static/list/guide_entries = list()
@@ -303,88 +288,147 @@
 		),
 		"warning" = "SCP-1048 is NOT cute. It WILL take your ears, teeth, or skin to make replicas. The replicas are murderous. Destroy them without hesitation.",
 	)
+	guide_entries["scp-087"] = list(
+		"designation" = "SCP-087",
+		"class" = "Euclid",
+		"threat" = "Endless stairwell, psychological horror, hostile entity (SCP-087-1)",
+		"procedures" = list(
+			"Do NOT enter SCP-087 without authorization",
+			"Descent causes progressive psychological deterioration",
+			"SCP-087-1 entity stalks and attacks descenders",
+			"Maximum recommended descent depth: 4 floors",
+			"Always maintain voice contact with surface team",
+			"Amnestic treatment recommended for all who descend",
+		),
+		"warning" = "SCP-087's depths are seemingly infinite. Those who descend too far do not return. The crying you hear is a lure.",
+	)
+	guide_entries["scp-3008"] = list(
+		"designation" = "SCP-3008",
+		"class" = "Euclid",
+		"threat" = "Infinite IKEA dimension, hostile staff at night, temporal distortion",
+		"procedures" = list(
+			"SCP-3008 is an entrance to an apparently infinite IKEA store",
+			"Day/night cycle inside — staff become hostile at night",
+			"Personnel inside during night phase MUST find shelter",
+			"Navigation is extremely difficult — spatial distortion",
+			"Rescue operations require GPS tethering equipment",
+			"Do NOT engage IKEA staff during night phase — flee and hide",
+		),
+		"warning" = "Once inside SCP-3008, finding the exit is nearly impossible. The staff are not human. They WILL attack at night. Survive until morning.",
+	)
+	guide_entries["scp-076"] = list(
+		"designation" = "SCP-076",
+		"class" = "Keter",
+		"threat" = "Hostile humanoid, respawns from stone cube upon death",
+		"procedures" = list(
+			"SCP-076-2 is a highly skilled hostile combatant",
+			"Upon death, it reforms inside SCP-076-1 (the stone cube)",
+			"Monitor SCP-076-1 for signs of awakening — vibration, humming",
+			"Mobile Task Force Omega-7 for containment operations only",
+			"Kill on sight if breached — it will not negotiate",
+			"Cube containment must be sealed at all times",
+		),
+		"warning" = "SCP-076-2 is faster, stronger, and more skilled than any human. It treats combat as sport. Killing it is temporary — it always comes back.",
+	)
+	guide_entries["scp-500"] = list(
+		"designation" = "SCP-500",
+		"class" = "Safe",
+		"threat" = "None — beneficial item, limited supply",
+		"procedures" = list(
+			"SCP-500 is a bottle of 47 red pills that cure any disease",
+			"Each pill is irreplaceable — use ONLY with Level 4 authorization",
+			"Pills have been confirmed to cure SCP-008 infection",
+			"Remaining pill count must be logged after each use",
+			"Replication attempts via SCP-914 have been denied",
+			"Report any unauthorized access to the SCP-500 storage",
+		),
+		"warning" = "There are a finite number of SCP-500 pills. Once they are gone, they are gone forever. Do NOT waste them on minor ailments.",
+	)
+	guide_entries["scp-427"] = list(
+		"designation" = "SCP-427",
+		"class" = "Safe",
+		"threat" = "Beneficial healing object, prolonged use causes horrific mutation (SCP-427-1)",
+		"procedures" = list(
+			"SCP-427 is a small locket that rapidly heals injuries when held",
+			"LIMITED USE ONLY — 30 seconds maximum exposure",
+			"Prolonged exposure causes uncontrolled biological mutation",
+			"Subjects who overuse become SCP-427-1 — flesh monsters",
+			"SCP-427-1 instances are hostile and must be terminated",
+			"Return SCP-427 to secure storage after each authorized use",
+		),
+		"warning" = "SCP-427 will heal you — and then it will change you. The mutation is irreversible. Use for 30 seconds ONLY. Set a timer.",
+	)
+	guide_entries["scp-1499"] = list(
+		"designation" = "SCP-1499",
+		"class" = "Safe",
+		"threat" = "Dimensional displacement helmet, hostile entities in alternate dimension",
+		"procedures" = list(
+			"SCP-1499 is a gas mask that transports the wearer to an alternate dimension",
+			"Removing the mask returns the wearer to their original location",
+			"Entities in the dimension are hostile — avoid contact",
+			"Use ONLY in secure areas with a spotter present",
+			"If the wearer does not return after 5 minutes, assume containment breach",
+			"Never use SCP-1499 near other SCPs",
+		),
+		"warning" = "If SCP-1499 is removed while in the alternate dimension, the wearer is stranded. Always have a buddy system. The entities there are NOT friendly.",
+	)
+	guide_entries["scp-012"] = list(
+		"designation" = "SCP-012",
+		"class" = "Euclid",
+		"threat" = "Compulsive score completion, self-mutilation",
+		"procedures" = list(
+			"SCP-012 is a musical score that compels viewers to complete it",
+			"Viewers will use their own blood to finish writing the score",
+			"NEVER view SCP-012 directly — use camera feeds only",
+			"Personnel affected must be physically restrained immediately",
+			"Amnestic treatment required for exposed personnel",
+			"Containment room must have no sharp objects",
+		),
+		"warning" = "SCP-012 will make you want to complete it — with your own blood. By the time you realize what you're doing, it may be too late. Do NOT look at it.",
+	)
+	guide_entries["scp-895"] = list(
+		"designation" = "SCP-895",
+		"class" = "Euclid",
+		"threat" = "Camera-disrupting coffin, causes cardiac arrest via video feed",
+		"procedures" = list(
+			"SCP-895 disrupts any camera feed that observes it",
+			"Viewing SCP-895 through a camera causes psychological disturbance",
+			"Prolonged camera observation causes cardiac arrest",
+			"Remove all camera coverage of SCP-895's containment area",
+			"Direct visual observation is safe — camera observation is NOT",
+			"Report any 'ghostly' images on camera feeds near 895",
+		),
+		"warning" = "SCP-895 is safe to look at directly. It is LETHAL to observe through cameras. The disturbing images you see on the feed will kill you.",
+	)
+	guide_entries["scp-066"] = list(
+		"designation" = "SCP-066",
+		"class" = "Safe",
+		"threat" = "Unpredictable anomalous effects, aggressive when provoked",
+		"procedures" = list(
+			"SCP-066 is a small mass of intertwined wires",
+			"It responds to verbal stimuli with unpredictable anomalous effects",
+			"Do NOT say 'Eric' in its presence — it becomes aggressive",
+			"Effects range from harmless to dangerous with no pattern",
+			"Observe from behind safety glass when testing",
+			"Report any unusual phenomena near SCP-066 containment",
+		),
+		"warning" = "SCP-066 is unpredictable. It might do nothing, or it might blind everyone in the room. Never say 'Eric' near it. Ever.",
+	)
 
-/obj/machinery/computer/scp_recontainment_guide
-	name = "SCP Recontainment Terminal"
-	desc = "A reference terminal containing classified recontainment protocols for Foundation personnel."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "medlaptop"
-	circuit = /obj/item/circuitboard/computer/scp_recontainment_guide
-	density = TRUE
-	anchored = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 50
-	var/datum/scp_recontainment_guide/guide_system = new()
 
-/obj/machinery/computer/scp_recontainment_guide/ui_interact(mob/user, datum/tgui/ui)
-	. = ..()
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "SCPRecontainmentGuide", "RECONTAINMENT PROTOCOLS")
-		ui.open()
-
-/obj/machinery/computer/scp_recontainment_guide/ui_state(mob/user)
-	return GLOB.default_state
-
-/obj/machinery/computer/scp_recontainment_guide/ui_data(mob/user)
-	var/list/data = list()
-	var/list/all_guides = list()
-	for(var/key in guide_system.guide_entries)
-		var/list/entry = guide_system.guide_entries[key]
-		all_guides += list(list(
-			"designation" = entry["designation"],
-			"class" = entry["class"],
-			"threat" = entry["threat"],
-			"procedures" = entry["procedures"],
-			"warning" = entry["warning"],
-		))
-	data["guides"] = all_guides
-	return data
-
-/obj/machinery/computer/scp_recontainment_guide/ui_act(action, params)
-	. = ..()
-	return
-
-/obj/item/circuitboard/computer/scp_recontainment_guide
-	name = "SCP Recontainment Terminal (Computer Board)"
-	build_path = /obj/machinery/computer/scp_recontainment_guide
-
-/mob/living/scp/proc/damage_nearby_facility()
-	if(stat == DEAD || containment_status != "breached")
-		return
-	if(prob(15))
-		for(var/obj/machinery/light/L in range(3, src))
-			if(prob(40))
-				L.set_on(FALSE)
-				break
-	if(prob(10))
-		for(var/obj/machinery/door/airlock/D in range(2, src))
-			if(!D.welded && prob(30))
-				D.try_to_crowbar(null)
-				break
-	if(prob(5))
-		for(var/obj/machinery/power/apc/A in range(5, src))
-			if(prob(20))
-				A.energy_fail(rand(30, 90))
-				break
-	if(prob(8))
-		for(var/obj/machinery/camera/C in range(4, src))
-			if(C.status)
-				C.toggle_cam(null, 0)
-				break
 
 SUBSYSTEM_DEF(scp_gameplay)
 	name = "SCP Gameplay"
 	wait = 10 SECONDS
 	priority = FIRE_PRIORITY_INPUT
 	var/list/datum/escort_task/escort_tasks = list()
-	var/list/datum/round_event_log/event_log = list()
 	var/list/breach_door_seals = list()
 
 /datum/controller/subsystem/scp_gameplay/fire()
 	process_escort_tasks()
-	process_scp_facility_damage()
 	process_breach_door_seals()
+	process_zone_sanity_effects()
+	process_emergency_shelter_sanity()
 
 /datum/controller/subsystem/scp_gameplay/proc/process_escort_tasks()
 	var/list/to_remove = list()
@@ -409,12 +453,6 @@ SUBSYSTEM_DEF(scp_gameplay)
 					to_chat(task.researcher, span_warning("Test subject [task.subject.real_name] has been lost. Testing cancelled."))
 	for(var/task_id in to_remove)
 		escort_tasks -= task_id
-
-/datum/controller/subsystem/scp_gameplay/proc/process_scp_facility_damage()
-	for(var/mob/living/scp/S in GLOB.mob_list)
-		if(S.stat == DEAD || S.containment_status != "breached")
-			continue
-		S.damage_nearby_facility()
 
 /datum/controller/subsystem/scp_gameplay/proc/process_breach_door_seals()
 	for(var/zone in breach_door_seals)
@@ -464,22 +502,45 @@ SUBSYSTEM_DEF(scp_gameplay)
 			S.open()
 	priority_announce("Emergency shutters opening in [uppertext(zone)]. Area may still be hazardous.", "SEAL LIFTED", null, ANNOUNCER_ALERT)
 
-/datum/round_event_log
-	var/event_time
-	var/event_type
-	var/description
-	var/participants
-
-/datum/round_event_log/New(time, etype, desc, parts)
-	event_time = time
-	event_type = etype
-	description = desc
-	participants = parts
+/datum/controller/subsystem/scp_gameplay/proc/process_zone_sanity_effects()
+	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(H.stat == DEAD || !H.sanity)
+			continue
+		var/area/A = get_area(H)
+		if(!A)
+			continue
+		if(istype(A, /area/scp/lcz))
+			if(prob(3))
+				H.sanity.adjust_sanity(-1, "lcz_exposure")
+				if(prob(10))
+					to_chat(H, "<span class='warning'>The sterile containment zone atmosphere weighs on your mind...</span>")
+		else if(istype(A, /area/scp/hcz))
+			if(prob(5))
+				H.sanity.adjust_sanity(-2, "hcz_exposure")
+				if(prob(15))
+					to_chat(H, "<span class='warning'>The heavy containment zone feels oppressive and dangerous...</span>")
+		else if(istype(A, /area/scp/ez))
+			if(prob(2))
+				H.sanity.adjust_sanity(1, "ez_safety")
+		if(SSscp_persistence?.manager)
+			var/breach_count = SSscp_persistence.manager.active_breaches
+			if(breach_count > 0 && (istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz)) && prob(breach_count * 2))
+				H.sanity.adjust_sanity(-1, "breach_proximity")
 
 /proc/log_round_event(etype, desc, parts = "")
-	if(!SSscp_gameplay)
+	if(!GLOB.scp_round_report)
 		return
-	SSscp_gameplay.event_log += new /datum/round_event_log(world.time, etype, desc, parts)
+	switch(etype)
+		if("scp_breach")
+			GLOB.scp_round_report.log_breach(desc, "unknown", world.time)
+		if("scp_recontainment")
+			GLOB.scp_round_report.log_recontainment(desc, parts ? list(parts) : list(), world.time)
+		if("power_failure")
+			GLOB.scp_round_report.log_lockdown(desc, 0, world.time)
+		if("goi_sabotage", "goi_spawn")
+			GLOB.scp_round_report.log_casualty(etype, desc, parts, world.time)
+		else
+			GLOB.scp_round_report.log_casualty(etype, desc, parts, world.time)
 
 /proc/generate_after_action_report()
 	var/list/report = list()
@@ -490,16 +551,14 @@ SUBSYSTEM_DEF(scp_gameplay)
 	report += "<hr>"
 
 	report += "<b>SECURITY INCIDENTS</b>"
-	var/breach_count = 0
-	var/recontain_count = 0
-	for(var/datum/round_event_log/E in SSscp_gameplay.event_log)
-		if(E.event_type == "scp_breach")
-			breach_count++
-			report += "- BREACH: [E.description] ([E.participants])"
-		if(E.event_type == "scp_recontainment")
-			recontain_count++
-			report += "- RECONTAINMENT: [E.description] ([E.participants])"
-	report += "Total Breaches: [breach_count] | Total Recontainments: [recontain_count]"
+	if(GLOB.scp_round_report)
+		report += "Total Breaches: [GLOB.scp_round_report.total_breaches] | Total Recontainments: [GLOB.scp_round_report.total_recontainments]"
+		for(var/list/E in GLOB.scp_round_report.breach_log)
+			report += "- BREACH: [E["id"]] in [E["zone"]]"
+		for(var/list/E in GLOB.scp_round_report.recontainment_log)
+			report += "- RECONTAINMENT: [E["id"]]"
+	else
+		report += "No round report data available."
 	report += "<hr>"
 
 	report += "<b>RESEARCH PROGRESS</b>"
@@ -540,5 +599,41 @@ SUBSYSTEM_DEF(scp_gameplay)
 		for(var/obj_id in SSround_objectives.objectives)
 			var/datum/round_objective/O = SSround_objectives.objectives[obj_id]
 			report += "- [O.title]: [O.completed ? "COMPLETE" : "[O.current_progress]/[O.target_progress]"]"
+	report += "<hr>"
+
+	report += "<b>FACILITY OPERATIONS</b>"
+	if(SSfoundation_comms)
+		report += "Threat Level: [SSfoundation_comms.facility_threat_level] | Active Dispatches: [SSfoundation_comms.active_dispatches] | Announcements: [SSfoundation_comms.total_announcements]"
+	if(SSfoundation_budget)
+		report += "Budget Spent: [SSfoundation_budget.total_spent] / [SSfoundation_budget.total_budget] credits"
+	if(SSpsychology)
+		report += "Psych Evaluations: [SSpsychology.completed_evals] | Counseling Sessions: [SSpsychology.counseling_sessions] | Amnestics Recommended: [SSpsychology.amnestics_recommended]"
+	if(SSraisa)
+		report += "Intel Reports: [SSraisa.total_reports] | Info Breaches: [SSraisa.active_breaches] active / [SSraisa.contained_breaches] contained"
+	if(SSanomalous_investigations)
+		report += "Evidence Collected: [SSanomalous_investigations.total_evidence] | Analyzed: [SSanomalous_investigations.analyzed_evidence]"
+	if(SSit_network)
+		report += "Network Integrity: [SSit_network.overall_integrity]% | SCP-079 Presence: [SSit_network.scp079_network_presence]"
+	report += "<hr>"
+
+	report += "<b>LEGAL AND ETHICS</b>"
+	if(SSethics_committee)
+		report += "Ethics Violations: [SSethics_committee.violations.len] | Tests Reviewed: [SSethics_committee.total_reviews]"
+	if(SSinternal_tribunal)
+		report += "Tribunal Cases: [SSinternal_tribunal.total_cases]"
+	if(SSlegal_system)
+		report += "Legal Cases: [SSlegal_system.total_cases]"
+	report += "<hr>"
+
+	report += "<b>COMMAND AND COORDINATION</b>"
+	if(SSsite_command)
+		report += "Directives Issued: [SSsite_command.total_directives]"
+	if(SSdepartment_coordination)
+		report += "Coordination Tasks: [SSdepartment_coordination.completed_tasks]/[SSdepartment_coordination.total_tasks] completed | Memos: [SSdepartment_coordination.interdepartmental_memos.len]"
+	if(SSgoi_relations)
+		var/list/standing_summary = list()
+		for(var/goi_name in SSgoi_relations.goi_standing)
+			standing_summary += "[goi_name]: [SSgoi_relations.goi_standing[goi_name]]"
+		report += "GOI Standings: [jointext(standing_summary, ", ")]"
 
 	return jointext(report, "<br>")

@@ -95,8 +95,8 @@
 		data["target_health"] = round((target.health / target.maxHealth) * 100)
 		data["target_evolution"] = target.evolution_stage
 		data["containment_status"] = target.containment_status
-		if(target.containment_system?.acid_bath)
-			var/datum/scp682_acid_bath/bath = target.containment_system.acid_bath
+		if(target.acid_bath)
+			var/datum/scp682_acid_bath/bath = target.acid_bath
 			data["acid_level"] = round(bath.acid_level)
 			data["bath_active"] = bath.bath_active
 			data["containment_progress"] = round(bath.containment_progress)
@@ -124,9 +124,9 @@
 			if(!target)
 				to_chat(usr, span_warning("No SCP-682 detected."))
 				return
-			if(!target.containment_system?.acid_bath)
-				target.containment_system.acid_bath = new /datum/scp682_acid_bath(target)
-			var/datum/scp682_acid_bath/bath = target.containment_system.acid_bath
+			if(!target.acid_bath)
+				target.acid_bath = new /datum/scp682_acid_bath(target)
+			var/datum/scp682_acid_bath/bath = target.acid_bath
 			bath.add_acid(30)
 			flood_cooldown = world.time + flood_cooldown_time
 			to_chat(usr, span_notice("Acid flood released. Level: [round(bath.acid_level)]%"))
@@ -142,9 +142,9 @@
 					break
 			if(!target)
 				return
-			if(!target.containment_system?.acid_bath)
-				target.containment_system.acid_bath = new /datum/scp682_acid_bath(target)
-			var/datum/scp682_acid_bath/bath = target.containment_system.acid_bath
+			if(!target.acid_bath)
+				target.acid_bath = new /datum/scp682_acid_bath(target)
+			var/datum/scp682_acid_bath/bath = target.acid_bath
 			bath.add_acid(60)
 			flood_cooldown = world.time + flood_cooldown_time * 2
 			to_chat(usr, span_danger("EMERGENCY ACID FLOOD. Maximum concentration deployed."))
@@ -155,7 +155,7 @@
 	name = "SCP-682 Acid Bath Console (Computer Board)"
 	build_path = /obj/machinery/scp682_acid_bath_console
 
-/datum/scp682_containment_system/var/datum/scp682_acid_bath/acid_bath
+
 
 /proc/trigger_power_failure_cascade()
 	var/list/failure_areas = list()

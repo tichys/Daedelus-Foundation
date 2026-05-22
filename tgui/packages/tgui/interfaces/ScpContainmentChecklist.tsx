@@ -238,7 +238,7 @@ export const ScpContainmentConsole = (_props: unknown) => {
     <Window
       width={600}
       height={700}
-      theme="scp"
+      theme="scp_terminal"
       backgroundColor={C.bg}
     >
       <Window.Content scrollable>

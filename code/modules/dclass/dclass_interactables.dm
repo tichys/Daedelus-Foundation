@@ -96,6 +96,7 @@
 	to_chat(H, span_notice("<b>D-Class nearby:</b> [dclass_count]"))
 	to_chat(H, span_notice("<b>Security Level:</b> [security_level]"))
 	to_chat(H, span_notice("<b>Time Slot:</b> [time_slot]"))
+	to_chat(H, span_notice("<b>Credits:</b> [player.credits], <b>Trust:</b> [player.trust_points]%"))
 	player.gain_experience(2, "observation")
 
 /obj/structure/dclass_watercooler

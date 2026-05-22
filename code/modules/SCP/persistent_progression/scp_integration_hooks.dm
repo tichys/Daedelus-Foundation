@@ -1,30 +1,39 @@
-#ifndef INTERACTION_TYPE_OBSERVATION
-#define INTERACTION_TYPE_OBSERVATION 1
-#define INTERACTION_TYPE_COMBAT 2
-#define INTERACTION_TYPE_CONTAINMENT 3
-#define INTERACTION_TYPE_RESEARCH 4
-#define INTERACTION_TYPE_COMMUNICATION 5
-#define INTERACTION_TYPE_EXPERIMENT 6
-#define INTERACTION_TYPE_CARE 7
-#define INTERACTION_TYPE_EXPLORATION 8
-#define INTERACTION_TYPE_SURVIVAL 9
-#define INTERACTION_TYPE_MEDICAL 10
-
-#define INTERACTION_RISK_NONE 0
-#define INTERACTION_RISK_LOW 1
-#define INTERACTION_RISK_MEDIUM 2
-#define INTERACTION_RISK_HIGH 3
-#define INTERACTION_RISK_CRITICAL 4
+#ifndef THREAT_LEVEL_GREEN
+#define THREAT_LEVEL_GREEN 0
+#define THREAT_LEVEL_YELLOW 1
+#define THREAT_LEVEL_ORANGE 2
+#define THREAT_LEVEL_RED 3
 #endif
+
+#ifndef DISPATCH_SECURITY
+#define DISPATCH_SECURITY 1
+#define DISPATCH_MEDICAL 2
+#define DISPATCH_ENGINEERING 3
+#define DISPATCH_MTF 4
+#endif
+
+#ifndef NETWORK_NODE_OFFLINE
+#define NETWORK_NODE_OFFLINE 0
+#define NETWORK_NODE_ONLINE 1
+#define NETWORK_NODE_DEGRADED 2
+#define NETWORK_NODE_COMPROMISED 3
+#endif
+
+var/list/GLOB_scp_breach_cooldown = list()
 
 /proc/hook_scp_breach(scp_id, atom/scp_atom)
 	if(!scp_id)
+		return FALSE
+
+	if(GLOB_scp_breach_cooldown[scp_id] && world.time < GLOB_scp_breach_cooldown[scp_id])
 		return FALSE
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
 		if(instance && instance.containment_status == "breached")
 			return FALSE
+
+	GLOB_scp_breach_cooldown[scp_id] = world.time + 5 MINUTES
 
 	var/breach_zone = "unknown"
 	if(scp_atom)
@@ -95,6 +104,38 @@
 		if(scp_type)
 			addtimer(CALLBACK(GLOB.scp_role_controller, TYPE_PROC_REF(/datum/scp_role_controller, offer_all_available_scp_roles)), 30 SECONDS)
 
+	if(SSfoundation_comms)
+		var/_hook_threat_level = THREAT_LEVEL_YELLOW
+		if(findtext(scp_id, "682") || findtext(scp_id, "106"))
+			_hook_threat_level = THREAT_LEVEL_RED
+		else if(findtext(scp_id, "096") || findtext(scp_id, "049") || findtext(scp_id, "457") || findtext(scp_id, "939"))
+			_hook_threat_level = THREAT_LEVEL_ORANGE
+		var/_hook_loc_name = "Unknown"
+		if(scp_atom)
+			var/area/_hook_A = get_area(scp_atom)
+			if(_hook_A)
+				_hook_loc_name = _hook_A.name
+		SSfoundation_comms.register_threat("SCP-[scp_id] Containment Breach", "scp_breach", _hook_threat_level, _hook_loc_name, "SCP-[scp_id] has breached containment. All personnel exercise extreme caution.")
+		SSfoundation_comms.create_dispatch(null, DISPATCH_SECURITY, "SCP-[scp_id] containment breach in [_hook_loc_name]. All security personnel respond immediately.", 2)
+		SSfoundation_comms.create_dispatch(null, DISPATCH_MTF, "SCP-[scp_id] breach confirmed. Mobilize containment teams to [_hook_loc_name].", 2)
+
+	if(findtext(scp_id, "079") && SSit_network)
+		SSit_network.scp079_network_presence = min(100, SSit_network.scp079_network_presence + 40)
+		if(SSraisa)
+			var/datum/info_breach/_hook_IB = new("SCP-079 Network Intrusion", "SCP-079", "Facility network systems", 3)
+			SSraisa.register_breach(_hook_IB)
+
+	if(SSanomalous_investigations)
+		SSanomalous_investigations.open_case("SCP-[scp_id]", "Automatic case opened due to SCP-[scp_id] containment breach.")
+
+	hook_breach_budget_impact(scp_id)
+	hook_breach_mtf_auto_deploy(scp_id)
+	hook_breach_containment_integrity(scp_id, scp_atom)
+	hook_breach_medical_response(scp_id, scp_atom)
+	hook_breach_ventilation_contamination(scp_id, scp_atom)
+	hook_breach_triage_detection(scp_id, scp_atom)
+	hook_breach_patrol_generation(scp_id, scp_atom)
+
 	return TRUE
 
 /proc/get_scp_type_from_id(scp_id)
@@ -126,6 +167,8 @@
 /proc/hook_scp_recontainment(scp_id, list/participants)
 	if(!scp_id)
 		return FALSE
+
+	GLOB_scp_breach_cooldown -= scp_id
 
 	log_game("SCP Recontained: [scp_id]")
 
@@ -164,6 +207,34 @@
 		if(SSpersistent_progression.analytics_manager)
 			SSpersistent_progression.analytics_manager.track_event(null, "scp_recontainment", list("scp_id" = scp_id, "participants" = length(participants || list())))
 
+	if(SSfoundation_comms)
+		for(var/datum/facility_threat/T in SSfoundation_comms.threats)
+			if(!T.resolved && findtext(T.threat_name, scp_id))
+				var/_hook_resolver = "Containment Team"
+				if(participants && length(participants))
+					var/list/_hook_names = list()
+					for(var/mob/living/carbon/human/H in participants)
+						_hook_names += H.real_name
+					if(length(_hook_names))
+						_hook_resolver = jointext(_hook_names, ", ")
+				T.resolve(_hook_resolver)
+		SSfoundation_comms.recalculate_threat_level()
+
+	if(SSanomalous_investigations)
+		SSanomalous_investigations.close_case("SCP-[scp_id]")
+
+	if(findtext(scp_id, "079") && SSit_network)
+		SSit_network.scp079_network_presence = max(0, SSit_network.scp079_network_presence - 30)
+		for(var/datum/network_node/N in SSit_network.nodes)
+			N.scp079_influence = max(0, N.scp079_influence - 15)
+			if(N.scp079_influence <= 50 && N.integrity >= 50)
+				N.status = NETWORK_NODE_ONLINE
+		SSit_network.recalculate_integrity()
+
+	hook_recontainment_budget_recovery(scp_id, participants)
+	hook_recontainment_security_level_downgrade()
+	hook_recontainment_integrity_repair(scp_id)
+
 	return TRUE
 
 /proc/hook_scp_interaction(mob/living/carbon/human/player, scp_id, interaction_type, list/data = null)
@@ -190,6 +261,35 @@
 	if(interaction_type == INTERACTION_TYPE_MEDICAL && SSround_objectives)
 		SSround_objectives.report_objective_progress("medical_treat", 1)
 
+	if(interaction_type == INTERACTION_TYPE_COMBAT && SSraisa)
+		SSraisa.record_incident(player)
+
+	if(interaction_type == INTERACTION_TYPE_OBSERVATION && SSraisa)
+		SSraisa.record_observation(player)
+
+	if(SSpsychology)
+		var/_hook_exp_type = "physical"
+		if(interaction_type == INTERACTION_TYPE_COMMUNICATION)
+			_hook_exp_type = "cognitive"
+		else if(interaction_type == INTERACTION_TYPE_EXPLORATION)
+			_hook_exp_type = "environmental"
+		else if(interaction_type == INTERACTION_TYPE_COMBAT)
+			_hook_exp_type = "traumatic"
+		else if(interaction_type == INTERACTION_TYPE_EXPERIMENT)
+			_hook_exp_type = "experimental"
+		var/_hook_symptoms = ""
+		if(interaction_type == INTERACTION_TYPE_COMBAT)
+			_hook_symptoms = "Elevated stress response, possible PTSD indicators"
+		else if(interaction_type == INTERACTION_TYPE_COMMUNICATION)
+			_hook_symptoms = "Mild cognitive dissonance reported"
+		SSpsychology.record_exposure(player, "SCP-[scp_id]", _hook_exp_type, _hook_symptoms)
+		if(ishuman(player))
+			var/mob/living/carbon/human/_hook_H = player
+			if(_hook_H.sanity && interaction_type == INTERACTION_TYPE_COMBAT)
+				_hook_H.sanity.adjust_sanity(-5, "scp_combat")
+			else if(_hook_H.sanity && interaction_type == INTERACTION_TYPE_COMMUNICATION)
+				_hook_H.sanity.adjust_sanity(-2, "scp_communication")
+
 	return TRUE
 
 /proc/hook_scp_observation(mob/living/carbon/human/observer, scp_id)
@@ -214,6 +314,17 @@
 	if(!researcher || !scp_id)
 		return FALSE
 	hook_scp_interaction(researcher, scp_id, INTERACTION_TYPE_RESEARCH, list("type" = research_type))
+	if(SSfoundation_budget)
+		var/_hook_bonus = 500
+		if(research_type == "breakthrough")
+			_hook_bonus = 2000
+		else if(research_type == "detailed")
+			_hook_bonus = 1000
+		var/datum/department_budget/B = SSfoundation_budget.department_budgets["science"]
+		if(B)
+			B.allocate(_hook_bonus)
+	if(SSraisa)
+		SSraisa.record_observation(researcher)
 	return TRUE
 
 /proc/hook_scp_experiment(mob/living/carbon/human/researcher, scp_id, experiment_type)
@@ -260,6 +371,28 @@
 		if(pdata)
 			pdata.total_deaths++
 
+	if(SSanomalous_investigations)
+		var/area/_hook_A = get_area(victim)
+		var/_hook_loc_name = _hook_A ? _hook_A.name : "Unknown"
+		var/datum/anomalous_evidence/_hook_E = new(null, "Biological", _hook_loc_name, "SCP-[scp_id]", "Casualty event: [victim.real_name] died near SCP-[scp_id] in [_hook_loc_name]")
+		SSanomalous_investigations.log_evidence(_hook_E)
+
+	if(SSfoundation_comms)
+		for(var/datum/facility_threat/T in SSfoundation_comms.threats)
+			if(!T.resolved && findtext(T.threat_name, scp_id) && T.threat_level < THREAT_LEVEL_RED)
+				T.threat_level = min(THREAT_LEVEL_RED, T.threat_level + 1)
+		SSfoundation_comms.recalculate_threat_level()
+
+	if(SSraisa)
+		SSraisa.record_incident(victim)
+
+	if(SSpsychology)
+		for(var/mob/living/carbon/human/H in hearers(7, victim))
+			if(H != victim && H.stat != DEAD)
+				SSpsychology.record_exposure(H, "SCP-[scp_id]", "witnessed_casualty", "Witnessed death of [victim.real_name] near SCP-[scp_id]")
+				if(H.sanity)
+					H.sanity.adjust_sanity(-10, "witnessed_scp_casualty")
+
 /proc/hook_scp_damage(scp_id, damage_percent)
 	if(!scp_id)
 		return
@@ -277,3 +410,71 @@
 		return
 	if(SScontainment_evaluation)
 		report_facility_damage(scp_id, damage_level)
+
+/proc/hook_breach_containment_integrity(scp_id, atom/scp_atom)
+	if(!SScontainment_integrity)
+		return
+	var/target_zone = null
+	if(scp_atom)
+		var/area/A = get_area(scp_atom)
+		if(A)
+			var/zone_name = get_containment_zone(A)
+			if(zone_name)
+				target_zone = zone_name
+	if(!target_zone)
+		for(var/list/Z in SScontainment_integrity.containment_zones)
+			if(findtext(Z["name"], scp_id) || findtext(scp_id, Z["name"]))
+				target_zone = Z["name"]
+				break
+	if(target_zone)
+		SScontainment_integrity.repair_zone(target_zone, -30)
+		SScontainment_integrity.generate_maintenance_task(target_zone, "breach_damage_[scp_id]")
+
+/proc/hook_breach_medical_response(scp_id, atom/scp_atom)
+	if(!SSscp_medical_response || !scp_atom)
+		return
+	for(var/mob/living/carbon/human/H in range(7, scp_atom))
+		if(H.stat == DEAD || !H.ckey)
+			continue
+		if(H.getBruteLoss() > 20 || H.getFireLoss() > 20 || H.getToxLoss() > 20)
+			SSscp_medical_response.report_scp_injury(H, "Breach-related injury", 3, "SCP-[scp_id]")
+
+/proc/hook_breach_ventilation_contamination(scp_id, atom/scp_atom)
+	if(!SSzone_ventilation)
+		return
+	var/zone_id = 0
+	if(scp_atom)
+		var/area/A = get_area(scp_atom)
+		var/zone = get_containment_zone(A)
+		if(zone == "lcz")
+			zone_id = 1
+		else if(zone == "hcz")
+			zone_id = 2
+		else if(zone == "ez")
+			zone_id = 3
+	if(zone_id > 0)
+		SSzone_ventilation.report_contamination(zone_id, 15, "SCP-[scp_id] breach")
+
+/proc/hook_recontainment_integrity_repair(scp_id)
+	if(!SScontainment_integrity)
+		return
+	var/target_zone = null
+	for(var/list/Z in SScontainment_integrity.containment_zones)
+		if(findtext(Z["name"], scp_id) || findtext(scp_id, Z["name"]))
+			target_zone = Z["name"]
+			break
+	if(target_zone)
+		SScontainment_integrity.repair_zone(target_zone, 25)
+
+/proc/hook_breach_triage_detection(scp_id, atom/scp_atom)
+	if(!SSscp_triage || !scp_atom)
+		return
+	SSscp_triage.auto_detect_patients()
+
+/proc/hook_breach_patrol_generation(scp_id, atom/scp_atom)
+	if(!SSscp_patrol || !scp_atom)
+		return
+	var/area/A = get_area(scp_atom)
+	var/zone = get_containment_zone(A)
+	if(zone)
+		SSscp_patrol.generate_dynamic_route(zone)

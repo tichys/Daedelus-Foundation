@@ -161,8 +161,8 @@
 /obj/item/clothing/under/scp/warden/lcz
 	name = "LCZ senior security uniform"
 	desc = "A white, tactical security uniform with SCP insignia on it. Weaved with a durable fabric to absorb melee hits. This one has a silver badge, and belt buckle, with a dirty rose color on the shoulders and wrists most known for Sergeants."
-	icon_state = "lcz_sergeant"
-	worn_icon_state = "lcz_sergeant"
+	icon_state = "white_sergeant_lcz"
+	worn_icon_state = "white_sergeant_lcz"
 	armor = list(melee = 35, bullet = 25, laser = 20, energy = 15, bomb = 15, bio = 10, rad = 5)
 	siemens_coefficient = 0.9
 

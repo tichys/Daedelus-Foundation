@@ -1,6 +1,30 @@
 // Site53 map stubs batch 5 - remaining parent-only child types
 // Auto-generated stubs for map-placed instances
 
+/obj/structure/cable/green
+	var/c_tag
+	var/RCon_tag
+	var/initial_gas
+	var/health_resistances
+	var/send_access
+	var/magazine_type
+	var/use_power
+	var/aiControlDisabled
+	var/caliber
+	var/height
+
+/obj/machinery/door/poddoor
+	var/begins_closed = TRUE
+
+/obj/machinery/power/smes
+	var/RCon_tag
+
+/turf/open/floor
+	var/c_tag
+
+/obj/effect/turf_decal
+	var/id
+
 /obj/effect/decal/cleanable/blood/gibs/robot
 	name = "Robot"
 
@@ -12,6 +36,7 @@
 
 /obj/effect/decal/cleanable/blood/writing
 	name = "Writing"
+	var/message
 
 /obj/effect/decal/cleanable/cobweb2
 	name = "Cobweb2"
@@ -36,6 +61,7 @@
 
 /obj/effect/landmark/map_data
 	name = "Map Data"
+	var/height
 
 /obj/effect/landmark/polarized/full
 	name = "Polarized Full"
@@ -312,10 +338,6 @@
 
 /obj/item/clothing/accessory/toggleable/corpjacket
 	name = "Toggleable Corpjacket"
-
-
-/obj/item/clothing/glasses/hud/scramble/experimental
-	name = "Scramble Experimental"
 
 /obj/item/clothing/glasses/tacgoggles
 	name = "Tacgoggles"
@@ -1520,6 +1542,10 @@
 
 /obj/machinery/atmospherics/omni/mixer
 	name = "Omni Mixer"
+	var/tag_south_con
+	var/tag_east_con
+	var/tag_west_con
+	var/tag_north_con
 
 /obj/machinery/atmospherics/pipe/cap/hidden
 	name = "Cap Hidden"
@@ -1682,6 +1708,8 @@
 
 /obj/machinery/atmospherics/unary/vent_pump
 	name = "Unary Vent Pump"
+	var/external_pressure_bound = ONE_ATMOSPHERE
+	var/external_pressure_bound_default
 
 /obj/machinery/atmospherics/unary/vent_pump/high_volume/airlock
 	name = "Unary Vent Pump High Volume Airlock"
@@ -1853,6 +1881,7 @@
 
 /obj/machinery/power/breakerbox
 	name = "Breakerbox"
+	var/RCon_tag
 
 /obj/machinery/power/breakerbox/activated
 	name = "Breakerbox Activated"

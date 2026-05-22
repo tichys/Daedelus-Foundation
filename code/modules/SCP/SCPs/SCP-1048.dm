@@ -305,6 +305,8 @@
 	. = ..()
 	. += "Materials: [materials_collected]/[materials_needed]"
 	. += "Copies: [length(copies_spawned)]/[max_copies]"
+	. += "Build Ready: [materials_collected >= materials_needed ? "Yes" : "No"]"
+	. += "Body Parts Harvested: [body_parts_harvested]"
 
 // === HOSTILE COPIES ===
 

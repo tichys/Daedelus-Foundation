@@ -64,6 +64,26 @@
 				if(H.stat != DEAD && !H.SCP)
 					mask.telepathy_system.apply_influence(H)
 					break
+	else if(mask && mask.possession_system?.current_host)
+		if(prob(8))
+			var/mob/living/carbon/human/host = mask.possession_system.current_host
+			for(var/atom/A in range(1, host))
+				if(A == host || A == mask)
+					continue
+				if(isobj(A))
+					var/obj/O = A
+					if(istype(O, /obj/item/organ) || istype(O, /obj/item/bodypart))
+						continue
+					if(ismob(O.loc))
+						continue
+					O.take_damage(15, BURN, ACID)
+				if(ishuman(A))
+					var/mob/living/carbon/human/H = A
+					if(H != host && H.stat != DEAD)
+						H.adjustBruteLoss(5)
+						H.adjustFireLoss(5)
+						to_chat(H, span_danger("Corrosive liquid burns your skin!"))
+			playsound(host, 'sound/weapons/sear.ogg', 30, TRUE)
 
 /mob/living/scp035/proc/enter_host(mob/living/carbon/human/host)
 	if(!host || !mask)

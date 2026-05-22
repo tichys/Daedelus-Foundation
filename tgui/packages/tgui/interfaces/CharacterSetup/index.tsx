@@ -64,19 +64,25 @@ const FactionClassPage = () => {
   const [confirmReset, setConfirmReset] = useSharedState('CS.confirmReset', false);
   const [confirmAdmin, setConfirmAdmin] = useSharedState('CS.confirmAdmin', false);
 
+  const longestFaction = factions.reduce((a: string, b: string) => a.length >= b.length ? a : b, 'SELECT...');
+  const longestClass = classes.reduce((a: string, b: string) => a.length >= b.length ? a : b, 'SELECT...');
+  const charPx = 7.5;
+  const arrowPx = 22;
+  const padPx = 16;
+
   return (
     <TermBox>
       <TermHeader>FACTION ASSIGNMENT</TermHeader>
       <TermRow>
         <TermLabel>FACTION</TermLabel>
         {locked ? <TermValue color={C.amber} bold>{selectedFaction || '—'}</TermValue> : (
-          <Dropdown width="100%" options={factions} selected={selectedFaction} displayText={selectedFaction || 'SELECT...'} onSelected={(v: string) => act('set_faction', { value: v })} />
+          <Dropdown width={`${longestFaction.length * charPx + arrowPx + padPx}px`} options={factions} selected={selectedFaction} displayText={selectedFaction || 'SELECT...'} onSelected={(v: string) => act('set_faction', { value: v })} />
         )}
       </TermRow>
       <TermRow>
         <TermLabel>CLASS</TermLabel>
         {locked ? <TermValue color={C.amber} bold>{selectedClass || '—'}</TermValue> : (
-          <Dropdown width="100%" options={classes} selected={selectedClass} displayText={selectedClass || 'SELECT...'} onSelected={(v: string) => act('set_class', { value: v })} />
+          <Dropdown width={`${longestClass.length * charPx + arrowPx + padPx}px`} options={classes} selected={selectedClass} displayText={selectedClass || 'SELECT...'} onSelected={(v: string) => act('set_class', { value: v })} />
         )}
       </TermRow>
       <TermDivider />

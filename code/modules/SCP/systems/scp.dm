@@ -79,7 +79,10 @@
 		GLOB.SCP_list -= parent
 		parent.SCP = null
 	if(meme_comp)
-		meme_comp = null //we dont delete the memetic component as it isint ours, but we still remove our reference to it
+		meme_comp = null
+	if(advanced_components)
+		qdel(advanced_components)
+		advanced_components = null
 	UnregisterSignal(parent, COMSIG_PARENT_EXAMINE)
 	parent = null
 
@@ -123,6 +126,8 @@
 	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[id]
 	if(instance)
 		instance.add_interaction_record(user, interaction_type)
+	if(uses_advanced_components)
+		trigger_component_event(COMPONENT_EVENT_INTERACT, list("user" = user, "type" = interaction_type))
 
 ///Helper to record a breach event
 /datum/scp/proc/log_breach()

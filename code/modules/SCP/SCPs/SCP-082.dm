@@ -225,6 +225,21 @@
 
 	to_chat(src, "<span class='notice'>You are [status]. Satiation: [round(satiation, 1)]/[SCP082_SATIATION_MAX]</span>")
 
+/mob/living/scp/scp082/verb/verb_greet_nearby()
+	set name = "Greet Nearby"
+	set category = "SCP-082"
+	greet_nearby()
+
+/mob/living/scp/scp082/verb/verb_offer_food()
+	set name = "Offer Hospitality"
+	set category = "SCP-082"
+	offer_food()
+
+/mob/living/scp/scp082/verb/verb_speak_french()
+	set name = "Speak French"
+	set category = "SCP-082"
+	speak_french()
+
 // Hospitality System - Lures victims through polite conversation
 /datum/scp082_hospitality_system
 	var/mob/living/scp/scp082/parent

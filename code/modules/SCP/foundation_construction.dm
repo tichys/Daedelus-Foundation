@@ -81,6 +81,16 @@
 	assemblytype = /obj/structure/door_assembly/door_assembly_sc
 	req_access = list(ACCESS_SCIENCE)
 	normal_integrity = 500
+	var/zone_name = "UNKNOWN"
+	var/clearance_message = "Insufficient clearance for this zone."
+
+/obj/machinery/door/airlock/scp/do_animate(animation)
+	. = ..()
+	if(animation == "deny")
+		playsound(src, 'sound/machines/deniedbeep.ogg', 50, FALSE, 3)
+		var/mob/user = usr
+		if(user && ishuman(user))
+			to_chat(user, span_warning("[clearance_message]"))
 
 /obj/machinery/door/airlock/scp/containment
 	name = "Containment Door"
@@ -102,11 +112,21 @@
 /obj/machinery/door/airlock/scp/lcz
 	name = "LCZ Airlock"
 	req_access = list(ACCESS_LCZ)
+	zone_name = "Light Containment Zone"
+	clearance_message = "ACCESS DENIED: LCZ clearance required. Report to your supervisor for access authorization."
 
 /obj/machinery/door/airlock/scp/hcz
 	name = "HCZ Airlock"
 	req_access = list(ACCESS_HCZ)
+	zone_name = "Heavy Containment Zone"
+	clearance_message = "ACCESS DENIED: HCZ Level 3+ clearance required. Unauthorized entry to Keter containment is grounds for immediate termination."
 
 /obj/machinery/door/airlock/scp/ez
 	name = "EZ Airlock"
 	req_access = list(ACCESS_EZ)
+	zone_name = "Entrance Zone"
+	clearance_message = "ACCESS DENIED: EZ clearance required. All visitors must be escorted by Foundation personnel."
+
+/obj/machinery/door/airlock/scp/dclass
+	zone_name = "D-Class Block"
+	clearance_message = "ACCESS DENIED: D-Class personnel must remain in designated areas. Unauthorized departure is grounds for immediate termination."

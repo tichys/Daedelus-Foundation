@@ -360,10 +360,6 @@
 /datum/component_manager_advanced
 	var/datum/scp_component_effect_manager/effect_manager = null
 
-/datum/component_manager_advanced/New(mob/target)
-	. = ..()
-	effect_manager = new /datum/scp_component_effect_manager()
-
 /datum/component_manager_advanced/proc/add_effect(effect_type, source_component, config_data)
 	if(!effect_manager)
 		return FALSE

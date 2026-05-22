@@ -67,7 +67,7 @@ export const ScpDclassWorkBoard = (_props: unknown) => {
   const { assignments = [], current_assignment, credits, trust, level } = data;
 
   return (
-    <Window width={500} height={600} theme="scp" backgroundColor={C.bg}>
+    <Window width={500} height={600} theme="scp_terminal" backgroundColor={C.bg}>
       <Window.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
