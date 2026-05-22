@@ -528,39 +528,91 @@ const TechTreeTab = (props) => {
 
 const TeamsTab = (props) => {
   const { act, data } = useBackend();
-  const { research_teams, researcher_skills } = data;
+  const { research_teams, researcher_skills, user_ckey } = data;
+  const [showCreate, setShowCreate] = React.useState(false);
+  const [teamName, setTeamName] = React.useState('');
 
   const teamList = research_teams ? Object.values(research_teams) : [];
   const skills = researcher_skills || {};
 
+  const userTeamId = (() => {
+    for (const team of teamList) {
+      for (const m of team.members || []) {
+        if (m.ckey === user_ckey) return team.id;
+      }
+    }
+    return null;
+  })();
+
+  const handleCreate = () => {
+    act('create_team', { name: teamName || undefined });
+    setTeamName('');
+    setShowCreate(false);
+  };
+
   return (
     <Section title="Research Teams" buttons={
-      <Button icon="plus" onClick={() => act('create_team', { name: 'Research Team Alpha' })}>
+      <Button icon="plus" onClick={() => setShowCreate(!showCreate)}>
         New Team
       </Button>
     }>
+      {showCreate && (
+        <Section title="Create Team" level={2} mb={1}>
+          <LabeledList>
+            <LabeledList.Item label="Team Name">
+              <Input
+                value={teamName}
+                placeholder="Leave blank for auto-name..."
+                onChange={(e, value) => setTeamName(value)}
+                fluid
+              />
+            </LabeledList.Item>
+            <LabeledList.Item label="Actions">
+              <Button icon="check" color="good" onClick={handleCreate}>
+                Create
+              </Button>
+              <Button onClick={() => setShowCreate(false)}>
+                Cancel
+              </Button>
+            </LabeledList.Item>
+          </LabeledList>
+        </Section>
+      )}
       <Flex>
         <Flex.Item width="55%">
           {teamList.length > 0 ? (
-            teamList.map((team) => (
-              <Section key={team.id} title={team.name || team.id} level={2} buttons={
-                <Button icon="user-plus" size="tiny" onClick={() => act('add_team_member', { team_id: team.id })}>
-                  Join
-                </Button>
-              }>
-                <LabeledList>
-                  <LabeledList.Item label="Status">
-                    <Box color={team.status === 'active' ? 'good' : 'bad'}>{team.status}</Box>
-                  </LabeledList.Item>
-                  <LabeledList.Item label="Members">
-                    {(team.members || []).map((m) => m.name).join(', ') || 'None'}
-                  </LabeledList.Item>
-                  <LabeledList.Item label="Experiments Completed">
-                    {team.completed_experiments || 0}
-                  </LabeledList.Item>
-                </LabeledList>
-              </Section>
-            ))
+            teamList.map((team) => {
+              const isMember = (team.members || []).some((m) => m.ckey === user_ckey);
+              return (
+                <Section key={team.id} title={team.name || team.id} level={2} buttons={
+                  isMember ? (
+                    <Button icon="user-minus" size="tiny" color="bad" onClick={() => act('remove_team_member', { team_id: team.id, ckey: user_ckey })}>
+                      Leave
+                    </Button>
+                  ) : !userTeamId ? (
+                    <Button icon="user-plus" size="tiny" color="good" onClick={() => act('add_team_member', { team_id: team.id })}>
+                      Join
+                    </Button>
+                  ) : (
+                    <Button icon="user-plus" size="tiny" disabled tooltip="Already in a team">
+                      Join
+                    </Button>
+                  )
+                }>
+                  <LabeledList>
+                    <LabeledList.Item label="Status">
+                      <Box color={team.status === 'active' ? 'good' : 'bad'}>{team.status}</Box>
+                    </LabeledList.Item>
+                    <LabeledList.Item label="Members">
+                      {(team.members || []).map((m) => m.name).join(', ') || 'None'}
+                    </LabeledList.Item>
+                    <LabeledList.Item label="Experiments Completed">
+                      {team.completed_experiments || 0}
+                    </LabeledList.Item>
+                  </LabeledList>
+                </Section>
+              );
+            })
           ) : (
             <Box color="label" p={2}>No research teams created yet.</Box>
           )}
@@ -652,10 +704,7 @@ const AdminTab = (props) => {
       <Flex wrap="wrap">
         <Flex.Item width="48%" m={0.5}>
           <Section title="Quick Actions" level={2}>
-            <Button icon="plus" fluid mb={0.5} onClick={() => act('create_project', { name: 'Admin Research Project', description: 'Admin-created project.', risk_level: 3, research_points: 500, scp_target: '' })}>
-              Create Research Project
-            </Button>
-            <Button icon="users" fluid mb={0.5} onClick={() => act('create_team', { name: 'Admin Team' })}>
+            <Button icon="users" fluid mb={0.5} onClick={() => act('create_team', {})}>
               Create Research Team
             </Button>
             <Button icon="shield-alt" fluid mb={0.5} onClick={() => act('record_violation', { protocol_id: 'safety_standard' })}>

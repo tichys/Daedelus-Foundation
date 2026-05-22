@@ -178,8 +178,29 @@ SUBSYSTEM_DEF(research_laboratory)
 	research_projects -= project_id
 	return TRUE
 
+/datum/research_laboratory_manager/var/list/team_name_registry = list()
+
+/datum/research_laboratory_manager/proc/get_next_team_name()
+	var/static/list/nato_names = list("Alpha", "Beta", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India", "Juliet", "Kilo", "Lima", "Mike", "November", "Oscar", "Papa", "Quebec", "Romeo", "Sierra", "Tango", "Uniform", "Victor", "Whiskey", "Xray", "Yankee", "Zulu")
+	for(var/i in 1 to length(nato_names))
+		var/base_name = "Research Team [nato_names[i]]"
+		if(!(base_name in team_name_registry))
+			team_name_registry[base_name] = TRUE
+			return base_name
+	var/suffix = 2
+	while(TRUE)
+		var/fallback_name = "Research Team [nato_names[length(nato_names)]]-[suffix]"
+		if(!(fallback_name in team_name_registry))
+			team_name_registry[fallback_name] = TRUE
+			return fallback_name
+		suffix++
+
 /datum/research_laboratory_manager/proc/create_research_team(list/team_data)
 	var/team_id = "team_[world.time]_[rand(1000, 9999)]"
+	if(!team_data["name"])
+		team_data["name"] = get_next_team_name()
+	else
+		team_name_registry[team_data["name"]] = TRUE
 	team_data["id"] = team_id
 	team_data["creation_time"] = world.time
 	team_data["status"] = "active"
@@ -193,6 +214,18 @@ SUBSYSTEM_DEF(research_laboratory)
 	var/list/team = research_teams[team_id]
 	if(!team)
 		return FALSE
+	if(!researcher.ckey)
+		return FALSE
+	for(var/list/existing in team["members"])
+		if(existing["ckey"] == researcher.ckey)
+			return FALSE
+	for(var/other_id in research_teams)
+		if(other_id == team_id)
+			continue
+		var/list/other_team = research_teams[other_id]
+		for(var/list/existing in other_team["members"])
+			if(existing["ckey"] == researcher.ckey)
+				return FALSE
 	team["members"] += list(list(
 		"ckey" = researcher.ckey,
 		"name" = researcher.real_name,
