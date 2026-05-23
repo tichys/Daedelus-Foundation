@@ -1,4 +1,5 @@
 /mob/living/scp/scp2343
+	ai_enabled = TRUE
 	name = "strange american man"
 	desc = "A brusk and wiley man of american decent."
 	icon = 'icons/scp/scp_2343.dmi'
@@ -50,3 +51,19 @@
 /mob/living/scp/scp2343/examine(mob/living/user)
 	. = ..()
 	to_chat(user, "<span class='notice'>This being seems to have reality-bending powers.</span>")
+
+/mob/living/scp/scp2343/process_ai()
+	if(stat == DEAD)
+		return
+
+	var/mob/living/carbon/human/H = locate() in view(5, src)
+	if(H && H.stat != DEAD)
+		if(get_dist(src, H) > 2)
+			ai_step_towards(H)
+		else if(prob(8))
+			var/phrases = list("Need some help?", "Things will be alright.", "I can fix that.", "Don't worry about it.")
+			say(pick(phrases))
+		return
+
+	if(prob(10))
+		step_rand(src)

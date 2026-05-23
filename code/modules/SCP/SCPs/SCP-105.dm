@@ -1,4 +1,5 @@
 /mob/living/scp/scp105
+	ai_enabled = TRUE
 	name = "SCP-105"
 	desc = "A young woman with blonde hair. She possesses the ability to manipulate photographs of locations she can see through cameras."
 	icon = 'icons/mob/human.dmi'
@@ -150,3 +151,16 @@
 		qdel(src)
 	else
 		return ..()
+
+/mob/living/scp/scp105/process_ai()
+	if(stat == DEAD)
+		return
+
+	if(prob(8))
+		var/mob/living/carbon/human/H = locate() in view(4, src)
+		if(H && H.stat != DEAD)
+			var/phrases = list("Hello.", "How are you?", "I can help, if you need it.", "Nice day, isn't it?")
+			say(pick(phrases))
+
+	if(prob(10))
+		step_rand(src)

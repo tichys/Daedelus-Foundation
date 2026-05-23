@@ -131,6 +131,9 @@
 
 	return ..()
 
+/mob/living/scp/scp173/process_ai()
+	return
+
 /mob/living/scp/scp173/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
 	if(.)
@@ -178,7 +181,7 @@
 		for(var/mob/living/carbon/human/H in current_observers)
 			on_observation_start(H)
 	else if(!is_being_observed && was_observed)
-		for(var/mob/living/carbon/human/H in observers)
+		for(var/mob/living/carbon/human/H in scp173_observers)
 			on_observation_end(H)
 
 	var/atom/blink_source = istype(loc, /obj/structure/scp173_cage) ? loc : src
@@ -263,9 +266,6 @@
 	feces_count = CountFeces()
 
 	if(feces_count >= 60)
-		var/area/A = get_area(src)
-		if(A)
-			priority_announce("SCP-173 containment chamber contamination critical. Breach imminent.", "SCP-173 Alert", sub_title = "Containment Warning", sound_type = ANNOUNCER_ALERT)
 		hook_scp_breach("SCP-173", src)
 		breach_count++
 	else if(feces_count >= 40)
@@ -287,7 +287,6 @@
 	return status_items
 
 /mob/living/scp/scp173/death(gibbed)
-	hook_scp_breach("SCP-173", src)
 	return ..()
 
 /mob/living/scp/scp173/proc/scp914_refine(setting, obj/machinery/scp914/machine)

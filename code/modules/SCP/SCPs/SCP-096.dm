@@ -1,16 +1,6 @@
 // SCP-096 - The Shy Guy
 // A tall, thin humanoid that becomes enraged when its face is viewed
-
-#define SCP096_DOCILE "docile"
-#define SCP096_SCREAMING "screaming"
-#define SCP096_PURSUING "pursuing"
-#define SCP096_VIEW_RANGE 12
-#define SCP096_SCREAM_PHASE_MIN (60 SECONDS)
-#define SCP096_SCREAM_PHASE_MAX (120 SECONDS)
-#define SCP096_PURSUIT_SPEED_MOD -3
-#define SCP096_PURSUIT_DAMAGE 60
-#define SCP096_RAGE_DAMAGE_MULT 0.15
-#define SCP096_FACE_COVER_EMOTE_COOLDOWN (10 SECONDS)
+// Defines moved to code/modules/SCP/scp_defines.dm
 
 /datum/movespeed_modifier/scp096_pursuit
 	id = "scp096_pursuit"
@@ -414,7 +404,6 @@
 
 /mob/living/scp/scp096/death(gibbed)
 	STOP_PROCESSING(SSobj, src)
-	hook_scp_recontainment("SCP-096", list())
 	. = ..()
 
 /mob/living/scp/scp096/Logout()
@@ -460,13 +449,3 @@
 			trigger_face_view(H)
 			return
 
-#undef SCP096_DOCILE
-#undef SCP096_SCREAMING
-#undef SCP096_PURSUING
-#undef SCP096_VIEW_RANGE
-#undef SCP096_SCREAM_PHASE_MIN
-#undef SCP096_SCREAM_PHASE_MAX
-#undef SCP096_PURSUIT_SPEED_MOD
-#undef SCP096_PURSUIT_DAMAGE
-#undef SCP096_RAGE_DAMAGE_MULT
-#undef SCP096_FACE_COVER_EMOTE_COOLDOWN

@@ -162,6 +162,14 @@ SUBSYSTEM_DEF(scp_persistence)
 			continue
 		project.update_progress()
 
+/datum/scp_persistence_manager/proc/remove_research_project(project_id)
+	var/datum/research_project/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	research_projects -= project_id
+	qdel(project)
+	return TRUE
+
 /datum/scp_persistence_manager/proc/update_containment_protocols()
 	for(var/protocol_id in containment_protocols.Copy())
 		var/datum/containment_protocol/protocol = containment_protocols[protocol_id]

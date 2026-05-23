@@ -149,6 +149,7 @@
 /mob/living/simple_animal/scp131/death(gibbed, cause_of_death = "Unknown")
 	scp173_stared = FALSE
 	visible_message("<span class='danger'>[src] closes its eye and goes still!</span>")
+	hook_scp_recontainment("SCP-131", list())
 	..()
 
 /mob/living/simple_animal/scp131/examine(mob/user)

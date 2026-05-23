@@ -56,6 +56,7 @@
 	SCP.min_time = 10 MINUTES
 	available_abilities = list("camera_hop", "toggle_door", "flicker_lights", "broadcast_message")
 	locate_initial_camera()
+	setup_containment_system()
 
 /mob/living/scp079/Destroy()
 	hacked_doors = null
@@ -418,6 +419,7 @@
 	visible_message(span_danger("[src]'s screen goes dark. The entity within screeches one last time through the speakers before falling silent."))
 	hacked_doors?.Cut()
 	is_manifested = FALSE
+	hook_scp_recontainment("SCP-079", list())
 	if(SSscp_persistence?.manager?.scp_instances?["SCP-079"])
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-079"]
 		instance.containment_status = "neutralized"
@@ -653,7 +655,8 @@
 	hack_progress = 0
 	current_stage = 1
 	visible_message(span_notice("[src] begins the countermeasure sequence against SCP-079!"))
-	priority_announce("ATTENTION: SCP-079 recontainment countermeasures initiated. Network isolation in progress.", null, null, ANNOUNCER_ALERT)
+	// Automated announcements removed - dispatch/AIC should announce recontainment
+	// priority_announce("ATTENTION: SCP-079 recontainment countermeasures initiated. Network isolation in progress.", null, null, ANNOUNCER_ALERT)
 
 	START_PROCESSING(SSobj, src)
 
@@ -772,5 +775,6 @@
 			hack_progress = 0
 			current_stage = 1
 			visible_message(span_notice("[src] begins the countermeasure sequence against SCP-079!"))
-			priority_announce("ATTENTION: SCP-079 recontainment countermeasures initiated. Network isolation in progress.", null, null, ANNOUNCER_ALERT)
+			// Automated announcements removed - dispatch/AIC should announce recontainment
+			// priority_announce("ATTENTION: SCP-079 recontainment countermeasures initiated. Network isolation in progress.", null, null, ANNOUNCER_ALERT)
 			START_PROCESSING(SSobj, src)
