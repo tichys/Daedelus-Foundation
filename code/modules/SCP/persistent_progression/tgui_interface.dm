@@ -315,7 +315,7 @@
 
 	return data
 
-/datum/persistent_progression_ui/ui_act(action, params)
+/datum/persistent_progression_ui/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
@@ -518,7 +518,7 @@
 	data["players"] = players
 	return data
 
-/datum/persistent_progression_admin_ui/ui_act(action, params)
+/datum/persistent_progression_admin_ui/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return

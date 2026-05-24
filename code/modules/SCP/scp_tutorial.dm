@@ -85,7 +85,7 @@
 	data["pages"] = pages
 	return data
 
-/obj/machinery/computer/scp_tutorial_console/ui_act(action, params)
+/obj/machinery/computer/scp_tutorial_console/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
