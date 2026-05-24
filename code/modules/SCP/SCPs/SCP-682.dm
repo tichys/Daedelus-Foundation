@@ -57,6 +57,11 @@
 	update_fov_angles()
 	update_cone_show()
 
+	add_verb(src, list(
+		/mob/living/scp/scp682/proc/verb_rampage,
+		/mob/living/scp/scp682/proc/verb_berserk,
+	))
+
 /mob/living/scp/scp682/Destroy()
 	QDEL_NULL(evolution_system)
 	QDEL_NULL(threat_system)
@@ -282,7 +287,7 @@
 		total_regen += SCP682_CRITICAL_REGENERATION_BONUS
 	. += "Regeneration Rate: [total_regen] HP/sec"
 
-/mob/living/scp/scp682/verb/verb_rampage()
+/mob/living/scp/scp682/proc/verb_rampage()
 	set name = "Rampage"
 	set category = "SCP-682"
 	visible_message(span_danger("[src] goes on a rampage, lashing out at everything!"))
@@ -300,7 +305,7 @@
 	if(combat_system)
 		combat_system.perform_area_attack()
 
-/mob/living/scp/scp682/verb/verb_berserk()
+/mob/living/scp/scp682/proc/verb_berserk()
 	set name = "Berserk Frenzy"
 	set category = "SCP-682"
 	add_movespeed_modifier(/datum/movespeed_modifier/scp682_berserk)

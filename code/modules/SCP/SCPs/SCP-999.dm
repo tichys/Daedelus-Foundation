@@ -53,6 +53,10 @@
 	max_scp_armor = 25
 	scp_armor = max_scp_armor
 
+	add_verb(src, list(
+		/mob/living/scp/scp999/proc/verb_comfort_zone,
+	))
+
 /mob/living/scp/scp999/Destroy()
 	healed_targets = list()
 	mood_improved_targets = list()
@@ -374,7 +378,7 @@
 	. += "Healing Sessions: [healing_sessions]"
 	. += "Mood Improved: [mood_improvements]"
 
-/mob/living/scp/scp999/verb/verb_comfort_zone()
+/mob/living/scp/scp999/proc/verb_comfort_zone()
 	set name = "Comfort Zone"
 	set category = "SCP-999"
 	comfort_zone_ability()

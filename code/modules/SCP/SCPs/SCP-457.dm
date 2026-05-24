@@ -58,6 +58,10 @@
 	addtimer(CALLBACK(src, PROC_REF(CreateInitialFires)), 1)
 	RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(on_move_absorb_fires))
 
+	add_verb(src, list(
+		/mob/living/scp/scp457/proc/verb_hurl_fireball,
+	))
+
 /mob/living/scp/scp457/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
 	return
 
@@ -399,7 +403,7 @@
 	. += "Active Fires: [length(active_fires)]"
 	. += "Containment Level: [containment_level]"
 
-/mob/living/scp/scp457/verb/verb_hurl_fireball()
+/mob/living/scp/scp457/proc/verb_hurl_fireball()
 	set name = "Hurl Fireball"
 	set category = "SCP-457"
 	var/list/targets = list()

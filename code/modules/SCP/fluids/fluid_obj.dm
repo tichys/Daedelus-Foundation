@@ -50,9 +50,9 @@
 /obj/fluid/proc/handle_mob_interaction(mob/living/L)
 	if(depth_level >= FLUID_DEPTH_WADE && viscosity > 3)
 		L.add_movespeed_modifier(/datum/movespeed_modifier/flesh_corruption)
-		addtimer(CALLBACK(L, TYPE_PROC_REF(/mob/living, remove_movespeed_modifier), /datum/movespeed_modifier/flesh_corruption), 3 SECONDS)
+		addtimer(CALLBACK(L, TYPE_PROC_REF(/mob, remove_movespeed_modifier), /datum/movespeed_modifier/flesh_corruption), 3 SECONDS)
 
-	if(depth_level >= FLUID_DEPTH_SHALLOW && prob(50 - viscosity * 5))
+	if(depth_level >= FLUID_DEPTH_SHALLOW && prob(max(0, 50 - viscosity * 5)))
 		L.slip(4 SECONDS, src, NO_SLIP_WHEN_WALKING)
 
 	if(group?.fluid_reagents && depth_level >= FLUID_DEPTH_WADE)

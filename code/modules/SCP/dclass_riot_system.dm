@@ -26,6 +26,9 @@
 	if(riot_active)
 		return
 	riot_active = TRUE
+	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		if(findtext(H.job, "D-Class"))
+			add_verb(H, list(/mob/living/carbon/human/proc/join_riot, /mob/living/carbon/human/proc/refuse_riot))
 	stage = 1
 	var/num_demands = rand(2, 3)
 	demands = list()
@@ -206,6 +209,8 @@
 
 /datum/dclass_riot/proc/end_riot(violent)
 	riot_active = FALSE
+	for(var/mob/living/carbon/human/H in GLOB.player_list)
+		remove_verb(H, list(/mob/living/carbon/human/proc/join_riot, /mob/living/carbon/human/proc/refuse_riot))
 	var/old_stage = stage
 	log_game("D-Class Riot ended: [partial_win ? "partial win" : "suppressed"]")
 	stage = 0
@@ -327,7 +332,7 @@ SUBSYSTEM_DEF(dclass_riot)
 	flags &= ~SS_NO_FIRE
 	return TRUE
 
-/mob/living/carbon/human/verb/join_riot()
+/mob/living/carbon/human/proc/join_riot()
 	set name = "Join Riot"
 	set category = "D-Class"
 	set desc = "Join the D-Class riot."
@@ -338,7 +343,7 @@ SUBSYSTEM_DEF(dclass_riot)
 		return
 	SSdclass_riot.current_riot.dclass_join(src)
 
-/mob/living/carbon/human/verb/refuse_riot()
+/mob/living/carbon/human/proc/refuse_riot()
 	set name = "Refuse Riot"
 	set category = "D-Class"
 	set desc = "Refuse to participate in the D-Class riot."

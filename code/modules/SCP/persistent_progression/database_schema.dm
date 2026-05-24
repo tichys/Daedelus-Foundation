@@ -149,6 +149,7 @@
 		"total_objectives" = 0,
 		"total_scp_interactions" = 0,
 		"total_containment_breaches" = 0,
+		"total_recontainments" = 0,
 		"total_research_completed" = 0,
 		"total_treatments" = 0,
 		"total_constructions" = 0,
@@ -180,7 +181,7 @@
 	if(!players[ckey])
 		return FALSE
 
-	var/list/safe_keys = list("current_class_id", "current_faction_id", "current_rank", "current_rank_name", "total_experience", "rounds_played", "rounds_survived", "rounds_died", "preferred_class", "preferred_faction", "total_kills", "total_deaths", "total_healing", "total_damage_dealt", "total_objectives", "total_scp_interactions", "total_containment_breaches", "total_research_completed", "total_treatments", "total_constructions", "total_repairs", "total_arrests", "reputation_score", "total_playtime", "current_streak", "longest_streak", "current_job", "skill_boost_multiplier", "achievement_points", "total_achievements_unlocked", "data_version")
+	var/list/safe_keys = list("current_class_id", "current_faction_id", "current_rank", "current_rank_name", "total_experience", "rounds_played", "rounds_survived", "rounds_died", "preferred_class", "preferred_faction", "total_kills", "total_deaths", "total_healing", "total_damage_dealt", "total_objectives", "total_scp_interactions", "total_containment_breaches", "total_recontainments", "total_research_completed", "total_treatments", "total_constructions", "total_repairs", "total_arrests", "reputation_score", "total_playtime", "current_streak", "longest_streak", "current_job", "skill_boost_multiplier", "achievement_points", "total_achievements_unlocked", "data_version")
 	for(var/key in safe_keys)
 		if(!isnull(data[key]))
 			players[ckey][key] = data[key]

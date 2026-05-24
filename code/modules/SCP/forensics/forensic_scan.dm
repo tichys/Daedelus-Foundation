@@ -13,8 +13,8 @@
 	if(holder)
 		fingerprints_found = holder.fingerprints ? holder.fingerprints.Copy() : null
 		dna_found = holder.dna_samples ? holder.dna_samples.Copy() : null
-		anomalies_found = holder.anomaly_evidence ? holder.anomaly_evidence.Copy() : null
-		traces_found = holder.trace_evidence ? holder.trace_evidence.Copy() : null
+		anomalies_found = holder.anomaly_evidence ? deep_copy_list(holder.anomaly_evidence) : null
+		traces_found = holder.trace_evidence ? deep_copy_list(holder.trace_evidence) : null
 
 /datum/forensic_scan_result/proc/build_report()
 	var/list/report = list()

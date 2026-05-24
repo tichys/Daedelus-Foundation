@@ -22,6 +22,10 @@
 
 	START_PROCESSING(SSobj, src)
 
+	add_verb(src, list(
+		/mob/living/scp/scp343/proc/verb_divine_zone,
+	))
+
 
 /mob/living/scp/scp343/Destroy()
 	STOP_PROCESSING(SSobj, src)
@@ -126,7 +130,7 @@
 			return
 	return ..()
 
-/mob/living/scp/scp343/verb/verb_divine_zone()
+/mob/living/scp/scp343/proc/verb_divine_zone()
 	set name = "Divine Zone"
 	set category = "SCP-343"
 	divine_zone_ability()

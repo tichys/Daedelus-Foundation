@@ -1,3 +1,5 @@
+GLOBAL_LIST_EMPTY(ritual_components)
+
 /datum/ritual_component
 	var/name
 	var/flags
@@ -60,5 +62,3 @@
 		if(get_dist(owner, comp.owner) <= range)
 			link_to_anchor(comp)
 			break
-
-GLOBAL_LIST_EMPTY(ritual_components)

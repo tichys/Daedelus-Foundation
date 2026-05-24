@@ -28,6 +28,11 @@
 	health = maxHealth
 	alpha = 200
 
+	add_verb(src, list(
+		/mob/living/scp/scp408/proc/toggle_invisibility,
+		/mob/living/scp/scp408/proc/disrupt_vision,
+	))
+
 /mob/living/scp/scp408/Destroy()
 	deactivate_invisibility()
 	deactivate_disruption()
@@ -87,7 +92,7 @@
 			if(prob(5))
 				healing_aura()
 
-/mob/living/scp/scp408/verb/toggle_invisibility()
+/mob/living/scp/scp408/proc/toggle_invisibility()
 	set name = "Toggle Invisibility"
 	set category = "SCP-408"
 	set desc = "Become invisible to the naked eye."
@@ -115,7 +120,7 @@
 	invisibility_cooldown = 200
 	visible_message("<span class='notice'>A swarm of iridescent butterflies materializes!</span>")
 
-/mob/living/scp/scp408/verb/disrupt_vision()
+/mob/living/scp/scp408/proc/disrupt_vision()
 	set name = "Visual Disruption"
 	set category = "SCP-408"
 	set desc = "Disrupt the vision of nearby creatures."

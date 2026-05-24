@@ -48,6 +48,7 @@
 		"total_player_kills" = 0,
 		"total_scp_interactions" = 0,
 		"total_containment_breaches" = 0,
+		"total_recontainments" = 0,
 		"total_research_discoveries" = 0,
 		"total_medical_treatments" = 0,
 		"total_engineering_builds" = 0,

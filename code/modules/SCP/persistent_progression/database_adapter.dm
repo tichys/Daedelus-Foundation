@@ -42,6 +42,7 @@
 	data.total_objectives = text2num(db_row["total_objectives"]) || 0
 	data.total_scp_interactions = text2num(db_row["total_scp_interactions"]) || 0
 	data.total_containment_breaches = text2num(db_row["total_containment_breaches"]) || 0
+	data.total_recontainments = text2num(db_row["total_recontainments"]) || 0
 	data.total_research_completed = text2num(db_row["total_research_completed"]) || 0
 	data.total_treatments = text2num(db_row["total_treatments"]) || 0
 	data.total_constructions = text2num(db_row["total_constructions"]) || 0
@@ -151,6 +152,7 @@
 	db_data["total_objectives"] = data.total_objectives
 	db_data["total_scp_interactions"] = data.total_scp_interactions
 	db_data["total_containment_breaches"] = data.total_containment_breaches
+	db_data["total_recontainments"] = data.total_recontainments
 	db_data["total_research_completed"] = data.total_research_completed
 	db_data["total_treatments"] = data.total_treatments
 	db_data["total_constructions"] = data.total_constructions

@@ -19,13 +19,13 @@
 #define NETWORK_NODE_COMPROMISED 3
 #endif
 
-var/list/GLOB_scp_breach_cooldown = list()
+var/list/scp_breach_cooldown = list()
 
 /proc/hook_scp_breach(scp_id, atom/scp_atom)
 	if(!scp_id)
 		return FALSE
 
-	if(GLOB_scp_breach_cooldown[scp_id] && world.time < GLOB_scp_breach_cooldown[scp_id])
+	if(scp_breach_cooldown[scp_id] && world.time < scp_breach_cooldown[scp_id])
 		return FALSE
 
 	if(SSscp_persistence && SSscp_persistence.manager)
@@ -33,7 +33,7 @@ var/list/GLOB_scp_breach_cooldown = list()
 		if(instance && instance.containment_status == "breached")
 			return FALSE
 
-	GLOB_scp_breach_cooldown[scp_id] = world.time + 5 MINUTES
+	scp_breach_cooldown[scp_id] = world.time + 5 MINUTES
 
 	var/breach_zone = "unknown"
 	if(scp_atom)
@@ -47,7 +47,7 @@ var/list/GLOB_scp_breach_cooldown = list()
 
 	if(breach_zone == "lcz" || breach_zone == "hcz")
 		set_zone_emergency_lighting(breach_zone, TRUE)
-		addtimer(CALLBACK(GLOBAL_PROC, /proc/set_zone_emergency_lighting, breach_zone, FALSE), 5 MINUTES)
+		addtimer(CALLBACK(GLOBAL_PROC, /proc/conditional_restore_zone_lighting, breach_zone, scp_id), 5 MINUTES)
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
@@ -136,6 +136,16 @@ var/list/GLOB_scp_breach_cooldown = list()
 	hook_breach_triage_detection(scp_id, scp_atom)
 	hook_breach_patrol_generation(scp_id, scp_atom)
 
+	if(scp_atom && minimap_renderer)
+		var/datum/minimap_marker/marker = new(scp_atom, MINIMAP_LAYER_SECURITY | MINIMAP_LAYER_MTF | MINIMAP_LAYER_COMMAND, "#ff0000", "minimap_breach_[scp_id]")
+		GLOB.minimap_markers[scp_id] = marker
+
+	if(GLOB.foundation_network)
+		var/datum/net_bus/containment_bus = GLOB.foundation_network.get_bus(NET_CHANNEL_CONTAINMENT)
+		if(containment_bus)
+			var/datum/net_signal/breach_signal = new(list("scp_id" = scp_id, "zone" = breach_zone, "time" = world.time), NET_CMD_ALERT, null, NET_TRANSMIT_WIRED)
+			containment_bus.broadcast_packet(breach_signal)
+
 	return TRUE
 
 /proc/get_scp_type_from_id(scp_id)
@@ -168,7 +178,7 @@ var/list/GLOB_scp_breach_cooldown = list()
 	if(!scp_id)
 		return FALSE
 
-	GLOB_scp_breach_cooldown -= scp_id
+	scp_breach_cooldown -= scp_id
 
 	log_game("SCP Recontained: [scp_id]")
 
@@ -200,7 +210,7 @@ var/list/GLOB_scp_breach_cooldown = list()
 					SSpersistent_progression.award_experience(H.ckey, "scp_containment_assist", 0, "SCP-[scp_id] Recontainment")
 					var/datum/persistent_player_data/pdata = SSpersistent_progression.get_player_data(H.ckey)
 					if(pdata)
-						pdata.total_containment_breaches++
+						pdata.total_recontainments++
 						if(pdata.current_job)
 							pdata.respond_to_containment_breach(pdata.current_job, scp_id, "recontainment", "successful")
 
@@ -234,6 +244,11 @@ var/list/GLOB_scp_breach_cooldown = list()
 	hook_recontainment_budget_recovery(scp_id, participants)
 	hook_recontainment_security_level_downgrade()
 	hook_recontainment_integrity_repair(scp_id)
+
+	var/datum/minimap_marker/old_marker = GLOB.minimap_markers[scp_id]
+	if(old_marker)
+		GLOB.minimap_markers -= scp_id
+		qdel(old_marker)
 
 	return TRUE
 

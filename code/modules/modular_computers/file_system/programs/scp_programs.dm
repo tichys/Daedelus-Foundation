@@ -718,6 +718,28 @@
 		data["access_denied"] = TRUE
 		return data
 	data["access_denied"] = FALSE
+	if(!SSsite_command)
+		data["status"] = list(
+			"total_breaches" = 0,
+			"active_breaches" = 0,
+			"total_recontainments" = 0,
+			"power_status" = "Unknown",
+			"comms_status" = "Unknown",
+			"casualties" = 0,
+			"dclass_alive" = 0,
+			"dclass_escaped" = 0,
+			"research_points" = 0,
+			"time" = 0,
+		)
+		data["directives"] = list()
+		data["total_directives"] = 0
+		data["budget_spent"] = 0
+		data["budget_total"] = 0
+		data["ethics_pending"] = 0
+		data["tribunal_cases"] = 0
+		data["research_points"] = 0
+		data["network_integrity"] = 100
+		return data
 	if(SSsite_command.current_report)
 		var/datum/facility_status_report/R = SSsite_command.current_report
 		data["status"] = list(
@@ -777,6 +799,8 @@
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_ADMIN_LVL5 in id_card.access))
+		return
+	if(!SSsite_command)
 		return
 	switch(action)
 		if("print_status_report")
@@ -1799,9 +1823,9 @@
 /datum/computer_file/program/scp_recontainment_guide/ui_data(mob/user)
 	var/list/data = get_header_data()
 	var/list/all_guides = list()
-	var/datum/scp_recontainment_guide/_G = new()
-	for(var/key in _G.guide_entries)
-		var/list/entry = _G.guide_entries[key]
+	var/list/entries = new /datum/scp_recontainment_guide().guide_entries
+	for(var/key in entries)
+		var/list/entry = entries[key]
 		all_guides += list(list("designation" = entry["designation"], "class" = entry["class"], "threat" = entry["threat"], "procedures" = entry["procedures"], "warning" = entry["warning"]))
 	data["guides"] = all_guides
 	return data

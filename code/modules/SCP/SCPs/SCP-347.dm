@@ -31,6 +31,11 @@
 
 	apply_invisibility()
 
+	add_verb(src, list(
+		/mob/living/scp/scp347/proc/verb_stealth_sprint,
+		/mob/living/scp/scp347/proc/verb_toggle_visibility,
+	))
+
 /mob/living/scp/scp347/Life()
 	. = ..()
 	if(stat == DEAD)
@@ -189,12 +194,12 @@
 			return
 	return ..()
 
-/mob/living/scp/scp347/verb/verb_stealth_sprint()
+/mob/living/scp/scp347/proc/verb_stealth_sprint()
 	set name = "Stealth Sprint"
 	set category = "SCP-347"
 	stealth_sprint()
 
-/mob/living/scp/scp347/verb/verb_toggle_visibility()
+/mob/living/scp/scp347/proc/verb_toggle_visibility()
 	set name = "Toggle Visibility"
 	set category = "SCP-347"
 	if(is_revealed)

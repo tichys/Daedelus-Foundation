@@ -235,6 +235,7 @@ SUBSYSTEM_DEF(persistent_progression)
 		"total_objectives" = data.total_objectives,
 		"total_scp_interactions" = data.total_scp_interactions,
 		"total_containment_breaches" = data.total_containment_breaches,
+		"total_recontainments" = data.total_recontainments,
 		"total_research_completed" = data.total_research_completed,
 		"total_treatments" = data.total_treatments,
 		"total_constructions" = data.total_constructions,
@@ -320,6 +321,7 @@ SUBSYSTEM_DEF(persistent_progression)
 	data.total_objectives = load_data["total_objectives"] || 0
 	data.total_scp_interactions = load_data["total_scp_interactions"] || 0
 	data.total_containment_breaches = load_data["total_containment_breaches"] || 0
+	data.total_recontainments = load_data["total_recontainments"] || 0
 	data.total_research_completed = load_data["total_research_completed"] || 0
 	data.total_treatments = load_data["total_treatments"] || 0
 	data.total_constructions = load_data["total_constructions"] || 0

@@ -44,6 +44,11 @@
 	SCP.min_time = 10 MINUTES
 	grant_language(/datum/language/common, TRUE, TRUE)
 
+	add_verb(src, list(
+		/mob/living/scp/scp966/proc/verb_toggle_invisibility,
+		/mob/living/scp/scp966/proc/verb_stalk_target,
+	))
+
 /mob/living/scp/scp966/Life()
 	. = ..()
 	if(stat == DEAD)
@@ -125,7 +130,7 @@
 		return
 	to_chat(src, span_warning("[H] is too alert to attack effectively. Weaken them first with sleep deprivation."))
 
-/mob/living/scp/scp966/verb/verb_toggle_invisibility()
+/mob/living/scp/scp966/proc/verb_toggle_invisibility()
 	set name = "Toggle Invisibility"
 	set category = "SCP-966"
 	stealth_active = !stealth_active
@@ -134,7 +139,7 @@
 /mob/living/scp/scp966/proc/action_toggle_invisibility()
 	verb_toggle_invisibility()
 
-/mob/living/scp/scp966/verb/verb_stalk_target()
+/mob/living/scp/scp966/proc/verb_stalk_target()
 	set name = "Stalk Target"
 	set category = "SCP-966"
 	var/list/targets = list()

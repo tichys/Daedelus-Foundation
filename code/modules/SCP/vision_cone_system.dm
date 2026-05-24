@@ -400,18 +400,20 @@
 	alpha = 0
 
 // Test verbs
-/mob/living/verb/test_vision_cone()
+/mob/living/proc/test_vision_cone()
 	set name = "Test Vision Cone"
 	set category = "Debug"
-
+	if(!check_rights_for(src, R_DEBUG))
+		return
 	to_chat(src, "<span class='notice'>Testing vision cone system...</span>")
 	fovangle = FOV_DEFAULT
 	update_cone_show()
 
-/mob/living/verb/toggle_vision_cone()
+/mob/living/proc/toggle_vision_cone()
 	set name = "Toggle Vision Cone"
 	set category = "Debug"
-
+	if(!check_rights_for(src, R_DEBUG))
+		return
 	if(fovangle)
 		fovangle = 0
 		hide_cone()
@@ -421,34 +423,38 @@
 		show_cone()
 		to_chat(src, "<span class='notice'>Vision cone enabled.</span>")
 
-/mob/living/verb/remove_vision_cone()
+/mob/living/proc/remove_vision_cone()
 	set name = "Remove Vision Cone"
 	set category = "Debug"
-
+	if(!check_rights_for(src, R_DEBUG))
+		return
 	fovangle = 0
 	hide_cone()
 	to_chat(src, "<span class='notice'>Vision cone removed.</span>")
 
-/mob/living/verb/set_fov_left()
+/mob/living/proc/set_fov_left()
 	set name = "Set FOV Left"
 	set category = "Debug"
-
+	if(!check_rights_for(src, R_DEBUG))
+		return
 	fovangle = FOV_LEFT
 	update_vision_cone()
 	to_chat(src, "<span class='notice'>FOV set to left only.</span>")
 
-/mob/living/verb/set_fov_right()
+/mob/living/proc/set_fov_right()
 	set name = "Set FOV Right"
 	set category = "Debug"
-
+	if(!check_rights_for(src, R_DEBUG))
+		return
 	fovangle = FOV_RIGHT
 	update_vision_cone()
 	to_chat(src, "<span class='notice'>FOV set to right only.</span>")
 
-/mob/living/verb/set_fov_behind()
+/mob/living/proc/set_fov_behind()
 	set name = "Set FOV Behind"
 	set category = "Debug"
-
+	if(!check_rights_for(src, R_DEBUG))
+		return
 	fovangle = FOV_BEHIND
 	update_vision_cone()
 	to_chat(src, "<span class='notice'>FOV set to behind only.</span>")

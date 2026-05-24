@@ -63,7 +63,6 @@
 	containment_breached = TRUE
 	visible_message(span_danger("[user] breaks the seal on [src]! A horrible organic stench fills the air."))
 	containment_status = "breached"
-	hook_scp_breach("SCP-610", src)
 
 	var/turf/T = get_turf(src)
 	spread_system.begin_spread(T)
@@ -190,6 +189,9 @@
 	if(flesh_mob)
 		flesh_mob.name = "[target.name] (Flesh)"
 		flesh_mob.desc = "What was once [target.name], now consumed by SCP-610."
+		var/obj/structure/scp610_core/core = locate() in range(7, T)
+		if(core)
+			core.register_flesh_mob(flesh_mob)
 
 	owner?.spread_system?.spread_flesh_turf(T)
 
@@ -259,49 +261,6 @@
 	var/obj/structure/S = new structure_type(T)
 	flesh_structures += S
 
-/datum/scp610_spread_system/proc/do_spread()
-	if(!spread_active)
-		return
-
-	if(world.time < spread_cooldown)
-		return
-
-	spread_cooldown = world.time + spread_cooldown_time
-
-	if(current_spread_radius >= max_spread_radius)
-		return
-
-	current_spread_radius++
-
-	var/list/edge_turfs = list()
-	var/turf/center_turf = get_center_turf()
-	if(!center_turf)
-		return
-
-	for(var/turf/T in RANGE_TURFS(current_spread_radius, center_turf))
-		if(T.scp610_corrupted)
-			continue
-		if(T.density)
-			continue
-		if(get_dist(center_turf, T) >= current_spread_radius)
-			edge_turfs += T
-
-	for(var/turf/T in edge_turfs)
-		if(prob(60))
-			spread_flesh_turf(T)
-
-	if(current_spread_radius % flesh_node_interval == 0)
-		if(edge_turfs.len > 0)
-			var/turf/node_turf = pick(edge_turfs)
-			var/obj/structure/scp610_core/core = locate() in range(7, node_turf)
-			if(core)
-				core.place_creep(node_turf)
-				core.place_structure(/obj/structure/scp610_flesh_structure/growth_node, node_turf)
-
-	if(current_spread_radius % 2 == 0 && edge_turfs.len > 0)
-		var/turf/cable_turf = pick(edge_turfs)
-		place_flesh_structure(cable_turf, pick(/obj/structure/flesh_structure/flesh_cable_vert, /obj/structure/flesh_structure/flesh_cable_horz, /obj/structure/flesh_structure/flesh_cable_center))
-
 /datum/scp610_spread_system/proc/get_center_turf()
 	if(!owner)
 		return null
@@ -311,22 +270,6 @@
 	if(length(flesh_turfs))
 		return get_turf(flesh_turfs[1])
 	return null
-
-/datum/scp610_spread_system/proc/heal_flesh_mobs()
-	if(!spread_active)
-		return
-
-	var/turf/center = get_center_turf()
-	if(!center)
-		return
-
-	for(var/mob/living/simple_animal/hostile/scp610_fleshman/F in range(current_spread_radius, center))
-		if(F.health < F.maxHealth)
-			F.adjustHealth(-5)
-
-	for(var/mob/living/simple_animal/hostile/scp610_flesh_walker/W in range(current_spread_radius, center))
-		if(W.health < W.maxHealth)
-			W.adjustHealth(-3)
 
 // ============================================================================
 // SCP-610 FLESH MOB - FLESHMAN
@@ -537,6 +480,9 @@
 
 	if(flesh_mob)
 		flesh_mob.name = "[name] (Fully Infested)"
+		var/obj/structure/scp610_core/core = locate() in range(7, T)
+		if(core)
+			core.register_flesh_mob(flesh_mob)
 
 	visible_message(span_danger("[src] is fully consumed by the flesh, transforming into [flesh_mob]!"))
 	qdel(src)
@@ -671,6 +617,8 @@
 	var/obj/structure/scp610_core/core = locate() in range(7, T)
 	if(core)
 		core.place_creep(T)
+		if(flesh_mob)
+			core.register_flesh_mob(flesh_mob)
 
 	H.visible_message(span_danger("[H] is consumed entirely by the flesh, transforming into a hideous creature!"))
 	to_chat(H, span_userdanger("Your mind dissolves into the flesh..."))

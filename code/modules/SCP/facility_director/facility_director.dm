@@ -166,8 +166,11 @@
 	var/scp_list = length(breached_scps) ? english_list(breached_scps) : "unknown entities"
 	priority_announce("ALERT: Mobile Task Force dispatch authorized. Active breaches: [scp_list]. All personnel cooperate with MTF operations.", "MTF DEPLOYMENT", null, ANNOUNCER_ALERT)
 	for(var/obj/machinery/mtf_deployment_console/console in world)
-		if(!QDELETED(console))
-			console.deploy_mtf_team("mtf_epsilon11", console.available_teams["mtf_epsilon11"], null)
+		if(QDELETED(console))
+			continue
+		var/list/team_data = console.available_teams?["mtf_epsilon11"]
+		if(team_data)
+			console.deploy_mtf_team("mtf_epsilon11", team_data, null)
 			break
 
 /datum/facility_director/proc/deploy_crew_reinforcements()

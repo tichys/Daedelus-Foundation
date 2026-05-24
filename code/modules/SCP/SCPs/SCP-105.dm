@@ -19,6 +19,11 @@
 	maxHealth = 100
 	health = maxHealth
 
+	add_verb(src, list(
+		/mob/living/scp/scp105/proc/create_portal,
+		/mob/living/scp/scp105/proc/close_all_portals,
+	))
+
 /mob/living/scp/scp105/Destroy()
 	for(var/obj/effect/portal/scp105_portal/P in active_portals)
 		qdel(P)
@@ -42,7 +47,7 @@
 	for(var/S in stale)
 		active_portals -= S
 
-/mob/living/scp/scp105/verb/create_portal()
+/mob/living/scp/scp105/proc/create_portal()
 	set name = "Open Iris Portal"
 	set category = "SCP-105"
 	set desc = "Create a portal through a camera feed you can see."
@@ -93,7 +98,7 @@
 
 	return cam_name
 
-/mob/living/scp/scp105/verb/close_all_portals()
+/mob/living/scp/scp105/proc/close_all_portals()
 	set name = "Close All Portals"
 	set category = "SCP-105"
 	set desc = "Close all active Iris portals."

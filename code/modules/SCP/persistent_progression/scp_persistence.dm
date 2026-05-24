@@ -11,6 +11,8 @@ SUBSYSTEM_DEF(scp_persistence)
 /datum/controller/subsystem/scp_persistence/Initialize()
 	manager = new /datum/scp_persistence_manager()
 	initialize_chain_breaches()
+	init_zone_lighting_controllers()
+	minimap_renderer = new()
 	world.log << "SCP Persistence Subsystem: Initialized"
 	return ..()
 

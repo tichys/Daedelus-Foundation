@@ -55,9 +55,9 @@
 		clear_hallucinations()
 
 /datum/status_effect/cognitohazard_exposure/on_change(list/arguments)
-	if(length(arguments) < 4)
+	if(length(arguments) < 3)
 		return
-	var/extra_accumulation = arguments[4]
+	var/extra_accumulation = arguments[3]
 	if(extra_accumulation <= 0)
 		return
 	extra_accumulation = modify_change(extra_accumulation)
@@ -208,7 +208,7 @@
 			var/turf/T = get_turf(owner)
 			if(!T)
 				return
-			var/image/I = image(icon = 'icons/effects/effects.dmi', loc = T, icon_state = pick("blood3", "smoke"), layer = ABOVE_MOB_LAYER)
+			var/image/I = image(icon = 'icons/effects/effects.dmi', loc = T, icon_state = pick("nothing", "smoke"), layer = ABOVE_MOB_LAYER)
 			owner.client.images += I
 			addtimer(CALLBACK(src, PROC_REF(remove_hallucination_image), I), 8 SECONDS)
 
@@ -218,7 +218,15 @@
 	qdel(I)
 
 /datum/status_effect/cognitohazard_exposure/proc/clear_hallucinations()
-	return
+	if(!owner?.client)
+		return
+	var/list/to_remove = list()
+	for(var/image/I in owner.client.images)
+		if(I.icon == 'icons/effects/effects.dmi')
+			to_remove += I
+	for(var/image/I in to_remove)
+		owner.client.images -= I
+		qdel(I)
 
 /datum/status_effect/cognitohazard_exposure/proc/on_z_change()
 	SIGNAL_HANDLER

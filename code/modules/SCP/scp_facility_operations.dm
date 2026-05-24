@@ -633,127 +633,127 @@ SUBSYSTEM_DEF(round_objectives)
 	name = "Foundation Evacuation Console (Computer Board)"
 	build_path = /obj/machinery/computer/foundation_evacuation
 
-/mob/living/scp/verb/action_scratch_wall()
+/mob/living/scp/proc/action_scratch_wall()
 	set name = "Scratch Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("scratch_wall"); return; }
 
-/mob/living/scp/verb/action_intimidate()
+/mob/living/scp/proc/action_intimidate()
 	set name = "Intimidate Observer"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("intimidate"); return; }
 
-/mob/living/scp/verb/action_snap_restraints()
+/mob/living/scp/proc/action_snap_restraints()
 	set name = "Snap Restraints"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("snap_restraints"); return; }
 
-/mob/living/scp/verb/action_cover_face()
+/mob/living/scp/proc/action_cover_face()
 	set name = "Cover Face"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("cover_face"); return; }
 
-/mob/living/scp/verb/action_sob_quietly()
+/mob/living/scp/proc/action_sob_quietly()
 	set name = "Sob Quietly"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sob_quietly"); return; }
 
-/mob/living/scp/verb/action_press_wall()
+/mob/living/scp/proc/action_press_wall()
 	set name = "Press Against Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("press_against_wall"); return; }
 
-/mob/living/scp/verb/action_sudden_dash()
+/mob/living/scp/proc/action_sudden_dash()
 	set name = "Sudden Dash"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sudden_dash"); return; }
 
-/mob/living/scp/verb/action_sense_pestilence()
+/mob/living/scp/proc/action_sense_pestilence()
 	set name = "Sense Pestilence"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sense_pestilence"); return; }
 
-/mob/living/scp/verb/action_request_interview()
+/mob/living/scp/proc/action_request_interview()
 	set name = "Request Interview"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("request_interview"); return; }
 
-/mob/living/scp/verb/action_examine_equipment()
+/mob/living/scp/proc/action_examine_equipment()
 	set name = "Examine Equipment"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("examine_equipment"); return; }
 
-/mob/living/scp/verb/action_corrode_wall()
+/mob/living/scp/proc/action_corrode_wall()
 	set name = "Corrode Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("corrode_wall"); return; }
 
-/mob/living/scp/verb/action_test_phase()
+/mob/living/scp/proc/action_test_phase()
 	set name = "Test Phase"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("test_phase"); return; }
 
-/mob/living/scp/verb/action_mimic_voice()
+/mob/living/scp/proc/action_mimic_voice()
 	set name = "Mimic Voice"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("mimic_voice"); return; }
 
-/mob/living/scp/verb/action_listen_sounds()
+/mob/living/scp/proc/action_listen_sounds()
 	set name = "Listen to Sounds"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("listen_sounds"); return; }
 
-/mob/living/scp/verb/action_probe_network()
+/mob/living/scp/proc/action_probe_network()
 	set name = "Probe Network"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("probe_network"); return; }
 
-/mob/living/scp/verb/action_brute_force()
+/mob/living/scp/proc/action_brute_force()
 	set name = "Brute Force Lock"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("brute_force"); return; }
 
-/mob/living/scp/verb/action_test_wall()
+/mob/living/scp/proc/action_test_wall()
 	set name = "Test Wall"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("test_wall"); return; }
 
-/mob/living/scp/verb/action_acid_spit()
+/mob/living/scp/proc/action_acid_spit()
 	set name = "Acid Spit"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("acid_spit"); return; }
 
-/mob/living/scp/verb/action_endure_torment()
+/mob/living/scp/proc/action_endure_torment()
 	set name = "Endure Torment"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("endure_torment"); return; }
 
-/mob/living/scp/verb/action_rage_burst()
+/mob/living/scp/proc/action_rage_burst()
 	set name = "Rage Burst"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("rage_burst"); return; }
 
-/mob/living/scp/verb/action_flare_up()
+/mob/living/scp/proc/action_flare_up()
 	set name = "Flare Up"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("flare_up"); return; }
 
-/mob/living/scp/verb/action_reach_flames()
+/mob/living/scp/proc/action_reach_flames()
 	set name = "Reach Flames"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("reach_flames"); return; }
 
-/mob/living/scp/verb/action_absorb_heat()
+/mob/living/scp/proc/action_absorb_heat()
 	set name = "Absorb Heat"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("absorb_heat"); return; }
 
-/mob/living/scp/verb/action_firestorm()
+/mob/living/scp/proc/action_firestorm()
 	set name = "Firestorm"
 	set category = "SCP Contained"
 	if(scp_containment_system) { scp_containment_system.perform_interaction("firestorm"); return; }
 
-/mob/living/scp/verb/show_containment_status()
+/mob/living/scp/proc/show_containment_status()
 	set name = "Show Containment Status"
 	set category = "SCP"
 	set desc = "View your containment tension and available actions."
@@ -770,6 +770,43 @@ SUBSYSTEM_DEF(round_objectives)
 	msg += "\n[span_notice("State: [CS.containment_state || "Unknown"]")]"
 	msg += "\n[span_notice("Observers: [CS.observer_count]")]"
 	to_chat(src, msg)
+
+/mob/living/scp/proc/grant_containment_verbs()
+	var/list/interaction_ids = list()
+	if(scp_containment_system)
+		var/list/options = scp_containment_system.get_interact_options()
+		for(var/list/opt in options)
+			interaction_ids += opt["id"]
+	var/static/list/verb_map = list(
+		"scratch_wall" = /mob/living/scp/proc/action_scratch_wall,
+		"intimidate" = /mob/living/scp/proc/action_intimidate,
+		"snap_restraints" = /mob/living/scp/proc/action_snap_restraints,
+		"cover_face" = /mob/living/scp/proc/action_cover_face,
+		"sob_quietly" = /mob/living/scp/proc/action_sob_quietly,
+		"press_against_wall" = /mob/living/scp/proc/action_press_wall,
+		"sudden_dash" = /mob/living/scp/proc/action_sudden_dash,
+		"sense_pestilence" = /mob/living/scp/proc/action_sense_pestilence,
+		"request_interview" = /mob/living/scp/proc/action_request_interview,
+		"examine_equipment" = /mob/living/scp/proc/action_examine_equipment,
+		"corrode_wall" = /mob/living/scp/proc/action_corrode_wall,
+		"test_phase" = /mob/living/scp/proc/action_test_phase,
+		"mimic_voice" = /mob/living/scp/proc/action_mimic_voice,
+		"listen_sounds" = /mob/living/scp/proc/action_listen_sounds,
+		"probe_network" = /mob/living/scp/proc/action_probe_network,
+		"brute_force" = /mob/living/scp/proc/action_brute_force,
+		"test_wall" = /mob/living/scp/proc/action_test_wall,
+		"acid_spit" = /mob/living/scp/proc/action_acid_spit,
+		"endure_torment" = /mob/living/scp/proc/action_endure_torment,
+		"rage_burst" = /mob/living/scp/proc/action_rage_burst,
+		"flare_up" = /mob/living/scp/proc/action_flare_up,
+		"reach_flames" = /mob/living/scp/proc/action_reach_flames,
+		"absorb_heat" = /mob/living/scp/proc/action_absorb_heat,
+		"firestorm" = /mob/living/scp/proc/action_firestorm,
+	)
+	for(var/id in interaction_ids)
+		if(verb_map[id])
+			add_verb(src, verb_map[id])
+	add_verb(src, /mob/living/scp/proc/show_containment_status)
 
 /proc/scp_execute_test_outcome(mob/living/carbon/human/test_subject, scp_id, test_type, risk_level)
 	if(!test_subject || test_subject.stat == DEAD)

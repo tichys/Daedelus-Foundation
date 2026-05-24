@@ -779,6 +779,9 @@
 /mob/living/proc/setup_containment_system()
 	if(!scp_containment_system)
 		scp_containment_system = new /datum/scp_containment_system(src)
+	if(istype(src, /mob/living/scp))
+		var/mob/living/scp/S = src
+		S.grant_containment_verbs()
 
 /obj/structure/scp_cell_window
 	name = "reinforced observation window"

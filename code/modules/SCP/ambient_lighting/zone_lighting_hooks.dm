@@ -41,3 +41,11 @@ GLOBAL_LIST_EMPTY(zone_lighting_controllers)
 	var/datum/zone_lighting_controller/controller = GLOB.zone_lighting_controllers[zone_id]
 	controller.apply_color_to_lights()
 	SEND_GLOBAL_SIGNAL(COMSIG_SCP_RECONTAINED, zone_id)
+
+/proc/conditional_restore_zone_lighting(zone_id, scp_id)
+	if(!SSscp_persistence?.manager)
+		restore_zone_lighting(zone_id)
+		return
+	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+	if(!instance || instance.containment_status != "breached")
+		restore_zone_lighting(zone_id)

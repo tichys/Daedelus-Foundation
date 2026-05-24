@@ -264,7 +264,6 @@ SUBSYSTEM_DEF(scp_testing)
 	var/list/proposal = test_proposals[proposal_id]
 	if(!SSethics_committee)
 		return FALSE
-	var/researcher_ckey = proposal["researcher_ckey"]
 	for(var/datum/ethics_violation/V in SSethics_committee.violations)
 		if(V.accused_name == proposal["researcher"] && V.status == ETHICS_STATUS_UPHELD && (world.time - V.time_reported) < 10 MINUTES)
 			reject_proposal(proposal_id, "Ethics Committee override: active upheld violation against researcher within 10 minutes.")
