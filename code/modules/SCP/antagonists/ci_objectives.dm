@@ -300,14 +300,14 @@
 	target_department = pick(depts)
 	explanation_text = "Drain the [target_department] department's budget by at least [drain_required] credits through sabotage, resource waste, or misappropriation."
 	if(SSfoundation_budget)
-		var/datum/department_budget/B = SSfoundation_budget.department_budgets[target_department]
+		var/datum/department_budget/B = SSfoundation_budget?.department_budgets[target_department]
 		if(B)
 			initial_budget = B.remaining
 
 /datum/objective/ci_budget_drain/check_completion()
 	if(!SSfoundation_budget)
 		return FALSE
-	var/datum/department_budget/B = SSfoundation_budget.department_budgets[target_department]
+	var/datum/department_budget/B = SSfoundation_budget?.department_budgets[target_department]
 	if(!B)
 		return FALSE
 	var/drain = initial_budget - B.remaining
@@ -350,7 +350,7 @@
 /datum/objective/ci_ethics_undermine/check_completion()
 	if(!SSethics_committee)
 		return FALSE
-	return SSethics_committee.violations.len >= violations_required
+	return SSethics_committee?.violations.len >= violations_required
 
 /datum/objective/ci_goi_contact
 	name = "establish GOI contact"

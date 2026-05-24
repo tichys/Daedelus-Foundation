@@ -16,10 +16,10 @@
 			var/list/violations_review = SSethics_committee.get_violations_by_status(ETHICS_STATUS_UNDER_REVIEW)
 			fields["pending_count"] = length(violations_pending)
 			fields["under_review_count"] = length(violations_review)
-			fields["total_violations"] = length(SSethics_committee.violations)
-			fields["total_reviews"] = SSethics_committee.total_reviews
-			fields["upheld_count"] = SSethics_committee.upheld_count
-			fields["dismissed_count"] = SSethics_committee.dismissed_count
+			fields["total_violations"] = length(SSethics_committee?.violations)
+			fields["total_reviews"] = SSethics_committee?.total_reviews
+			fields["upheld_count"] = SSethics_committee?.upheld_count
+			fields["dismissed_count"] = SSethics_committee?.dismissed_count
 			var/list/violation_summary = list()
 			for(var/datum/ethics_violation/V in violations_pending)
 				violation_summary += "[V.violation_id]: [V.violation_type] ([V.get_severity_text()]) - Accused: [V.accused_name]"
@@ -27,23 +27,23 @@
 				violation_summary += "[V.violation_id]: [V.violation_type] ([V.get_severity_text()]) - Accused: [V.accused_name] - UNDER REVIEW"
 			fields["violation_list"] = jointext(violation_summary, "<br>")
 			var/list/oversight_summary = list()
-			for(var/test_id in SSethics_committee.active_test_oversights)
+			for(var/test_id in SSethics_committee?.active_test_oversights)
 				var/list/O = SSethics_committee.active_test_oversights[test_id]
 				oversight_summary += "[test_id]: [O["scp_name"]] - Risk: [O["risk_level"]] - [O["approved"] ? "APPROVED" : O["denied"] ? "DENIED" : "PENDING"]"
 			fields["oversight_list"] = jointext(oversight_summary, "<br>")
 		if(PAPER_AUTOFILL_BUDGET)
 			if(!SSfoundation_budget)
 				return
-			fields["total_budget"] = SSfoundation_budget.total_budget
-			fields["total_spent"] = SSfoundation_budget.total_spent
-			fields["remaining"] = SSfoundation_budget.total_budget - SSfoundation_budget.total_spent
+			fields["total_budget"] = SSfoundation_budget?.total_budget
+			fields["total_spent"] = SSfoundation_budget?.total_spent
+			fields["remaining"] = (SSfoundation_budget?.total_budget || 0) - (SSfoundation_budget?.total_spent || 0)
 			var/list/dept_summary = list()
-			for(var/dept in SSfoundation_budget.department_budgets)
+			for(var/dept in SSfoundation_budget?.department_budgets)
 				var/datum/department_budget/B = SSfoundation_budget.department_budgets[dept]
 				dept_summary += "[capitalize(dept)]: Allocated [B.allocated], Spent [B.spent], Remaining [B.remaining], Pending [B.pending_requests]"
 			fields["department_list"] = jointext(dept_summary, "<br>")
 			var/list/pending_requests = list()
-			for(var/datum/budget_request/R in SSfoundation_budget.requests)
+			for(var/datum/budget_request/R in SSfoundation_budget?.requests)
 				if(R.status == "pending")
 					pending_requests += "[R.request_id]: [capitalize(R.department)] - [R.amount]cr by [R.requester_name] - [R.purpose]"
 			fields["pending_requests"] = jointext(pending_requests, "<br>")

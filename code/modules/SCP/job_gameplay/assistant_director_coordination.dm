@@ -59,7 +59,7 @@ SUBSYSTEM_DEF(department_coordination)
 			T.complete(notes)
 			completed_tasks++
 			if(SSfoundation_budget)
-				var/datum/department_budget/B = SSfoundation_budget.department_budgets[T.department]
+				var/datum/department_budget/B = SSfoundation_budget?.department_budgets[T.department]
 				if(B)
 					B.allocate(25)
 					SSfoundation_budget.total_budget += 25
