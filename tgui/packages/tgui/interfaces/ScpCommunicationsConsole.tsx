@@ -82,26 +82,26 @@ export const ScpCommunicationsConsole = (props) => {
                     act('dispatch', { dispatch_type: d.type, message: dispatchMessage || 'Assistance required', priority: 0 });
                     setDispatchMessage('');
                   }}
-                  style={{ fontFamily: 'monospace', fontSize: '9px', background: 'transparent', border: `1px solid ${d.color}`, color: d.color, padding: '2px 8px' }}
+                  style={{ fontFamily: 'monospace', fontSize: '11px', background: 'transparent', border: `1px solid ${d.color}`, color: d.color, padding: '4px 10px' }}
                 >
                   {d.label}
                 </Button>
               ))}
             </Box>
-            <TextArea placeholder="Dispatch message..." value={dispatchMessage} onInput={(_e, value: string) => setDispatchMessage(value)} rows={2} />
+            <TextArea placeholder="Dispatch message..." value={dispatchMessage} onInput={(_e, value: string) => setDispatchMessage(value)} rows={2} style={{ lineHeight: '1.5' }} />
           </Box>
         </Section>
 
         <Section title="MAKE ANNOUNCEMENT">
           <Box style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <TextArea placeholder="Announcement text..." value={announcementText} onInput={(_e, value: string) => setAnnouncementText(value)} rows={2} />
+            <TextArea placeholder="Announcement text..." value={announcementText} onInput={(_e, value: string) => setAnnouncementText(value)} rows={2} style={{ lineHeight: '1.5' }} />
             <Box style={{ display: 'flex', gap: '6px' }}>
               <Button
                 onClick={() => {
                   act('make_announcement', { message: announcementText, priority: '0' });
                   setAnnouncementText('');
                 }}
-                style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '2px 8px' }}
+                style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '4px 10px' }}
               >
                 STANDARD
               </Button>
@@ -110,7 +110,7 @@ export const ScpCommunicationsConsole = (props) => {
                   act('make_announcement', { message: announcementText, priority: '1' });
                   setAnnouncementText('');
                 }}
-                style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '2px 8px' }}
+                style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '4px 10px' }}
               >
                 PRIORITY
               </Button>
@@ -131,7 +131,7 @@ export const ScpCommunicationsConsole = (props) => {
               {!d.responded && (
                 <Button
                   onClick={() => act('respond_dispatch', { dispatch_id: d.dispatch_id })}
-                  style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px', marginTop: '4px' }}
+                  style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px', marginTop: '4px' }}
                 >
                   RESPOND
                 </Button>
@@ -154,7 +154,7 @@ export const ScpCommunicationsConsole = (props) => {
                 {!t.resolved && (
                   <Button
                     onClick={() => act('resolve_threat', { threat_id: t.threat_id })}
-                    style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px', marginTop: '4px' }}
+                    style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px', marginTop: '4px' }}
                   >
                     RESOLVE
                   </Button>

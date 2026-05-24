@@ -155,7 +155,7 @@ export const ScpHumanResources = (_props: unknown) => {
                   textAlign: 'center',
                 }}
               >
-                <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em' }}>PENDING</Box>
+                <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em' }}>PENDING</Box>
                 <Box style={{ color: C.amber, fontSize: '16px' }}>{pending_count}</Box>
               </Box>
             </Stack.Item>
@@ -168,7 +168,7 @@ export const ScpHumanResources = (_props: unknown) => {
                   textAlign: 'center',
                 }}
               >
-                <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em' }}>REVIEWS</Box>
+                <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em' }}>REVIEWS</Box>
                 <Box style={{ color: C.text, fontSize: '16px' }}>{total_reviews}</Box>
               </Box>
             </Stack.Item>
@@ -181,7 +181,7 @@ export const ScpHumanResources = (_props: unknown) => {
                   textAlign: 'center',
                 }}
               >
-                <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em' }}>APPROVED</Box>
+                <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em' }}>APPROVED</Box>
                 <Box style={{ color: C.brightGreen, fontSize: '16px' }}>{approved_reviews}</Box>
               </Box>
             </Stack.Item>
@@ -194,7 +194,7 @@ export const ScpHumanResources = (_props: unknown) => {
                   textAlign: 'center',
                 }}
               >
-                <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em' }}>DENIED</Box>
+                <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em' }}>DENIED</Box>
                 <Box style={{ color: C.red, fontSize: '16px' }}>{denied_reviews}</Box>
               </Box>
             </Stack.Item>
@@ -207,7 +207,7 @@ export const ScpHumanResources = (_props: unknown) => {
                   textAlign: 'center',
                 }}
               >
-                <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em' }}>REASSIGNMENTS</Box>
+                <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em' }}>REASSIGNMENTS</Box>
                 <Box style={{ color: C.text, fontSize: '16px' }}>{total_reassignments}</Box>
               </Box>
             </Stack.Item>
@@ -220,7 +220,7 @@ export const ScpHumanResources = (_props: unknown) => {
                   textAlign: 'center',
                 }}
               >
-                <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em' }}>AMNESTIC AUTHS</Box>
+                <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em' }}>AMNESTIC AUTHS</Box>
                 <Box style={{ color: C.text, fontSize: '16px' }}>{total_amnestic_auths}</Box>
               </Box>
             </Stack.Item>
@@ -446,7 +446,7 @@ export const ScpHumanResources = (_props: unknown) => {
               marginBottom: '8px',
             }}
           >
-            <Box style={{ color: C.dim, fontSize: '9px', letterSpacing: '0.1em', marginBottom: '8px' }}>
+            <Box style={{ color: C.dim, fontSize: '11px', letterSpacing: '0.1em', marginBottom: '8px' }}>
               ISSUE NEW AMNESTIC AUTHORIZATION
             </Box>
             <LabeledList>

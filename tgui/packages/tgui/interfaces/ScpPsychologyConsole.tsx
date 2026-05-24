@@ -68,7 +68,7 @@ export const ScpPsychologyConsole = (props) => {
                 setPsychPatient('');
                 setPsychEvalType('');
               }}
-              style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,136,255,0.2)', border: '1px solid #4488ff', color: '#4488ff', padding: '4px 12px' }}
+              style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,136,255,0.2)', border: '1px solid #4488ff', color: '#4488ff', padding: '4px 12px' }}
             >
               START EVAL
             </Button>
@@ -82,7 +82,7 @@ export const ScpPsychologyConsole = (props) => {
               onClick={() => {
                 act('conduct_counseling', { patient: psychActionPatient });
               }}
-              style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px' }}
+              style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px' }}
             >
               COUNSELING SESSION
             </Button>
@@ -90,7 +90,7 @@ export const ScpPsychologyConsole = (props) => {
               onClick={() => {
                 act('assess_sanity', { patient: psychActionPatient });
               }}
-              style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '2px 8px' }}
+              style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '4px 10px' }}
             >
               ASSESS SANITY
             </Button>
@@ -118,7 +118,7 @@ export const ScpPsychologyConsole = (props) => {
                 <Box style={{ marginTop: '4px' }}>
                   <Button
                     onClick={() => act('complete_evaluation', { eval_id: e.eval_id, findings: 'Evaluation completed', recommendations: 'Monitor', amnestic: 'None', sanity: e.sanity_score, exposure: 0, trauma: '' })}
-                    style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px' }}
+                    style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px' }}
                   >
                     COMPLETE EVAL
                   </Button>
@@ -141,7 +141,7 @@ export const ScpPsychologyConsole = (props) => {
                 {!ex.treated && (
                   <Button
                     onClick={() => act('treat_exposure', { person: ex.person, treatment: 'Amnestic + Counseling' })}
-                    style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px', marginTop: '4px' }}
+                    style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px', marginTop: '4px' }}
                   >
                     RECORD TREATMENT
                   </Button>

@@ -95,7 +95,7 @@ export const SCPCameraConsole = (props) => {
             </Box>
             <Box
               style={{
-                fontSize: '9px',
+                fontSize: '11px',
                 color: C.textDim,
                 letterSpacing: '0.12em',
                 marginTop: '2px',
@@ -132,7 +132,7 @@ export const SCPCameraConsole = (props) => {
                       : '2px solid transparent',
                   color:
                     current_zone === zone ? C.textBright : C.textDim,
-                  fontSize: '9px',
+                  fontSize: '11px',
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
                   fontFamily: C.mono,
@@ -151,7 +151,7 @@ export const SCPCameraConsole = (props) => {
                 onClick={() => act('toggle_motion')}
                 style={{
                   fontFamily: C.mono,
-                  fontSize: '9px',
+                  fontSize: '11px',
                   letterSpacing: '0.1em',
                   background: motion_detection
                     ? 'rgba(26,122,26,0.3)'
@@ -168,7 +168,7 @@ export const SCPCameraConsole = (props) => {
                 onClick={() => act('toggle_anomaly')}
                 style={{
                   fontFamily: C.mono,
-                  fontSize: '9px',
+                  fontSize: '11px',
                   letterSpacing: '0.1em',
                   background: anomaly_detection
                     ? 'rgba(212,160,23,0.3)'
@@ -227,7 +227,7 @@ export const SCPCameraConsole = (props) => {
                     <Box
                       style={{
                         color: C.textDim,
-                        fontSize: '9px',
+                        fontSize: '11px',
                       }}
                     >
                       {cam.area} | {cam.network}
@@ -240,7 +240,7 @@ export const SCPCameraConsole = (props) => {
                     }
                     style={{
                       fontFamily: C.mono,
-                      fontSize: '9px',
+                      fontSize: '11px',
                       letterSpacing: '0.1em',
                       background:
                         cam.status === 'active'
@@ -252,7 +252,7 @@ export const SCPCameraConsole = (props) => {
                         cam.status === 'active'
                           ? C.textBright
                           : C.textDim,
-                      padding: '2px 6px',
+                      padding: '4px 8px',
                     }}
                   >
                     VIEW
@@ -322,7 +322,7 @@ export const SCPCameraConsole = (props) => {
             <Box
               style={{
                 color: C.textDim,
-                fontSize: '9px',
+                fontSize: '11px',
                 letterSpacing: '0.1em',
               }}
             >

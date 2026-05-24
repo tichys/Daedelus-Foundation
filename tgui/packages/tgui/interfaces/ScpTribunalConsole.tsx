@@ -53,7 +53,7 @@ export const ScpTribunalConsole = (props) => {
           <Box style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <Input placeholder="Defendant name..." value={tribunalDefendant} onInput={(_e, value: string) => setTribunalDefendant(value)} />
             <Input placeholder="Charges..." value={tribunalCharges} onInput={(_e, value: string) => setTribunalCharges(value)} />
-            <TextArea placeholder="Evidence summary..." value={tribunalEvidence} onInput={(_e, value: string) => setTribunalEvidence(value)} rows={3} />
+            <TextArea placeholder="Evidence summary..." value={tribunalEvidence} onInput={(_e, value: string) => setTribunalEvidence(value)} rows={3} style={{ lineHeight: '1.5' }} />
             <Button
               onClick={() => {
                 act('file_case', { defendant: tribunalDefendant, charges: tribunalCharges, evidence: tribunalEvidence });
@@ -61,7 +61,7 @@ export const ScpTribunalConsole = (props) => {
                 setTribunalCharges('');
                 setTribunalEvidence('');
               }}
-              style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '4px 12px', alignSelf: 'flex-start' }}
+              style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '4px 12px', alignSelf: 'flex-start' }}
             >
               FILE CASE
             </Button>
@@ -83,7 +83,7 @@ export const ScpTribunalConsole = (props) => {
                 {c.status_num === 0 && (
                   <Button
                     onClick={() => act('begin_hearing', { case_id: c.case_id })}
-                    style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '2px 8px' }}
+                    style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(212,160,23,0.2)', border: '1px solid #d4a017', color: '#d4a017', padding: '4px 10px' }}
                   >
                     BEGIN HEARING
                   </Button>
@@ -91,7 +91,7 @@ export const ScpTribunalConsole = (props) => {
                 {c.status_num === 1 && (
                   <Button
                     onClick={() => act('enter_deliberation', { case_id: c.case_id })}
-                    style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,136,255,0.2)', border: '1px solid #4488ff', color: '#4488ff', padding: '2px 8px' }}
+                    style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,136,255,0.2)', border: '1px solid #4488ff', color: '#4488ff', padding: '4px 10px' }}
                   >
                     ENTER DELIBERATION
                   </Button>
@@ -100,19 +100,19 @@ export const ScpTribunalConsole = (props) => {
                   <>
                     <Button
                       onClick={() => act('render_verdict', { case_id: c.case_id, guilty: true, sanction: 1, sanction_text: 'Formal Reprimand' })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '4px 10px' }}
                     >
                       GUILTY
                     </Button>
                     <Button
                       onClick={() => act('render_verdict', { case_id: c.case_id, guilty: false, sanction: 0, sanction_text: '' })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px' }}
                     >
                       NOT GUILTY
                     </Button>
                     <Button
                       onClick={() => act('dismiss_case', { case_id: c.case_id })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(106,106,112,0.2)', border: '1px solid #6a6a70', color: '#6a6a70', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(106,106,112,0.2)', border: '1px solid #6a6a70', color: '#6a6a70', padding: '4px 10px' }}
                     >
                       DISMISS
                     </Button>

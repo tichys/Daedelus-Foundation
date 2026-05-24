@@ -67,19 +67,19 @@ export const ScpEthicsReview = (props) => {
                     Reporter: {v.reporter} | Accused: {v.accused} | Status: {v.status}
                   </Box>
                   <Box style={{ fontSize: '10px', color: '#8a8a90' }}>{v.description}</Box>
-                  {v.notes && <Box style={{ fontSize: '9px', color: '#6a6a70' }}>Notes: {v.notes}</Box>}
+                  {v.notes && <Box style={{ fontSize: '11px', color: '#6a6a70' }}>Notes: {v.notes}</Box>}
                 </Box>
                 {v.status_num < 2 && (
                   <Box style={{ display: 'flex', gap: '4px', alignItems: 'flex-start' }}>
                     <Button
                       onClick={() => act('review_uphold', { violation_id: v.violation_id, notes: '' })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '4px 10px' }}
                     >
                       UPHOLD
                     </Button>
                     <Button
                       onClick={() => act('review_dismiss', { violation_id: v.violation_id, notes: '' })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px' }}
                     >
                       DISMISS
                     </Button>
@@ -114,13 +114,13 @@ export const ScpEthicsReview = (props) => {
                   <Box style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
                     <Button
                       onClick={() => act('approve_test', { test_id: t.test_id })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(68,255,68,0.1)', border: '1px solid #44ff44', color: '#44ff44', padding: '4px 10px' }}
                     >
                       APPROVE
                     </Button>
                     <Button
                       onClick={() => act('deny_test', { test_id: t.test_id })}
-                      style={{ fontFamily: 'monospace', fontSize: '9px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '2px 8px' }}
+                      style={{ fontFamily: 'monospace', fontSize: '11px', background: 'rgba(139,0,0,0.3)', border: '1px solid #8b0000', color: '#cc2222', padding: '4px 10px' }}
                     >
                       DENY
                     </Button>
