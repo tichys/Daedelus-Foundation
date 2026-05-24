@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Song = {
   name: string;
@@ -28,8 +28,8 @@ export const ScpRecordPlayer = (props) => {
   const { songs, cooldown_active, cooldown_remaining } = data;
 
   return (
-    <Window theme="scp_terminal" width={400} height={340}>
-      <Window.Content scrollable>
+    <NtosWindow width={400} height={340}>
+      <NtosWindow.Content scrollable>
         <Section title="FOUNDATION RECORD PLAYER">
           <Box
             style={{
@@ -109,7 +109,7 @@ export const ScpRecordPlayer = (props) => {
             })}
           </Box>
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   standard_rations: number;
@@ -43,8 +43,8 @@ export const ScpRationDispenser = (props) => {
   };
 
   return (
-    <Window theme="scp_terminal" width={400} height={380}>
-      <Window.Content scrollable>
+    <NtosWindow width={400} height={380}>
+      <NtosWindow.Content scrollable>
         <Section title="D-CLASS RATION DISPENSER">
           <Box
             style={{
@@ -131,7 +131,7 @@ export const ScpRationDispenser = (props) => {
             })}
           </Box>
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

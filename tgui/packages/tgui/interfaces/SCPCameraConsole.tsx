@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type CameraInfo = {
   area: string;
@@ -63,8 +63,8 @@ export const SCPCameraConsole = (props) => {
   } = data;
 
   return (
-    <Window theme="scp_terminal" width={600} height={550}>
-      <Window.Content scrollable>
+    <NtosWindow width={600} height={550}>
+      <NtosWindow.Content scrollable>
         <Box
           style={{
             background: C.bg,
@@ -331,7 +331,7 @@ export const SCPCameraConsole = (props) => {
             </Box>
           </Box>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

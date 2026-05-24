@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   dispatches: Dispatch[];
@@ -53,8 +53,8 @@ export const ScpCommunicationsConsole = (props) => {
   const [announcementText, setAnnouncementText] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Section title="COMMUNICATIONS CENTER">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             FACILITY THREAT LEVEL:
@@ -164,7 +164,7 @@ export const ScpCommunicationsConsole = (props) => {
             ))}
           </Section>
         )}
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

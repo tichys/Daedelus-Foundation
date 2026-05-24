@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, LabeledList, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   violations: Violation[];
@@ -50,8 +50,8 @@ export const ScpEthicsReview = (props) => {
   const { violations, test_oversights, pending_count, total_reviews, upheld_count, dismissed_count } = data;
 
   return (
-    <Window theme="scp_terminal" width={700} height={600}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={600}>
+      <NtosWindow.Content scrollable>
         <Section title="ETHICS COMMITTEE — VIOLATION REVIEW">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             PENDING: {pending_count} | REVIEWS: {total_reviews} | UPHELD: {upheld_count} | DISMISSED: {dismissed_count}
@@ -132,7 +132,7 @@ export const ScpEthicsReview = (props) => {
             ))}
           </Section>
         )}
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

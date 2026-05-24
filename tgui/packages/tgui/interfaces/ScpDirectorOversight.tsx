@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -111,8 +111,8 @@ export const ScpDirectorOversight = (_props, context) => {
   };
 
   return (
-    <Window theme="scp_terminal" width={800} height={700} scrollable>
-      <Window.Content scrollable>
+    <NtosWindow width={800} height={700} scrollable>
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -799,7 +799,7 @@ export const ScpDirectorOversight = (_props, context) => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

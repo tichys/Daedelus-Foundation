@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBackend } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -71,8 +71,8 @@ export const ScpTriage = (_props, context) => {
   ];
 
   return (
-    <Window theme="scp_terminal" width={700} height={700}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={700}>
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section>
@@ -414,7 +414,7 @@ export const ScpTriage = (_props, context) => {
             </Stack.Item>
           )}
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

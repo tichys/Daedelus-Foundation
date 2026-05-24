@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   evaluations: Eval[];
@@ -50,8 +50,8 @@ export const ScpPsychologyConsole = (props) => {
   const [psychActionPatient, setPsychActionPatient] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Section title="PSYCHOLOGY DEPARTMENT">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             PENDING: {pending_evals} | COMPLETED: {completed_evals} | AMNESTICS REC: {data.amnestics_recommended} | SESSIONS: {counseling_sessions}
@@ -150,7 +150,7 @@ export const ScpPsychologyConsole = (props) => {
             ))}
           </Section>
         )}
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

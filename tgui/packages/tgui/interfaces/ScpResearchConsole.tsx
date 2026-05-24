@@ -1,6 +1,6 @@
 import { useBackend } from '../backend';
 import { Box, Button, Flex, LabeledList, NoticeBox, ProgressBar, Section, Stack, Tabs } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 import { useState } from 'react';
 
 const RANK_COLORS: Record<string, string> = {
@@ -404,8 +404,8 @@ export const ScpResearchConsole = (props) => {
   } = data;
 
   return (
-    <Window theme="scp_terminal" width={750} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={750} height={650}>
+      <NtosWindow.Content scrollable>
         <Stack vertical>
           <Stack.Item>
             <Section title="SCP FOUNDATION RESEARCH DIVISION">
@@ -487,7 +487,7 @@ export const ScpResearchConsole = (props) => {
             {tabIndex === 5 && <RewardsTab />}
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

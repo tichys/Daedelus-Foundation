@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   evidence: Evidence[];
@@ -39,8 +39,8 @@ export const ScpInvestigationsTerminal = (props) => {
   const [invDesc, setInvDesc] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={600}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={600}>
+      <NtosWindow.Content scrollable>
         <Section title="ANOMALOUS INVESTIGATIONS">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             EVIDENCE: {total_evidence} | ANALYZED: {analyzed_evidence} | OPEN CASES: {cases.filter((c) => c.status === 'open').length}
@@ -111,7 +111,7 @@ export const ScpInvestigationsTerminal = (props) => {
             ))}
           </Section>
         )}
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

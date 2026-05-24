@@ -9,7 +9,7 @@ import {
   Input,
   NumberInput,
 } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 import { C, term, TermHeader, TermLabel, TermValue, TermRow, TermDivider, TermButton, TermProgressBar, TermModal } from './CharacterSetup/shared';
 
 interface SCPData {
@@ -248,8 +248,8 @@ export const SCPManagementInterface = (props) => {
   ];
 
   return (
-    <Window width={1200} height={800} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow width={1200} height={800} >
+      <NtosWindow.Content scrollable>
         <Box
           style={{
             background: C.bg,
@@ -1030,8 +1030,8 @@ export const SCPManagementInterface = (props) => {
             </Box>
           </Box>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };
 

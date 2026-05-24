@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack, Input, LabeledList } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -117,8 +117,8 @@ export const ScpMedicalResponse = (_props: unknown) => {
   const [reportSource, setReportSource] = useState('');
 
   return (
-    <Window title="SCP Medical Response" width={700} height={650} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow title="SCP Medical Response" width={700} height={650} >
+      <NtosWindow.Content scrollable>
         <Box backgroundColor={C.bg} height="100%">
           <Section
             title={
@@ -480,7 +480,7 @@ export const ScpMedicalResponse = (_props: unknown) => {
             </Stack>
           </Section>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

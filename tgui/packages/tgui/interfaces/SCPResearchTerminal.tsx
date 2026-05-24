@@ -1,5 +1,5 @@
 import { useBackend } from '../backend';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Experiment = {
   id: string;
@@ -44,8 +44,8 @@ export const SCPResearchTerminal = (_props: unknown) => {
   } = data;
 
   return (
-    <Window theme="scp_terminal" width={600} height={450}>
-      <Window.Content scrollable>
+    <NtosWindow width={600} height={450}>
+      <NtosWindow.Content scrollable>
         <div
           style={{
             background: C.bg,
@@ -206,7 +206,7 @@ export const SCPResearchTerminal = (_props: unknown) => {
             </div>
           )}
         </div>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

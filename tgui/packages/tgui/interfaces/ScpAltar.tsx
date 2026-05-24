@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   meditation_progress: number;
@@ -16,8 +16,8 @@ export const ScpAltar = (props) => {
   const { meditation_progress, ritual_ready, ritual_cooldown } = data;
 
   return (
-    <Window theme="scp_terminal" width={420} height={380}>
-      <Window.Content scrollable>
+    <NtosWindow width={420} height={380}>
+      <NtosWindow.Content scrollable>
         <Section title="FOUNDATION MEDITATION ALTAR">
           <Box
             style={{
@@ -185,7 +185,7 @@ export const ScpAltar = (props) => {
             </Box>
           </Box>
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

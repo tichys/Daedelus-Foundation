@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -71,8 +71,8 @@ export const ScpContainmentIntegrity = (_props, context) => {
   } = data;
 
   return (
-    <Window title="Containment Integrity Monitor" width={700} height={700} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow title="Containment Integrity Monitor" width={700} height={700} >
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -558,7 +558,7 @@ export const ScpContainmentIntegrity = (_props, context) => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

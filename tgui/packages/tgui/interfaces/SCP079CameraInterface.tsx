@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Ability = {
   id: string;
@@ -104,8 +104,8 @@ export const SCP079CameraInterface = (props) => {
   );
 
   return (
-    <Window theme="scp_terminal" width={700} height={600}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={600}>
+      <NtosWindow.Content scrollable>
         <Box
           style={{
             background: C.bg,
@@ -800,7 +800,7 @@ export const SCP079CameraInterface = (props) => {
             </Box>
           </Box>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

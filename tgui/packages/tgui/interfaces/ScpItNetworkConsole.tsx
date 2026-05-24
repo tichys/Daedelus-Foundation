@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   nodes: NetworkNode[];
@@ -49,8 +49,8 @@ export const ScpItNetworkConsole = (props) => {
   const { nodes, racks, overall_integrity, scp079_presence, last_scan } = data;
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Section title="IT NETWORK MANAGEMENT">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             NETWORK INTEGRITY: <Box as="span" style={{ color: overall_integrity > 70 ? '#44ff44' : overall_integrity > 40 ? '#d4a017' : '#cc2222', fontWeight: 'bold' }}>{overall_integrity}%</Box>
@@ -140,7 +140,7 @@ export const ScpItNetworkConsole = (props) => {
             </Box>
           ))}
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   status: FacilityStatus;
@@ -71,8 +71,8 @@ export const ScpSiteDirectorConsole = (props) => {
   const [dirExpiry, setDirExpiry] = useState('0');
 
   return (
-    <Window theme="scp_terminal" width={700} height={700}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={700}>
+      <NtosWindow.Content scrollable>
         <Section title="SITE COMMAND — FACILITY STATUS">
           <Box style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
             <Box style={{ padding: '8px', background: '#111114', borderLeft: '2px solid #4488ff' }}>
@@ -201,7 +201,7 @@ export const ScpSiteDirectorConsole = (props) => {
             </Box>
           ))}
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

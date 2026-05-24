@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 import { C, term, TermHeader, TermLabel, TermValue, TermRow, TermDivider, TermButton, TermProgressBar, TermModal } from './CharacterSetup/shared';
 
 interface AvailableTest {
@@ -53,8 +53,8 @@ export const SCPTestingConsole = (props) => {
   } = data;
 
   return (
-    <Window width={900} height={650} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow width={900} height={650} >
+      <NtosWindow.Content scrollable>
         <Box
           style={{
             background: C.bg,
@@ -221,7 +221,7 @@ export const SCPTestingConsole = (props) => {
             </Box>
           </Box>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

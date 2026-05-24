@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   details: VipDetail[];
@@ -29,8 +29,8 @@ export const ScpVipProtectionConsole = (props) => {
   const [vipName, setVipName] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={600} height={500}>
-      <Window.Content scrollable>
+    <NtosWindow width={600} height={500}>
+      <NtosWindow.Content scrollable>
         <Section title="VIP PROTECTION — EZ SECURITY">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             TOTAL DETAILS: {total_details} | OVERDUE ALERTS: <Box as="span" style={{ color: overdue_alerts > 0 ? '#cc2222' : '#44ff44' }}>{overdue_alerts}</Box>
@@ -77,7 +77,7 @@ export const ScpVipProtectionConsole = (props) => {
             </Box>
           ))}
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

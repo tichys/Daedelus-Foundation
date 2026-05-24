@@ -1,6 +1,6 @@
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack, Input, LabeledList } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -107,8 +107,8 @@ export const ScpHumanResources = (_props: unknown) => {
 
   if (access_denied) {
     return (
-      <Window theme="scp_terminal" width={700} height={650}>
-        <Window.Content scrollable>
+      <NtosWindow width={700} height={650}>
+        <NtosWindow.Content scrollable>
           <Box
             style={{
               fontFamily: 'monospace',
@@ -126,14 +126,14 @@ export const ScpHumanResources = (_props: unknown) => {
               INSUFFICIENT CLEARANCE FOR PERSONNEL MANAGEMENT SYSTEM
             </Box>
           </Box>
-        </Window.Content>
-      </Window>
+        </NtosWindow.Content>
+      </NtosWindow>
     );
   }
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Section
           title="HUMAN RESOURCES — PERSONNEL MANAGEMENT"
           style={{
@@ -634,7 +634,7 @@ export const ScpHumanResources = (_props: unknown) => {
             );
           })}
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

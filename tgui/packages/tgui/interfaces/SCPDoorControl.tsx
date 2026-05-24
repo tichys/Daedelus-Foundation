@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type ZoneState = {
   name: string;
@@ -51,8 +51,8 @@ export const SCPDoorControl = (props) => {
   const { zone_states, total_doors, locked_doors, door_log } = data;
 
   return (
-    <Window theme="scp_terminal" width={600} height={500}>
-      <Window.Content scrollable>
+    <NtosWindow width={600} height={500}>
+      <NtosWindow.Content scrollable>
         <Box
           style={{
             background: C.bg,
@@ -379,7 +379,7 @@ export const SCPDoorControl = (props) => {
             </Box>
           </Box>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };
