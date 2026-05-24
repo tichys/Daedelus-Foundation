@@ -41,38 +41,38 @@
 			var/build_type = params["build_id"]
 			var/cost = text2num(params["cost"])
 			if(uses < cost)
-				to_chat(usr, span_warning("Not enough materials remaining."))
+				to_chat(ui.user, span_warning("Not enough materials remaining."))
 				return
 			uses -= cost
-			var/turf/T = get_turf(usr)
+			var/turf/T = get_turf(ui.user)
 			if(!T)
 				return
 			switch(build_type)
 				if("wall")
 					var/turf/closed/wall/W = T
 					if(istype(W))
-						to_chat(usr, span_warning("There's already a wall here."))
+						to_chat(ui.user, span_warning("There's already a wall here."))
 						uses += cost
 						return
 					var/turf/new_wall = T.ChangeTurf(/turf/closed/wall)
 					if(new_wall)
 						playsound(T, 'sound/items/welder.ogg', 50, TRUE)
-						to_chat(usr, span_notice("Containment wall constructed."))
+						to_chat(ui.user, span_notice("Containment wall constructed."))
 				if("door")
 					var/obj/machinery/door/airlock/scp/containment/D = new(T)
 					if(D)
 						playsound(T, 'sound/machines/doors/airlock_close.ogg', 50, TRUE)
-						to_chat(usr, span_notice("Containment door installed."))
+						to_chat(ui.user, span_notice("Containment door installed."))
 				if("window")
 					var/obj/structure/window/reinforced/W = new(T)
 					if(W)
 						playsound(T, 'sound/effects/glassbr1.ogg', 50, TRUE)
-						to_chat(usr, span_notice("Observation window installed."))
+						to_chat(ui.user, span_notice("Observation window installed."))
 				if("airlock")
 					var/obj/machinery/door/airlock/scp/decon/A = new(T)
 					if(A)
 						playsound(T, 'sound/machines/doors/airlock_close.ogg', 50, TRUE)
-						to_chat(usr, span_notice("Decontamination airlock installed."))
+						to_chat(ui.user, span_notice("Decontamination airlock installed."))
 
 /obj/machinery/door/airlock/scp
 	name = "Foundation airlock"

@@ -50,7 +50,7 @@
 	if(.)
 		return
 
-	var/mob/user = usr
+	var/mob/user = ui.user
 	if(!ishuman(user))
 		return
 	var/mob/living/carbon/human/H = user
@@ -702,10 +702,10 @@
 					sarc.contained_scp.stat = UNCONSCIOUS
 					sarc.contained_scp.current_state = "dormant"
 					sarc.contained_scp.dormant_timer = world.time + sarc.contained_scp.dormant_duration
-					hook_scp_recontainment("SCP-076", list(usr))
+					hook_scp_recontainment("SCP-076", list(ui.user))
 					priority_announce("SCP-076-1 sarcophagus has been sealed remotely. SCP-076-2 forced into dormant state.", null, null, ANNOUNCER_DEFAULT)
 				else
-					to_chat(usr, span_warning("Cannot seal while SCP-076-2 is active!"))
+					to_chat(ui.user, span_warning("Cannot seal while SCP-076-2 is active!"))
 			. = TRUE
 
 /obj/item/circuitboard/computer/scp076_sealing_terminal

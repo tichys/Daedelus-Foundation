@@ -693,8 +693,8 @@ SUBSYSTEM_DEF(research_laboratory)
 
 		if("add_team_member")
 			var/team_id = params["team_id"]
-			if(team_id && ishuman(usr))
-				mgr.add_team_member(team_id, usr)
+			if(team_id && ishuman(ui.user))
+				mgr.add_team_member(team_id, ui.user)
 			. = TRUE
 
 		if("remove_team_member")
@@ -707,8 +707,8 @@ SUBSYSTEM_DEF(research_laboratory)
 		if("start_experiment")
 			var/scp_id = params["scp_id"]
 			var/exp_type = text2num(params["experiment_type"])
-			if(scp_id && exp_type && ishuman(usr))
-				var/mob/living/carbon/human/H = usr
+			if(scp_id && exp_type && ishuman(ui.user))
+				var/mob/living/carbon/human/H = ui.user
 				var/datum/scp_experiment/exp = mgr.start_scp_experiment(H, scp_id, exp_type)
 				if(!exp)
 					to_chat(H, "<span class='warning'>Failed to start experiment.</span>")
@@ -720,26 +720,26 @@ SUBSYSTEM_DEF(research_laboratory)
 		if("suspend_experiment")
 			var/exp_id = params["experiment_id"]
 			if(exp_id)
-				mgr.suspend_scp_experiment(exp_id, usr)
+				mgr.suspend_scp_experiment(exp_id, ui.user)
 			. = TRUE
 
 		if("resume_experiment")
 			var/exp_id = params["experiment_id"]
 			if(exp_id)
-				mgr.resume_scp_experiment(exp_id, usr)
+				mgr.resume_scp_experiment(exp_id, ui.user)
 			. = TRUE
 
 		if("terminate_experiment")
 			var/exp_id = params["experiment_id"]
 			if(exp_id)
-				mgr.terminate_scp_experiment(exp_id, usr)
+				mgr.terminate_scp_experiment(exp_id, ui.user)
 			. = TRUE
 
 		if("unlock_tech")
 			var/node_id = params["node_id"]
 			if(node_id)
-				if(!mgr.unlock_tech_node(node_id, usr))
-					to_chat(usr, "<span class='warning'>Cannot unlock this technology.</span>")
+				if(!mgr.unlock_tech_node(node_id, ui.user))
+					to_chat(ui.user, "<span class='warning'>Cannot unlock this technology.</span>")
 			. = TRUE
 
 		if("record_violation")

@@ -82,7 +82,7 @@
 			var/team_key = params["team_name"]
 			if(!team_key || !(team_key in available_teams))
 				return
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = ui.user
 			if(!istype(H))
 				return
 			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -102,7 +102,7 @@
 			last_deployment = team["name"]
 			deploy_mtf_team(team_key, team, H)
 		if("reinforce")
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = ui.user
 			if(!istype(H))
 				return
 			var/obj/item/card/id/id_card = H.get_idcard(TRUE)

@@ -263,7 +263,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H) || H.stat != CONSCIOUS || !(H in range(1, src)))
 		return
 	switch(action)
@@ -366,13 +366,13 @@
 			if(running || !length(loaded_items))
 				return
 			anomalous_cleanse = FALSE
-			start_cycle(usr)
+			start_cycle(ui.user)
 			. = TRUE
 		if("start_decon")
 			if(running || !length(loaded_items))
 				return
 			anomalous_cleanse = TRUE
-			start_cycle(usr)
+			start_cycle(ui.user)
 			. = TRUE
 		if("eject")
 			if(running)
@@ -439,23 +439,23 @@
 					if(standard_rations <= 0)
 						return
 					standard_rations--
-					ration = new /obj/item/reagent_containers/food/snacks/dclass_ration/premade(get_turf(usr))
+					ration = new /obj/item/reagent_containers/food/snacks/dclass_ration/premade(get_turf(ui.user))
 				if("improved")
 					if(improved_rations <= 0)
 						return
 					improved_rations--
-					ration = new /obj/item/reagent_containers/food/snacks/dclass_ration/improved(get_turf(usr))
+					ration = new /obj/item/reagent_containers/food/snacks/dclass_ration/improved(get_turf(ui.user))
 				if("premium")
 					if(premium_rations <= 0)
 						return
 					premium_rations--
-					ration = new /obj/item/reagent_containers/food/snacks/dclass_ration/premium(get_turf(usr))
+					ration = new /obj/item/reagent_containers/food/snacks/dclass_ration/premium(get_turf(ui.user))
 				else
 					return
 			if(!ration)
 				return
 			total_dispensed++
-			usr.put_in_hands(ration)
+			ui.user.put_in_hands(ration)
 			if(ration.quality_bonus > 0 && SSfoundation_politics?.manager)
 				SSfoundation_politics.manager.political_tensions = max(0, SSfoundation_politics.manager.political_tensions - ration.quality_bonus)
 
@@ -505,7 +505,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	switch(action)

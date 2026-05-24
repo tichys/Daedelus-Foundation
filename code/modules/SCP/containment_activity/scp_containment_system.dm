@@ -746,9 +746,9 @@
 		if("refresh")
 			return TRUE
 		if("start_experiment")
-			if(!ishuman(usr))
+			if(!ishuman(ui.user))
 				return
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = ui.user
 			var/exp_type = text2num(params["experiment_type"]) || 1
 			var/scp_id = linked_system.get_scp_id()
 			if(SSscp_experiments?.manager && scp_id)
@@ -757,9 +757,9 @@
 					to_chat(H, "<span class='notice'>Experiment started on [scp_id].</span>")
 			return TRUE
 		if("request_subject")
-			if(!ishuman(usr))
+			if(!ishuman(ui.user))
 				return
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = ui.user
 			var/danger_level = text2num(params["danger_level"]) || 1
 			var/scp_id = linked_system.get_scp_id()
 			if(SSdclass_experiments && scp_id)

@@ -404,7 +404,7 @@ SUBSYSTEM_DEF(dclass_riot)
 
 /obj/machinery/computer/dclass_riot_console/ui_act(action, params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
-	var/mob/user = usr
+	var/mob/user = ui.user
 	if(.)
 		return
 

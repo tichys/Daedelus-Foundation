@@ -103,7 +103,7 @@
 
 	switch(action)
 		if("scan")
-			attack_self(usr)
+			attack_self(ui.user)
 			. = TRUE
 		if("toggle_breached_only")
 			detect_breached_only = !detect_breached_only

@@ -319,9 +319,9 @@ SUBSYSTEM_DEF(facility_power)
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_ENGINEERING in id_card.access))
 		to_chat(H, "<span class='warning'>Requires Engineering access.</span>")

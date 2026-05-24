@@ -595,7 +595,7 @@ SUBSYSTEM_DEF(round_objectives)
 		if(evacuation_called)
 			return
 		if(SSsecurity_level && SSsecurity_level.current_level < SEC_LEVEL_RED)
-			to_chat(usr, span_warning("Evacuation requires Code Red or higher security level."))
+			to_chat(ui.user, span_warning("Evacuation requires Code Red or higher security level."))
 			return
 		evacuation_called = TRUE
 		evacuation_timer = world.time + evacuation_delay
