@@ -37,6 +37,7 @@
 	return ..()
 
 /obj/item/scp113/proc/handle_item_pickup(datum/source, mob/living/user)
+	SIGNAL_HANDLER
 	if(!ishuman(user))
 		return
 
@@ -68,6 +69,7 @@
 	victims[H.ckey] = list("time" = world.time, "count" = current_count + 1)
 
 /obj/item/scp113/proc/handle_item_unequipped(datum/source, mob/living/user)
+	SIGNAL_HANDLER
 	if(!ishuman(user))
 		return
 

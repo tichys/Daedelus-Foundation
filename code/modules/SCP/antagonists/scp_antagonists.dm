@@ -291,6 +291,7 @@
 	UnregisterSignal(owner.current, COMSIG_MOB_SAY)
 
 /datum/antagonist/scp/scp173/proc/on_speak(mob/living/source, list/speech_args)
+	SIGNAL_HANDLER
 	speech_args[SPEECH_MESSAGE] = ""
 
 // ================================================================
@@ -349,6 +350,7 @@
 	remove_action(/datum/action/innate/scp_ability/scp096_cover_face)
 
 /datum/antagonist/scp/scp096/proc/on_face_seen(mob/living/source, mob/living/seer)
+	SIGNAL_HANDLER
 	if(!ishuman(seer))
 		return
 	var/mob/living/carbon/human/H = seer

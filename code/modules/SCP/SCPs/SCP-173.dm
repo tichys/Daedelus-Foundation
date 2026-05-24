@@ -56,6 +56,7 @@
 	return ..()
 
 /mob/living/scp/scp173/proc/on_speak(mob/living/source, list/speech_args)
+	SIGNAL_HANDLER
 	speech_args[SPEECH_MESSAGE] = ""
 
 /mob/living/scp/scp173/Move(a, b, flag)

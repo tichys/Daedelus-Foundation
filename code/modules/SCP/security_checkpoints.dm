@@ -28,6 +28,7 @@
 	RegisterSignal(src, COMSIG_ATOM_ENTERED, PROC_REF(on_crossed))
 
 /obj/machinery/scp_checkpoint_scanner/proc/on_crossed(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
 	if(!ishuman(AM))
 		return
 	if(world.time < scan_cooldown)

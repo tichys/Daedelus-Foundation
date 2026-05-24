@@ -143,6 +143,7 @@
 			horror_system.increase_psychological_horror()
 
 /obj/structure/scp087/proc/on_crossed(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
 	if(ishuman(AM))
 		var/mob/living/carbon/human/H = AM
 		if(H.stat != DEAD)

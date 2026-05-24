@@ -86,6 +86,7 @@
 	RegisterSignal(src, COMSIG_ATOM_ENTERED, PROC_REF(on_crossed))
 
 /obj/effect/pocket_dimension_hazard/acid_pool/proc/on_crossed(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
 	if(!istype(AM, /mob/living/carbon/human))
 		return
 	var/mob/living/carbon/human/H = AM
@@ -103,6 +104,7 @@
 	RegisterSignal(src, COMSIG_ATOM_ENTERED, PROC_REF(on_crossed))
 
 /obj/effect/pocket_dimension_hazard/sanity_drain/proc/on_crossed(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
 	if(!istype(AM, /mob/living/carbon/human))
 		return
 	var/mob/living/carbon/human/H = AM
