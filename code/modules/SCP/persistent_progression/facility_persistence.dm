@@ -6,7 +6,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/controller/subsystem/facility_persistence/Initialize()
 	manager = new /datum/facility_persistence_manager()
-	world.log << "Facility Persistence Subsystem: Initialized"
+	log_world("Facility Persistence Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/facility_persistence/fire()
@@ -28,6 +28,7 @@ SUBSYSTEM_DEF(facility_persistence)
 	var/facility_age = 0
 	var/facility_health = 0
 	var/maintenance_level = 0
+	var/list/maintenance_tasks = list()
 	var/security_level = 1
 	var/power_efficiency = 0
 	var/containment_stability = 0

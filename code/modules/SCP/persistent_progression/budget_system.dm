@@ -206,7 +206,7 @@ SUBSYSTEM_DEF(budget_system)
 	budget_requests[request_id] = request
 
 	// Log the request
-	world.log << "Budget: Budget increase request [request_id] from [department_id] for [requested_amount] credits"
+	log_game("Budget: Budget increase request [request_id] from [department_id] for [requested_amount] credits")
 
 	return request
 
@@ -247,7 +247,7 @@ SUBSYSTEM_DEF(budget_system)
 	// Update global metrics
 	update_budget_statistics()
 
-	world.log << "Budget: Transfer of [amount] credits from [from_department] to [to_department] by [transferred_by]"
+	log_game("Budget: Transfer of [amount] credits from [from_department] to [to_department] by [transferred_by]")
 	return TRUE
 
 // Generate budget alerts
@@ -315,7 +315,7 @@ SUBSYSTEM_DEF(budget_system)
 	// Store alerts
 	if(length(alerts) > 0)
 		budget_alerts[alert_id] = alerts
-		world.log << "Budget: Generated [length(alerts)] budget alerts"
+		log_game("Budget: Generated [length(alerts)] budget alerts")
 
 	return alerts
 
@@ -352,7 +352,7 @@ SUBSYSTEM_DEF(budget_system)
 		if(old_timestamp < oldest_allowed)
 			budget_history -= old_timestamp
 
-	world.log << "Budget: Recorded historical data for timestamp [timestamp]"
+	log_game("Budget: Recorded historical data for timestamp [timestamp]")
 
 // Get budget trends analysis
 /datum/budget_manager/proc/get_budget_trends()
@@ -415,7 +415,7 @@ SUBSYSTEM_DEF(budget_system)
 
 		update_department_status(dept_budget)
 
-	world.log << "Budget: Budget request [request_id] approved by [approved_by]"
+	log_game("Budget: Budget request [request_id] approved by [approved_by]")
 	return TRUE
 
 /datum/budget_manager/proc/deny_budget_request(var/request_id, var/denied_by, var/denial_notes = "")
@@ -427,7 +427,7 @@ SUBSYSTEM_DEF(budget_system)
 	request.approved_by = denied_by
 	request.approval_notes = denial_notes
 
-	world.log << "Budget: Budget request [request_id] denied by [denied_by]"
+	log_game("Budget: Budget request [request_id] denied by [denied_by]")
 	return TRUE
 
 /datum/budget_manager/proc/update_department_status(var/datum/budget_data/dept_budget)
@@ -714,11 +714,11 @@ SUBSYSTEM_DEF(budget_system)
 
 // Subsystem initialization
 /datum/controller/subsystem/budget_system/Initialize()
-	world.log << "Budget system initializing..."
+	log_world("Budget system initializing...")
 	manager = new /datum/budget_manager()
 	manager.initialize_department_budgets()
 	manager.load_budget_data()
-	world.log << "Budget system initialized with [length(manager.department_budgets)] departments"
+	log_world("Budget system initialized with [length(manager.department_budgets)] departments")
 	return ..()
 
 /datum/controller/subsystem/budget_system/fire()

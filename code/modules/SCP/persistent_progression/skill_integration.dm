@@ -10,7 +10,7 @@ SUBSYSTEM_DEF(skill_integration)
 
 /datum/controller/subsystem/skill_integration/Initialize()
 	manager = new /datum/skill_integration_manager()
-	world.log << "Skill Integration Subsystem: Initialized"
+	log_world("Skill Integration Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/skill_integration/fire()

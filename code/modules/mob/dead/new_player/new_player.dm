@@ -38,34 +38,21 @@
 
 
 /mob/dead/new_player/ui_interact(mob/user, datum/tgui/ui)
-	world.log << "ui_interact called for LateChoices"
-	world.log << "User: [user], Src: [src], UI: [ui]"
 	ui = SStgui.try_update_ui(user, src, ui)
-	world.log << "try_update_ui result: [ui]"
 	if(!ui)
-		world.log << "Creating new TGUI interface"
-		world.log << "Attempting to create interface: Vote"
 		ui = new(user, src, "Vote")
-		world.log << "TGUI interface created with name: Vote"
-		world.log << "UI object: [ui]"
 		ui.open()
-		world.log << "TGUI interface opened successfully"
-	else
-		world.log << "Updating existing TGUI interface"
 
 /mob/dead/new_player/ui_data(mob/user)
-	world.log << "ui_data called, returning: [data]"
 	return data
 
 /mob/dead/new_player/ui_act(action, list/params)
-	world.log << "TGUI: ui_act called with action: [action], params: [params]"
 	. = ..()
 	if(.)
 		return
 
 	switch(action)
 		if("select_job")
-			world.log << "TGUI: select_job action received with params: [params]"
 			var/job_title = params["job"]
 			if(job_title)
 				// Check if round is in progress

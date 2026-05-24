@@ -171,12 +171,12 @@
 	generate_ikea_labyrinth(new_z)
 
 	if(!entry_point)
-		world.log << "IKEA interior [id]: Entry point is null after generation, using fallback"
+		log_game("IKEA interior [id]: Entry point is null after generation, using fallback")
 		entry_point = locate(50, 50, new_z)
 		if(entry_point)
 			entry_point.ChangeTurf(/turf/open/floor/wood)
 
-	world.log << "IKEA interior [id]: Entry point at [entry_point ? "[entry_point.x],[entry_point.y],[entry_point.z]" : "NULL"]"
+	log_game("IKEA interior [id]: Entry point at [entry_point ? "[entry_point.x],[entry_point.y],[entry_point.z]" : "NULL"]")
 
 /area/scp/ikea
 	name = "SCP-3008 Interior"
@@ -192,7 +192,7 @@
 	ambientsounds = list('sound/ambience/ambigen1.ogg','sound/ambience/ambigen3.ogg','sound/ambience/ambigen4.ogg','sound/ambience/ambigen5.ogg','sound/ambience/ambigen6.ogg','sound/ambience/ambigen7.ogg','sound/ambience/ambigen8.ogg','sound/ambience/ambigen9.ogg','sound/ambience/ambigen10.ogg','sound/ambience/ambigen11.ogg','sound/ambience/ambigen12.ogg')
 
 /datum/ikea_interior/proc/generate_ikea_labyrinth(z_level)
-	world.log << "IKEA interior: Starting BSP generation for z-level [z_level]"
+	log_game("IKEA interior: Starting BSP generation for z-level [z_level]")
 
 	var/area/scp/ikea/ikea_area = new /area/scp/ikea()
 	interior_area = ikea_area
@@ -279,7 +279,7 @@
 		if(entry_point)
 			entry_point.ChangeTurf(/turf/open/floor/wood)
 
-	world.log << "IKEA interior: BSP generation completed - [length(rooms)] rooms on z-level [z_level]"
+	log_game("IKEA interior: BSP generation completed - [length(rooms)] rooms on z-level [z_level]")
 
 /datum/ikea_sector
 	var/x1

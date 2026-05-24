@@ -146,23 +146,23 @@ SUBSYSTEM_DEF(persistence)
 	// Load adventure data into the system
 	for(var/adventure_id in json)
 		// Process each adventure
-		world.log << "Persistence: Loaded adventure [adventure_id]"
+		log_world("Persistence: Loaded adventure [adventure_id]")
 
 /datum/controller/subsystem/persistence/proc/initialize_persistence_managers()
 	// Initialize all persistence managers
-	world.log << "Persistence: Initializing persistence managers..."
+	log_world("Persistence: Initializing persistence managers...")
 
 	// Ensure all subsystems are ready
 	if(!SSsecurity_persistence)
-		world.log << "Persistence: Warning - Security persistence subsystem not available"
+		log_world("Persistence: Warning - Security persistence subsystem not available")
 	if(!SSmedical_persistence)
-		world.log << "Persistence: Warning - Medical persistence subsystem not available"
+		log_world("Persistence: Warning - Medical persistence subsystem not available")
 	if(!SSresearch_persistence)
-		world.log << "Persistence: Warning - Research persistence subsystem not available"
+		log_world("Persistence: Warning - Research persistence subsystem not available")
 	if(!SSpersonnel_persistence)
-		world.log << "Persistence: Warning - Personnel persistence subsystem not available"
+		log_world("Persistence: Warning - Personnel persistence subsystem not available")
 
-	world.log << "Persistence: Persistence managers initialized"
+	log_world("Persistence: Persistence managers initialized")
 
 /datum/controller/subsystem/persistence/Shutdown()
 	collect_data()

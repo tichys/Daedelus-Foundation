@@ -229,7 +229,7 @@ SUBSYSTEM_DEF(storytelling)
 	return summary
 
 /proc/log_storytelling(message)
-	world.log << "Storytelling: [message]"
+	log_game("Storytelling: [message]")
 
 /datum/story_arc
 	var/arc_id = ""

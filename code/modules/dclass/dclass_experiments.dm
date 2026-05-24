@@ -14,7 +14,7 @@ SUBSYSTEM_DEF(dclass_experiments)
 	var/list/test_history = list()
 
 /datum/controller/subsystem/dclass_experiments/Initialize()
-	world.log << "D-Class Experiment System: Initialized"
+	log_world("D-Class Experiment System: Initialized")
 	return ..()
 
 /datum/controller/subsystem/dclass_experiments/fire()

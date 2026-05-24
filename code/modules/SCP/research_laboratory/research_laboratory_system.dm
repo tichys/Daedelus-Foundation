@@ -8,7 +8,7 @@ SUBSYSTEM_DEF(research_laboratory)
 /datum/controller/subsystem/research_laboratory/Initialize()
 	manager = new /datum/research_laboratory_manager()
 	manager.initialize()
-	world.log << "Research Laboratory Subsystem: Initialized"
+	log_game("Research Laboratory Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/research_laboratory/fire()

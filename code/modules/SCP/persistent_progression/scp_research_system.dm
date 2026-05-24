@@ -111,7 +111,7 @@ SUBSYSTEM_DEF(scp_research)
 /datum/scp_research_manager/proc/initialize_research_system()
 	initialize_research_rewards()
 	initialize_research_milestones()
-	world.log << "SCP Research: Research system initialized with [length(research_rewards)] rewards and [length(research_milestones) + 1] milestones"
+	log_world("SCP Research: Research system initialized with [length(research_rewards)] rewards and [length(research_milestones) + 1] milestones")
 
 /datum/scp_research_manager/proc/initialize_research_rewards()
 	add_research_reward("budget_1000", "budget", 1000, "Research Grant: Basic funding for SCP research", list("completed_projects" = 1))
@@ -157,7 +157,7 @@ SUBSYSTEM_DEF(scp_research)
 	research_projects[project_id] = project
 	var/datum/researcher_data/researcher = get_researcher_profile(researcher_ckey)
 	researcher.total_projects++
-	world.log << "SCP Research: Research project [project_id] started by [researcher_ckey]"
+	log_game("SCP Research: Research project [project_id] started by [researcher_ckey]")
 	return project
 
 /datum/scp_research_manager/proc/contribute_research_points(project_id, points, researcher_ckey)
@@ -204,7 +204,7 @@ SUBSYSTEM_DEF(scp_research)
 	var/level_reward = project.research_level * 100
 	researcher.research_points += level_reward
 	notify_researcher(researcher_ckey, "Research Level Up!", "Your research on [project.scp_designation] has reached level [project.research_level]! +[level_reward] research points")
-	world.log << "SCP Research: [researcher_ckey] reached research level [project.research_level] on [project.scp_designation]"
+	log_game("SCP Research: [researcher_ckey] reached research level [project.research_level] on [project.scp_designation]")
 
 /datum/scp_research_manager/proc/complete_research_project(project_id, researcher_ckey)
 	var/datum/research_data/project = research_projects[project_id]
@@ -237,7 +237,7 @@ SUBSYSTEM_DEF(scp_research)
 	check_reward_unlocks(researcher_ckey)
 	notify_researcher(researcher_ckey, "Research Complete!", "Research on [project.scp_designation] completed! +[project.completion_reward] research points, +[budget_reward] budget, +[progression_reward] progression")
 
-	world.log << "SCP Research: [researcher_ckey] completed research on [project.scp_designation]"
+	log_game("SCP Research: [researcher_ckey] completed research on [project.scp_designation]")
 	return TRUE
 
 /datum/scp_research_manager/proc/calculate_completion_reward(datum/research_data/project)
@@ -320,7 +320,7 @@ SUBSYSTEM_DEF(scp_research)
 	researcher.research_points += milestone_reward
 	researcher.achievements += milestone.milestone_name
 	notify_researcher(researcher_ckey, "Milestone Achieved!", "[milestone.milestone_name]: [milestone.milestone_description] +[milestone_reward] research points")
-	world.log << "SCP Research: [researcher_ckey] achieved milestone [milestone.milestone_name]"
+	log_game("SCP Research: [researcher_ckey] achieved milestone [milestone.milestone_name]")
 
 /datum/scp_research_manager/proc/notify_researcher(ckey, title, message)
 	for(var/client/C in GLOB.clients)
@@ -412,11 +412,11 @@ SUBSYSTEM_DEF(scp_research)
 			instance.containment_difficulty = max(1, instance.containment_difficulty - 1)
 
 /datum/controller/subsystem/scp_research/Initialize()
-	world.log << "SCP Research system initializing..."
+	log_world("SCP Research system initializing...")
 	manager = new /datum/scp_research_manager()
 	manager.initialize_research_system()
 	manager.load_research_persistence()
-	world.log << "SCP Research system initialized"
+	log_world("SCP Research system initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_research/fire()
@@ -563,7 +563,7 @@ SUBSYSTEM_DEF(scp_research)
 			if(reward)
 				reward.unlocked = rdata["unlocked"] || FALSE
 
-	world.log << "SCP Research: Loaded persistence data"
+	log_game("SCP Research: Loaded persistence data")
 
 /proc/award_research_points(scp_designation, research_type, points, researcher_ckey)
 	if(SSscp_research && SSscp_research.manager)

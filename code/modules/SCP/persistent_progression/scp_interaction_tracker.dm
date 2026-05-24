@@ -6,7 +6,7 @@ SUBSYSTEM_DEF(scp_interactions)
 
 /datum/controller/subsystem/scp_interactions/Initialize()
 	manager = new /datum/scp_interaction_manager()
-	world.log << "SCP Interaction Tracker: Initialized"
+	log_game("SCP Interaction Tracker: Initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_interactions/fire()

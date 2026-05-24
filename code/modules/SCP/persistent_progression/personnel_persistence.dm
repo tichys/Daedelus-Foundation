@@ -496,7 +496,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 
 /datum/personnel_persistence_manager/proc/save_personnel_data_to_database()
 	if(!SSdbcore.Connect())
-		world.log << "Personnel Persistence: Database connection failed, skipping database save"
+		log_game("Personnel Persistence: Database connection failed, skipping database save")
 		return
 
 	// Save personnel records to database
@@ -529,7 +529,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		))
 
 		if(!query_save_personnel.warn_execute())
-			world.log << "Personnel Persistence: Failed to save personnel record for [ckey]"
+			log_game("Personnel Persistence: Failed to save personnel record for [ckey]")
 		qdel(query_save_personnel)
 
 	// Save assignments to database
@@ -558,7 +558,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		))
 
 		if(!query_save_assignment.warn_execute())
-			world.log << "Personnel Persistence: Failed to save assignment [assignment_id]"
+			log_game("Personnel Persistence: Failed to save assignment [assignment_id]")
 		qdel(query_save_assignment)
 
 	// Save performance reviews to database
@@ -586,7 +586,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		))
 
 		if(!query_save_review.warn_execute())
-			world.log << "Personnel Persistence: Failed to save performance review [review_id]"
+			log_game("Personnel Persistence: Failed to save performance review [review_id]")
 		qdel(query_save_review)
 
 	// Save training records to database
@@ -615,7 +615,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		))
 
 		if(!query_save_training.warn_execute())
-			world.log << "Personnel Persistence: Failed to save training record [training_id]"
+			log_game("Personnel Persistence: Failed to save training record [training_id]")
 		qdel(query_save_training)
 
 	// Save promotions to database
@@ -642,10 +642,10 @@ SUBSYSTEM_DEF(personnel_persistence)
 		))
 
 		if(!query_save_promotion.warn_execute())
-			world.log << "Personnel Persistence: Failed to save promotion [promotion_id]"
+			log_game("Personnel Persistence: Failed to save promotion [promotion_id]")
 		qdel(query_save_promotion)
 
-	world.log << "Personnel Persistence: Saved [length(personnel_records)] personnel records, [length(assignments)] assignments, [length(performance_reviews)] reviews, [length(training_records)] training records, and [length(promotions)] promotions to database"
+	log_game("Personnel Persistence: Saved [length(personnel_records)] personnel records, [length(assignments)] assignments, [length(performance_reviews)] reviews, [length(training_records)] training records, and [length(promotions)] promotions to database")
 
 /datum/personnel_persistence_manager/proc/load_personnel_data()
 	// First, load existing records from datacore
@@ -748,11 +748,11 @@ SUBSYSTEM_DEF(personnel_persistence)
 
 /datum/personnel_persistence_manager/proc/load_personnel_data_from_database()
 	if(!SSdbcore.Connect())
-		world.log << "Personnel Persistence: Database connection failed, skipping database load"
+		log_game("Personnel Persistence: Database connection failed, skipping database load")
 		return
 
 	// Temporarily disabled database loading to fix compilation issues
-	world.log << "Personnel Persistence: Database loading temporarily disabled"
+	log_world("Personnel Persistence: Database loading temporarily disabled")
 	return
 
 	/*
@@ -761,7 +761,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		"SELECT ckey, real_name, employee_id, department, position, hire_date, clearance_level, performance_rating, salary, status, skills, certifications, emergency_contact, last_updated FROM [format_table_name('personnel_records')]"
 	)
 	if(!query_load_personnel.warn_execute())
-		world.log << "Personnel Persistence: Could not load personnel records from database (table may not exist)"
+		log_game("Personnel Persistence: Could not load personnel records from database (table may not exist)")
 		qdel(query_load_personnel)
 	else
 		while(query_load_personnel.NextRow())
@@ -801,7 +801,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		"SELECT assignment_id, employee_ckey, assignment_type, assignment_description, start_date, end_date, status, priority, completion_rating, supervisor_ckey, notes FROM [format_table_name('personnel_assignments')]"
 	)
 	if(!query_load_assignments.warn_execute())
-		world.log << "Personnel Persistence: Could not load assignments from database (table may not exist)"
+		log_game("Personnel Persistence: Could not load assignments from database (table may not exist)")
 		qdel(query_load_assignments)
 	else
 		while(query_load_assignments.NextRow())
@@ -832,7 +832,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		"SELECT review_id, employee_ckey, reviewer_ckey, review_date, performance_rating, strengths, weaknesses, goals, overall_assessment, next_review_date FROM [format_table_name('personnel_performance_reviews')]"
 	)
 	if(!query_load_reviews.warn_execute())
-		world.log << "Personnel Persistence: Could not load performance reviews from database (table may not exist)"
+		log_game("Personnel Persistence: Could not load performance reviews from database (table may not exist)")
 		qdel(query_load_reviews)
 	else
 		while(query_load_reviews.NextRow())
@@ -863,7 +863,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		"SELECT training_id, employee_ckey, training_type, training_name, training_date, completion_date, status, score, certification_expiry, trainer_ckey, notes FROM [format_table_name('personnel_training_records')]"
 	)
 	if(!query_load_training.warn_execute())
-		world.log << "Personnel Persistence: Could not load training records from database (table may not exist)"
+		log_game("Personnel Persistence: Could not load training records from database (table may not exist)")
 		qdel(query_load_training)
 	else
 		while(query_load_training.NextRow())
@@ -894,7 +894,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 		"SELECT promotion_id, employee_ckey, old_position, new_position, promotion_date, reason, approver_ckey, salary_increase, clearance_increase FROM [format_table_name('personnel_promotions')]"
 	)
 	if(!query_load_promotions.warn_execute())
-		world.log << "Personnel Persistence: Could not load promotions from database (table may not exist)"
+		log_game("Personnel Persistence: Could not load promotions from database (table may not exist)")
 		qdel(query_load_promotions)
 	else
 		while(query_load_promotions.NextRow())
@@ -916,20 +916,20 @@ SUBSYSTEM_DEF(personnel_persistence)
 			promotions[promotion_id] = promotion
 		qdel(query_load_promotions)
 
-	world.log << "Personnel Persistence: Loaded [length(personnel_records)] personnel records, [length(assignments)] assignments, [length(performance_reviews)] reviews, [length(training_records)] training records, and [length(promotions)] promotions from database"
+	log_world("Personnel Persistence: Loaded [length(personnel_records)] personnel records, [length(assignments)] assignments, [length(performance_reviews)] reviews, [length(training_records)] training records, and [length(promotions)] promotions from database")
 	*/
 
 // Subsystem initialization
 /datum/controller/subsystem/personnel_persistence/Initialize()
-	world.log << "Personnel persistence subsystem initializing..."
+	log_world("Personnel persistence subsystem initializing...")
 	manager = new /datum/personnel_persistence_manager()
-	world.log << "Personnel persistence manager created"
+	log_game("Personnel persistence manager created")
 
 	// Load existing personnel records from datacore
-	world.log << "Loading existing personnel records from datacore..."
+	log_world("Loading existing personnel records from datacore...")
 	manager.load_existing_personnel_records()
 
-	world.log << "Personnel records count at initialization: [length(manager.personnel_records)]"
+	log_game("Personnel records count at initialization: [length(manager.personnel_records)]")
 	return ..()
 
 /datum/controller/subsystem/personnel_persistence/fire()
@@ -1204,7 +1204,7 @@ SUBSYSTEM_DEF(personnel_persistence)
 	if(!SSdatacore)
 		return
 
-	world.log << "Personnel: Loading existing personnel records from datacore..."
+	log_world("Personnel: Loading existing personnel records from datacore...")
 
 	// Load from general records (station records)
 	for(var/datum/data/record/general_record in SSdatacore.get_records(DATACORE_RECORDS_STATION))
@@ -1263,13 +1263,13 @@ SUBSYSTEM_DEF(personnel_persistence)
 				personnel_record.last_updated = world.time
 				personnel_records[ckey] = personnel_record
 
-				world.log << "Personnel: Loaded record for [general_record.fields[DATACORE_NAME]] ([department] - [position])"
+				log_game("Personnel: Loaded record for [general_record.fields[DATACORE_NAME]] ([department] - [position])")
 
 	// Update total staff count
 	total_staff = length(personnel_records)
 	active_staff = total_staff
 
-	world.log << "Personnel: Loaded [length(personnel_records)] personnel records from datacore"
+	log_world("Personnel: Loaded [length(personnel_records)] personnel records from datacore")
 
 // Clear persistent storage to ensure only real data is used
 /datum/personnel_persistence_manager/proc/clear_persistent_storage()
@@ -1286,8 +1286,8 @@ SUBSYSTEM_DEF(personnel_persistence)
 	var/savefile/S = new /savefile("data/personnel_persistence.json")
 	if(S)
 		S["data"] << null
-		world.log << "Personnel: Cleared persistent storage file"
+		log_game("Personnel: Cleared persistent storage file")
 
-	world.log << "Personnel: Cleared all persistent storage data"
+	log_game("Personnel: Cleared all persistent storage data")
 
 

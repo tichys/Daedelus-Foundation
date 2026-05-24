@@ -478,7 +478,7 @@ SUBSYSTEM_DEF(research_persistence)
 
 /datum/research_persistence_manager/proc/save_research_data_to_database()
 	if(!SSdbcore.Connect())
-		world.log << "Research Persistence: Database connection failed, skipping database save"
+		log_game("Research Persistence: Database connection failed, skipping database save")
 		return
 
 	// Save research projects to database
@@ -515,7 +515,7 @@ SUBSYSTEM_DEF(research_persistence)
 		))
 
 		if(!query_save_project.warn_execute())
-			world.log << "Research Persistence: Failed to save research project [project_id]"
+			log_game("Research Persistence: Failed to save research project [project_id]")
 		qdel(query_save_project)
 
 	// Save scientific discoveries to database
@@ -546,7 +546,7 @@ SUBSYSTEM_DEF(research_persistence)
 		))
 
 		if(!query_save_discovery.warn_execute())
-			world.log << "Research Persistence: Failed to save scientific discovery [discovery_id]"
+			log_game("Research Persistence: Failed to save scientific discovery [discovery_id]")
 		qdel(query_save_discovery)
 
 	// Save publications to database
@@ -574,7 +574,7 @@ SUBSYSTEM_DEF(research_persistence)
 		))
 
 		if(!query_save_publication.warn_execute())
-			world.log << "Research Persistence: Failed to save publication [publication_id]"
+			log_game("Research Persistence: Failed to save publication [publication_id]")
 		qdel(query_save_publication)
 
 	// Save research facilities to database
@@ -603,7 +603,7 @@ SUBSYSTEM_DEF(research_persistence)
 		))
 
 		if(!query_save_facility.warn_execute())
-			world.log << "Research Persistence: Failed to save research facility [facility_id]"
+			log_game("Research Persistence: Failed to save research facility [facility_id]")
 		qdel(query_save_facility)
 
 	// Save research grants to database
@@ -632,10 +632,10 @@ SUBSYSTEM_DEF(research_persistence)
 		))
 
 		if(!query_save_grant.warn_execute())
-			world.log << "Research Persistence: Failed to save research grant [grant_id]"
+			log_game("Research Persistence: Failed to save research grant [grant_id]")
 		qdel(query_save_grant)
 
-	world.log << "Research Persistence: Saved [length(research_projects)] research projects, [length(scientific_discoveries)] discoveries, [length(publications)] publications, [length(research_facilities)] facilities, and [length(research_grants)] grants to database"
+	log_game("Research Persistence: Saved [length(research_projects)] research projects, [length(scientific_discoveries)] discoveries, [length(publications)] publications, [length(research_facilities)] facilities, and [length(research_grants)] grants to database")
 
 /datum/research_persistence_manager/proc/load_research_data()
 	var/savefile/S = new /savefile("data/research_persistence.json")

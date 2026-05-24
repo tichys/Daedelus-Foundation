@@ -10,7 +10,7 @@ SUBSYSTEM_DEF(roleplay_character)
 
 /datum/controller/subsystem/roleplay_character/Initialize()
 	manager = new /datum/roleplay_character_manager()
-	world.log << "Roleplay Character Subsystem: Initialized"
+	log_game("Roleplay Character Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/roleplay_character/fire()
@@ -315,7 +315,7 @@ SUBSYSTEM_DEF(roleplay_character)
 	character_sheets[ckey] = new_character
 	total_characters_created++
 
-	world.log << "Roleplay Character: Created character [name] ([character_type]) for [ckey]"
+	log_game("Roleplay Character: Created character [name] ([character_type]) for [ckey]")
 	return new_character
 
 /datum/roleplay_character_manager/proc/get_character(ckey)

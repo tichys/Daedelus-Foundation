@@ -189,7 +189,7 @@ SUBSYSTEM_DEF(scp_cross_interactions)
 	register_interaction("682_adapt_610","Flesh Immunity","SCP-682 adapts to SCP-610 infection after exposure, becoming completely immune and consuming flesh creatures for biomass.","SCP-682","SCP-610",CROSS_INTERACT_TIER_4,4,4,2,6,300 SECONDS)
 	register_interaction("457_burn_610","Cleansing Fire","SCP-457's flames are highly effective against SCP-610 flesh structures, burning them away faster than they can regenerate.","SCP-457","SCP-610",CROSS_INTERACT_TIER_2,3,2,5,8,90 SECONDS)
 	register_interaction("939_hunt_610","Predator vs Parasite","SCP-939 preys on SCP-610 half-infested hosts, but the infection spreads to 939's vocal apparatus, corrupting its mimicry.","SCP-939","SCP-610",CROSS_INTERACT_TIER_3,3,3,3,8,150 SECONDS)
-	world.log << "SCP Cross-Interactions: Registered [length(interactions)] interactions"
+	log_game("SCP Cross-Interactions: Registered [length(interactions)] interactions")
 
 /datum/controller/subsystem/scp_cross_interactions/proc/register_interaction(id, name, desc, scp1, scp2, tier, req1, req2, prob, range_req, cooldown_time)
 	var/datum/cross_scp_interaction/I = new(id, name, desc, scp1, scp2, tier, req1, req2, prob, range_req, cooldown_time)

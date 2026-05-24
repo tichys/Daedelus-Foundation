@@ -590,7 +590,7 @@
 				)
 
 				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) has been added to the Player Access Management system.</span>")
-				world.log << "SCPManagementInterface: Player [player_key] added by [admin_client.key]"
+				log_game("SCPManagementInterface: Player [player_key] added by [admin_client.key]")
 				. = TRUE
 
 		if("remove_player_from_access")
@@ -599,7 +599,7 @@
 				var/player_name = player_permissions[player_key]["name"]
 				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) has been removed from the Player Access Management system.</span>")
 				player_permissions -= player_key
-				world.log << "SCPManagementInterface: Player [player_key] removed by [admin_client.key]"
+				log_game("SCPManagementInterface: Player [player_key] removed by [admin_client.key]")
 				. = TRUE
 
 		if("update_player_permissions")
@@ -621,7 +621,7 @@
 
 				var/player_name = player_permissions[player_key]["name"]
 				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) permissions have been updated.</span>")
-				world.log << "SCPManagementInterface: Player [player_key] permissions updated by [admin_client.key]"
+				log_game("SCPManagementInterface: Player [player_key] permissions updated by [admin_client.key]")
 				. = TRUE
 
 		if("view_scp_logs")
