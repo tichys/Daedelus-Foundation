@@ -14,7 +14,7 @@
 
 	database = new /datum/persistent_progression_database()
 	initialized = TRUE
-	world.log << "Persistent Progression Database Adapter: Initialized successfully"
+	log_world("Persistent Progression Database Adapter: Initialized successfully")
 
 // Convert database row to persistent_player_data format
 /datum/persistent_progression_database_adapter/proc/db_row_to_player_data(db_row)
@@ -339,7 +339,7 @@
 	var/success = save_player_data(ckey, json_data)
 
 	if(success)
-		world.log << "Persistent Progression Database: Migrated data for [ckey] from JSON to database"
+		log_game("Persistent Progression Database: Migrated data for [ckey] from JSON to database")
 
 	return success
 

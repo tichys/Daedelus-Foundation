@@ -13,7 +13,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	initialize_chain_breaches()
 	init_zone_lighting_controllers()
 	minimap_renderer = new()
-	world.log << "SCP Persistence Subsystem: Initialized"
+	log_world("SCP Persistence Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_persistence/fire()
@@ -260,7 +260,7 @@ SUBSYSTEM_DEF(scp_persistence)
 		var/filename = "data/scp_persistence.json"
 		rustg_file_write(json_encode(data), filename)
 	catch
-		world.log << "SCP Persistence: Error saving SCP data"
+		stack_trace("SCP Persistence: Error saving SCP data")
 
 /datum/scp_persistence_manager/proc/load_scp_data()
 	var/list/data = null
@@ -379,7 +379,7 @@ SUBSYSTEM_DEF(scp_persistence)
 			rotation_interval = data["rotation_interval"] || 18000
 			last_rotation_time = data["last_rotation_time"] || 0
 	catch
-		world.log << "SCP Persistence: Error loading SCP data"
+		stack_trace("SCP Persistence: Error loading SCP data")
 
 // SCP Instance Datum
 /datum/scp_instance
@@ -811,7 +811,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	else
 		scp_configurations[scp_id]["enabled"] = TRUE
 
-	world.log << "SCP Management: [scp_id] enabled"
+	log_game("SCP Management: [scp_id] enabled")
 	return TRUE
 
 // Disable an SCP
@@ -828,7 +828,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	if(scp_id in scp_configurations)
 		scp_configurations[scp_id]["enabled"] = FALSE
 
-	world.log << "SCP Management: [scp_id] disabled"
+	log_game("SCP Management: [scp_id] disabled")
 	return TRUE
 
 // Check if an SCP is enabled
@@ -872,7 +872,7 @@ SUBSYSTEM_DEF(scp_persistence)
 		return FALSE
 
 	global_scp_management_mode = mode
-	world.log << "SCP Management: Global mode changed to [mode]"
+	log_game("SCP Management: Global mode changed to [mode]")
 	return TRUE
 
 // Apply management mode effects
@@ -927,12 +927,12 @@ SUBSYSTEM_DEF(scp_persistence)
 			enable_scp(selected_scp)
 			all_scps -= selected_scp
 
-	world.log << "SCP Management: Rotation completed, [length(enabled_scps)] SCPs enabled"
+	log_game("SCP Management: Rotation completed, [length(enabled_scps)] SCPs enabled")
 
 // Force SCP rotation (admin command)
 /datum/scp_persistence_manager/proc/force_scp_rotation()
 	rotate_scps()
-	world.log << "SCP Management: Force rotation executed by admin"
+	log_game("SCP Management: Force rotation executed by admin")
 
 // Get SCP template data for TGUI
 /datum/scp_persistence_manager/proc/get_scp_templates()

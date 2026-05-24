@@ -748,7 +748,7 @@
 	if(.)
 		return
 
-	var/mob/user = usr
+	var/mob/user = ui.user
 
 	switch(action)
 		if("initiate")

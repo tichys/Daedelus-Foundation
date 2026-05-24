@@ -284,9 +284,11 @@
 
 	to_chat(src, "<span class='notice'>[message]</span>")
 
-/mob/living/simple_animal/scp1048/proc/view_persistence_data()
+/mob/living/simple_animal/scp1048/proc/view_persistence_data(mob/user)
+	if(!user)
+		user = usr
 	if(!check_rights(R_ADMIN))
-		to_chat(usr, "<span class='warning'>You don't have permission to view persistence data.</span>")
+		to_chat(user, "<span class='warning'>You don't have permission to view persistence data.</span>")
 		return
 
 	var/message = "<h2>SCP-1048 Persistence Data</h2>"
@@ -299,7 +301,7 @@
 		if(instance)
 			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 
-	to_chat(usr, "<span class='notice'>[message]</span>")
+	to_chat(user, "<span class='notice'>[message]</span>")
 
 /mob/living/simple_animal/scp1048/get_status_tab_items()
 	. = ..()

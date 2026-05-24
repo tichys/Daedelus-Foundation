@@ -41,7 +41,7 @@
 	create_analytics_table()
 
 	initialized = TRUE
-	world.log << "Persistent Progression Database: Initialized successfully"
+	log_world("Persistent Progression Database: Initialized successfully")
 
 // Create players table
 /datum/persistent_progression_database/proc/create_players_table()
@@ -596,7 +596,7 @@
 					analytics[ckey][metric_name] = new_entries
 	write_json_file(file_path, analytics)
 
-	world.log << "Persistent Progression Database: Cleaned up data older than [days_to_keep] days"
+	log_world("Persistent Progression Database: Cleaned up data older than [days_to_keep] days")
 
 // Export player data
 /datum/persistent_progression_database/proc/export_player_data(ckey)
