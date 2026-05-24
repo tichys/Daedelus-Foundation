@@ -4687,6 +4687,7 @@
 #include "code\modules\SCP\SCPs\SCP-527.dm"
 #include "code\modules\SCP\SCPs\SCP-529.dm"
 #include "code\modules\SCP\SCPs\SCP-5295.dm"
+#include "code\modules\SCP\SCPs\scp610_core.dm"
 #include "code\modules\SCP\SCPs\SCP-610.dm"
 #include "code\modules\SCP\SCPs\SCP-073.dm"
 #include "code\modules\SCP\SCPs\SCP-076.dm"
