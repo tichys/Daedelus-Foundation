@@ -1180,7 +1180,7 @@
 	icon_state = "beret"
 	clothing_flags = SNUG_FIT | HEADINTERNALS
 	flags_inv = HIDEEYES|HIDEFACE|HIDEHAIR|HIDESNOUT
-	armor = list(melee = 20, bullet = 10, laser = 10, energy = 10, bomb = 20, fire = 50, acid = 50)
+	armor = list(BLUNT = 20, PUNCTURE = 10, SLASH = 0, LASER = 10, ENERGY = 10, BOMB = 20, BIO = 0, FIRE = 50, ACID = 50)
 
 /obj/item/clothing/head/hood_scp096/equipped(mob/user, slot)
 	. = ..()
