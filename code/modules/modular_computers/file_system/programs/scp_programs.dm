@@ -114,7 +114,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -215,7 +215,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -327,7 +327,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -454,7 +454,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -552,7 +552,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -645,7 +645,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -794,7 +794,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -870,7 +870,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -986,7 +986,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1067,7 +1067,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1136,7 +1136,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1205,7 +1205,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1275,7 +1275,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	switch(action)
@@ -1285,7 +1285,7 @@
 				return
 			if(!SSscp_research?.manager)
 				return
-			SSscp_research.manager.adjust_research_points(points, "testing_app_submission:[usr?.ckey || "unknown"]")
+			SSscp_research.manager.adjust_research_points(points, "testing_app_submission:[ui.user?.ckey || "unknown"]")
 			to_chat(H, span_notice("Submitted [points] research points."))
 			if(SSraisa)
 				SSraisa.record_observation(H)
@@ -1355,7 +1355,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1455,7 +1455,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1554,7 +1554,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1685,7 +1685,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1802,8 +1802,8 @@
 		return
 	if(action == "view_camera")
 		var/obj/machinery/camera/C = locate(params["ref"])
-		if(C && !(C.machine_stat & NOPOWER) && ishuman(usr))
-			var/mob/living/carbon/human/H = usr
+		if(C && !(C.machine_stat & NOPOWER) && ishuman(ui.user))
+			var/mob/living/carbon/human/H = ui.user
 			H.reset_perspective(C)
 			addtimer(CALLBACK(H, /mob/proc/reset_perspective), 100)
 			. = TRUE
@@ -1901,10 +1901,10 @@
 		if(!H || H.stat != DEAD)
 			return
 		var/cause = params["cause"] || "Pending Autopsy"
-		var/obj/item/paper/death_certificate/cert = new(get_turf(usr))
+		var/obj/item/paper/death_certificate/cert = new(get_turf(ui.user))
 		cert.generate_certificate(H, cause)
 		if(GLOB.scp_admin_log)
-			GLOB.scp_admin_log.log_event("death_cert", "N/A", usr?.ckey || "N/A", H.real_name, "Death certificate issued: [cause]", 2)
+			GLOB.scp_admin_log.log_event("death_cert", "N/A", ui.user?.ckey || "N/A", H.real_name, "Death certificate issued: [cause]", 2)
 		. = TRUE
 
 /datum/computer_file/program/scp_security_codes
@@ -1940,7 +1940,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1992,9 +1992,9 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!H.sanity)
 		return
 	var/datum/sanity/S = H.sanity
@@ -2045,12 +2045,12 @@
 			var/recipient = params["recipient"] || "All Staff"
 			var/subject = params["subject"] || "No Subject"
 			var/body = params["body"] || ""
-			if(!usr)
+			if(!ui.user)
 				return
-			var/sender_name = usr?.real_name || "Unknown"
+			var/sender_name = ui.user?.real_name || "Unknown"
 			var/sender_job = "Unknown"
-			if(ishuman(usr))
-				var/mob/living/carbon/human/H = usr
+			if(ishuman(ui.user))
+				var/mob/living/carbon/human/H = ui.user
 				sender_job = H.job || "Unknown"
 			var/message = list("sender" = sender_name, "sender_job" = sender_job, "recipient" = recipient, "subject" = subject, "body" = body, "time" = gameTimestamp("hh:mm"), "priority" = params["priority"] || "normal")
 			for(var/obj/machinery/foundation_email_terminal/T in INSTANCES_OF(/obj/machinery/foundation_email_terminal))
@@ -2058,7 +2058,7 @@
 					T.inbox.Cut(1, 2)
 				T.inbox += list(message)
 			if(GLOB.scp_admin_log)
-				GLOB.scp_admin_log.log_event("email", "N/A", usr?.ckey || "N/A", recipient, "[subject]: [body]", 1)
+				GLOB.scp_admin_log.log_event("email", "N/A", ui.user?.ckey || "N/A", recipient, "[subject]: [body]", 1)
 			. = TRUE
 
 /datum/computer_file/program/scp_dclass_work
@@ -2083,7 +2083,7 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
 
 /datum/computer_file/program/scp_rehabilitation
@@ -2185,16 +2185,16 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
 	switch(action)
 		if("declare_quarantine")
-			var/area/A = get_area(usr)
+			var/area/A = get_area(ui.user)
 			if(A && GLOB.contagion_tracker)
 				GLOB.contagion_tracker.declare_quarantine(A, params["reason"] || "Contagion risk detected")
 			. = TRUE
 		if("lift_quarantine")
-			var/area/A = get_area(usr)
+			var/area/A = get_area(ui.user)
 			if(A && GLOB.contagion_tracker)
 				GLOB.contagion_tracker.lift_quarantine(A)
 			. = TRUE
@@ -2229,7 +2229,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2286,7 +2286,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2351,7 +2351,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2409,7 +2409,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2461,7 +2461,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2552,7 +2552,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2597,7 +2597,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2643,7 +2643,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2693,7 +2693,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
