@@ -64,15 +64,15 @@
 		mtf_team_key = "mtf_epsilon11"
 	if(!mtf_team_key)
 		return
-	var/list/team_data
 	for(var/obj/machinery/mtf_deployment_console/console in world)
-		if(console.available_teams[mtf_team_key])
-			team_data = console.available_teams[mtf_team_key]
-			if(world.time >= console.deployment_cooldown && active_breaches >= team_data["min_breach"])
-				console.deploy_mtf_team(mtf_team_key, team_data, null)
-				if(SSfoundation_comms)
-					SSfoundation_comms.create_dispatch(null, DISPATCH_MTF, "Automated MTF deployment: [team_data["name"]] dispatched for SCP-[scp_id] breach response.", 2)
-			break
+		var/list/team_data = console.available_teams?[mtf_team_key]
+		if(!team_data)
+			continue
+		if(world.time >= console.deployment_cooldown && active_breaches >= team_data["min_breach"])
+			console.deploy_mtf_team(mtf_team_key, team_data, null)
+			if(SSfoundation_comms)
+				SSfoundation_comms.create_dispatch(null, DISPATCH_MTF, "Automated MTF deployment: [team_data["name"]] dispatched for SCP-[scp_id] breach response.", 2)
+		break
 
 /proc/hook_recontainment_budget_recovery(scp_id, list/participants)
 	if(!SSfoundation_budget)
