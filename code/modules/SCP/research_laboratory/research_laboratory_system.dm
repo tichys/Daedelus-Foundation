@@ -583,7 +583,7 @@ SUBSYSTEM_DEF(research_laboratory)
 
 /datum/research_laboratory_manager/proc/apply_containment_bonus(bonus)
 	for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances?[scp_id]
 		if(instance)
 			instance.containment_effectiveness = min(1.5, instance.containment_effectiveness + bonus)
 			instance.containment_difficulty = max(1, instance.containment_difficulty - 1)
