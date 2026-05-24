@@ -344,20 +344,17 @@
 				. = TRUE
 
 		if("save_character")
-			// Character is automatically saved when updated
-			to_chat(usr, "<span class='notice'>Character saved successfully!</span>")
+			to_chat(ui.user, "<span class='notice'>Character saved successfully!</span>")
 			. = TRUE
 
 		if("sync_to_preferences")
-			// Sync character sheet changes back to preferences
 			sync_character_to_preferences()
-			to_chat(usr, "<span class='notice'>Character sheet synced to preferences!</span>")
+			to_chat(ui.user, "<span class='notice'>Character sheet synced to preferences!</span>")
 			. = TRUE
 
 		if("sync_from_preferences")
-			// Sync preferences to character sheet
 			sync_with_character_preferences()
-			to_chat(usr, "<span class='notice'>Character sheet synced from preferences!</span>")
+			to_chat(ui.user, "<span class='notice'>Character sheet synced from preferences!</span>")
 			. = TRUE
 
 		if("update_character_background")

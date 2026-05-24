@@ -5,6 +5,9 @@
 	status_flags = 0
 	hud_possible = list()
 	hud_type = /datum/hud
+	var/scp_designation = ""
+	var/scp_class = ""
+	var/scp_name = ""
 	var/obj_damage = 50
 	melee_damage_lower = 15
 	melee_damage_upper = 25

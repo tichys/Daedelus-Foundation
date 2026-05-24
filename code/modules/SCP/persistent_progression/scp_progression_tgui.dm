@@ -112,7 +112,7 @@
 	switch(action)
 		if("export_scp_data")
 			var/data_json = json_encode(list("ckey" = user.ckey, "scp_data" = "export"))
-			user << browse(data_json, "window=scp_progression_data;size=600x400;can_close=1;can_resize=1")
+			user << ftp(data_json, "scp_progression_data.json")
 			to_chat(user, span_notice("SCP progression data exported."))
 			. = TRUE
 

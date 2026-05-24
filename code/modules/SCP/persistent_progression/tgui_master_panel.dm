@@ -2311,7 +2311,7 @@
 			log_game("PersistenceMasterPanel: Processing progression_export_data for [admin_client.ckey]")
 			if(SSpersistent_progression)
 				var/export_data = SSpersistent_progression.export_all_data()
-				admin_client << browse(export_data, "window=progression_export;size=800x600;can_close=1;can_resize=1")
+				admin_client << ftp(export_data, "progression_export.json")
 				to_chat(admin_client, span_notice("Progression data exported successfully."))
 			else
 				to_chat(admin_client, span_warning("Progression system not available."))
