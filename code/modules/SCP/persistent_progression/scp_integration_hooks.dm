@@ -29,7 +29,7 @@ var/list/scp_breach_cooldown = list()
 		return FALSE
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance && instance.containment_status == "breached")
 			return FALSE
 
@@ -50,19 +50,19 @@ var/list/scp_breach_cooldown = list()
 		addtimer(CALLBACK(GLOBAL_PROC, /proc/conditional_restore_zone_lighting, breach_zone, scp_id), 5 MINUTES)
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance)
 			instance.containment_status = "breached"
 			instance.containment_health = 0
 			instance.last_breach = world.time
 			instance.add_breach_record()
 
-		SSscp_persistence.manager.active_breaches++
-		SSscp_persistence.manager.global_containment_stability = max(0, SSscp_persistence.manager.global_containment_stability - 10)
+		SSscp_persistence?.manager?.active_breaches++
+		SSscp_persistence?.manager?.global_containment_stability = max(0, SSscp_persistence?.manager?.global_containment_stability - 10)
 
 	var/is_keter = FALSE
 	if(SSscp_persistence?.manager?.scp_instances?[scp_id])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance.containment_class == SCP_KETER)
 			is_keter = TRUE
 
@@ -183,14 +183,14 @@ var/list/scp_breach_cooldown = list()
 	log_game("SCP Recontained: [scp_id]")
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance)
 			instance.containment_status = "contained"
 			instance.containment_health = 100
 			instance.add_interaction_record(null, "recontained")
 
-		SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
-		SSscp_persistence.manager.global_containment_stability = min(100, SSscp_persistence.manager.global_containment_stability + 5)
+		SSscp_persistence?.manager?.active_breaches = max(0, SSscp_persistence?.manager?.active_breaches - 1)
+		SSscp_persistence?.manager?.global_containment_stability = min(100, SSscp_persistence?.manager?.global_containment_stability + 5)
 
 	if(SScontainment_evaluation)
 		complete_containment_evaluation(scp_id, participants)
@@ -376,7 +376,7 @@ var/list/scp_breach_cooldown = list()
 	if(!victim || !scp_id)
 		return
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance)
 			instance.add_interaction_record(victim, "player_death")
 	if(SScontainment_evaluation)
@@ -412,7 +412,7 @@ var/list/scp_breach_cooldown = list()
 	if(!scp_id)
 		return
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance)
 			instance.containment_health = max(0, instance.containment_health - damage_percent)
 			if(instance.containment_health < 50 && instance.containment_status != "breached")

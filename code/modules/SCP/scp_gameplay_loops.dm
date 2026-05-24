@@ -523,7 +523,7 @@ SUBSYSTEM_DEF(scp_gameplay)
 			if(prob(2))
 				H.sanity.adjust_sanity(1, "ez_safety")
 		if(SSscp_persistence?.manager)
-			var/breach_count = SSscp_persistence.manager.active_breaches
+			var/breach_count = SSscp_persistence?.manager?.active_breaches
 			if(breach_count > 0 && (istype(A, /area/scp/lcz) || istype(A, /area/scp/hcz)) && prob(breach_count * 2))
 				H.sanity.adjust_sanity(-1, "breach_proximity")
 
@@ -563,7 +563,7 @@ SUBSYSTEM_DEF(scp_gameplay)
 
 	report += "<b>RESEARCH PROGRESS</b>"
 	if(SSscp_research && SSscp_research.manager)
-		report += "Total Research Points Earned: [SSscp_research.manager.total_research_points]"
+		report += "Total Research Points Earned: [SSscp_research?.manager?.total_research_points]"
 	report += "<hr>"
 
 	report += "<b>D-CLASS STATUS</b>"
@@ -571,8 +571,8 @@ SUBSYSTEM_DEF(scp_gameplay)
 		var/escaped = 0
 		var/survived = 0
 		var/deceased = 0
-		for(var/ckey in SSdclass.manager.dclass_players)
-			var/datum/dclass_player/P = SSdclass.manager.dclass_players[ckey]
+		for(var/ckey in SSdclass?.manager?.dclass_players)
+			var/datum/dclass_player/P = SSdclass?.manager?.dclass_players[ckey]
 			if(!P.mob)
 				continue
 			if(P.mob.stat == DEAD)

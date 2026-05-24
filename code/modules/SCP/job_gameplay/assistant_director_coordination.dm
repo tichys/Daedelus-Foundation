@@ -64,7 +64,7 @@ SUBSYSTEM_DEF(department_coordination)
 					B.allocate(25)
 					SSfoundation_budget.total_budget += 25
 			if(SSscp_research?.manager)
-				SSscp_research.manager.adjust_research_points(3, "coordination_task:[T.task_id]")
+				SSscp_research?.manager?.adjust_research_points(3, "coordination_task:[T.task_id]")
 			return TRUE
 	return FALSE
 

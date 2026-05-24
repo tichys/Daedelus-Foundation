@@ -477,8 +477,8 @@
 		research_value = 50
 		if(SSscp_persistence?.manager)
 			var/found_id
-			for(var/id in SSscp_persistence.manager.scp_instances)
-				var/datum/scp_instance/inst = SSscp_persistence.manager.scp_instances[id]
+			for(var/id in SSscp_persistence?.manager?.scp_instances)
+				var/datum/scp_instance/inst = SSscp_persistence?.manager?.scp_instances[id]
 				if(inst.containment_status != "breached")
 					found_id = id
 					break
@@ -506,7 +506,7 @@
 	collected_specimens += specimen_name
 	user.visible_message("<span class='notice'>[user] collects a specimen sample from [target] using the collection kit.</span>", "<span class='notice'>You collect: [specimen_name]. [vials_remaining] vial(s) remaining.</span>")
 	if(SSscp_research?.manager)
-		SSscp_research.manager.adjust_research_points(research_value, "specimen_collection:[specimen_type]")
+		SSscp_research?.manager?.adjust_research_points(research_value, "specimen_collection:[specimen_type]")
 		to_chat(user, "<span class='notice'>+[research_value] research points from specimen collection.</span>")
 	if(SSraisa)
 		SSraisa.record_observation(user)

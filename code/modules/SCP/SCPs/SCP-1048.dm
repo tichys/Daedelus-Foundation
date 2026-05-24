@@ -118,7 +118,7 @@
 	hook_scp_breach("SCP-1048", src)
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-1048"]
 		if(instance)
 			instance.add_interaction_record(null, "copy_built_[initial(copy.name)]")
 
@@ -254,7 +254,7 @@
 		parent.infant_parts++
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-1048"]
 		if(instance)
 			instance.add_interaction_record(null, "material_harvested")
 
@@ -297,7 +297,7 @@
 	message += "<b>Copies Built:</b> [length(copies_spawned)]<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-1048"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-1048"]
 		if(instance)
 			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 

@@ -223,7 +223,7 @@ SUBSYSTEM_DEF(scp_research)
 
 	var/budget_reward = project.completion_reward * budget_reward_multiplier
 	if(SSbudget_system && SSbudget_system.manager)
-		SSbudget_system.manager.add_transaction("research", "REVENUE", budget_reward, "research_funding", "Research completion: [project.scp_designation] - [project.research_type]", researcher_ckey)
+		SSbudget_system?.manager?.add_transaction("research", "REVENUE", budget_reward, "research_funding", "Research completion: [project.scp_designation] - [project.research_type]", researcher_ckey)
 
 	var/progression_reward = project.completion_reward * progression_multiplier
 	researcher.progression_points += progression_reward
@@ -406,7 +406,7 @@ SUBSYSTEM_DEF(scp_research)
 /datum/scp_research_manager/proc/apply_containment_improvement(bonus)
 	containment_improvements++
 	for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance)
 			instance.containment_effectiveness = min(1.0, instance.containment_effectiveness + bonus)
 			instance.containment_difficulty = max(1, instance.containment_difficulty - 1)
@@ -568,23 +568,23 @@ SUBSYSTEM_DEF(scp_research)
 /proc/award_research_points(scp_designation, research_type, points, researcher_ckey)
 	if(SSscp_research && SSscp_research.manager)
 		var/project_id = "research_[scp_designation]_[research_type]_[researcher_ckey]"
-		if(!SSscp_research.manager.research_projects[project_id])
-			SSscp_research.manager.start_research_project(scp_designation, research_type, researcher_ckey)
-		return SSscp_research.manager.add_research_points(project_id, points, researcher_ckey)
+		if(!SSscp_research?.manager?.research_projects[project_id])
+			SSscp_research?.manager?.start_research_project(scp_designation, research_type, researcher_ckey)
+		return SSscp_research?.manager?.add_research_points(project_id, points, researcher_ckey)
 	return FALSE
 
 /proc/get_researcher_data(ckey)
 	if(SSscp_research && SSscp_research.manager)
-		return SSscp_research.manager.get_researcher_profile(ckey)
+		return SSscp_research?.manager?.get_researcher_profile(ckey)
 	return null
 
 /proc/check_research_achievements(ckey)
 	if(SSscp_research && SSscp_research.manager)
-		SSscp_research.manager.check_research_milestones(ckey)
+		SSscp_research?.manager?.check_research_milestones(ckey)
 
 /proc/adjust_global_research_points(amount, reason)
 	if(SSscp_research && SSscp_research.manager)
-		return SSscp_research.manager.adjust_research_points(amount, reason)
+		return SSscp_research?.manager?.adjust_research_points(amount, reason)
 	return 0
 
 /mob/proc/view_research_status()
@@ -632,8 +632,8 @@ SUBSYSTEM_DEF(scp_research)
 	var/found_projects = FALSE
 	to_chat(src, "<span class='notice'><b>=== ACTIVE RESEARCH PROJECTS ===</b></span>")
 
-	for(var/project_id in SSscp_research.manager.research_projects)
-		var/datum/research_data/project = SSscp_research.manager.research_projects[project_id]
+	for(var/project_id in SSscp_research?.manager?.research_projects)
+		var/datum/research_data/project = SSscp_research?.manager?.research_projects[project_id]
 		if(project.researcher_ckey == ckey && project.status == "ACTIVE")
 			found_projects = TRUE
 			to_chat(src, "<span class='notice'>[project.scp_designation] - [project.research_type]</span>")

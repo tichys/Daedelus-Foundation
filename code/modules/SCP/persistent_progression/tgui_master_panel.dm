@@ -972,12 +972,12 @@
 
 		if("facility_save_data")
 			if(SSfacility_persistence && SSfacility_persistence.manager)
-				SSfacility_persistence.manager.save_facility_data()
+				SSfacility_persistence?.manager?.save_facility_data()
 				to_chat(admin_client, span_notice("Facility data saved successfully."))
 
 		if("facility_load_data")
 			if(SSfacility_persistence && SSfacility_persistence.manager)
-				SSfacility_persistence.manager.load_facility_data()
+				SSfacility_persistence?.manager?.load_facility_data()
 				to_chat(admin_client, span_notice("Facility data loaded successfully."))
 
 		if("facility_reset_data")
@@ -1011,7 +1011,7 @@
 				var/scp_id = input(admin_client, "Enter SCP ID (e.g., SCP-173):", "Add SCP Instance") as text
 				if(scp_id)
 					var/datum/scp_instance/new_instance = new /datum/scp_instance(scp_id, null)
-					SSscp_persistence.manager.scp_instances[scp_id] = new_instance
+					SSscp_persistence?.manager?.scp_instances[scp_id] = new_instance
 					to_chat(admin_client, span_notice("SCP instance '[scp_id]' added successfully."))
 
 		if("scp_add_research")
@@ -1021,12 +1021,12 @@
 				if(project_name && project_desc)
 					var/project_id = "project_[world.time]"
 					var/datum/research_project/new_project = new /datum/research_project(project_id, project_name, project_desc)
-					SSscp_persistence.manager.research_projects[project_id] = new_project
+					SSscp_persistence?.manager?.research_projects[project_id] = new_project
 					to_chat(admin_client, span_notice("Research project '[project_name]' added successfully."))
 
 		if("scp_save_data")
 			if(SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.save_scp_data()
+				SSscp_persistence?.manager?.save_scp_data()
 				to_chat(admin_client, span_notice("SCP data saved successfully."))
 
 		if("open_scp_management_interface")
@@ -1096,12 +1096,12 @@
 
 		if("medical_save_data")
 			if(SSmedical_persistence && SSmedical_persistence.manager)
-				SSmedical_persistence.manager.save_medical_data()
+				SSmedical_persistence?.manager?.save_medical_data()
 				to_chat(admin_client, span_notice("Medical data saved successfully."))
 
 		if("medical_load_data")
 			if(SSmedical_persistence && SSmedical_persistence.manager)
-				SSmedical_persistence.manager.load_medical_data()
+				SSmedical_persistence?.manager?.load_medical_data()
 				to_chat(admin_client, span_notice("Medical data loaded successfully."))
 
 		if("medical_add_record")
@@ -1110,7 +1110,7 @@
 				var/ckey = input(admin_client, "Enter patient ckey:", "Add Medical Record") as text
 				var/real_name = input(admin_client, "Enter patient name:", "Add Medical Record") as text
 				if(ckey && real_name)
-					SSmedical_persistence.manager.add_medical_record(ckey, real_name)
+					SSmedical_persistence?.manager?.add_medical_record(ckey, real_name)
 					to_chat(admin_client, span_notice("Medical record added for [real_name]."))
 					log_game("PersistenceMasterPanel: Medical record added for [real_name] by [admin_client.ckey]")
 				else
@@ -1126,7 +1126,7 @@
 				var/treatment_type = input(admin_client, "Enter treatment type:", "Add Treatment") as text
 				var/doctor_ckey = input(admin_client, "Enter doctor ckey:", "Add Treatment") as text
 				if(patient_ckey && treatment_type && doctor_ckey)
-					SSmedical_persistence.manager.add_treatment_log(patient_ckey, treatment_type, doctor_ckey)
+					SSmedical_persistence?.manager?.add_treatment_log(patient_ckey, treatment_type, doctor_ckey)
 					to_chat(admin_client, span_notice("Treatment added for [patient_ckey]."))
 					log_game("PersistenceMasterPanel: Treatment added for [patient_ckey] by [admin_client.ckey]")
 				else
@@ -1141,7 +1141,7 @@
 				var/disease_type = input(admin_client, "Enter disease type:", "Report Outbreak") as text
 				var/severity = input(admin_client, "Enter severity (1-5):", "Report Outbreak") as num
 				if(disease_name && disease_type)
-					SSmedical_persistence.manager.add_outbreak_record(disease_name, disease_type, severity)
+					SSmedical_persistence?.manager?.add_outbreak_record(disease_name, disease_type, severity)
 					to_chat(admin_client, span_notice("Outbreak reported: [disease_name]."))
 					log_game("PersistenceMasterPanel: Outbreak reported: [disease_name] by [admin_client.ckey]")
 				else
@@ -1157,7 +1157,7 @@
 				var/research_field = input(admin_client, "Enter research field:", "Add Research") as text
 				var/lead_researcher = input(admin_client, "Enter lead researcher:", "Add Research") as text
 				if(project_name && project_desc && research_field && lead_researcher)
-					SSmedical_persistence.manager.add_medical_research_project(project_name, project_desc, research_field, lead_researcher)
+					SSmedical_persistence?.manager?.add_medical_research_project(project_name, project_desc, research_field, lead_researcher)
 					to_chat(admin_client, span_notice("Research project added: [project_name]."))
 					log_game("PersistenceMasterPanel: Research project added: [project_name] by [admin_client.ckey]")
 				else
@@ -1195,7 +1195,7 @@
 		if("medical_export_patients")
 			log_game("PersistenceMasterPanel: Processing medical_export_patients for [admin_client.ckey]")
 			if(SSmedical_persistence && SSmedical_persistence.manager)
-				var/export_data = SSmedical_persistence.manager.export_patient_data()
+				var/export_data = SSmedical_persistence?.manager?.export_patient_data()
 				admin_client << ftp(export_data, "medical_patients_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
 				to_chat(admin_client, span_notice("Patient data exported successfully."))
 			else
@@ -1206,7 +1206,7 @@
 			if(SSmedical_persistence && SSmedical_persistence.manager)
 				var/import_file = input(admin_client, "Select file to import:", "Import Patients") as file
 				if(import_file)
-					var/result = SSmedical_persistence.manager.import_patient_data(import_file)
+					var/result = SSmedical_persistence?.manager?.import_patient_data(import_file)
 					if(result)
 						to_chat(admin_client, span_notice("Patient data imported successfully."))
 					else
@@ -1247,12 +1247,12 @@
 
 		if("security_save_data")
 			if(SSsecurity_persistence && SSsecurity_persistence.manager)
-				SSsecurity_persistence.manager.save_security_data()
+				SSsecurity_persistence?.manager?.save_security_data()
 				to_chat(admin_client, span_notice("Security data saved successfully."))
 
 		if("security_load_data")
 			if(SSsecurity_persistence && SSsecurity_persistence.manager)
-				SSsecurity_persistence.manager.load_security_data()
+				SSsecurity_persistence?.manager?.load_security_data()
 				to_chat(admin_client, span_notice("Security data loaded successfully."))
 
 		if("security_add_incident")
@@ -1262,7 +1262,7 @@
 				var/incident_desc = input(admin_client, "Enter incident description:", "Add Security Incident") as text
 				var/severity = input(admin_client, "Enter severity (1-5):", "Add Security Incident") as num
 				if(incident_type && incident_desc)
-					SSsecurity_persistence.manager.add_security_incident(incident_type, incident_desc, severity)
+					SSsecurity_persistence?.manager?.add_security_incident(incident_type, incident_desc, severity)
 					to_chat(admin_client, span_notice("Security incident added: [incident_type]."))
 					log_game("PersistenceMasterPanel: Security incident added: [incident_type] by [admin_client.ckey]")
 				else
@@ -1278,7 +1278,7 @@
 				var/real_name = input(admin_client, "Enter personnel name:", "Add Security Personnel") as text
 				var/clearance_level = input(admin_client, "Enter clearance level (1-5):", "Add Security Personnel") as num
 				if(ckey && real_name)
-					SSsecurity_persistence.manager.add_security_personnel(ckey, real_name, clearance_level)
+					SSsecurity_persistence?.manager?.add_security_personnel(ckey, real_name, clearance_level)
 					to_chat(admin_client, span_notice("Security personnel added: [real_name]."))
 					log_game("PersistenceMasterPanel: Security personnel added: [real_name] by [admin_client.ckey]")
 				else
@@ -1293,7 +1293,7 @@
 				var/protocol_desc = input(admin_client, "Enter protocol description:", "Add Security Protocol") as text
 				var/clearance_required = input(admin_client, "Enter clearance required (1-5):", "Add Security Protocol") as num
 				if(protocol_name && protocol_desc)
-					SSsecurity_persistence.manager.add_security_protocol(protocol_name, protocol_desc, clearance_required)
+					SSsecurity_persistence?.manager?.add_security_protocol(protocol_name, protocol_desc, clearance_required)
 					to_chat(admin_client, span_notice("Security protocol added: [protocol_name]."))
 					log_game("PersistenceMasterPanel: Security protocol added: [protocol_name] by [admin_client.ckey]")
 				else
@@ -1308,7 +1308,7 @@
 				var/requested_level = input(admin_client, "Enter requested clearance level (1-5):", "Add Clearance Request") as num
 				var/reason = input(admin_client, "Enter reason for request:", "Add Clearance Request") as text
 				if(personnel_ckey && reason)
-					SSsecurity_persistence.manager.add_clearance_request(personnel_ckey, requested_level, reason)
+					SSsecurity_persistence?.manager?.add_clearance_request(personnel_ckey, requested_level, reason)
 					to_chat(admin_client, span_notice("Clearance request added for [personnel_ckey]."))
 					log_game("PersistenceMasterPanel: Clearance request added for [personnel_ckey] by [admin_client.ckey]")
 				else
@@ -1332,12 +1332,12 @@
 
 		if("research_save_data")
 			if(SSresearch_persistence && SSresearch_persistence.manager)
-				SSresearch_persistence.manager.save_research_data()
+				SSresearch_persistence?.manager?.save_research_data()
 				to_chat(admin_client, span_notice("Research data saved successfully."))
 
 		if("research_load_data")
 			if(SSresearch_persistence && SSresearch_persistence.manager)
-				SSresearch_persistence.manager.load_research_data()
+				SSresearch_persistence?.manager?.load_research_data()
 				to_chat(admin_client, span_notice("Research data loaded successfully."))
 
 		if("research_add_project")
@@ -1348,7 +1348,7 @@
 				var/research_field = input(admin_client, "Enter research field:", "Add Research Project") as text
 				var/lead_researcher = input(admin_client, "Enter lead researcher:", "Add Research Project") as text
 				if(project_name && project_desc && research_field && lead_researcher)
-					SSresearch_persistence.manager.add_research_project(project_name, project_desc, research_field, lead_researcher)
+					SSresearch_persistence?.manager?.add_research_project(project_name, project_desc, research_field, lead_researcher)
 					to_chat(admin_client, span_notice("Research project added: [project_name]."))
 					log_game("PersistenceMasterPanel: Research project added: [project_name] by [admin_client.ckey]")
 				else
@@ -1365,7 +1365,7 @@
 				var/field = input(admin_client, "Enter research field:", "Record Discovery") as text
 				var/discoverer = input(admin_client, "Enter discoverer:", "Record Discovery") as text
 				if(discovery_name && discovery_desc && field && discoverer)
-					SSresearch_persistence.manager.add_scientific_discovery(discovery_name, discovery_desc, field, discoverer)
+					SSresearch_persistence?.manager?.add_scientific_discovery(discovery_name, discovery_desc, field, discoverer)
 					to_chat(admin_client, span_notice("Scientific discovery recorded: [discovery_name]."))
 					log_game("PersistenceMasterPanel: Scientific discovery recorded: [discovery_name] by [admin_client.ckey]")
 				else
@@ -1381,7 +1381,7 @@
 				var/journal = input(admin_client, "Enter journal:", "Publish Paper") as text
 				var/impact_factor = input(admin_client, "Enter impact factor:", "Publish Paper") as num
 				if(paper_title && authors && journal)
-					SSresearch_persistence.manager.add_publication(paper_title, authors, journal, impact_factor)
+					SSresearch_persistence?.manager?.add_publication(paper_title, authors, journal, impact_factor)
 					to_chat(admin_client, span_notice("Publication added: [paper_title]."))
 					log_game("PersistenceMasterPanel: Publication added: [paper_title] by [admin_client.ckey]")
 				else
@@ -1396,7 +1396,7 @@
 				var/facility_type = input(admin_client, "Enter facility type:", "Add Research Facility") as text
 				var/capacity = input(admin_client, "Enter capacity:", "Add Research Facility") as text
 				if(facility_name && facility_type && capacity)
-					SSresearch_persistence.manager.add_research_facility(facility_name, facility_type, capacity)
+					SSresearch_persistence?.manager?.add_research_facility(facility_name, facility_type, capacity)
 					to_chat(admin_client, span_notice("Research facility added: [facility_name]."))
 					log_game("PersistenceMasterPanel: Research facility added: [facility_name] by [admin_client.ckey]")
 				else
@@ -1420,12 +1420,12 @@
 
 		if("personnel_save_data")
 			if(SSpersonnel_persistence && SSpersonnel_persistence.manager)
-				SSpersonnel_persistence.manager.save_personnel_data()
+				SSpersonnel_persistence?.manager?.save_personnel_data()
 				to_chat(admin_client, span_notice("Personnel data saved successfully."))
 
 		if("personnel_load_data")
 			if(SSpersonnel_persistence && SSpersonnel_persistence.manager)
-				SSpersonnel_persistence.manager.load_personnel_data()
+				SSpersonnel_persistence?.manager?.load_personnel_data()
 				to_chat(admin_client, span_notice("Personnel data loaded successfully."))
 
 		if("personnel_add_record")
@@ -1436,7 +1436,7 @@
 				var/department = input(admin_client, "Enter department:", "Add Personnel Record") as text
 				var/position = input(admin_client, "Enter position:", "Add Personnel Record") as text
 				if(ckey && real_name && department && position)
-					SSpersonnel_persistence.manager.add_personnel_record(ckey, real_name, department, position)
+					SSpersonnel_persistence?.manager?.add_personnel_record(ckey, real_name, department, position)
 					to_chat(admin_client, span_notice("Personnel record added for [real_name]."))
 					log_game("PersistenceMasterPanel: Personnel record added for [real_name] by [admin_client.ckey]")
 				else
@@ -1452,7 +1452,7 @@
 				var/dept_head = input(admin_client, "Enter department head:", "Add Department") as text
 				var/budget = input(admin_client, "Enter department budget:", "Add Department") as num
 				if(dept_name && dept_head)
-					SSpersonnel_persistence.manager.add_department(dept_name, dept_head, budget)
+					SSpersonnel_persistence?.manager?.add_department(dept_name, dept_head, budget)
 					to_chat(admin_client, span_notice("Department added: [dept_name]."))
 					log_game("PersistenceMasterPanel: Department added: [dept_name] by [admin_client.ckey]")
 				else
@@ -1467,7 +1467,7 @@
 				var/instructor = input(admin_client, "Enter instructor:", "Schedule Training") as text
 				var/duration = input(admin_client, "Enter duration (weeks):", "Schedule Training") as num
 				if(program_name && instructor)
-					SSpersonnel_persistence.manager.add_training_program(program_name, instructor, duration)
+					SSpersonnel_persistence?.manager?.add_training_program(program_name, instructor, duration)
 					to_chat(admin_client, span_notice("Training program scheduled: [program_name]."))
 					log_game("PersistenceMasterPanel: Training program scheduled: [program_name] by [admin_client.ckey]")
 				else
@@ -1483,7 +1483,7 @@
 				var/rating = input(admin_client, "Enter rating (1-100):", "Add Performance Review") as num
 				var/notes = input(admin_client, "Enter review notes:", "Add Performance Review") as text
 				if(employee_ckey && reviewer && notes)
-					SSpersonnel_persistence.manager.add_performance_review(employee_ckey, reviewer, rating, notes)
+					SSpersonnel_persistence?.manager?.add_performance_review(employee_ckey, reviewer, rating, notes)
 					to_chat(admin_client, span_notice("Performance review added for [employee_ckey]."))
 					log_game("PersistenceMasterPanel: Performance review added for [employee_ckey] by [admin_client.ckey]")
 				else
@@ -1495,7 +1495,7 @@
 		if("personnel_export_employees")
 			log_game("PersistenceMasterPanel: Processing personnel_export_employees for [admin_client.ckey]")
 			if(SSpersonnel_persistence && SSpersonnel_persistence.manager)
-				var/export_data = SSpersonnel_persistence.manager.export_personnel_data()
+				var/export_data = SSpersonnel_persistence?.manager?.export_personnel_data()
 				admin_client << ftp(export_data, "personnel_employees_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
 				to_chat(admin_client, span_notice("Personnel data exported successfully."))
 			else
@@ -1623,7 +1623,7 @@
 						new_room.health = health
 						new_room.power_status = power_status
 
-						SSfacility_persistence.manager.room_states[room_id] = new_room
+						SSfacility_persistence?.manager?.room_states[room_id] = new_room
 						to_chat(admin_client, span_notice("Room '[room_id]' added successfully."))
 						log_game("PersistenceMasterPanel: Room [room_id] added by [admin_client.ckey]")
 					else
@@ -1707,13 +1707,13 @@
 
 						// Store the maintenance task in the facility persistence system
 						if(SSfacility_persistence && SSfacility_persistence.manager)
-							if(!SSfacility_persistence.manager.maintenance_tasks)
-								SSfacility_persistence.manager.maintenance_tasks = list()
-							SSfacility_persistence.manager.maintenance_tasks[task_id] = maintenance_task
+							if(!SSfacility_persistence?.manager?.maintenance_tasks)
+								SSfacility_persistence?.manager?.maintenance_tasks = list()
+							SSfacility_persistence?.manager?.maintenance_tasks[task_id] = maintenance_task
 
 						// Add to facility maintenance queue (store in a temporary way for now)
-						if(!SSfacility_persistence.manager.room_states)
-							SSfacility_persistence.manager.room_states = list()
+						if(!SSfacility_persistence?.manager?.room_states)
+							SSfacility_persistence?.manager?.room_states = list()
 						// Note: For now, store maintenance tasks in a simple way
 						to_chat(admin_client, span_notice("Note: Maintenance task recorded in system logs."))
 
@@ -1833,15 +1833,15 @@
 					for(var/ckey in personnel_info["active_personnel_list"] || list())
 						var/real_name = personnel_info["active_personnel_list"][ckey] || "Unknown"
 						var/clearance_level = text2num(personnel_info["clearance_levels"]?[ckey] || "1")
-						SSsecurity_persistence.manager.add_security_personnel(ckey, real_name, clearance_level)
+						SSsecurity_persistence?.manager?.add_security_personnel(ckey, real_name, clearance_level)
 
 					// Update security staff count
-					SSsecurity_persistence.manager.security_staff_count = text2num(personnel_info["total_personnel"] || "0")
+					SSsecurity_persistence?.manager?.security_staff_count = text2num(personnel_info["total_personnel"] || "0")
 
 					// Update security statistics
-					SSsecurity_persistence.manager.update_security_statistics()
+					SSsecurity_persistence?.manager?.update_security_statistics()
 
-				to_chat(admin_client, span_notice("Security personnel management updated successfully. [SSsecurity_persistence.manager.security_staff_count] personnel records updated."))
+				to_chat(admin_client, span_notice("Security personnel management updated successfully. [SSsecurity_persistence?.manager?.security_staff_count] personnel records updated."))
 				log_game("PersistenceMasterPanel: Security personnel management updated by [admin_client.ckey] with data: [json_encode(personnel_data)]")
 			else
 				to_chat(admin_client, span_warning("No personnel data provided or security persistence system unavailable."))
@@ -1855,9 +1855,9 @@
 				var/log_description = "Security log query: [logs_data["date_range"]?["start_date"] || "unknown"] to [logs_data["date_range"]?["end_date"] || "unknown"]"
 				var/severity = text2num(logs_data["max_results"] || "1000") > 500 ? 2 : 1
 
-				SSsecurity_persistence.manager.add_security_incident(log_type, log_description, severity, "Security Console", list(admin_client.ckey))
+				SSsecurity_persistence?.manager?.add_security_incident(log_type, log_description, severity, "Security Console", list(admin_client.ckey))
 
-				to_chat(admin_client, span_notice("Security logs retrieved successfully. Found [length(SSsecurity_persistence.manager.access_logs)] access logs and [length(SSsecurity_persistence.manager.security_incidents)] incidents."))
+				to_chat(admin_client, span_notice("Security logs retrieved successfully. Found [length(SSsecurity_persistence?.manager?.access_logs)] access logs and [length(SSsecurity_persistence?.manager?.security_incidents)] incidents."))
 				log_game("PersistenceMasterPanel: Security logs retrieved by [admin_client.ckey] with parameters: [json_encode(logs_data)]")
 			else
 				to_chat(admin_client, span_warning("No logs data provided or security persistence system unavailable."))
@@ -1886,19 +1886,19 @@
 					scan_targets += "physical_security"
 
 				// Perform the actual security scan
-				var/list/scan_results = SSsecurity_persistence.manager.perform_comprehensive_security_scan(scan_type, scan_targets)
+				var/list/scan_results = SSsecurity_persistence?.manager?.perform_comprehensive_security_scan(scan_type, scan_targets)
 
 				// Create security incident for the scan
 				var/scan_description = "Security scan completed: [scan_type] scan found [scan_results["total_threats"]] threats and [scan_results["total_vulnerabilities"]] vulnerabilities"
 				var/severity = scan_results["overall_severity"] > 10 ? 5 : (scan_results["overall_severity"] > 5 ? 4 : 3)
 
-				SSsecurity_persistence.manager.add_security_incident("SECURITY_SCAN", scan_description, severity, "Security Console", list(admin_client.ckey))
+				SSsecurity_persistence?.manager?.add_security_incident("SECURITY_SCAN", scan_description, severity, "Security Console", list(admin_client.ckey))
 
 				// Add access log for the scan
-				SSsecurity_persistence.manager.add_access_log(admin_client.ckey, "Security Console - Scan", TRUE, 4, "Security scan completed")
+				SSsecurity_persistence?.manager?.add_access_log(admin_client.ckey, "Security Console - Scan", TRUE, 4, "Security scan completed")
 
 				// Update security statistics
-				SSsecurity_persistence.manager.update_security_statistics()
+				SSsecurity_persistence?.manager?.update_security_statistics()
 
 				// Send detailed scan results to the user
 				var/scan_message = "<h3>Security Scan Results</h3>"
@@ -1946,14 +1946,14 @@
 						var/protocol_description = "Access level [level_data["name"] || level_key] permissions updated"
 						var/clearance_required = text2num(level_data["clearance_required"] || "1")
 
-						SSsecurity_persistence.manager.add_security_protocol(protocol_name, protocol_description, clearance_required)
+						SSsecurity_persistence?.manager?.add_security_protocol(protocol_name, protocol_description, clearance_required)
 						access_count++
 
 				// Add access log
-				SSsecurity_persistence.manager.add_access_log(admin_client.ckey, "Security Console - Access Control", TRUE, 4, "Access control settings updated")
+				SSsecurity_persistence?.manager?.add_access_log(admin_client.ckey, "Security Console - Access Control", TRUE, 4, "Access control settings updated")
 
 				// Update security statistics
-				SSsecurity_persistence.manager.update_security_statistics()
+				SSsecurity_persistence?.manager?.update_security_statistics()
 
 				to_chat(admin_client, span_notice("Security access control updated successfully. [access_count] access levels configured."))
 				log_game("PersistenceMasterPanel: Security access control updated by [admin_client.ckey] with data: [json_encode(access_data)]")
@@ -2119,7 +2119,7 @@
 				var/justification = request_data["justification"] || "No justification provided"
 				var/priority = text2num(request_data["priority"] || "1")
 
-				var/datum/budget_request_data/request = SSbudget_system.manager.request_budget_increase(department_id, requested_amount, category, justification, admin_client.ckey)
+				var/datum/budget_request_data/request = SSbudget_system?.manager?.request_budget_increase(department_id, requested_amount, category, justification, admin_client.ckey)
 				if(request)
 					request.priority = priority
 					to_chat(admin_client, span_notice("Budget increase request submitted successfully. Request ID: [request.request_id]"))
@@ -2136,7 +2136,7 @@
 				var/request_id = approval_data["request_id"]
 				var/approval_notes = approval_data["approval_notes"] || "Approved by [admin_client.ckey]"
 
-				if(SSbudget_system.manager.approve_budget_request(request_id, admin_client.ckey, approval_notes))
+				if(SSbudget_system?.manager?.approve_budget_request(request_id, admin_client.ckey, approval_notes))
 					to_chat(admin_client, span_notice("Budget request [request_id] approved successfully."))
 					log_game("PersistenceMasterPanel: Budget request [request_id] approved by [admin_client.ckey]")
 				else
@@ -2151,7 +2151,7 @@
 				var/request_id = denial_data["request_id"]
 				var/denial_notes = denial_data["denial_notes"] || "Denied by [admin_client.ckey]"
 
-				if(SSbudget_system.manager.deny_budget_request(request_id, admin_client.ckey, denial_notes))
+				if(SSbudget_system?.manager?.deny_budget_request(request_id, admin_client.ckey, denial_notes))
 					to_chat(admin_client, span_notice("Budget request [request_id] denied successfully."))
 					log_game("PersistenceMasterPanel: Budget request [request_id] denied by [admin_client.ckey]")
 				else
@@ -2169,7 +2169,7 @@
 				var/category = transaction_data["category"] || "miscellaneous"
 				var/description = transaction_data["description"] || "Transaction added via admin panel"
 
-				var/datum/transaction_data/transaction = SSbudget_system.manager.add_transaction(department_id, transaction_type, amount, category, description, admin_client.ckey)
+				var/datum/transaction_data/transaction = SSbudget_system?.manager?.add_transaction(department_id, transaction_type, amount, category, description, admin_client.ckey)
 				if(transaction)
 					to_chat(admin_client, span_notice("Transaction added successfully. Transaction ID: [transaction.transaction_id]"))
 					log_game("PersistenceMasterPanel: Transaction [transaction.transaction_id] added by [admin_client.ckey] for [amount] credits")
@@ -2188,13 +2188,13 @@
 				var/reason = transfer_data["reason"] || "Budget transfer via admin panel"
 
 				// Check if source department has sufficient budget
-				var/datum/budget_data/from_dept = SSbudget_system.manager.department_budgets[from_department]
+				var/datum/budget_data/from_dept = SSbudget_system?.manager?.department_budgets[from_department]
 				if(!from_dept || from_dept.remaining_budget < amount)
 					to_chat(admin_client, span_warning("Insufficient budget in [from_department] department for transfer."))
 					return
 
 				// Execute the transfer
-				if(SSbudget_system.manager.transfer_budget(from_department, to_department, amount, reason, admin_client.ckey))
+				if(SSbudget_system?.manager?.transfer_budget(from_department, to_department, amount, reason, admin_client.ckey))
 					to_chat(admin_client, span_notice("Budget transfer completed successfully. [amount] credits transferred from [from_department] to [to_department]."))
 					log_game("PersistenceMasterPanel: Budget transfer of [amount] credits from [from_department] to [to_department] by [admin_client.ckey]")
 				else
@@ -2276,9 +2276,9 @@
 			// Test budget system
 			if(SSbudget_system && SSbudget_system.manager)
 				test_message += "<b>Budget System:</b> ✅ OPERATIONAL<br>"
-				test_message += "<b>Total Budget:</b> [SSbudget_system.manager.total_budget] credits<br>"
-				test_message += "<b>Current Balance:</b> [SSbudget_system.manager.current_balance] credits<br>"
-				test_message += "<b>Departments:</b> [length(SSbudget_system.manager.department_budgets)] departments<br>"
+				test_message += "<b>Total Budget:</b> [SSbudget_system?.manager?.total_budget] credits<br>"
+				test_message += "<b>Current Balance:</b> [SSbudget_system?.manager?.current_balance] credits<br>"
+				test_message += "<b>Departments:</b> [length(SSbudget_system?.manager?.department_budgets)] departments<br>"
 				log_game("PersistenceMasterPanel: Budget system operational")
 			else
 				test_message += "<b>Budget System:</b> ❌ NOT AVAILABLE<br>"

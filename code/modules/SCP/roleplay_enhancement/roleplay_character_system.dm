@@ -101,7 +101,7 @@ SUBSYSTEM_DEF(roleplay_character)
 
 	// Link to personnel record if available
 	if(SSpersonnel_persistence && SSpersonnel_persistence.manager)
-		linked_personnel_record = SSpersonnel_persistence.manager.personnel_records[ckey]
+		linked_personnel_record = SSpersonnel_persistence?.manager?.personnel_records[ckey]
 
 /datum/roleplay_character_sheet/proc/process_character_development()
 	// Update character development based on recent activities

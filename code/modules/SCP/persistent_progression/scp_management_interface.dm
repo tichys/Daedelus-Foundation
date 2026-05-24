@@ -461,35 +461,35 @@
 		if("enable_scp")
 			var/scp_id = params["scp_id"]
 			if(scp_id && SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.enable_scp(scp_id)
+				SSscp_persistence?.manager?.enable_scp(scp_id)
 				. = TRUE
 
 		if("disable_scp")
 			var/scp_id = params["scp_id"]
 			if(scp_id && SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.disable_scp(scp_id)
+				SSscp_persistence?.manager?.disable_scp(scp_id)
 				. = TRUE
 
 		if("set_management_mode")
 			var/mode = params["mode"]
 			if(mode && SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.set_management_mode(mode)
+				SSscp_persistence?.manager?.set_management_mode(mode)
 				. = TRUE
 
 		if("toggle_auto_containment")
 			if(SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.auto_containment_enabled = !SSscp_persistence.manager.auto_containment_enabled
+				SSscp_persistence?.manager?.auto_containment_enabled = !SSscp_persistence?.manager?.auto_containment_enabled
 				. = TRUE
 
 		if("toggle_scp_rotation")
 			if(SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.scp_rotation_enabled = !SSscp_persistence.manager.scp_rotation_enabled
+				SSscp_persistence?.manager?.scp_rotation_enabled = !SSscp_persistence?.manager?.scp_rotation_enabled
 				. = TRUE
 
 		if("set_rotation_interval")
 			var/interval = text2num(params["interval"])
 			if(interval && SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.rotation_interval = interval * 600 // Convert minutes to ticks
+				SSscp_persistence?.manager?.rotation_interval = interval * 600 // Convert minutes to ticks
 				. = TRUE
 
 		if("set_scp_configuration")
@@ -497,7 +497,7 @@
 			var/config_key = params["config_key"]
 			var/value = params["value"]
 			if(scp_id && config_key && SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.set_scp_configuration(scp_id, config_key, value)
+				SSscp_persistence?.manager?.set_scp_configuration(scp_id, config_key, value)
 				. = TRUE
 
 		if("create_spawn_schedule")
@@ -554,7 +554,7 @@
 
 		if("force_scp_rotation")
 			if(SSscp_persistence && SSscp_persistence.manager)
-				SSscp_persistence.manager.force_scp_rotation()
+				SSscp_persistence?.manager?.force_scp_rotation()
 				. = TRUE
 
 		if("force_contain_scp")
@@ -714,7 +714,7 @@
 
 		// Log the spawn
 		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance)
 				instance.add_interaction_record(null, "admin_forced_spawn")
 	else
@@ -791,7 +791,7 @@
 	if(!scp_id || !SSscp_persistence || !SSscp_persistence.manager)
 		return
 
-	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 	if(!instance)
 		to_chat(admin_client, "<span class='warning'>No logs found for [scp_id]</span>")
 		return
@@ -820,10 +820,10 @@
 
 	if(SSscp_persistence && SSscp_persistence.manager)
 		export_data["persistence_data"] = list(
-			"enabled_scps" = SSscp_persistence.manager.enabled_scps,
-			"disabled_scps" = SSscp_persistence.manager.disabled_scps,
-			"scp_configurations" = SSscp_persistence.manager.scp_configurations,
-			"global_management_mode" = SSscp_persistence.manager.global_scp_management_mode
+			"enabled_scps" = SSscp_persistence?.manager?.enabled_scps,
+			"disabled_scps" = SSscp_persistence?.manager?.disabled_scps,
+			"scp_configurations" = SSscp_persistence?.manager?.scp_configurations,
+			"global_management_mode" = SSscp_persistence?.manager?.global_scp_management_mode
 		)
 
 	var/json_data = json_encode(export_data)

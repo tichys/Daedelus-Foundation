@@ -131,7 +131,7 @@
 
 /datum/objective/ci_breach_assist/check_completion()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		return SSscp_persistence.manager.active_breaches > 0 || SSscp_persistence.manager.global_containment_stability < 80
+		return SSscp_persistence?.manager?.active_breaches > 0 || SSscp_persistence?.manager?.global_containment_stability < 80
 	return FALSE
 
 /datum/objective/ci_extract_dclass

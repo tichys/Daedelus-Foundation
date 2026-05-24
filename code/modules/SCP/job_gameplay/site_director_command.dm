@@ -85,7 +85,7 @@
 			if(istype(A, /area/scp/surface) || istype(A, /area/site53/surface))
 				dclass_escaped++
 	if(SSscp_research && SSscp_research.manager)
-		research_points = SSscp_research.manager.total_research_points
+		research_points = SSscp_research?.manager?.total_research_points
 
 SUBSYSTEM_DEF(site_command)
 	name = "Site Command"

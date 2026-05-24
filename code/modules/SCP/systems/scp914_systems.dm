@@ -127,7 +127,7 @@
 
 	// Update persistence
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-914"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-914"]
 		if(instance)
 			instance.add_interaction_record(null, "refinement_completed")
 

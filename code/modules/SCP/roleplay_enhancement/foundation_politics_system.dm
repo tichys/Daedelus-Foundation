@@ -380,8 +380,8 @@ SUBSYSTEM_DEF(foundation_politics)
 		if("intelligence")
 			var/list/breach_info = list()
 			if(SSscp_persistence && SSscp_persistence.manager)
-				for(var/scp_id in SSscp_persistence.manager.scp_instances)
-					var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+				for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+					var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 					if(instance && instance.containment_status == "breached")
 						var/area/scp_area = null
 						for(var/mob/living/scp/S as anything in INSTANCES_OF(/mob/living/scp))
@@ -803,7 +803,7 @@ SUBSYSTEM_DEF(foundation_politics)
 	switch(department_type)
 		if("research")
 			if(SSscp_research && SSscp_research.manager)
-				return SSscp_research.manager.total_research_points
+				return SSscp_research?.manager?.total_research_points
 			return 0
 		if("security")
 			if(GLOB.scp_round_report)
@@ -811,7 +811,7 @@ SUBSYSTEM_DEF(foundation_politics)
 			return 0
 		if("medical")
 			if(SSmedical_persistence && SSmedical_persistence.manager)
-				return SSmedical_persistence.manager.total_patients_treated
+				return SSmedical_persistence?.manager?.total_patients_treated
 			return 0
 		if("engineering")
 			var/repair_count = 0
@@ -847,15 +847,15 @@ SUBSYSTEM_DEF(foundation_politics)
 	switch(goal)
 		if("advance_scp_knowledge")
 			if(SSscp_research && SSscp_research.manager)
-				return SSscp_research.manager.total_research_points > 0
+				return SSscp_research?.manager?.total_research_points > 0
 			return FALSE
 		if("maintain_containment")
 			if(SSscp_persistence && SSscp_persistence.manager)
-				return SSscp_persistence.manager.active_breaches == 0
+				return SSscp_persistence?.manager?.active_breaches == 0
 			return TRUE
 		if("provide_medical_care")
 			if(SSmedical_persistence && SSmedical_persistence.manager)
-				return SSmedical_persistence.manager.total_patients_treated >= 3
+				return SSmedical_persistence?.manager?.total_patients_treated >= 3
 			return FALSE
 		if("maintain_facility")
 			var/functional_count = 0
@@ -883,11 +883,11 @@ SUBSYSTEM_DEF(foundation_politics)
 			return FALSE
 		if("study_scp_effects")
 			if(SSscp_research && SSscp_research.manager)
-				return SSscp_research.manager.research_breakthroughs >= 1
+				return SSscp_research?.manager?.research_breakthroughs >= 1
 			return FALSE
 		if("develop_treatments")
 			if(SSmedical_persistence && SSmedical_persistence.manager)
-				return length(SSmedical_persistence.manager.treatment_logs) >= 5
+				return length(SSmedical_persistence?.manager?.treatment_logs) >= 5
 			return FALSE
 		if("develop_containment_systems")
 			return length(department_achievements) >= 2

@@ -114,7 +114,7 @@
 	persistence_data["last_breach_time"] = last_breach_time
 	persistence_data["interaction_history"] = interaction_history.Copy()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.containment_status = containment_status
 
@@ -151,7 +151,7 @@
 	var/record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [interaction_type] with [target ? "[target]" : "unknown"]"
 	interaction_history += record
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.add_interaction_record(target, interaction_type)
 
@@ -400,7 +400,7 @@
 
 	// Update persistence
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-035"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-035"]
 		if(instance)
 			instance.add_interaction_record(current_host, "possession")
 
@@ -541,7 +541,7 @@
 	remove_from_current_host()
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-035"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-035"]
 		if(instance)
 			instance.add_interaction_record(host, "complete_corruption")
 

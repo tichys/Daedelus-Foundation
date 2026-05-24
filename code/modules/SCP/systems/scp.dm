@@ -116,14 +116,14 @@
 		return
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/id = get_scp_id()
-		SSscp_persistence.manager.scp_instances[id] = new /datum/scp_instance(id, parent)
+		SSscp_persistence?.manager?.scp_instances[id] = new /datum/scp_instance(id, parent)
 
 ///Helper to record an interaction in persistence
 /datum/scp/proc/log_interaction(mob/user, interaction_type)
 	if(!(SSscp_persistence && SSscp_persistence.manager))
 		return
 	var/id = get_scp_id()
-	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[id]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[id]
 	if(instance)
 		instance.add_interaction_record(user, interaction_type)
 	if(uses_advanced_components)
@@ -134,7 +134,7 @@
 	if(!(SSscp_persistence && SSscp_persistence.manager))
 		return
 	var/id = get_scp_id()
-	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[id]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[id]
 	if(instance)
 		instance.add_breach_record()
 

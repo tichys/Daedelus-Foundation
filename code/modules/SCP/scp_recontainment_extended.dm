@@ -59,7 +59,7 @@
 				to_chat(S, "<span class='userdanger'>The frequency overwhelms your senses!</span>")
 
 				if(SSscp_persistence && SSscp_persistence.manager)
-					var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-939"]
+					var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-939"]
 					if(instance && instance.containment_status == "breached")
 						hook_scp_recontainment("SCP-939", list(user))
 						priority_announce("SCP-939 has been neutralized via sonic lure protocol.", null, null, ANNOUNCER_DEFAULT)
@@ -206,7 +206,7 @@
 		var/turf/target_turf = get_turf(target)
 		if(target_turf && target_turf.get_lumcount() < 0.15)
 			if(SSscp_persistence && SSscp_persistence.manager)
-				var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-017"]
+				var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-017"]
 				if(instance && instance.containment_status == "breached")
 					hook_scp_recontainment("SCP-017", list())
 					priority_announce("SCP-017 has been recontained via light suppression protocol.", null, null, ANNOUNCER_DEFAULT)

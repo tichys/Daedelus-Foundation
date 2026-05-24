@@ -734,12 +734,12 @@ GLOBAL_DATUM_INIT(budget_manager, /datum/budget_manager, new)
 // Cargo/Supply System Integration
 /proc/track_cargo_expense(var/amount, var/description, var/department_id = "supply")
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.add_transaction(department_id, "EXPENSE", amount, "equipment", description, "SYSTEM")
+		return SSbudget_system?.manager?.add_transaction(department_id, "EXPENSE", amount, "equipment", description, "SYSTEM")
 	return null
 
 /proc/track_cargo_revenue(var/amount, var/description, var/revenue_type = "government_funding")
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.add_transaction("supply", "REVENUE", amount, revenue_type, description, "SYSTEM")
+		return SSbudget_system?.manager?.add_transaction("supply", "REVENUE", amount, revenue_type, description, "SYSTEM")
 	return null
 
 /proc/track_supply_order(var/datum/supply_order/order)
@@ -750,49 +750,49 @@ GLOBAL_DATUM_INIT(budget_manager, /datum/budget_manager, new)
 		// Determine which department is paying
 		if(order.paying_account)
 			// Find which department this account belongs to
-			for(var/dept_id in SSbudget_system.manager.department_budgets)
+			for(var/dept_id in SSbudget_system?.manager?.department_budgets)
 				// This is a simplified check - in a real implementation you'd have account-to-department mapping
 				if(order.paying_account.account_balance >= amount)
 					department_id = dept_id
 					break
 
 		var/description = "Supply order #[order.id]: [order.pack.name] - [order.reason ? order.reason : "No reason provided"]"
-		return SSbudget_system.manager.add_transaction(department_id, "EXPENSE", amount, "equipment", description, order.orderer_ckey || "SYSTEM")
+		return SSbudget_system?.manager?.add_transaction(department_id, "EXPENSE", amount, "equipment", description, order.orderer_ckey || "SYSTEM")
 	return null
 
 /proc/track_cargo_export(var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.add_transaction("supply", "REVENUE", amount, "technology_sales", description, "SYSTEM")
+		return SSbudget_system?.manager?.add_transaction("supply", "REVENUE", amount, "technology_sales", description, "SYSTEM")
 	return null
 
 // Security System Integration
 /proc/track_security_expense(var/expense_type, var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.process_security_expense(expense_type, amount, description)
+		return SSbudget_system?.manager?.process_security_expense(expense_type, amount, description)
 	return null
 
 // Medical System Integration
 /proc/track_medical_expense(var/expense_type, var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.process_medical_expense(expense_type, amount, description)
+		return SSbudget_system?.manager?.process_medical_expense(expense_type, amount, description)
 	return null
 
 // Research System Integration
 /proc/track_research_expense(var/expense_type, var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.process_research_expense(expense_type, amount, description)
+		return SSbudget_system?.manager?.process_research_expense(expense_type, amount, description)
 	return null
 
 // Engineering System Integration
 /proc/track_engineering_expense(var/expense_type, var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.process_engineering_expense(expense_type, amount, description)
+		return SSbudget_system?.manager?.process_engineering_expense(expense_type, amount, description)
 	return null
 
 // Supply System Integration
 /proc/track_supply_expense(var/expense_type, var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.process_supply_expense(expense_type, amount, description)
+		return SSbudget_system?.manager?.process_supply_expense(expense_type, amount, description)
 	return null
 
 // General Expense Tracking
@@ -819,19 +819,19 @@ GLOBAL_DATUM_INIT(budget_manager, /datum/budget_manager, new)
 			if("transportation")
 				category = "transportation"
 
-		return SSbudget_system.manager.add_transaction(department_id, "EXPENSE", amount, category, description, "SYSTEM")
+		return SSbudget_system?.manager?.add_transaction(department_id, "EXPENSE", amount, category, description, "SYSTEM")
 	return null
 
 // Revenue Tracking
 /proc/track_department_revenue(var/department_id, var/revenue_type, var/amount, var/description)
 	if(SSbudget_system && SSbudget_system.manager)
-		return SSbudget_system.manager.add_transaction(department_id, "REVENUE", amount, revenue_type, description, "SYSTEM")
+		return SSbudget_system?.manager?.add_transaction(department_id, "REVENUE", amount, revenue_type, description, "SYSTEM")
 	return null
 
 // Budget Request Helper
 /proc/request_department_budget(var/department_id, var/amount, var/category, var/justification, var/requested_by, var/priority = 1)
 	if(SSbudget_system && SSbudget_system.manager)
-		var/datum/budget_request_data/request = SSbudget_system.manager.request_budget_increase(department_id, amount, category, justification, requested_by)
+		var/datum/budget_request_data/request = SSbudget_system?.manager?.request_budget_increase(department_id, amount, category, justification, requested_by)
 		if(request)
 			request.priority = priority
 		return request

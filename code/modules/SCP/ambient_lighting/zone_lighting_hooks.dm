@@ -46,6 +46,6 @@ GLOBAL_LIST_EMPTY(zone_lighting_controllers)
 	if(!SSscp_persistence?.manager)
 		restore_zone_lighting(zone_id)
 		return
-	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 	if(!instance || instance.containment_status != "breached")
 		restore_zone_lighting(zone_id)

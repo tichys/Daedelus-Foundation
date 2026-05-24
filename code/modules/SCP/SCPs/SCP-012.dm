@@ -147,7 +147,7 @@
 
 	// Update persistence system
 	if(SSscp_persistence && SSscp_persistence.manager && world.time >= persistence_cooldown)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-012"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-012"]
 		if(instance)
 			instance.add_interaction_record(target, "sanity_drain")
 		persistence_cooldown = world.time + 30 SECONDS
@@ -186,7 +186,7 @@
 
 	// Update persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-012"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-012"]
 		if(instance)
 			instance.add_interaction_record(composer, "completion_attempt")
 
@@ -246,7 +246,7 @@
 	hook_player_death_near_scp(composer, "SCP-012")
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-012"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-012"]
 		if(instance)
 			instance.add_interaction_record(composer, "failed_completion")
 
@@ -276,7 +276,7 @@
 	message += "<b>Sanity Drain Radius:</b> [sanity_drain_radius] tiles<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-012"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-012"]
 		if(instance)
 			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 

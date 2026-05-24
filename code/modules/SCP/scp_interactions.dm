@@ -231,8 +231,8 @@ SUBSYSTEM_DEF(scp_cross_interactions)
 	if(!SSscp_research || !SSscp_research.manager)
 		return 0
 	var/max_level = 0
-	for(var/project_id in SSscp_research.manager.research_projects)
-		var/datum/research_data/project = SSscp_research.manager.research_projects[project_id]
+	for(var/project_id in SSscp_research?.manager?.research_projects)
+		var/datum/research_data/project = SSscp_research?.manager?.research_projects[project_id]
 		if(project.scp_designation == scp_id && project.status == "ACTIVE")
 			max_level = max(max_level, project.research_level)
 	return max_level
@@ -264,7 +264,7 @@ SUBSYSTEM_DEF(scp_cross_interactions)
 	discovered_interactions[interaction_id] = I
 	log_game("SCP Cross-Interaction Discovered: [I.name] ([I.scp_id_1] x [I.scp_id_2]) by [researcher_ckey || "system"]")
 	if(researcher_ckey && SSscp_research?.manager)
-		var/datum/researcher_data/researcher = SSscp_research.manager.get_researcher_profile(researcher_ckey)
+		var/datum/researcher_data/researcher = SSscp_research?.manager?.get_researcher_profile(researcher_ckey)
 		if(researcher)
 			researcher.research_points += 500
 			researcher.achievements += "Discovered: [I.name]"
@@ -489,8 +489,8 @@ SUBSYSTEM_DEF(scp_cross_interactions)
 		return
 	log_game("Cross-SCP Interaction: [scp_id_1] x [scp_id_2] - [interaction_type]")
 	if(SSscp_persistence?.manager)
-		var/datum/scp_instance/instance1 = SSscp_persistence.manager.scp_instances[scp_id_1]
-		var/datum/scp_instance/instance2 = SSscp_persistence.manager.scp_instances[scp_id_2]
+		var/datum/scp_instance/instance1 = SSscp_persistence?.manager?.scp_instances[scp_id_1]
+		var/datum/scp_instance/instance2 = SSscp_persistence?.manager?.scp_instances[scp_id_2]
 		if(instance1)
 			instance1.add_interaction_record(null, "cross_interaction_[scp_id_2]")
 		if(instance2)

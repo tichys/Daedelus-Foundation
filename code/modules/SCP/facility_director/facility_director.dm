@@ -138,8 +138,8 @@
 	var/dead_crew = 0
 	var/total_crew = 0
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			total_scp_count++
 			if(instance.containment_status == "breached")
 				breached_count++
@@ -159,8 +159,8 @@
 /datum/facility_director/proc/deploy_mtf_reinforcements()
 	var/list/breached_scps = list()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance.containment_status == "breached")
 				breached_scps += scp_id
 	var/scp_list = length(breached_scps) ? english_list(breached_scps) : "unknown entities"

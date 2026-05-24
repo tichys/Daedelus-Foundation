@@ -99,7 +99,7 @@
 
 	data["research_points"] = 0
 	if(SSscp_research?.manager)
-		data["research_points"] = SSscp_research.manager.total_research_points
+		data["research_points"] = SSscp_research?.manager?.total_research_points
 
 	data["has_bsl_access"] = FALSE
 	if(ishuman(user))

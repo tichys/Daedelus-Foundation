@@ -554,11 +554,11 @@
 		"total_playtime" = total_playtime + (world.time - session_start_time)
 	)
 	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.save_scp_data("SCP-049", persistence_data)
+		SSscp_persistence?.manager?.save_scp_data("SCP-049", persistence_data)
 
 /mob/living/scp/scp049/proc/load_persistence_data()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/list/persistence_data = SSscp_persistence.manager.load_scp_data("SCP-049")
+		var/list/persistence_data = SSscp_persistence?.manager?.load_scp_data("SCP-049")
 		if(persistence_data)
 			pestilence_level = persistence_data["pestilence_level"] || 0
 			cure_potency = persistence_data["cure_potency"] || 1

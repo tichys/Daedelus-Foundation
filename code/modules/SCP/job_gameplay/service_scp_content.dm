@@ -50,7 +50,7 @@
 	qdel(paper)
 	to_chat(user, "<span class='notice'>You scan '[title]' into the Foundation archive. Total catalogued: [catalogued_scp.len]</span>")
 	if(SSscp_research && SSscp_research.manager)
-		SSscp_research.manager.adjust_research_points(25, "document_archival")
+		SSscp_research?.manager?.adjust_research_points(25, "document_archival")
 		to_chat(user, "<span class='notice'>+25 research points from document archival.</span>")
 	if(SSraisa && ishuman(user))
 		var/datum/intel_report/R = new(user, "document_scan", title, "", "UNCLASSIFIED", "Document '[title]' scanned and archived by [user].", "Automated archival")
@@ -136,7 +136,7 @@
 		uses_left--
 		user.visible_message("<span class='notice'>[user] decontaminates [target].</span>", "<span class='notice'>You decontaminate [target]. [uses_left] uses remaining.</span>")
 		if(SSscp_persistence?.manager)
-			SSscp_persistence.manager.environmental_changes += list(list("type" = "decontamination", "area" = get_area_name(target), "time" = world.time))
+			SSscp_persistence?.manager?.environmental_changes += list(list("type" = "decontamination", "area" = get_area_name(target), "time" = world.time))
 
 /obj/item/botany_scp_sample_kit
 	name = "Anomalous Botany Sample Kit"
@@ -157,7 +157,7 @@
 		collected_samples += sample_name
 		user.visible_message("<span class='notice'>[user] collects a botany sample from [target].</span>", "<span class='notice'>You collect a sample from [sample_name]. Samples: [collected_samples.len]</span>")
 		if(SSscp_research?.manager)
-			SSscp_research.manager.adjust_research_points(10, "botany_sample")
+			SSscp_research?.manager?.adjust_research_points(10, "botany_sample")
 			to_chat(user, "<span class='notice'>+10 research points from anomalous botany sample.</span>")
 	else if(istype(target, /obj/structure/flora))
 		var/sample_name = target.name || "Wild Flora"
@@ -167,7 +167,7 @@
 		collected_samples += sample_name
 		user.visible_message("<span class='notice'>[user] collects a wild flora sample from [target].</span>", "<span class='notice'>You collect a sample of [sample_name]. Samples: [collected_samples.len]</span>")
 		if(SSscp_research?.manager)
-			SSscp_research.manager.adjust_research_points(5, "wild_flora_sample")
+			SSscp_research?.manager?.adjust_research_points(5, "wild_flora_sample")
 
 /obj/item/botany_scp_sample_kit/attack_self(mob/user)
 	if(!collected_samples.len)
@@ -396,7 +396,7 @@
 		if(anomalous_cleanse)
 			I.remove_atom_colour(WASHABLE_COLOUR_PRIORITY)
 			if(SSscp_persistence?.manager)
-				SSscp_persistence.manager.environmental_changes += list(list("type" = "laundry_decon", "area" = get_area_name(src), "time" = world.time))
+				SSscp_persistence?.manager?.environmental_changes += list(list("type" = "laundry_decon", "area" = get_area_name(src), "time" = world.time))
 		I.forceMove(get_turf(src))
 	loaded_items.Cut()
 	visible_message("<span class='notice'>[src] finishes its wash cycle with a pleasant chime.</span>")

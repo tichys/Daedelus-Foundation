@@ -22,7 +22,7 @@
 	var/list/valid_scps = list()
 	for(var/scp_id in breachable_scps)
 		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance && instance.containment_status != "breached")
 				valid_scps += scp_id
 	if(!length(valid_scps))
@@ -30,7 +30,7 @@
 	breached_scp = pick(valid_scps)
 	var/atom/scp_atom = null
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[breached_scp]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[breached_scp]
 		if(instance)
 			for(var/mob/living/scp/S in GLOB.mob_list)
 				if(!QDELETED(S) && S.persistence_id == breached_scp)
@@ -64,17 +64,17 @@
 	for(var/obj/machinery/power/apc/A as anything in INSTANCES_OF(/obj/machinery/power/apc))
 		if(prob(30))
 			A.energy_fail(rand(30, 120))
-	if(SSscp_persistence && SSscp_persistence.manager && length(SSscp_persistence.manager.scp_instances) > 0)
+	if(SSscp_persistence && SSscp_persistence.manager && length(SSscp_persistence?.manager?.scp_instances) > 0)
 		var/list/breached = list()
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance && instance.containment_status == "breached")
 				breached += scp_id
 		if(length(breached) && prob(25))
 			var/breached_id = pick(breached)
 			var/atom/scp_atom = null
 			if(SSscp_persistence && SSscp_persistence.manager)
-				var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[breached_id]
+				var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[breached_id]
 				if(instance)
 					for(var/mob/living/scp/S in GLOB.mob_list)
 						if(!QDELETED(S) && S.persistence_id == breached_id)
@@ -136,7 +136,7 @@
 	var/list/valid = list()
 	for(var/scp_id in breachable)
 		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(!instance || instance.containment_status != "breached")
 				valid += scp_id
 	if(!length(valid))
@@ -144,7 +144,7 @@
 	var/first_scp = pick(valid)
 	var/atom/first_atom = null
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/fi = SSscp_persistence.manager.scp_instances[first_scp]
+		var/datum/scp_instance/fi = SSscp_persistence?.manager?.scp_instances[first_scp]
 		if(fi)
 			for(var/mob/living/scp/S in GLOB.mob_list)
 				if(!QDELETED(S) && S.persistence_id == first_scp)
@@ -156,7 +156,7 @@
 		var/second_scp = pick(remaining)
 		var/atom/second_atom = null
 		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/si = SSscp_persistence.manager.scp_instances[second_scp]
+			var/datum/scp_instance/si = SSscp_persistence?.manager?.scp_instances[second_scp]
 			if(si)
 				for(var/mob/living/scp/S in GLOB.mob_list)
 					if(!QDELETED(S) && S.persistence_id == second_scp)
@@ -201,8 +201,8 @@
 	if(SSscp_research && SSscp_research.manager)
 		var/bonus_points = rand(100, 500)
 		adjust_global_research_points(bonus_points, "round_event_breakthrough")
-		if(SSscp_research.manager.research_breakthroughs < 99)
-			SSscp_research.manager.research_breakthroughs++
+		if(SSscp_research?.manager?.research_breakthroughs < 99)
+			SSscp_research?.manager?.research_breakthroughs++
 		var/list/researchers_notified = list()
 		for(var/mob/living/carbon/human/H in GLOB.player_list)
 			if(QDELETED(H))
@@ -247,7 +247,7 @@
 			if(H.sanity)
 				H.sanity.adjust_sanity(-5, "security_alert_stress")
 		if(findtext(H.job, "D-Class") && SSdclass && SSdclass.manager)
-			var/datum/dclass_player/player = SSdclass.manager.dclass_players[H.ckey]
+			var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[H.ckey]
 			if(player && prob(30))
 				player.add_contraband(pick(contraband_types), 1)
 
@@ -281,7 +281,7 @@
 			dclass_count++
 			to_chat(H, "<span class='warning'>The air of tension in the cell block is palpable. Something is about to happen.</span>")
 			if(SSdclass && SSdclass.manager)
-				var/datum/dclass_player/player = SSdclass.manager.dclass_players[H.ckey]
+				var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[H.ckey]
 				if(player)
 					player.adjust_trust(5, "dclass_incident")
 					player.add_contraband("improvised_tool", 1)

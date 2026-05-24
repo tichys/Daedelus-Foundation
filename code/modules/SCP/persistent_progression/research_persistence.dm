@@ -167,7 +167,7 @@ SUBSYSTEM_DEF(research_persistence)
 	if(world.time % 3000 == 0)
 		save_research_data()
 		if(SSscp_research?.manager)
-			SSscp_research.manager.save_research_persistence()
+			SSscp_research?.manager?.save_research_persistence()
 
 /datum/research_persistence_manager/proc/sync_from_scp_research()
 	if(!SSscp_research || !SSscp_research.manager)

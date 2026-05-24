@@ -41,12 +41,12 @@
 /proc/hook_breach_mtf_auto_deploy(scp_id)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
-	var/active_breaches = SSscp_persistence.manager.active_breaches
+	var/active_breaches = SSscp_persistence?.manager?.active_breaches
 	var/is_keter = FALSE
 	var/is_biohazard = FALSE
 	var/is_fire = FALSE
 	if(SSscp_persistence?.manager?.scp_instances?[scp_id])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance.containment_class == SCP_KETER)
 			is_keter = TRUE
 	if(findtext(scp_id, "008") || findtext(scp_id, "049") || findtext(scp_id, "610"))
@@ -98,7 +98,7 @@
 		return
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
-	if(SSscp_persistence.manager.active_breaches > 0)
+	if(SSscp_persistence?.manager?.active_breaches > 0)
 		return
 	if(SSsecurity_level.current_level == SEC_LEVEL_DELTA)
 		set_foundation_security_code(SEC_LEVEL_RED, "All SCPs recontained. Downgrading from Delta.")
@@ -108,7 +108,7 @@
 /proc/hook_research_milestone_announcement()
 	if(!SSscp_research || !SSscp_research.manager)
 		return
-	var/points = SSscp_research.manager.total_research_points
+	var/points = SSscp_research?.manager?.total_research_points
 	var/list/thresholds = list(1000, 5000, 15000, 30000, 50000)
 	var/list/messages = list(
 		"Research Division has achieved 1,000 total research points. Foundation science progresses steadily.",
@@ -121,7 +121,7 @@
 	for(var/threshold in thresholds)
 		if(points >= threshold)
 			announced_milestones++
-	var/list/stored_milestones = SSscp_research.manager.research_milestones
+	var/list/stored_milestones = SSscp_research?.manager?.research_milestones
 	if(!stored_milestones["_announced_round_milestones"])
 		stored_milestones["_announced_round_milestones"] = 0
 	var/prev = stored_milestones["_announced_round_milestones"]

@@ -149,7 +149,7 @@
 	report_lockdown_to_round_log(reason, 0)
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.global_scp_management_mode = "lockdown"
+		SSscp_persistence?.manager?.global_scp_management_mode = "lockdown"
 
 /obj/machinery/facility_lockdown_console/proc/lift_lockdown(mob/user)
 	lockdown_state = LOCKDOWN_NONE
@@ -165,7 +165,7 @@
 	report_lockdown_to_round_log("Lockdown lifted", world.time - lockdown_start_time)
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.global_scp_management_mode = "standard"
+		SSscp_persistence?.manager?.global_scp_management_mode = "standard"
 
 /obj/machinery/facility_lockdown_console/proc/close_blast_doors()
 	blast_doors_closed = TRUE
@@ -193,8 +193,8 @@
 
 /obj/machinery/facility_lockdown_console/proc/lockdown_dclass_areas()
 	if(SSdclass && SSdclass.manager)
-		saved_security_level = SSdclass.manager.current_security_level
-		SSdclass.manager.current_security_level = 4
+		saved_security_level = SSdclass?.manager?.current_security_level
+		SSdclass?.manager?.current_security_level = 4
 	if(world.time < cached_airlock_iteration_lockdown)
 		return
 	cached_airlock_iteration_lockdown = world.time + airlock_cache_cooldown
@@ -205,7 +205,7 @@
 
 /obj/machinery/facility_lockdown_console/proc/unlock_dclass_areas()
 	if(SSdclass && SSdclass.manager)
-		SSdclass.manager.current_security_level = saved_security_level ? saved_security_level : 1
+		SSdclass?.manager?.current_security_level = saved_security_level ? saved_security_level : 1
 	if(world.time < cached_airlock_iteration_unlock)
 		return
 	cached_airlock_iteration_unlock = world.time + airlock_cache_cooldown

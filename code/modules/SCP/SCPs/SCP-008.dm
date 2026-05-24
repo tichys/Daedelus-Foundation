@@ -173,7 +173,7 @@
 	total_infections_caused++
 	containment_breached = TRUE
 	containment_status = "breached"
-	if(!SSscp_persistence || !SSscp_persistence.manager || SSscp_persistence.manager.scp_instances["SCP-008"]?.containment_status != "breached")
+	if(!SSscp_persistence || !SSscp_persistence.manager || SSscp_persistence?.manager?.scp_instances["SCP-008"]?.containment_status != "breached")
 		hook_scp_breach("SCP-008", src)
 
 	visible_message("<span class='danger'>[target] has been infected with SCP-008!</span>")
@@ -192,7 +192,7 @@
 
 	// Update persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-008"]
 		if(instance)
 			instance.add_interaction_record(target, "infection")
 
@@ -281,7 +281,7 @@
 
 	// Update persistence system
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-008"]
 		if(instance)
 			instance.add_interaction_record(user, "reagent_exposure")
 
@@ -349,7 +349,7 @@
 	var/research_field = "SCP-008_OUTBREAK"
 	var/lead_researcher = "System"
 
-	var/datum/research_persistence_project/project = SSresearch_persistence.manager.add_research_project(
+	var/datum/research_persistence_project/project = SSresearch_persistence?.manager?.add_research_project(
 		project_name,
 		project_description,
 		research_field,
@@ -367,7 +367,7 @@
 			project.status = "COMPLETED"
 
 			// Add scientific discovery
-			SSresearch_persistence.manager.add_scientific_discovery(
+			SSresearch_persistence?.manager?.add_scientific_discovery(
 				"SCP-008 Outbreak Patterns",
 				"Comprehensive analysis of SCP-008's infection spreading and horde formation mechanics",
 				"SCP_RESEARCH",

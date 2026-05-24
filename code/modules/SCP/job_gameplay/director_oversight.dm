@@ -73,9 +73,9 @@ SUBSYSTEM_DEF(director_oversight)
 			completed_directives += list(D)
 			active_directives -= list(D)
 			if(SSscp_research?.manager)
-				SSscp_research.manager.adjust_research_points(10, "directive_complete:[D["department"]]")
+				SSscp_research?.manager?.adjust_research_points(10, "directive_complete:[D["department"]]")
 			if(SSbudget_system?.manager)
-				SSbudget_system.manager.add_transaction(D["department"], "REVENUE", 100, "personnel", "Directive completed: [D["directive_type"]]")
+				SSbudget_system?.manager?.add_transaction(D["department"], "REVENUE", 100, "personnel", "Directive completed: [D["directive_type"]]")
 			return TRUE
 	return FALSE
 
@@ -133,9 +133,9 @@ SUBSYSTEM_DEF(director_oversight)
 		if(D["department"] == department)
 			review["completed_directives"]++
 	if(SSscp_research?.manager)
-		review["research_points"] = SSscp_research.manager.total_research_points
+		review["research_points"] = SSscp_research?.manager?.total_research_points
 	if(SSbudget_system?.manager)
-		var/datum/budget_data/B = SSbudget_system.manager.department_budgets[department]
+		var/datum/budget_data/B = SSbudget_system?.manager?.department_budgets[department]
 		if(B)
 			review["budget_remaining"] = B.remaining_budget
 			review["budget_allocated"] = B.allocated_budget

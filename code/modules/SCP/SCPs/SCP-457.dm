@@ -453,7 +453,7 @@
 	var/research_field = "SCP-457_BEHAVIORAL"
 	var/lead_researcher = "System"
 
-	var/datum/research_persistence_project/project = SSresearch_persistence.manager.add_research_project(
+	var/datum/research_persistence_project/project = SSresearch_persistence?.manager?.add_research_project(
 		project_name,
 		project_description,
 		research_field,
@@ -468,7 +468,7 @@
 		if(project.progress >= 100)
 			project.status = "COMPLETED"
 
-			SSresearch_persistence.manager.add_scientific_discovery(
+			SSresearch_persistence?.manager?.add_scientific_discovery(
 				"SCP-457 Behavior Patterns",
 				"Comprehensive analysis of SCP-457's fire spreading mechanics",
 				"SCP_RESEARCH",

@@ -234,8 +234,8 @@ ___________________________________________________________________________<br><
 /datum/controller/subsystem/psychology/proc/process_suspicion_surveillance()
 	if(!SSdclass?.manager)
 		return
-	for(var/ckey in SSdclass.manager.dclass_players)
-		var/datum/dclass_player/P = SSdclass.manager.dclass_players[ckey]
+	for(var/ckey in SSdclass?.manager?.dclass_players)
+		var/datum/dclass_player/P = SSdclass?.manager?.dclass_players[ckey]
 		if(!P || !P.mob || P.suspicion_level < 40)
 			continue
 		var/datum/surveillance_subject/S = SSraisa.get_or_create_subject(P.mob)

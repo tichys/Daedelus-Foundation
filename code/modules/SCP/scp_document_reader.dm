@@ -39,8 +39,8 @@
 	unlocked_documents = list()
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(!instance)
 				continue
 
@@ -56,7 +56,7 @@
 				unlocked_documents[scp_id] = generate_document_data(scp_id, instance)
 
 	if(user && SSdclass && SSdclass.manager)
-		var/datum/dclass_player/player = SSdclass.manager.dclass_players[user.ckey]
+		var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[user.ckey]
 		if(player && player.tests_completed > 0)
 			for(var/scp_id in unlocked_documents)
 				var/required_tests = 1

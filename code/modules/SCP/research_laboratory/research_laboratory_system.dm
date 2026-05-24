@@ -41,11 +41,11 @@ SUBSYSTEM_DEF(research_laboratory)
 
 /datum/research_laboratory_manager/proc/sync_from_subsystems()
 	if(SSscp_research && SSscp_research.manager)
-		total_research_points = SSscp_research.manager.total_research_points
-		total_breakthroughs = SSscp_research.manager.research_breakthroughs
+		total_research_points = SSscp_research?.manager?.total_research_points
+		total_breakthroughs = SSscp_research?.manager?.research_breakthroughs
 	if(SSscp_experiments && SSscp_experiments.manager)
-		total_experiments_conducted = SSscp_experiments.manager.global_experiment_count
-		containment_breaches = SSscp_experiments.manager.global_catastrophe_count
+		total_experiments_conducted = SSscp_experiments?.manager?.global_experiment_count
+		containment_breaches = SSscp_experiments?.manager?.global_catastrophe_count
 
 /datum/research_laboratory_manager/proc/tick()
 	sync_from_subperiments()
@@ -274,8 +274,8 @@ SUBSYSTEM_DEF(research_laboratory)
 /datum/research_laboratory_manager/proc/get_available_scp_targets()
 	var/list/targets = list()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			targets += list(list(
 				"id" = scp_id,
 				"status" = instance.containment_status,
@@ -299,10 +299,10 @@ SUBSYSTEM_DEF(research_laboratory)
 
 	if(SSscp_research && SSscp_research.manager)
 		data["scp_research_data"] = list(
-			"total_research_points" = SSscp_research.manager.total_research_points,
-			"research_breakthroughs" = SSscp_research.manager.research_breakthroughs,
-			"containment_improvements" = SSscp_research.manager.containment_improvements,
-			"classification_updates" = SSscp_research.manager.classification_updates,
+			"total_research_points" = SSscp_research?.manager?.total_research_points,
+			"research_breakthroughs" = SSscp_research?.manager?.research_breakthroughs,
+			"containment_improvements" = SSscp_research?.manager?.containment_improvements,
+			"classification_updates" = SSscp_research?.manager?.classification_updates,
 		)
 
 	if(SStechnology_persistence && SStechnology_persistence.manager)
@@ -344,7 +344,7 @@ SUBSYSTEM_DEF(research_laboratory)
 		var/mob/living/carbon/human/H = user
 		if(H.job)
 			job_name = H.job
-	return SSscp_experiments.manager.get_default_certification(job_name)
+	return SSscp_experiments?.manager?.get_default_certification(job_name)
 
 /datum/research_laboratory_manager/proc/get_projects_data()
 	var/list/result = list()
@@ -352,10 +352,10 @@ SUBSYSTEM_DEF(research_laboratory)
 		var/list/project = research_projects[project_id]
 		result[project_id] = project
 	if(SSscp_persistence?.manager)
-		for(var/project_id in SSscp_persistence.manager.research_projects)
+		for(var/project_id in SSscp_persistence?.manager?.research_projects)
 			if(result[project_id])
 				continue
-			var/datum/research_project/scp_proj = SSscp_persistence.manager.research_projects[project_id]
+			var/datum/research_project/scp_proj = SSscp_persistence?.manager?.research_projects[project_id]
 			if(!scp_proj)
 				continue
 			result[project_id] = list(
@@ -370,10 +370,10 @@ SUBSYSTEM_DEF(research_laboratory)
 				"source" = "scp_persistence",
 			)
 	if(SSresearch_persistence?.manager)
-		for(var/project_id in SSresearch_persistence.manager.research_projects)
+		for(var/project_id in SSresearch_persistence?.manager?.research_projects)
 			if(result[project_id])
 				continue
-			var/datum/research_persistence_project/rp_proj = SSresearch_persistence.manager.research_projects[project_id]
+			var/datum/research_persistence_project/rp_proj = SSresearch_persistence?.manager?.research_projects[project_id]
 			if(!rp_proj)
 				continue
 			result[project_id] = list(
@@ -485,27 +485,27 @@ SUBSYSTEM_DEF(research_laboratory)
 		return list()
 	if(!ishuman(user))
 		return list()
-	return SSscp_experiments.manager.get_available_experiments(user, scp_id)
+	return SSscp_experiments?.manager?.get_available_experiments(user, scp_id)
 
 /datum/research_laboratory_manager/proc/start_scp_experiment(mob/living/carbon/human/user, scp_id, experiment_type)
 	if(!SSscp_experiments || !SSscp_experiments.manager)
 		return null
-	return SSscp_experiments.manager.start_experiment(scp_id, experiment_type, user)
+	return SSscp_experiments?.manager?.start_experiment(scp_id, experiment_type, user)
 
 /datum/research_laboratory_manager/proc/suspend_scp_experiment(experiment_id, mob/user)
 	if(!SSscp_experiments || !SSscp_experiments.manager)
 		return FALSE
-	return SSscp_experiments.manager.suspend_experiment(experiment_id, user)
+	return SSscp_experiments?.manager?.suspend_experiment(experiment_id, user)
 
 /datum/research_laboratory_manager/proc/resume_scp_experiment(experiment_id, mob/user)
 	if(!SSscp_experiments || !SSscp_experiments.manager)
 		return FALSE
-	return SSscp_experiments.manager.resume_experiment(experiment_id, user)
+	return SSscp_experiments?.manager?.resume_experiment(experiment_id, user)
 
 /datum/research_laboratory_manager/proc/terminate_scp_experiment(experiment_id, mob/user)
 	if(!SSscp_experiments || !SSscp_experiments.manager)
 		return FALSE
-	return SSscp_experiments.manager.terminate_experiment(experiment_id, user)
+	return SSscp_experiments?.manager?.terminate_experiment(experiment_id, user)
 
 /datum/research_laboratory_manager/proc/unlock_tech_node(node_id, mob/user)
 	if(!tech_tree.can_unlock(node_id, total_research_points))
@@ -590,15 +590,15 @@ SUBSYSTEM_DEF(research_laboratory)
 
 /datum/research_laboratory_manager/proc/apply_medical_bonus(bonus)
 	if(SSscp_research?.manager)
-		SSscp_research.manager.medical_bonus += bonus
+		SSscp_research?.manager?.medical_bonus += bonus
 
 /datum/research_laboratory_manager/proc/apply_sanity_resistance(bonus)
 	if(SSscp_research?.manager)
-		SSscp_research.manager.cognitive_bonus += bonus
+		SSscp_research?.manager?.cognitive_bonus += bonus
 
 /datum/research_laboratory_manager/proc/apply_research_multiplier(bonus)
 	if(SSscp_research?.manager)
-		SSscp_research.manager.research_point_multiplier += bonus
+		SSscp_research?.manager?.research_point_multiplier += bonus
 
 /datum/research_laboratory_manager/proc/restock_foundation_medical(list/items)
 	for(var/obj/machinery/vending/foundation_medical/V in INSTANCES_OF(/obj/machinery/vending/foundation_medical))

@@ -166,7 +166,7 @@ SUBSYSTEM_DEF(scp_testing)
 	total_tests_conducted++
 	total_research_earned += points_earned
 	if(SSscp_research?.manager)
-		SSscp_research.manager.adjust_research_points(points_earned, "scp_test:[proposal_id]:[researcher.ckey]")
+		SSscp_research?.manager?.adjust_research_points(points_earned, "scp_test:[proposal_id]:[researcher.ckey]")
 	if(danger_triggered)
 		total_incidents_during_tests++
 		if(SSscp_medical_response)

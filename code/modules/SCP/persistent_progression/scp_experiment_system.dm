@@ -245,7 +245,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	
 	var/datum/researcher_data/rd
 	if(SSscp_research && SSscp_research.manager)
-		rd = SSscp_research.manager.get_researcher_profile(researcher.ckey)
+		rd = SSscp_research?.manager?.get_researcher_profile(researcher.ckey)
 		if(rd)
 			rd.research_points += max(0, xp_change)
 			rd.completed_projects++
@@ -255,7 +255,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	
 	if(reward_modifier > 1.0 && SSbudget_system && SSbudget_system.manager)
 		var/budget_reward = round(100 * reward_modifier * experiment_reward_multiplier)
-		SSbudget_system.manager.add_transaction("research", "REVENUE", budget_reward, "experiment_reward", 
+		SSbudget_system?.manager?.add_transaction("research", "REVENUE", budget_reward, "experiment_reward", 
 			"Experiment completion: [exp.name]", researcher.ckey)
 	
 	notify_experiment_result(researcher, exp, outcome, xp_change)
@@ -301,7 +301,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	if(instance)
 		instance.containment_status = "breached"
 		instance.add_breach_record()
-		SSscp_persistence.manager.active_breaches++
+		SSscp_persistence?.manager?.active_breaches++
 	
 	message_admins("CATASTROPHIC EXPERIMENT FAILURE on [exp.scp_id] by [researcher.key]!")
 	
@@ -535,7 +535,7 @@ SUBSYSTEM_DEF(scp_experiments)
 			scp_parent = H
 			return
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/instance_id in SSscp_persistence.manager.scp_instances)
+		for(var/instance_id in SSscp_persistence?.manager?.scp_instances)
 			if(instance_id == scp_id)
 				return
 
@@ -585,7 +585,7 @@ SUBSYSTEM_DEF(scp_experiments)
 	var/outcome = determine_outcome()
 	
 	if(SSscp_experiments && SSscp_experiments.manager)
-		SSscp_experiments.manager.complete_experiment(experiment_id, outcome, primary_researcher)
+		SSscp_experiments?.manager?.complete_experiment(experiment_id, outcome, primary_researcher)
 
 /datum/scp_experiment/proc/determine_outcome()
 	var/base_success_chance = 50

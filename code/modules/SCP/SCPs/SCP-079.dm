@@ -65,7 +65,7 @@
 	interaction_history = null
 	persistence_data = null
 	if(SSscp_persistence?.manager)
-		SSscp_persistence.manager.scp_instances -= persistence_id
+		SSscp_persistence?.manager?.scp_instances -= persistence_id
 	QDEL_NULL(SCP)
 	return ..()
 
@@ -411,7 +411,7 @@
 	var/record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [interaction_type] with [target ? "[target]" : "unknown"]"
 	interaction_history += record
 	if(SSscp_persistence?.manager?.scp_instances?[persistence_id])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		instance.add_interaction_record(target, interaction_type)
 
 /mob/living/scp079/death(gibbed)
@@ -419,7 +419,7 @@
 	hacked_doors?.Cut()
 	is_manifested = FALSE
 	if(SSscp_persistence?.manager?.scp_instances?["SCP-079"])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-079"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-079"]
 		instance.containment_status = "neutralized"
 	..()
 

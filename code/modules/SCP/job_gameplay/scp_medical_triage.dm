@@ -133,7 +133,7 @@ SUBSYSTEM_DEF(scp_triage)
 			var/points = P["severity"] * 5
 			if(P["diagnosed"])
 				points += 5
-			SSscp_research.manager.adjust_research_points(points, "medical_triage:[doctor.ckey]")
+			SSscp_research?.manager?.adjust_research_points(points, "medical_triage:[doctor.ckey]")
 		update_doctor_stats(doctor.ckey, "treated")
 		to_chat(doctor, span_greenannounce("<b>TREATMENT COMPLETE:</b> [P["patient_name"]] — [P["diagnosis"] || P["condition"]]. Research points earned."))
 		return TRUE
@@ -162,7 +162,7 @@ SUBSYSTEM_DEF(scp_triage)
 			if(zone_id > 0)
 				SSzone_ventilation.replace_filter(zone_id, 5)
 		if(SSscp_research?.manager)
-			SSscp_research.manager.adjust_research_points(8, "decon_procedure:[doctor.ckey]")
+			SSscp_research?.manager?.adjust_research_points(8, "decon_procedure:[doctor.ckey]")
 		update_doctor_stats(doctor.ckey, "decon")
 		to_chat(doctor, span_notice("<b>DECONTAMINATION:</b> [P["patient_name"]] decontamination procedure complete."))
 		return TRUE

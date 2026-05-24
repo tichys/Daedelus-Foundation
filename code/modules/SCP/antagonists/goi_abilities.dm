@@ -501,4 +501,4 @@
 			else
 				award_amount = 2
 	if(award_amount > 0 && SSscp_research && SSscp_research.manager)
-		SSscp_research.manager.adjust_research_points(award_amount, "scp_interaction:[scp_id]:[interaction_type]")
+		SSscp_research?.manager?.adjust_research_points(award_amount, "scp_interaction:[scp_id]:[interaction_type]")

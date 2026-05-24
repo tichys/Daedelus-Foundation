@@ -320,7 +320,7 @@ SUBSYSTEM_DEF(scp_camera_alerts)
 		for(var/mob/living/scp/S in A)
 			S.containment_resistance = min(S.max_containment_resistance, S.containment_resistance + breach_reduction)
 			if(sanity_resist > 0 && SSscp_research?.manager)
-				SSscp_research.manager.cognitive_bonus += sanity_resist
+				SSscp_research?.manager?.cognitive_bonus += sanity_resist
 	if(breach_reduction > 0)
 		apply_containment_upgrade_to_area(A, breach_reduction)
 	qdel(src)
@@ -457,7 +457,7 @@ SUBSYSTEM_DEF(round_objectives)
 					O.current_progress = 1
 		if(O.objective_id == "command_direct")
 			if(SSscp_persistence?.manager)
-				O.current_progress = (SSscp_persistence.manager.global_containment_stability >= 50) ? 1 : 0
+				O.current_progress = (SSscp_persistence?.manager?.global_containment_stability >= 50) ? 1 : 0
 
 /datum/controller/subsystem/round_objectives/proc/report_objective_progress(obj_id, amount = 1)
 	var/datum/round_objective/O = objectives[obj_id]

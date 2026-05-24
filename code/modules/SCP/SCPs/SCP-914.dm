@@ -391,7 +391,7 @@
 		message += "<b>Temporal Events:</b> [temporal_system.temporal_events]<br>"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-914"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-914"]
 		if(instance)
 			message += "<b>Interaction History:</b> [length(instance.interaction_history)] records<br>"
 

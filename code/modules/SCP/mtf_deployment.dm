@@ -66,7 +66,7 @@
 
 	var/active_breaches = 0
 	if(SSscp_persistence && SSscp_persistence.manager)
-		active_breaches = SSscp_persistence.manager.active_breaches
+		active_breaches = SSscp_persistence?.manager?.active_breaches
 	data["active_breach_count"] = active_breaches
 	data["last_deployment"] = last_deployment
 
@@ -95,7 +95,7 @@
 			var/list/team = available_teams[team_key]
 			var/active_breaches = 0
 			if(SSscp_persistence && SSscp_persistence.manager)
-				active_breaches = SSscp_persistence.manager.active_breaches
+				active_breaches = SSscp_persistence?.manager?.active_breaches
 			if(active_breaches < team["min_breach"])
 				to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
 				return
@@ -155,7 +155,7 @@
 
 	var/active_breaches = 0
 	if(SSscp_persistence && SSscp_persistence.manager)
-		active_breaches = SSscp_persistence.manager.active_breaches
+		active_breaches = SSscp_persistence?.manager?.active_breaches
 
 	if(active_breaches < team["min_breach"])
 		to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
@@ -252,8 +252,8 @@
 
 	var/list/objectives = list("Reinforce active MTF operations", "Secure all containment breaches")
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance.containment_status == "breached")
 				objectives += "Priority: Recontain [scp_id]"
 
@@ -308,8 +308,8 @@
 			objectives += "Establish quarantine perimeter"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance.containment_status == "breached")
 				objectives += "Priority: Recontain [scp_id]"
 

@@ -39,7 +39,7 @@
 
 	var/scp106_status = "unknown"
 	if(SSscp_persistence?.manager?.scp_instances?["SCP-106"])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-106"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-106"]
 		scp106_status = instance.containment_status
 	data["scp106_status"] = scp106_status
 
@@ -84,7 +84,7 @@
 		visible_message("<span class='danger'>The Femur Breaker activates! [H] screams in agony!</span>")
 
 		if(SSscp_persistence && SSscp_persistence.manager)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-106"]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-106"]
 			if(instance && instance.containment_status == "breached")
 				priority_announce("ATTENTION: Femur Breaker protocol activated. SCP-106 is being lured back to containment.", null, null, ANNOUNCER_ALERT)
 				addtimer(CALLBACK(src, .proc/complete_femur_breaker, H), 300)
@@ -96,7 +96,7 @@
 /obj/machinery/scp_femur_breaker/proc/complete_femur_breaker(mob/living/carbon/human/victim)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
-	var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-106"]
+	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-106"]
 	if(instance)
 		instance.containment_status = "contained"
 		instance.containment_health = 100
@@ -104,8 +104,8 @@
 			instance.add_interaction_record(victim, "femur_breaker_recontainment")
 		else
 			instance.add_interaction_record(null, "femur_breaker_recontainment")
-		SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
-		SSscp_persistence.manager.global_containment_stability = min(100, SSscp_persistence.manager.global_containment_stability + 5)
+		SSscp_persistence?.manager?.active_breaches = max(0, SSscp_persistence?.manager?.active_breaches - 1)
+		SSscp_persistence?.manager?.global_containment_stability = min(100, SSscp_persistence?.manager?.global_containment_stability + 5)
 
 	var/list/recontain_list = !QDELETED(victim) ? list(victim) : list()
 	hook_scp_recontainment("SCP-106", recontain_list)
@@ -220,11 +220,11 @@
 			if(target_turf != get_turf(scp))
 				scp.forceMove(target_turf)
 			if(SSscp_persistence?.manager?.scp_instances?["SCP-457"])
-				var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-457"]
+				var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-457"]
 				if(instance.containment_status == "breached")
 					instance.containment_status = "contained"
 					instance.containment_health = 100
-					SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
+					SSscp_persistence?.manager?.active_breaches = max(0, SSscp_persistence?.manager?.active_breaches - 1)
 			hook_scp_recontainment("SCP-457", list(user))
 			priority_announce("SCP-457 has been suppressed and returned to containment.", null, null, ANNOUNCER_DEFAULT)
 
@@ -302,7 +302,7 @@
 		scp.lure_target = null
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-049"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-049"]
 		if(instance && instance.containment_status == "breached")
 			hook_scp_recontainment("SCP-049", list())
 
@@ -342,11 +342,11 @@
 
 	if(zombies_destroyed > 0)
 		if(SSscp_persistence?.manager?.scp_instances?["SCP-008"])
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-008"]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-008"]
 			if(instance.containment_status == "breached")
 				instance.containment_status = "contained"
 				instance.containment_health = 100
-				SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
+				SSscp_persistence?.manager?.active_breaches = max(0, SSscp_persistence?.manager?.active_breaches - 1)
 		hook_scp_recontainment("SCP-008", list())
 		priority_announce("SCP-008 biohazard incineration complete. [zombies_destroyed] instances neutralized.", null, null, ANNOUNCER_DEFAULT)
 	else
@@ -487,11 +487,11 @@
 		if(target_turf != get_turf(reptile))
 			reptile.forceMove(target_turf)
 		if(SSscp_persistence?.manager?.scp_instances?["SCP-682"])
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-682"]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-682"]
 			if(instance.containment_status == "breached")
 				instance.containment_status = "contained"
 				instance.containment_health = 100
-				SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
+				SSscp_persistence?.manager?.active_breaches = max(0, SSscp_persistence?.manager?.active_breaches - 1)
 	hook_scp_recontainment("SCP-682", list(user))
 	priority_announce("SCP-682 has been driven back to containment via acid deployment.", null, null, ANNOUNCER_DEFAULT)
 
@@ -531,11 +531,11 @@
 		if(target_turf != get_turf(target))
 			target.forceMove(target_turf)
 		if(SSscp_persistence?.manager?.scp_instances?["SCP-939"])
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-939"]
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-939"]
 			if(instance.containment_status == "breached")
 				instance.containment_status = "contained"
 				instance.containment_health = 100
-				SSscp_persistence.manager.active_breaches = max(0, SSscp_persistence.manager.active_breaches - 1)
+				SSscp_persistence?.manager?.active_breaches = max(0, SSscp_persistence?.manager?.active_breaches - 1)
 	hook_scp_recontainment("SCP-939", list(user))
 	priority_announce("SCP-939 has been neutralized via sonic dampener and returned to containment.", null, null, ANNOUNCER_DEFAULT)
 	addtimer(CALLBACK(src, .proc/deactivate_dampener), dampen_duration)

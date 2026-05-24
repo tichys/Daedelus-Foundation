@@ -171,7 +171,7 @@ SUBSYSTEM_DEF(guard_patrols)
 			research_bonus = 15
 		else if(route.zone == "lcz")
 			research_bonus = 10
-		SSscp_research.manager.adjust_research_points(research_bonus, "guard_patrol:[route.route_id]")
+		SSscp_research?.manager?.adjust_research_points(research_bonus, "guard_patrol:[route.route_id]")
 
 /datum/controller/subsystem/guard_patrols/proc/assign_guard_to_route(mob/living/carbon/human/guard, route_id)
 	var/datum/guard_patrol_route/route = routes[route_id]

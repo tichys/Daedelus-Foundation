@@ -752,7 +752,7 @@
 			var/exp_type = text2num(params["experiment_type"]) || 1
 			var/scp_id = linked_system.get_scp_id()
 			if(SSscp_experiments?.manager && scp_id)
-				var/datum/scp_experiment/exp = SSscp_experiments.manager.start_experiment(scp_id, exp_type, H)
+				var/datum/scp_experiment/exp = SSscp_experiments?.manager?.start_experiment(scp_id, exp_type, H)
 				if(exp)
 					to_chat(H, "<span class='notice'>Experiment started on [scp_id].</span>")
 			return TRUE
