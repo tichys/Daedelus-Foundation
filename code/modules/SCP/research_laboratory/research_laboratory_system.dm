@@ -579,7 +579,7 @@ SUBSYSTEM_DEF(research_laboratory)
 		if(QDELETED(H))
 			continue
 		if(H.job && (H.job in list("Research Director", "Scientist", "Senior Researcher", "Site Director")))
-			to_chat(H, "<span class='boldnotice'>RESEARCH BREAKTHROUGH: [node.name] unlocked!</span>")
+			to_chat(H, span_boldnotice("RESEARCH BREAKTHROUGH: [node.name] unlocked!"))
 
 /datum/research_laboratory_manager/proc/apply_containment_bonus(bonus)
 	for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
@@ -711,10 +711,10 @@ SUBSYSTEM_DEF(research_laboratory)
 				var/mob/living/carbon/human/H = ui.user
 				var/datum/scp_experiment/exp = mgr.start_scp_experiment(H, scp_id, exp_type)
 				if(!exp)
-					to_chat(H, "<span class='warning'>Failed to start experiment.</span>")
+					to_chat(H, span_warning("Failed to start experiment."))
 				else if(SSdclass_experiments)
 					SSdclass_experiments.request_test_subject(H, scp_id, "lab_experiment", 2, FALSE)
-					to_chat(H, "<span class='notice'>D-Class test subject requested.</span>")
+					to_chat(H, span_notice("D-Class test subject requested."))
 			. = TRUE
 
 		if("suspend_experiment")
@@ -739,7 +739,7 @@ SUBSYSTEM_DEF(research_laboratory)
 			var/node_id = params["node_id"]
 			if(node_id)
 				if(!mgr.unlock_tech_node(node_id, ui.user))
-					to_chat(ui.user, "<span class='warning'>Cannot unlock this technology.</span>")
+					to_chat(ui.user, span_warning("Cannot unlock this technology."))
 			. = TRUE
 
 		if("record_violation")
@@ -759,7 +759,7 @@ SUBSYSTEM_DEF(research_laboratory)
 	if(!check_rights(R_ADMIN))
 		return
 	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
-		to_chat(src, "<span class='warning'>Research laboratory system not available.</span>")
+		to_chat(src, span_warning("Research laboratory system not available."))
 		return
 	var/obj/machinery/computer/research_laboratory_console/virtual_console = new()
 	virtual_console.admin_virtual = TRUE

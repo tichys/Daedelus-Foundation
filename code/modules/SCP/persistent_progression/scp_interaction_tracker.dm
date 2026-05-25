@@ -78,7 +78,7 @@ SUBSYSTEM_DEF(scp_interactions)
 	if(SSpersistent_progression)
 		SSpersistent_progression.award_experience(player.ckey, "research_experiment", xp_reward, "scp_first_contact")
 	
-	to_chat(player, "<span class='boldnotice'>First contact with [scp_id]! +[xp_reward] XP</span>")
+	to_chat(player, span_boldnotice("First contact with [scp_id]! +[xp_reward] XP"))
 
 /datum/scp_interaction_manager/proc/award_interaction_xp(mob/living/carbon/human/player, interaction_type, data)
 	if(!player || !player.ckey)
@@ -213,8 +213,8 @@ SUBSYSTEM_DEF(scp_interactions)
 	if(!player)
 		return
 	
-	to_chat(player, "<span class='boldnotice'>Milestone Achieved: [title]</span>")
-	to_chat(player, "<span class='notice'>[description] - +[xp_reward] XP</span>")
+	to_chat(player, span_boldnotice("Milestone Achieved: [title]"))
+	to_chat(player, span_notice("[description] - +[xp_reward] XP"))
 	
 	if(SSpersistent_progression && player.ckey)
 		SSpersistent_progression.award_experience(player.ckey, "research_experiment", xp_reward, "scp_milestone")
@@ -350,13 +350,13 @@ SUBSYSTEM_DEF(scp_interactions)
 	set desc = "View your SCP interaction history."
 	
 	if(!SSscp_interactions || !SSscp_interactions.manager)
-		to_chat(src, "<span class='warning'>Interaction tracking system not available.</span>")
+		to_chat(src, span_warning("Interaction tracking system not available."))
 		return
 	
 	var/datum/scp_interaction_log/log = SSscp_interactions.manager.get_player_log(ckey)
 	
 	if(!log || !length(log.events))
-		to_chat(src, "<span class='notice'>No SCP interactions recorded yet.</span>")
+		to_chat(src, span_notice("No SCP interactions recorded yet."))
 		return
 	
 	var/list/summary = log.get_summary()
@@ -378,7 +378,7 @@ SUBSYSTEM_DEF(scp_interactions)
 			var/time_ago = round((world.time - event.timestamp) / 600, 0.1)
 			message += "- [event.scp_id] ([event.get_type_name()]) - [time_ago] min ago<br>"
 	
-	to_chat(src, "<span class='notice'>[message]</span>")
+	to_chat(src, span_notice("[message]"))
 
 /mob/proc/view_scp_stats()
 	set name = "View SCP Stats"
@@ -386,7 +386,7 @@ SUBSYSTEM_DEF(scp_interactions)
 	set desc = "View global SCP interaction statistics."
 	
 	if(!SSscp_interactions || !SSscp_interactions.manager)
-		to_chat(src, "<span class='warning'>Interaction tracking system not available.</span>")
+		to_chat(src, span_warning("Interaction tracking system not available."))
 		return
 	
 	var/datum/scp_interaction_manager/manager = SSscp_interactions.manager
@@ -403,4 +403,4 @@ SUBSYSTEM_DEF(scp_interactions)
 			total += counts[type]
 		message += "<b>[scp_id]:</b> [total] interactions<br>"
 	
-	to_chat(src, "<span class='notice'>[message]</span>")
+	to_chat(src, span_notice("[message]"))

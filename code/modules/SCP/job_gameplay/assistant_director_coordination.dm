@@ -49,7 +49,7 @@ SUBSYSTEM_DEF(department_coordination)
 	for(var/datum/coordination_task/T in tasks)
 		if(T.task_id == task_id && T.status == "pending")
 			T.assign(M)
-			to_chat(M, "<span class='notice'>You have been assigned coordination task: [T.description]</span>")
+			to_chat(M, span_notice("You have been assigned coordination task: [T.description]"))
 			return TRUE
 	return FALSE
 

@@ -26,7 +26,6 @@
 
 /mob/living/scp/scp3199/Initialize()
 	. = ..()
-	set_species(/datum/species/scp3199)
 	SCP = new /datum/scp(src, "sapient biological entity", SCP_KETER, "3199")
 
 	add_verb(src, list(

@@ -166,7 +166,7 @@
 /datum/player_analytics_manager/proc/notify_milestone(ckey, event_type, count)
 	for(var/client/C in GLOB.clients)
 		if(C.ckey == ckey)
-			to_chat(C, "<span class='boldnotice'>MILESTONE: You have recorded [count] [event_type] events!</span>")
+			to_chat(C, span_boldnotice("MILESTONE: You have recorded [count] [event_type] events!"))
 			break
 
 /datum/player_analytics_manager/proc/get_player_statistics(ckey)

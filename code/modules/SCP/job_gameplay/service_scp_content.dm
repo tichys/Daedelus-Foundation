@@ -9,11 +9,11 @@
 
 /obj/structure/scp_archive_shelf/attack_hand(mob/user)
 	if(!archived_documents.len)
-		to_chat(user, "<span class='notice'>The shelf is empty. File documents here by clicking it with a paper item.</span>")
+		to_chat(user, span_notice("The shelf is empty. File documents here by clicking it with a paper item."))
 		return
-	to_chat(user, "<span class='notice'>The shelf contains [archived_documents.len] archived document(s):</span>")
+	to_chat(user, span_notice("The shelf contains [archived_documents.len] archived document(s):"))
 	for(var/doc in archived_documents)
-		to_chat(user, "<span class='notice'>- [doc]</span>")
+		to_chat(user, span_notice("- [doc]"))
 
 /obj/structure/scp_archive_shelf/attackby(obj/item/P, mob/user, params)
 	if(istype(P, /obj/item/paper))
@@ -21,7 +21,7 @@
 		var/title = paper.name || "Untitled Document"
 		archived_documents += title
 		qdel(paper)
-		to_chat(user, "<span class='notice'>You file '[title]' in the archive shelf.</span>")
+		to_chat(user, span_notice("You file '[title]' in the archive shelf."))
 		return
 	return ..()
 
@@ -43,7 +43,7 @@
 	var/obj/item/paper/paper = P
 	var/title = paper.name || "Untitled Document"
 	if(title in catalogued_scp)
-		to_chat(user, "<span class='warning'>[title] is already in the archive.</span>")
+		to_chat(user, span_warning("[title] is already in the archive."))
 		return
 	catalogued_scp += title
 	scans_completed++

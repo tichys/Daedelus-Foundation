@@ -94,7 +94,7 @@
 	if(cooldown_time > 0 && world.time < next_use_time)
 		if(feedback)
 			var/time_left = round((next_use_time - world.time) / 10, 0.1)
-			to_chat(usr, span_warning("[name] is on cooldown for [time_left]s."))
+			to_chat(owner, span_warning("[name] is on cooldown for [time_left]s."))
 		return FALSE
 	return TRUE
 
@@ -371,7 +371,7 @@
 	cooldown_time = 5 SECONDS
 
 /datum/action/innate/scp_ability/scp096_cover_face/Activate()
-	var/mob/living/scp/scp096/scp_mob = usr
+	var/mob/living/scp/scp096/scp_mob = owner
 	if(!istype(scp_mob) || scp_mob.state != "docile")
 		to_chat(scp_mob, span_warning("You cannot cover your face right now!"))
 		return
@@ -436,7 +436,7 @@
 	cooldown_time = 10 SECONDS
 
 /datum/action/innate/scp_ability/scp008_groan/Activate()
-	var/mob/living/user = usr
+	var/mob/living/user = owner
 	if(!istype(user))
 		return
 	start_cooldown()
@@ -513,7 +513,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp035_whisper/Activate()
-	var/mob/living/user = usr
+	var/mob/living/user = owner
 	if(!istype(user))
 		return
 	var/atom/origin = user
@@ -547,7 +547,7 @@
 	button_icon_state = "mindswap"
 
 /datum/action/innate/scp_ability/scp035_manipulate/Activate()
-	var/mob/living/user = usr
+	var/mob/living/user = owner
 	if(!istype(user))
 		return
 	if(istype(user, /mob/living/scp035))
@@ -673,7 +673,7 @@
 	button_icon_state = "projectile"
 
 /datum/action/innate/scp_ability/scp079_camera_hop/Activate()
-	var/mob/living/scp079/scp_mob = usr
+	var/mob/living/scp079/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -687,7 +687,7 @@
 	cooldown_time = 8 SECONDS
 
 /datum/action/innate/scp_ability/scp079_toggle_door/Activate()
-	var/mob/living/scp079/scp_mob = usr
+	var/mob/living/scp079/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -701,7 +701,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp079_flicker_lights/Activate()
-	var/mob/living/scp079/scp_mob = usr
+	var/mob/living/scp079/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -715,11 +715,11 @@
 	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp079_broadcast/Activate()
-	var/mob/living/scp079/scp_mob = usr
+	var/mob/living/scp079/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
-	var/message = input(usr, "Enter your broadcast:", "SCP-079 Broadcast") as text|null
+	var/message = input(scp_mob, "Enter your broadcast:", "SCP-079 Broadcast") as text|null
 	if(!message)
 		return
 	scp_mob.broadcast_message(message)
@@ -827,13 +827,13 @@
 	cooldown_time = 20 SECONDS
 
 /datum/action/innate/scp_ability/scp457_fireball/IsAvailable(feedback = FALSE)
-	var/mob/living/scp/scp457/scp_mob = usr
+	var/mob/living/scp/scp457/scp_mob = owner
 	if(!istype(scp_mob))
 		return FALSE
 	return TRUE
 
 /datum/action/innate/scp_ability/scp457_fireball/Activate()
-	var/mob/living/scp/scp457/scp_mob = usr
+	var/mob/living/scp/scp457/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	var/list/targets = list()
@@ -917,7 +917,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp939_mimic_voice/Activate()
-	var/mob/living/scp/scp939/scp_mob = usr
+	var/mob/living/scp/scp939/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -944,7 +944,7 @@
 	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp939_hunt/Activate()
-	var/mob/living/scp/scp939/scp_mob = usr
+	var/mob/living/scp/scp939/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -965,7 +965,7 @@
 	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp939_lure/Activate()
-	var/mob/living/user = usr
+	var/mob/living/user = owner
 	if(!istype(user))
 		return
 	start_cooldown()
@@ -1044,7 +1044,7 @@
 	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp682_rampage/Activate()
-	var/mob/living/scp/scp682/scp_mob = usr
+	var/mob/living/scp/scp682/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1071,7 +1071,7 @@
 	cooldown_time = 90 SECONDS
 
 /datum/action/innate/scp_ability/scp682_berserk/Activate()
-	var/mob/living/scp/scp682/scp_mob = usr
+	var/mob/living/scp/scp682/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1163,7 +1163,7 @@
 	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/scp3199_protect_hatchlings/Trigger(trigger_flags)
-	var/mob/living/user = usr
+	var/mob/living/user = owner
 	if(!user)
 		return
 	start_cooldown()
@@ -1237,7 +1237,7 @@
 	cooldown_time = 20 SECONDS
 
 /datum/action/innate/scp_ability/scp347_sprint/Activate()
-	var/mob/living/scp/scp347/scp_mob = usr
+	var/mob/living/scp/scp347/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1251,7 +1251,7 @@
 	cooldown_time = 10 SECONDS
 
 /datum/action/innate/scp_ability/scp347_toggle_visibility/Activate()
-	var/mob/living/scp/scp347/scp_mob = usr
+	var/mob/living/scp/scp347/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1363,7 +1363,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp966_toggle_invisibility/Activate()
-	var/mob/living/scp/scp966/scp_mob = usr
+	var/mob/living/scp/scp966/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	scp_mob.action_toggle_invisibility()
@@ -1376,7 +1376,7 @@
 	cooldown_time = 20 SECONDS
 
 /datum/action/innate/scp_ability/scp966_stalk_target/Activate()
-	var/mob/living/scp/scp966/scp_mob = usr
+	var/mob/living/scp/scp966/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1426,7 +1426,7 @@
 	button_icon_state = "shield"
 
 /datum/action/innate/scp_ability/scp999_comfort_zone/Activate()
-	var/mob/living/scp/scp999/scp_mob = usr
+	var/mob/living/scp/scp999/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1517,7 +1517,7 @@
 	button_icon_state = "summons"
 
 /datum/action/innate/scp_ability/scp1507_call_flock/Activate()
-	var/mob/living/simple_animal/hostile/retaliate/scp1507/scp_mob = usr
+	var/mob/living/simple_animal/hostile/retaliate/scp1507/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1531,7 +1531,7 @@
 	cooldown_time = 25 SECONDS
 
 /datum/action/innate/scp_ability/scp1507_coordinate_attack/Activate()
-	var/mob/living/simple_animal/hostile/retaliate/scp1507/scp_mob = usr
+	var/mob/living/simple_animal/hostile/retaliate/scp1507/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1595,7 +1595,7 @@
 	cooldown_time = 10 SECONDS
 
 /datum/action/innate/scp_ability/scp2020_dramatic_speech/Activate()
-	var/mob/living/scp/scp2020/scp_mob = usr
+	var/mob/living/scp/scp2020/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1609,7 +1609,7 @@
 	cooldown_time = 10 SECONDS
 
 /datum/action/innate/scp_ability/scp2020_narrate_events/Activate()
-	var/mob/living/scp/scp2020/scp_mob = usr
+	var/mob/living/scp/scp2020/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1623,7 +1623,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp2020_identify_cliche/Activate()
-	var/mob/living/scp/scp2020/scp_mob = usr
+	var/mob/living/scp/scp2020/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
@@ -1808,7 +1808,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/scp527_dive/Activate()
-	var/mob/living/scp/scp527/scp_mob = usr
+	var/mob/living/scp/scp527/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()

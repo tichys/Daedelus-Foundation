@@ -589,7 +589,7 @@
 					"updated_by" = admin_client.key
 				)
 
-				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) has been added to the Player Access Management system.</span>")
+				to_chat(admin_client, span_notice("Player [player_name] ([player_key]) has been added to the Player Access Management system."))
 				log_game("SCPManagementInterface: Player [player_key] added by [admin_client.key]")
 				. = TRUE
 
@@ -597,7 +597,7 @@
 			var/player_key = params["player_key"]
 			if(player_key && player_permissions && player_permissions[player_key])
 				var/player_name = player_permissions[player_key]["name"]
-				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) has been removed from the Player Access Management system.</span>")
+				to_chat(admin_client, span_notice("Player [player_name] ([player_key]) has been removed from the Player Access Management system."))
 				player_permissions -= player_key
 				log_game("SCPManagementInterface: Player [player_key] removed by [admin_client.key]")
 				. = TRUE
@@ -620,7 +620,7 @@
 				player_permissions[player_key]["updated_by"] = admin_client.key
 
 				var/player_name = player_permissions[player_key]["name"]
-				to_chat(admin_client, "<span class='notice'>Player [player_name] ([player_key]) permissions have been updated.</span>")
+				to_chat(admin_client, span_notice("Player [player_name] ([player_key]) permissions have been updated."))
 				log_game("SCPManagementInterface: Player [player_key] permissions updated by [admin_client.key]")
 				. = TRUE
 
@@ -696,7 +696,7 @@
 	// Find the SCP template
 	var/list/template = scp_templates[scp_id]
 	if(!template)
-		to_chat(admin_client, "<span class='warning'>No template found for [scp_id]</span>")
+		to_chat(admin_client, span_warning("No template found for [scp_id]"))
 		return
 
 	// Check spawn conditions
@@ -704,13 +704,13 @@
 	var/min_players = template["spawn_conditions"]["min_players"]
 
 	if(player_count < min_players)
-		to_chat(admin_client, "<span class='warning'>Not enough players ([player_count]/[min_players]) to spawn [scp_id]</span>")
+		to_chat(admin_client, span_warning("Not enough players ([player_count]/[min_players]) to spawn [scp_id]"))
 		return
 
 	// Create the SCP object
 	var/obj/scp_object = create_scp_object(scp_id, template)
 	if(scp_object)
-		to_chat(admin_client, "<span class='notice'>Successfully spawned [scp_id] at [get_area(scp_object)]</span>")
+		to_chat(admin_client, span_notice("Successfully spawned [scp_id] at [get_area(scp_object)]"))
 
 		// Log the spawn
 		if(SSscp_persistence && SSscp_persistence.manager)
@@ -718,7 +718,7 @@
 			if(instance)
 				instance.add_interaction_record(null, "admin_forced_spawn")
 	else
-		to_chat(admin_client, "<span class='danger'>Failed to spawn [scp_id]</span>")
+		to_chat(admin_client, span_danger("Failed to spawn [scp_id]"))
 
 /datum/scp_management_interface/proc/create_scp_object(scp_id, template)
 	// This is a simplified version - in practice, you'd have specific creation logic for each SCP
@@ -785,7 +785,7 @@
 			scp.containment_status = "contained"
 		// Add more SCP-specific containment logic here
 
-	to_chat(admin_client, "<span class='notice'>Applied containment to [length(scp_objects)] instances of [scp_id]</span>")
+	to_chat(admin_client, span_notice("Applied containment to [length(scp_objects)] instances of [scp_id]"))
 
 /datum/scp_management_interface/proc/view_scp_logs(scp_id)
 	if(!scp_id || !SSscp_persistence || !SSscp_persistence.manager)
@@ -793,7 +793,7 @@
 
 	var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 	if(!instance)
-		to_chat(admin_client, "<span class='warning'>No logs found for [scp_id]</span>")
+		to_chat(admin_client, span_warning("No logs found for [scp_id]"))
 		return
 
 	var/message = "<h2>SCP [scp_id] Interaction Logs</h2>"
@@ -808,7 +808,7 @@
 		message += "<b>[interaction["timestamp"]]:</b> [interaction["type"]] - [interaction["target"] || "No target"]<br>"
 		count++
 
-	to_chat(admin_client, "<span class='notice'>[message]</span>")
+	to_chat(admin_client, span_notice("[message]"))
 
 /datum/scp_management_interface/proc/export_scp_data()
 	var/list/export_data = list(
@@ -827,7 +827,7 @@
 		)
 
 	var/json_data = json_encode(export_data)
-	to_chat(admin_client, "<span class='notice'>SCP Management Data exported. Data length: [length(json_data)] characters</span>")
+	to_chat(admin_client, span_notice("SCP Management Data exported. Data length: [length(json_data)] characters"))
 
 /datum/scp_management_interface/proc/import_scp_data(data)
 	try
@@ -842,11 +842,11 @@
 			if("containment_protocols" in import_data)
 				containment_protocols = import_data["containment_protocols"]
 
-			to_chat(admin_client, "<span class='notice'>SCP Management Data imported successfully</span>")
+			to_chat(admin_client, span_notice("SCP Management Data imported successfully"))
 		else
-			to_chat(admin_client, "<span class='danger'>Failed to parse import data</span>")
+			to_chat(admin_client, span_danger("Failed to parse import data"))
 	catch(var/exception/e)
-		to_chat(admin_client, "<span class='danger'>Error importing data: [e]</span>")
+		to_chat(admin_client, span_danger("Error importing data: [e]"))
 
 
 

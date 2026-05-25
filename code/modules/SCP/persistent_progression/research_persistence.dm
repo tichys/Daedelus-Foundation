@@ -849,7 +849,7 @@ SUBSYSTEM_DEF(research_persistence)
 		SSskill_integration.manager.add_experience(lead_researcher, /datum/skill/research, 200)
 
 	// Announce breakthrough
-	to_chat(lead_researcher, "<span class='boldnotice'>BREAKTHROUGH! You've made a major discovery in [project.project_name]!</span>")
+	to_chat(lead_researcher, span_boldnotice("BREAKTHROUGH! You've made a major discovery in [project.project_name]!"))
 
 	// Update research metrics
 	scientific_breakthroughs++
@@ -863,7 +863,7 @@ SUBSYSTEM_DEF(research_persistence)
 	// Notify lead researcher
 	var/mob/living/carbon/human/lead_researcher = get_researcher_by_name(project.lead_researcher)
 	if(lead_researcher)
-		to_chat(lead_researcher, "<span class='boldnotice'>[completion_message]</span>")
+		to_chat(lead_researcher, span_boldnotice("[completion_message]"))
 
 	// Log completion
 	log_game("Research project completed: [project.project_name] - [reward] points")

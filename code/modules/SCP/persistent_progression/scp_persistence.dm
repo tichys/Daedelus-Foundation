@@ -712,7 +712,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	set category = "SCP"
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
-		to_chat(src, "<span class='warning'>SCP Persistence system not available.</span>")
+		to_chat(src, span_warning("SCP Persistence system not available."))
 		return
 
 	var/datum/scp_persistence_manager/manager = SSscp_persistence.manager
@@ -733,18 +733,18 @@ SUBSYSTEM_DEF(scp_persistence)
 		var/datum/research_project/project = manager.research_projects[project_id]
 		message += "<b>[project.project_name]:</b> [project.progress]% complete ([project.research_status])<br>"
 
-	to_chat(src, "<span class='notice'>[message]</span>")
+	to_chat(src, span_notice("[message]"))
 
 /mob/proc/manage_scp_persistence()
 	set name = "Manage SCP Persistence"
 	set category = "SCP"
 
 	if(!check_rights(R_ADMIN))
-		to_chat(src, "<span class='warning'>You don't have permission to manage SCP persistence.</span>")
+		to_chat(src, span_warning("You don't have permission to manage SCP persistence."))
 		return
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
-		to_chat(src, "<span class='warning'>SCP Persistence system not available.</span>")
+		to_chat(src, span_warning("SCP Persistence system not available."))
 		return
 
 	var/datum/scp_persistence_manager/manager = SSscp_persistence.manager
@@ -759,11 +759,11 @@ SUBSYSTEM_DEF(scp_persistence)
 	switch(action)
 		if("Save SCP Data")
 			manager.save_scp_data()
-			to_chat(src, "<span class='notice'>SCP data saved successfully.</span>")
+			to_chat(src, span_notice("SCP data saved successfully."))
 
 		if("Load SCP Data")
 			manager.load_scp_data()
-			to_chat(src, "<span class='notice'>SCP data loaded successfully.</span>")
+			to_chat(src, span_notice("SCP data loaded successfully."))
 
 		if("Reset SCP Data")
 			if(alert(src, "Are you sure you want to reset all SCP persistence data?", "Confirm Reset", "Yes", "No") == "Yes")
@@ -773,7 +773,7 @@ SUBSYSTEM_DEF(scp_persistence)
 				manager.anomaly_effects = list()
 				manager.communication_logs = list()
 				manager.environmental_changes = list()
-				to_chat(src, "<span class='notice'>SCP persistence data reset.</span>")
+				to_chat(src, span_notice("SCP persistence data reset."))
 
 		if("View Detailed Status")
 			view_scp_persistence()
@@ -1031,11 +1031,11 @@ SUBSYSTEM_DEF(scp_persistence)
 	set category = "SCP"
 
 	if(!check_rights(R_ADMIN))
-		to_chat(src, "<span class='warning'>You don't have permission to manage the SCP system.</span>")
+		to_chat(src, span_warning("You don't have permission to manage the SCP system."))
 		return
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
-		to_chat(src, "<span class='warning'>SCP Persistence system not available.</span>")
+		to_chat(src, span_warning("SCP Persistence system not available."))
 		return
 
 	var/datum/scp_persistence_manager/manager = SSscp_persistence.manager
@@ -1058,33 +1058,33 @@ SUBSYSTEM_DEF(scp_persistence)
 			var/scp_id = input(src, "Enter SCP ID to enable:", "Enable SCP") as text
 			if(scp_id)
 				if(manager.enable_scp(scp_id))
-					to_chat(src, "<span class='notice'>[scp_id] enabled successfully.</span>")
+					to_chat(src, span_notice("[scp_id] enabled successfully."))
 				else
-					to_chat(src, "<span class='warning'>Failed to enable [scp_id].</span>")
+					to_chat(src, span_warning("Failed to enable [scp_id]."))
 
 		if("Disable SCP")
 			var/scp_id = input(src, "Enter SCP ID to disable:", "Disable SCP") as text
 			if(scp_id)
 				if(manager.disable_scp(scp_id))
-					to_chat(src, "<span class='notice'>[scp_id] disabled successfully.</span>")
+					to_chat(src, span_notice("[scp_id] disabled successfully."))
 				else
-					to_chat(src, "<span class='warning'>Failed to disable [scp_id].</span>")
+					to_chat(src, span_warning("Failed to disable [scp_id]."))
 
 		if("Set Management Mode")
 			var/mode = input(src, "Choose management mode:", "Set Management Mode") as null|anything in list("standard", "lockdown", "research", "emergency")
 			if(mode)
 				if(manager.set_management_mode(mode))
-					to_chat(src, "<span class='notice'>Management mode set to [mode].</span>")
+					to_chat(src, span_notice("Management mode set to [mode]."))
 				else
-					to_chat(src, "<span class='warning'>Failed to set management mode.</span>")
+					to_chat(src, span_warning("Failed to set management mode."))
 
 		if("Toggle Auto-Containment")
 			manager.auto_containment_enabled = !manager.auto_containment_enabled
-			to_chat(src, "<span class='notice'>Auto-containment [manager.auto_containment_enabled ? "enabled" : "disabled"].</span>")
+			to_chat(src, "span_notice("Auto-containment [manager.auto_containment_enabled ? "enabled" : "disabled"].")")
 
 		if("Toggle SCP Rotation")
 			manager.scp_rotation_enabled = !manager.scp_rotation_enabled
-			to_chat(src, "<span class='notice'>SCP rotation [manager.scp_rotation_enabled ? "enabled" : "disabled"].</span>")
+			to_chat(src, "span_notice("SCP rotation [manager.scp_rotation_enabled ? "enabled" : "disabled"].")")
 
 		if("View SCP Status")
 			view_scp_management_status()
@@ -1097,15 +1097,15 @@ SUBSYSTEM_DEF(scp_persistence)
 		if("Emergency Lockdown")
 			if(alert(src, "Are you sure you want to initiate emergency lockdown?", "Confirm Lockdown", "Yes", "No") == "Yes")
 				manager.set_management_mode("emergency")
-				to_chat(src, "<span class='danger'>Emergency lockdown initiated!</span>")
+				to_chat(src, span_danger("Emergency lockdown initiated!"))
 
 		if("Research Mode")
 			manager.set_management_mode("research")
-			to_chat(src, "<span class='notice'>Research mode activated.</span>")
+			to_chat(src, span_notice("Research mode activated."))
 
 		if("Standard Mode")
 			manager.set_management_mode("standard")
-			to_chat(src, "<span class='notice'>Standard mode activated.</span>")
+			to_chat(src, span_notice("Standard mode activated."))
 
 // View SCP management status
 /mob/proc/view_scp_management_status()
@@ -1113,7 +1113,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	set category = "SCP"
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
-		to_chat(src, "<span class='warning'>SCP Persistence system not available.</span>")
+		to_chat(src, span_warning("SCP Persistence system not available."))
 		return
 
 	var/datum/scp_persistence_manager/manager = SSscp_persistence.manager
@@ -1138,7 +1138,7 @@ SUBSYSTEM_DEF(scp_persistence)
 		var/list/config = manager.scp_configurations[scp_id]
 		message += "- [scp_id]: [config["enabled"] ? "Enabled" : "Disabled"]<br>"
 
-	to_chat(src, "<span class='notice'>[message]</span>")
+	to_chat(src, span_notice("[message]"))
 
 // Configure specific SCP
 /mob/proc/configure_scp(scp_id)
@@ -1161,17 +1161,17 @@ SUBSYSTEM_DEF(scp_persistence)
 			var/level = input(usr, "Choose containment level:", "Set Containment Level") as null|anything in list("standard", "enhanced", "maximum", "quarantine")
 			if(level)
 				manager.set_scp_configuration(scp_id, "containment_level", level)
-				to_chat(usr, "<span class='notice'>Containment level for [scp_id] set to [level].</span>")
+				to_chat(usr, span_notice("Containment level for [scp_id] set to [level]."))
 
 		if("Toggle Research Access")
 			var/current = manager.get_scp_configuration(scp_id, "research_allowed")
 			manager.set_scp_configuration(scp_id, "research_allowed", !current)
-			to_chat(usr, "<span class='notice'>Research access for [scp_id] [current ? "disabled" : "enabled"].</span>")
+			to_chat(usr, "span_notice("Research access for [scp_id] [current ? "disabled" : "enabled"].")")
 
 		if("Toggle Interaction Access")
 			var/current = manager.get_scp_configuration(scp_id, "interaction_allowed")
 			manager.set_scp_configuration(scp_id, "interaction_allowed", !current)
-			to_chat(usr, "<span class='notice'>Interaction access for [scp_id] [current ? "disabled" : "enabled"].</span>")
+			to_chat(usr, "span_notice("Interaction access for [scp_id] [current ? "disabled" : "enabled"].")")
 
 		if("Add Restriction")
 			var/restriction = input(usr, "Enter restriction:", "Add Restriction") as text
@@ -1179,7 +1179,7 @@ SUBSYSTEM_DEF(scp_persistence)
 				var/list/restrictions = manager.get_scp_configuration(scp_id, "restrictions") || list()
 				restrictions += restriction
 				manager.set_scp_configuration(scp_id, "restrictions", restrictions)
-				to_chat(usr, "<span class='notice'>Restriction added to [scp_id].</span>")
+				to_chat(usr, span_notice("Restriction added to [scp_id]."))
 
 		if("Remove Restriction")
 			var/list/restrictions = manager.get_scp_configuration(scp_id, "restrictions") || list()
@@ -1188,7 +1188,7 @@ SUBSYSTEM_DEF(scp_persistence)
 				if(restriction)
 					restrictions -= restriction
 					manager.set_scp_configuration(scp_id, "restrictions", restrictions)
-					to_chat(usr, "<span class='notice'>Restriction removed from [scp_id].</span>")
+					to_chat(usr, span_notice("Restriction removed from [scp_id]."))
 
 		if("View Configuration")
 			var/list/config = manager.scp_configurations[scp_id]
@@ -1196,7 +1196,7 @@ SUBSYSTEM_DEF(scp_persistence)
 				var/config_message = "<h3>[scp_id] Configuration</h3>"
 				for(var/key in config)
 					config_message += "<b>[key]:</b> [config[key]]<br>"
-				to_chat(usr, "<span class='notice'>[config_message]</span>")
+				to_chat(usr, span_notice("[config_message]"))
 
 // Player Performance Management Methods
 /datum/scp_persistence_manager/proc/process_player_performance()
@@ -1255,7 +1255,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	set category = "SCP"
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
-		to_chat(src, "<span class='warning'>SCP Persistence system not available.</span>")
+		to_chat(src, span_warning("SCP Persistence system not available."))
 		return
 
 	var/datum/scp_persistence_manager/manager = SSscp_persistence.manager
@@ -1305,13 +1305,13 @@ SUBSYSTEM_DEF(scp_persistence)
 				var/list/viol_data = violation
 				message += "- [viol_data["type"]] ([viol_data["severity"]]): [viol_data["description"]]<br>"
 
-			to_chat(src, "<span class='notice'>[message]</span>")
+			to_chat(src, span_notice("[message]"))
 
 		if("Set Access Level")
 			var/new_level = input(src, "Enter new access level (0-5):", "Set Access Level") as num|null
 			if(!isnull(new_level))
 				manager.set_player_access_level(ckey, new_level)
-				to_chat(src, "<span class='notice'>Access level for [ckey] set to [new_level].</span>")
+				to_chat(src, span_notice("Access level for [ckey] set to [new_level]."))
 
 		if("Add Achievement")
 			var/achievement_id = input(src, "Enter achievement ID:", "Add Achievement") as text|null
@@ -1320,7 +1320,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 			if(achievement_id && achievement_name && description)
 				manager.add_player_achievement(ckey, achievement_id, achievement_name, description)
-				to_chat(src, "<span class='notice'>Achievement added for [ckey].</span>")
+				to_chat(src, span_notice("Achievement added for [ckey]."))
 
 		if("Add Violation")
 			var/violation_type = input(src, "Enter violation type:", "Add Violation") as text|null
@@ -1329,7 +1329,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 			if(violation_type && description && severity)
 				manager.add_player_violation(ckey, violation_type, description, severity)
-				to_chat(src, "<span class='notice'>Violation added for [ckey].</span>")
+				to_chat(src, span_notice("Violation added for [ckey]."))
 
 		if("Reset Performance")
 			var/confirm = alert(src, "Are you sure you want to reset performance data for [ckey]?", "Reset Performance", "Yes", "No")
@@ -1338,4 +1338,4 @@ SUBSYSTEM_DEF(scp_persistence)
 				var/filename = "data/player_performance/[ckey].json"
 				if(fexists(filename))
 					fdel(filename)
-				to_chat(src, "<span class='notice'>Performance data reset for [ckey].</span>")
+				to_chat(src, span_notice("Performance data reset for [ckey]."))

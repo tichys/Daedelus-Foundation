@@ -115,7 +115,7 @@ SUBSYSTEM_DEF(site_command)
 	for(var/datum/facility_directive/D in directives)
 		if(D.directive_id == directive_id && D.status == "active")
 			D.acknowledge(M)
-			to_chat(M, "<span class='notice'>You have acknowledged directive: [D.title]</span>")
+			to_chat(M, span_notice("You have acknowledged directive: [D.title]"))
 			return TRUE
 	return FALSE
 

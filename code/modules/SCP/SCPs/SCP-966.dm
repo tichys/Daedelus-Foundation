@@ -38,7 +38,6 @@
 
 /mob/living/scp/scp966/Initialize()
 	. = ..()
-	set_species(/datum/species/scp966)
 	SCP = new /datum/scp(src, "Sleep Killer", SCP_EUCLID, "966", SCP_PLAYABLE)
 	SCP.min_playercount = 25
 	SCP.min_time = 10 MINUTES

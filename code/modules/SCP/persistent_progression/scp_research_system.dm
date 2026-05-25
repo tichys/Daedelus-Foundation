@@ -325,7 +325,7 @@ SUBSYSTEM_DEF(scp_research)
 /datum/scp_research_manager/proc/notify_researcher(ckey, title, message)
 	for(var/client/C in GLOB.clients)
 		if(C.ckey == ckey)
-			to_chat(C, "<span class='notice'><b>[title]</b>: [message]</span>")
+			to_chat(C, span_notice("<b>[title]</b>: [message]"))
 			break
 
 /datum/scp_research_manager/proc/apply_tech_bonuses(node_id)
@@ -593,32 +593,32 @@ SUBSYSTEM_DEF(scp_research)
 	set desc = "View your current research status and achievements."
 
 	if(!SSscp_research || !SSscp_research.manager)
-		to_chat(src, "<span class='warning'>Research system not available.</span>")
+		to_chat(src, span_warning("Research system not available."))
 		return
 
 	var/datum/researcher_data/researcher = get_researcher_data(ckey)
 	if(!researcher)
-		to_chat(src, "<span class='notice'>You haven't started any research projects yet.</span>")
+		to_chat(src, span_notice("You haven't started any research projects yet."))
 		return
 
-	to_chat(src, "<span class='notice'><b>=== RESEARCH STATUS ===</b></span>")
-	to_chat(src, "<span class='notice'>Research Points: [researcher.research_points]</span>")
-	to_chat(src, "<span class='notice'>Research Funding: [researcher.research_funding]</span>")
-	to_chat(src, "<span class='notice'>Progression Points: [researcher.progression_points]</span>")
-	to_chat(src, "<span class='notice'>Research Rank: [researcher.research_rank]</span>")
-	to_chat(src, "<span class='notice'>Total Projects: [researcher.total_projects]</span>")
-	to_chat(src, "<span class='notice'>Completed Projects: [researcher.completed_projects]</span>")
-	to_chat(src, "<span class='notice'>Failed Projects: [researcher.failed_projects]</span>")
+	to_chat(src, span_notice("<b>=== RESEARCH STATUS ===</b>"))
+	to_chat(src, span_notice("Research Points: [researcher.research_points]"))
+	to_chat(src, span_notice("Research Funding: [researcher.research_funding]"))
+	to_chat(src, span_notice("Progression Points: [researcher.progression_points]"))
+	to_chat(src, span_notice("Research Rank: [researcher.research_rank]"))
+	to_chat(src, span_notice("Total Projects: [researcher.total_projects]"))
+	to_chat(src, span_notice("Completed Projects: [researcher.completed_projects]"))
+	to_chat(src, span_notice("Failed Projects: [researcher.failed_projects]"))
 
 	if(length(researcher.achievements) > 0)
-		to_chat(src, "<span class='notice'><b>Achievements:</b></span>")
+		to_chat(src, span_notice("<b>Achievements:</b>"))
 		for(var/achievement in researcher.achievements)
-			to_chat(src, "<span class='notice'>- [achievement]</span>")
+			to_chat(src, span_notice("- [achievement]"))
 
 	if(length(researcher.completed_research) > 0)
-		to_chat(src, "<span class='notice'><b>Completed Research:</b></span>")
+		to_chat(src, span_notice("<b>Completed Research:</b>"))
 		for(var/research in researcher.completed_research)
-			to_chat(src, "<span class='notice'>- [research]</span>")
+			to_chat(src, span_notice("- [research]"))
 
 /mob/proc/view_research_projects()
 	set name = "View Research Projects"
@@ -626,20 +626,20 @@ SUBSYSTEM_DEF(scp_research)
 	set desc = "View your active research projects."
 
 	if(!SSscp_research || !SSscp_research.manager)
-		to_chat(src, "<span class='warning'>Research system not available.</span>")
+		to_chat(src, span_warning("Research system not available."))
 		return
 
 	var/found_projects = FALSE
-	to_chat(src, "<span class='notice'><b>=== ACTIVE RESEARCH PROJECTS ===</b></span>")
+	to_chat(src, span_notice("<b>=== ACTIVE RESEARCH PROJECTS ===</b>"))
 
 	for(var/project_id in SSscp_research?.manager?.research_projects)
 		var/datum/research_data/project = SSscp_research?.manager?.research_projects[project_id]
 		if(project.researcher_ckey == ckey && project.status == "ACTIVE")
 			found_projects = TRUE
-			to_chat(src, "<span class='notice'>[project.scp_designation] - [project.research_type]</span>")
-			to_chat(src, "<span class='notice'>  Level: [project.research_level]/[project.max_research_level]</span>")
-			to_chat(src, "<span class='notice'>  Points: [project.research_points]/[project.research_cost]</span>")
-			to_chat(src, "<span class='notice'>  Time: [round((world.time - project.timestamp) / 600)] minutes</span>")
+			to_chat(src, span_notice("[project.scp_designation] - [project.research_type]"))
+			to_chat(src, span_notice("  Level: [project.research_level]/[project.max_research_level]"))
+			to_chat(src, span_notice("  Points: [project.research_points]/[project.research_cost]"))
+			to_chat(src, span_notice("  Time: [round((world.time - project.timestamp) / 600)] minutes"))
 
 	if(!found_projects)
-		to_chat(src, "<span class='notice'>No active research projects.</span>")
+		to_chat(src, span_notice("No active research projects."))

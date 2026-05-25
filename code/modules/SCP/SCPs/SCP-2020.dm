@@ -57,7 +57,6 @@
 
 /mob/living/scp/scp2020/Initialize(mapload)
 	. = ..()
-	set_species(/datum/species/scp2020)
 	SCP = new /datum/scp(src, "Cliche, Right?", SCP_SAFE, "2020", SCP_PLAYABLE|SCP_ROLEPLAY)
 	SCP.min_playercount = 30
 	SCP.min_time = 15 MINUTES
