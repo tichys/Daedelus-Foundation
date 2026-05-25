@@ -1637,8 +1637,8 @@
 	name = "SCP-343"
 	scp_id = "SCP-343"
 	scp_class = "Safe"
-	description = "You are SCP-343, an elderly man who is God. Heal the wounded and create divine zones of protection."
-	lore_text = "SCP-343 is a humanoid male of apparent omnipotence who claims to be the Creator. Click humans to heal them passively with divine energy. Use Divine Zone to create an area of divine protection. Your power is absolute — use it wisely or whimsically."
+	description = "You are SCP-343, an elderly man who is God. Heal the wounded, manifest items, vanish, walk through walls, and cleanse corruption."
+	lore_text = "SCP-343 is a humanoid male of apparent omnipotence who claims to be the Creator. Click humans to heal them. Use Divine Zone for area healing, Manifest Item to conjure objects from nothing, Vanish to teleport, Walk Through Walls to phase through solid matter, and Cleanse Area to purify corruption. Your power is absolute — use it wisely or whimsically."
 
 /datum/antagonist/scp/scp343/forge_scp_objectives()
 	var/datum/objective/scp_heal_humans/obj1 = new()
@@ -1653,7 +1653,9 @@
 
 /datum/antagonist/scp/scp343/greet_scp()
 	to_chat(owner.current, span_notice("<b>You are SCP-343, God.</b>"))
-	to_chat(owner.current, span_notice("Click humans to heal them. Use Divine Zone to create areas of divine protection."))
+	to_chat(owner.current, span_notice("Click humans to heal them. Divine Zone creates an area of healing."))
+	to_chat(owner.current, span_notice("Manifest Item conjures objects from nothing. Vanish teleports you to a nearby location."))
+	to_chat(owner.current, span_notice("Walk Through Walls lets you phase through solid matter. Cleanse Area purifies corruption and contamination."))
 	to_chat(owner.current, span_notice("Your divine energy regenerates over time. Use it wisely to care for others."))
 	to_chat(owner.current, span_warning("Your power is benevolent — you exist to protect and heal, not harm."))
 
@@ -1665,6 +1667,10 @@
 	ADD_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
 	ADD_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
 	grant_action(/datum/action/innate/scp_ability/scp343_divine_zone)
+	grant_action(/datum/action/innate/scp_ability/scp343_manifest_item)
+	grant_action(/datum/action/innate/scp_ability/scp343_vanish)
+	grant_action(/datum/action/innate/scp_ability/scp343_walk_through_walls)
+	grant_action(/datum/action/innate/scp_ability/scp343_cleanse_area)
 
 /datum/antagonist/scp/scp343/remove_scp_effects()
 	if(!owner.current)
@@ -1674,6 +1680,10 @@
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTHIGHPRESSURE, SCP_TRAIT)
 	REMOVE_TRAIT(owner.current, TRAIT_RESISTLOWPRESSURE, SCP_TRAIT)
 	remove_action(/datum/action/innate/scp_ability/scp343_divine_zone)
+	remove_action(/datum/action/innate/scp_ability/scp343_manifest_item)
+	remove_action(/datum/action/innate/scp_ability/scp343_vanish)
+	remove_action(/datum/action/innate/scp_ability/scp343_walk_through_walls)
+	remove_action(/datum/action/innate/scp_ability/scp343_cleanse_area)
 
 /datum/action/innate/scp_ability/scp343_divine_zone
 	name = "Divine Zone"
@@ -1683,11 +1693,67 @@
 	cooldown_time = 60 SECONDS
 
 /datum/action/innate/scp_ability/scp343_divine_zone/Activate()
-	var/mob/living/scp/scp343/scp_mob = usr
+	var/mob/living/scp/scp343/scp_mob = owner
 	if(!istype(scp_mob))
 		return
 	start_cooldown()
-	scp_mob.divine_zone_verb()
+	scp_mob.divine_zone_ability()
+
+/datum/action/innate/scp_ability/scp343_manifest_item
+	name = "Manifest Item"
+	desc = "Conjure an item from nothing."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "summon"
+	cooldown_time = 20 SECONDS
+
+/datum/action/innate/scp_ability/scp343_manifest_item/Activate()
+	var/mob/living/scp/scp343/scp_mob = owner
+	if(!istype(scp_mob))
+		return
+	start_cooldown()
+	scp_mob.manifest_item_ability()
+
+/datum/action/innate/scp_ability/scp343_vanish
+	name = "Vanish"
+	desc = "Disappear and reappear elsewhere."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "teleport"
+	cooldown_time = 45 SECONDS
+
+/datum/action/innate/scp_ability/scp343_vanish/Activate()
+	var/mob/living/scp/scp343/scp_mob = owner
+	if(!istype(scp_mob))
+		return
+	start_cooldown()
+	scp_mob.vanish_ability()
+
+/datum/action/innate/scp_ability/scp343_walk_through_walls
+	name = "Walk Through Walls"
+	desc = "Phase through solid matter for a short time."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "ghost"
+	cooldown_time = 30 SECONDS
+
+/datum/action/innate/scp_ability/scp343_walk_through_walls/Activate()
+	var/mob/living/scp/scp343/scp_mob = owner
+	if(!istype(scp_mob))
+		return
+	start_cooldown()
+	scp_mob.walk_through_walls_ability()
+
+/datum/action/innate/scp_ability/scp343_cleanse_area
+	name = "Cleanse Area"
+	desc = "Purify corruption and contamination around you."
+	button_icon = 'icons/mob/actions/actions_spells.dmi'
+	button_icon_state = "purge"
+	cooldown_time = 40 SECONDS
+
+/datum/action/innate/scp_ability/scp343_cleanse_area/Activate()
+	var/mob/living/scp/scp343/scp_mob = owner
+	if(!istype(scp_mob))
+		return
+	start_cooldown()
+	scp_mob.cleanse_area_ability()
 
 // ================================================================
 // SCP-527 - Mr. Fish

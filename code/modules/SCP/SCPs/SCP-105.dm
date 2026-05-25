@@ -53,16 +53,16 @@
 	set desc = "Create a portal through a camera feed you can see."
 
 	if(portal_cooldown > 0)
-		to_chat(src, "<span class='warning'>Your portal ability is still recharging. Wait [ceil(portal_cooldown / 10)] seconds.</span>")
+		to_chat(src, span_warning("Your portal ability is still recharging. Wait [ceil(portal_cooldown / 10)] seconds."))
 		return
 
 	if(length(active_portals) >= max_active_portals)
-		to_chat(src, "<span class='warning'>You have too many active portals. Close one first.</span>")
+		to_chat(src, span_warning("You have too many active portals. Close one first."))
 		return
 
 	var/obj/machinery/camera/target_cam = select_camera()
 	if(!target_cam)
-		to_chat(src, "<span class='warning'>No suitable camera found.</span>")
+		to_chat(src, span_warning("No suitable camera found."))
 		return
 
 	var/turf/origin_turf = get_turf(src)
@@ -76,7 +76,7 @@
 
 	portal_cooldown = portal_cooldown_duration
 
-	visible_message("<span class='notice'>A shimmering portal opens near [src]!</span>")
+	visible_message(span_notice("A shimmering portal opens near [src]!"))
 	playsound(src, 'sound/effects/sparks1.ogg', 30, TRUE)
 
 /mob/living/scp/scp105/proc/select_camera()
@@ -106,12 +106,12 @@
 	for(var/obj/effect/portal/scp105_portal/P in active_portals)
 		qdel(P)
 	active_portals.Cut()
-	to_chat(src, "<span class='notice'>All portals closed.</span>")
+	to_chat(src, span_notice("All portals closed."))
 
 /mob/living/scp/scp105/examine(mob/user)
 	. = ..()
 	if(ishuman(user))
-		to_chat(user, "<span class='notice'>This is SCP-105, 'Iris'. She can create portals through camera feeds.</span>")
+		to_chat(user, span_notice("This is SCP-105, 'Iris'. She can create portals through camera feeds."))
 
 /mob/living/scp/scp105/get_status_tab_items()
 	. = ..()

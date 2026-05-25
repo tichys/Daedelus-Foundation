@@ -78,7 +78,7 @@
 
 	haunt_cooldown = 200
 
-	to_chat(victim, "<span class='danger'>You feel something moving beneath the water...</span>")
+	to_chat(victim, span_danger("You feel something moving beneath the water..."))
 	playsound(victim, 'sound/effects/slosh.ogg', 30, TRUE)
 
 	if(victim.sanity)
@@ -104,7 +104,7 @@
 	alpha = 255
 	density = TRUE
 
-	visible_message("<span class='danger'>A massive aquatic horror erupts from the water!</span>")
+	visible_message(span_danger("A massive aquatic horror erupts from the water!"))
 	playsound(src, 'sound/effects/slosh.ogg', 60, TRUE, extrarange = 10)
 
 	hook_scp_breach("SCP-1128", src)
@@ -119,7 +119,7 @@
 	alpha = 0
 	density = FALSE
 
-	visible_message("<span class='notice'>The aquatic horror sinks back beneath the water and vanishes.</span>")
+	visible_message(span_notice("The aquatic horror sinks back beneath the water and vanishes."))
 
 /mob/living/scp/scp1128/proc/attempt_grab(mob/living/carbon/human/victim)
 	if(grab_cooldown > 0)
@@ -133,8 +133,8 @@
 	victim.adjustOxyLoss(20)
 
 	victim.visible_message(
-		"<span class='danger'>[src] drags [victim] beneath the water!</span>",
-		"<span class='userdanger'>Something grabs you from below and drags you under! You can't breathe!</span>"
+		span_danger("[src] drags [victim] beneath the water!"),
+		span_userdanger("Something grabs you from below and drags you under! You can't breathe!")
 	)
 
 	if(victim.sanity)
@@ -155,7 +155,7 @@
 	if(H.sanity)
 		H.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, 10)
 
-	visible_message("<span class='danger'>[src] attacks [H] with crushing force!</span>")
+	visible_message(span_danger("[src] attacks [H] with crushing force!"))
 	playsound(src, 'sound/effects/blobattack.ogg', 40, TRUE)
 
 /mob/living/scp/scp1128/proc/add_aware_victim(mob/living/carbon/human/H)
@@ -173,7 +173,7 @@
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
 		add_aware_victim(H)
-		to_chat(H, "<span class='warning'>This is SCP-1128, an aquatic predator. By observing it, you have become vulnerable when submerged in water...</span>")
+		to_chat(H, span_warning("This is SCP-1128, an aquatic predator. By observing it, you have become vulnerable when submerged in water..."))
 		if(H.sanity)
 			H.sanity.add_trauma(TRAUMA_SCP_EXPOSURE, 5)
 

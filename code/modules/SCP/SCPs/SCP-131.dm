@@ -133,7 +133,7 @@
 
 	if(friend.health < friend.maxHealth * 0.5)
 		is_panicking = TRUE
-		visible_message("<span class='warning'>[src] starts chirping frantically!</span>")
+		visible_message(span_warning("[src] starts chirping frantically!"))
 
 /mob/living/simple_animal/scp131/attack_hand(mob/living/carbon/human/user)
 	. = ..()
@@ -144,19 +144,19 @@
 		hook_scp_interaction(user, "SCP-131", INTERACTION_TYPE_CARE)
 		if(user.reagents)
 			user.reagents.add_reagent(/datum/reagent/medicine/anomalous_happiness, 1)
-		to_chat(user, "<span class='notice'>[src] seems happy to see you!</span>")
+		to_chat(user, span_notice("[src] seems happy to see you!"))
 
 /mob/living/simple_animal/scp131/death(gibbed, cause_of_death = "Unknown")
 	scp173_stared = FALSE
-	visible_message("<span class='danger'>[src] closes its eye and goes still!</span>")
+	visible_message(span_danger("[src] closes its eye and goes still!"))
 	..()
 
 /mob/living/simple_animal/scp131/examine(mob/user)
 	. = ..()
-	to_chat(user, "<span class='notice'>A teardrop-shaped creature with a single large eye. Its gaze is intense and unwavering.</span>")
+	to_chat(user, span_notice("A teardrop-shaped creature with a single large eye. Its gaze is intense and unwavering."))
 	var/mob/living/carbon/human/friend = get_bonded_friend()
 	if(friend)
-		to_chat(user, "<span class='notice'>It seems particularly attached to [friend].</span>")
+		to_chat(user, span_notice("It seems particularly attached to [friend]."))
 
 /mob/living/simple_animal/scp131/get_status_tab_items()
 	. = ..()
