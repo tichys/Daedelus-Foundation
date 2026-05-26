@@ -167,6 +167,8 @@ SUBSYSTEM_DEF(scp_patrol)
 	return complete_patrol(guard_ckey, FALSE)
 
 /datum/controller/subsystem/scp_patrol/proc/report_anomaly(guard_ckey, anomaly_type, location, description)
+	if(scp_action_on_cooldown(guard_ckey, "report_anomaly", 60))
+		return FALSE
 	if(!(anomaly_type in list(SCP_ANOMALY_CONTAINMENT_DAMAGE, SCP_ANOMALY_UNAUTHORIZED_ACCESS, SCP_ANOMALY_SUSPICIOUS_ACTIVITY, SCP_ANOMALY_ENVIRONMENTAL_HAZARD, SCP_ANOMALY_SCP_CONTACT)))
 		return FALSE
 	var/list/report = list(
@@ -213,6 +215,8 @@ SUBSYSTEM_DEF(scp_patrol)
 	return TRUE
 
 /datum/controller/subsystem/scp_patrol/proc/respond_to_breach(guard_ckey, scp_id)
+	if(scp_action_on_cooldown(guard_ckey, "respond_to_breach", 90))
+		return FALSE
 	total_breach_responses++
 	var/list/stats = get_guard_stats(guard_ckey)
 	stats["breach_responses"]++
@@ -232,6 +236,8 @@ SUBSYSTEM_DEF(scp_patrol)
 	return TRUE
 
 /datum/controller/subsystem/scp_patrol/proc/seize_contraband(guard_ckey, item_name, dclass_name)
+	if(scp_action_on_cooldown(guard_ckey, "seize_contraband", 60))
+		return FALSE
 	total_contraband_seized++
 	var/list/stats = get_guard_stats(guard_ckey)
 	stats["contraband_seized"]++

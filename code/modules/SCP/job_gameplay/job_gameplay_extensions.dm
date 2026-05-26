@@ -1,5 +1,18 @@
+/var/list/scp_action_cooldowns = list()
+
+/proc/scp_action_on_cooldown(ckey, action_id, cooldown_seconds)
+	var/key = "[ckey]_[action_id]"
+	var/last_use = scp_action_cooldowns[key]
+	if(last_use && (world.time - last_use) < (cooldown_seconds SECONDS))
+		return TRUE
+	scp_action_cooldowns[key] = world.time
+	return FALSE
+
 /datum/controller/subsystem/scp_triage/proc/assist_treatment(patient_id, mob/living/carbon/human/assistant)
 	if(!istype(assistant))
+		return FALSE
+	if(scp_action_on_cooldown(assistant.ckey, "assist_treatment", 30))
+		to_chat(assistant, span_warning("You must wait before assisting another treatment."))
 		return FALSE
 	for(var/list/P in triage_queue)
 		if(P["patient_id"] == patient_id && P["status"] == TRIAGE_TREATING)
@@ -58,6 +71,9 @@
 /datum/controller/subsystem/scp_service/proc/assistant_task_complete(task_type, mob/living/carbon/human/assistant)
 	if(!istype(assistant))
 		return FALSE
+	if(scp_action_on_cooldown(assistant.ckey, "assistant_task", 60))
+		to_chat(assistant, span_warning("You must wait before completing another assistant task."))
+		return FALSE
 	var/reward = 5
 	switch(task_type)
 		if("cleaning")
@@ -115,6 +131,9 @@
 /datum/controller/subsystem/scp_patrol/proc/submit_shift_report(report_text, mob/living/carbon/human/officer)
 	if(!istype(officer) || !report_text)
 		return FALSE
+	if(scp_action_on_cooldown(officer.ckey, "shift_report", 120))
+		to_chat(officer, span_warning("You can only submit one shift report every 2 minutes."))
+		return FALSE
 	patrol_log += list(list(
 		"report_id" = "rpt_[world.time]",
 		"officer" = officer.real_name,
@@ -131,6 +150,9 @@
 
 /datum/controller/subsystem/scp_patrol/proc/respond_to_incident(incident_type, zone, mob/living/carbon/human/officer)
 	if(!istype(officer))
+		return FALSE
+	if(scp_action_on_cooldown(officer.ckey, "incident_response", 60))
+		to_chat(officer, span_warning("You must wait before responding to another incident."))
 		return FALSE
 	if(!guard_stats[officer.ckey])
 		guard_stats[officer.ckey] = list("name" = officer.real_name, "patrols_completed" = 0, "anomalies_reported" = 0, "breach_responses" = 0, "contraband_seized" = 0, "shift_reports" = 0, "incident_responses" = 0)
@@ -202,6 +224,9 @@
 		return
 	switch(action)
 		if("log_artifact")
+			if(scp_action_on_cooldown(H.ckey, "log_artifact", 60))
+				to_chat(H, span_warning("You must wait before logging another artifact."))
+				return
 			if(SSscp_supply)
 				SSscp_supply.log_anomalous_material(params["item_name"], params["source"] || "field_recovery", params["containment_class"] || "Safe")
 				if(SSscp_research?.manager)
@@ -209,6 +234,9 @@
 				to_chat(H, span_notice("Artifact logged. +25 research points."))
 				. = TRUE
 		if("log_mineral_sample")
+			if(scp_action_on_cooldown(H.ckey, "log_mineral", 45))
+				to_chat(H, span_warning("You must wait before logging another mineral sample."))
+				return
 			if(SSscp_supply)
 				SSscp_supply.log_anomalous_material(params["item_name"], params["source"] || "mining_recovery", params["containment_class"] || "Safe")
 				if(SSscp_research?.manager)
@@ -305,6 +333,9 @@
 				SScontainment_integrity.complete_assigned_task(params["task_id"], text2num(params["repair_amount"]) || 5, H)
 				. = TRUE
 		if("repair_zone")
+			if(scp_action_on_cooldown(H.ckey, "repair_zone", 90))
+				to_chat(H, span_warning("You must wait before performing another structural repair."))
+				return
 			if(SScontainment_integrity)
 				var/amount = text2num(params["repair_amount"]) || 10
 				SScontainment_integrity.repair_zone(params["zone_name"], amount)
@@ -374,6 +405,9 @@
 		return
 	switch(action)
 		if("report_patient")
+			if(scp_action_on_cooldown(H.ckey, "report_patient", 30))
+				to_chat(H, span_warning("You must wait before reporting another patient."))
+				return
 			if(SSscp_triage)
 				var/condition = params["condition"] || "physical_trauma"
 				var/severity = text2num(params["severity"]) || 1
@@ -406,6 +440,9 @@
 				SSscp_triage.perform_decontamination(params["patient_id"], H)
 				. = TRUE
 		if("report_contamination")
+			if(scp_action_on_cooldown(H.ckey, "report_contamination", 60))
+				to_chat(H, span_warning("You must wait before reporting another contamination."))
+				return
 			if(SSscp_medical_response)
 				SSscp_medical_response.report_contamination(H, params["condition"] || "unknown", params["source"] || "field_report")
 				. = TRUE

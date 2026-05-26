@@ -1091,6 +1091,11 @@ SUBSYSTEM_DEF(research_laboratory)
 		return data
 	var/list/lab_data = SSresearch_laboratory.manager.get_all_data(user)
 	data += lab_data
+	if(!data["has_access"] && computer)
+		var/obj/item/computer_hardware/card_slot/card_slot = computer.all_components[MC_CARD]
+		var/obj/item/card/id/id_card = card_slot?.GetID()
+		if(id_card && (ACCESS_SCIENCE in id_card.access))
+			data["has_access"] = TRUE
 	return data
 
 /datum/computer_file/program/research_laboratory/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
