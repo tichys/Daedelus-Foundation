@@ -212,6 +212,11 @@ const NAV_ITEMS = [
   { key: 'medical', label: 'MEDICAL' },
   { key: 'security', label: 'SECURITY' },
   { key: 'research', label: 'RESEARCH' },
+  { key: 'chemical', label: 'CHEMICAL' },
+  { key: 'incident', label: 'INCIDENT' },
+  { key: 'psychological', label: 'PSYCH' },
+  { key: 'infrastructure', label: 'INFRA' },
+  { key: 'analytics', label: 'ANALYTICS' },
   { key: 'personnel', label: 'PERSONNEL' },
   { key: 'players', label: 'PLAYERS' },
   { key: 'budget', label: 'BUDGET' },
@@ -318,12 +323,15 @@ export const PersistenceMasterPanel = (props, context) => {
     medical_data,
     security_data,
     research_data,
+    chemical_data,
+    incident_data,
+    psychological_data,
+    infrastructure_data,
+    analytics_data,
     personnel_data,
     budget_data,
     player_data,
     system_status,
-    analytics_data,
-    infrastructure_data,
   } = data;
 
   return (
@@ -1200,6 +1208,136 @@ export const PersistenceMasterPanel = (props, context) => {
                 </Box>
               )}
 
+              {/* CHEMICAL */}
+              {activeTab === 'chemical' && (
+                <GenericSection
+                  title="CHEMICAL CONTAINMENT MANAGEMENT"
+                  data={chemical_data}
+                  act={act}
+                  actions={[
+                    {
+                      label: 'SAVE',
+                      color: 'green',
+                      action: 'chemical_save_data',
+                    },
+                    { label: 'LOAD', action: 'chemical_load_data' },
+                    { label: 'VIEW', action: 'chemical_view_records' },
+                    {
+                      label: 'RESEARCH',
+                      color: 'green',
+                      action: 'chemical_add_research',
+                    },
+                    {
+                      label: 'CONTAINMENT',
+                      color: 'yellow',
+                      action: 'chemical_containment_status',
+                    },
+                  ]}
+                />
+              )}
+
+              {/* INCIDENT */}
+              {activeTab === 'incident' && (
+                <GenericSection
+                  title="INCIDENT RESPONSE MANAGEMENT"
+                  data={incident_data}
+                  act={act}
+                  actions={[
+                    {
+                      label: 'SAVE',
+                      color: 'green',
+                      action: 'incident_save_data',
+                    },
+                    { label: 'LOAD', action: 'incident_load_data' },
+                    { label: 'VIEW', action: 'incident_view_logs' },
+                    {
+                      label: 'BREACH',
+                      color: 'red',
+                      action: 'incident_add_breach',
+                    },
+                    {
+                      label: 'TEAMS',
+                      color: 'yellow',
+                      action: 'incident_response_teams',
+                    },
+                  ]}
+                />
+              )}
+
+              {/* PSYCHOLOGICAL */}
+              {activeTab === 'psychological' && (
+                <GenericSection
+                  title="PSYCHOLOGICAL SERVICES MANAGEMENT"
+                  data={psychological_data}
+                  act={act}
+                  actions={[
+                    {
+                      label: 'SAVE',
+                      color: 'green',
+                      action: 'psychological_save_data',
+                    },
+                    { label: 'LOAD', action: 'psychological_load_data' },
+                    { label: 'VIEW', action: 'psychological_view_records' },
+                    {
+                      label: 'SESSION',
+                      color: 'green',
+                      action: 'psychological_add_session',
+                    },
+                    {
+                      label: 'ASSESS',
+                      color: 'yellow',
+                      action: 'psychological_assessments',
+                    },
+                  ]}
+                />
+              )}
+
+              {/* INFRASTRUCTURE */}
+              {activeTab === 'infrastructure' && (
+                <GenericSection
+                  title="INFRASTRUCTURE MANAGEMENT"
+                  data={infrastructure_data}
+                  act={act}
+                  actions={[
+                    {
+                      label: 'SAVE',
+                      color: 'green',
+                      action: 'infrastructure_save_data',
+                    },
+                    { label: 'LOAD', action: 'infrastructure_load_data' },
+                    { label: 'VIEW', action: 'infrastructure_view_status' },
+                    {
+                      label: 'RESET',
+                      color: 'red',
+                      action: 'infrastructure_reset_data',
+                    },
+                  ]}
+                />
+              )}
+
+              {/* ANALYTICS */}
+              {activeTab === 'analytics' && (
+                <GenericSection
+                  title="ANALYTICS & PERFORMANCE"
+                  data={analytics_data}
+                  act={act}
+                  actions={[
+                    {
+                      label: 'SAVE',
+                      color: 'green',
+                      action: 'analytics_save_data',
+                    },
+                    { label: 'LOAD', action: 'analytics_load_data' },
+                    { label: 'VIEW', action: 'analytics_view_status' },
+                    {
+                      label: 'RESET',
+                      color: 'red',
+                      action: 'analytics_reset_data',
+                    },
+                  ]}
+                />
+              )}
+
               {/* PERSONNEL */}
               {activeTab === 'personnel' && (
                 <GenericSection
@@ -1593,6 +1731,26 @@ export const PersistenceMasterPanel = (props, context) => {
                   {research_data ? 'LIVE' : 'OFFLINE'}
                 </Box>
                 <Box>
+                  <StatusDot online={!!chemical_data} /> CHEMICAL:{' '}
+                  {chemical_data ? 'LIVE' : 'OFFLINE'}
+                </Box>
+                <Box>
+                  <StatusDot online={!!incident_data} /> INCIDENT:{' '}
+                  {incident_data ? 'LIVE' : 'OFFLINE'}
+                </Box>
+                <Box>
+                  <StatusDot online={!!psychological_data} /> PSYCH:{' '}
+                  {psychological_data ? 'LIVE' : 'OFFLINE'}
+                </Box>
+                <Box>
+                  <StatusDot online={!!infrastructure_data} /> INFRA:{' '}
+                  {infrastructure_data ? 'LIVE' : 'OFFLINE'}
+                </Box>
+                <Box>
+                  <StatusDot online={!!analytics_data} /> ANALYTICS:{' '}
+                  {analytics_data ? 'LIVE' : 'OFFLINE'}
+                </Box>
+                <Box>
                   <StatusDot online={!!personnel_data} /> PERSONNEL:{' '}
                   {personnel_data ? 'LIVE' : 'OFFLINE'}
                 </Box>
@@ -1612,12 +1770,30 @@ export const PersistenceMasterPanel = (props, context) => {
                   lineHeight: '1.6',
                 })}
               >
-                <Box>ACTIVE THREATS: 0</Box>
-                <Box>OUTBREAKS: 0</Box>
-                <Box>BREACHES: 0</Box>
-                <Box>STAFF: 0</Box>
-                <Box>PROJECTS: 0</Box>
-                <Box>PLAYERS: 0</Box>
+                <Box>
+                  ACTIVE THREATS:{' '}
+                  {security_data?.active_threats ?? 0}
+                </Box>
+                <Box>
+                  OUTBREAKS:{' '}
+                  {medical_data?.active_outbreaks ?? 0}
+                </Box>
+                <Box>
+                  BREACHES:{' '}
+                  {incident_data?.active_incidents ?? 0}
+                </Box>
+                <Box>
+                  STAFF:{' '}
+                  {personnel_data?.active_staff ?? 0}
+                </Box>
+                <Box>
+                  PROJECTS:{' '}
+                  {research_data?.total_research_projects ?? 0}
+                </Box>
+                <Box>
+                  PLAYERS:{' '}
+                  {player_data?.total_players ?? 0}
+                </Box>
               </Box>
 
               <TermDivider />

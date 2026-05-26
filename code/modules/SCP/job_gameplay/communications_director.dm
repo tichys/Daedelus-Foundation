@@ -23,6 +23,8 @@
 /datum/comm_dispatch/New(caller, dtype, msg, prio)
 	dispatch_id = "DSP-[world.time]-[rand(10,99)]"
 	time_created = world.time
+	caller_name = "Automated"
+	caller_location = "Facility"
 	if(istype(caller, /mob/living/carbon/human))
 		var/mob/living/carbon/human/C = caller
 		caller_name = C.real_name
@@ -49,7 +51,7 @@
 		return FALSE
 	responders += responder
 	responded = TRUE
-	to_chat(responder, "<span class='notice'>You have responded to dispatch [dispatch_id]. Proceed to [caller_location].</span>")
+	to_chat(responder, span_notice("You have responded to dispatch [dispatch_id]. Proceed to [caller_location]."))
 	return TRUE
 
 /datum/facility_threat

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBackend } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -87,8 +87,8 @@ export const ScpSupply = (_props, context) => {
   const maxBudget = Math.max(...Object.values(department_budgets), 1);
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section>
@@ -544,7 +544,7 @@ export const ScpSupply = (_props, context) => {
             </Stack.Item>
           )}
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

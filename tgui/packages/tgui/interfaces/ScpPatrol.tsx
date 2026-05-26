@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBackend } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -52,8 +52,8 @@ export const ScpPatrol = (_props, context) => {
   const userPatrol = active_patrols.length > 0 ? active_patrols[0] : null;
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section>
@@ -407,7 +407,7 @@ export const ScpPatrol = (_props, context) => {
             </Stack.Item>
           )}
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

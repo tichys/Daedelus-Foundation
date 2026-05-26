@@ -588,7 +588,7 @@
 
 	// Also output to world log for debugging
 	if(log_level >= 4)
-		world.log << log_entry
+		log_game(log_entry)
 
 /datum/component_manager_advanced/proc/get_log_entries(count = 10)
 	var/start_index = max(1, length(error_log) - count + 1)

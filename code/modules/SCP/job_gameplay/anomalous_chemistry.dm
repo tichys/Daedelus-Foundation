@@ -59,7 +59,7 @@ SUBSYSTEM_DEF(anomalous_chemistry)
 	if(S["stability_risk"] < 30)
 		total_containment_chemicals++
 		if(SSscp_research?.manager)
-			SSscp_research.manager.adjust_research_points(10, "anomalous_chemistry:[S["chemist"]]")
+			SSscp_research?.manager?.adjust_research_points(10, "anomalous_chemistry:[S["chemist"]]")
 		total_research_contributions++
 	test_results += list(list(
 		"compound" = S["compound"],

@@ -66,7 +66,7 @@
 
 	var/active_breaches = 0
 	if(SSscp_persistence && SSscp_persistence.manager)
-		active_breaches = SSscp_persistence.manager.active_breaches
+		active_breaches = SSscp_persistence?.manager?.active_breaches
 	data["active_breach_count"] = active_breaches
 	data["last_deployment"] = last_deployment
 
@@ -82,12 +82,12 @@
 			var/team_key = params["team_name"]
 			if(!team_key || !(team_key in available_teams))
 				return
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = ui.user
 			if(!istype(H))
 				return
 			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 			if(!id_card || !(ACCESS_ADMIN in id_card.access))
-				to_chat(H, "<span class='warning'>Requires Command access to authorize MTF deployment.</span>")
+				to_chat(H, span_warning("Requires Command access to authorize MTF deployment."))
 				return
 			if(world.time < deployment_cooldown)
 				to_chat(H, span_warning("MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)]."))
@@ -95,14 +95,14 @@
 			var/list/team = available_teams[team_key]
 			var/active_breaches = 0
 			if(SSscp_persistence && SSscp_persistence.manager)
-				active_breaches = SSscp_persistence.manager.active_breaches
+				active_breaches = SSscp_persistence?.manager?.active_breaches
 			if(active_breaches < team["min_breach"])
-				to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
+				to_chat(H, span_warning("Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]"))
 				return
 			last_deployment = team["name"]
 			deploy_mtf_team(team_key, team, H)
 		if("reinforce")
-			var/mob/living/carbon/human/H = usr
+			var/mob/living/carbon/human/H = ui.user
 			if(!istype(H))
 				return
 			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -134,11 +134,11 @@
 
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_ADMIN in id_card.access))
-		to_chat(H, "<span class='warning'>Requires Command access to authorize MTF deployment.</span>")
+		to_chat(H, span_warning("Requires Command access to authorize MTF deployment."))
 		return
 
 	if(world.time < deployment_cooldown)
-		to_chat(H, "<span class='warning'>MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)].</span>")
+		to_chat(H, span_warning("MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)]."))
 		return
 
 	var/list/options = list()
@@ -155,10 +155,10 @@
 
 	var/active_breaches = 0
 	if(SSscp_persistence && SSscp_persistence.manager)
-		active_breaches = SSscp_persistence.manager.active_breaches
+		active_breaches = SSscp_persistence?.manager?.active_breaches
 
 	if(active_breaches < team["min_breach"])
-		to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
+		to_chat(H, span_warning("Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]"))
 		return
 
 	var/confirm = alert(H, "Deploy [team["name"]]? Team size: [team["size"]]. This action cannot be undone.", "MTF Deployment", "Deploy", "Cancel")
@@ -221,7 +221,7 @@
 
 	for(var/mob/living/carbon/human/H in deployed_members)
 		for(var/obj in objectives)
-			to_chat(H, "<span class='notice'>MTF Objective: [obj]</span>")
+			to_chat(H, span_notice("MTF Objective: [obj]"))
 
 	report_lockdown_to_round_log("MTF Deployment: [team_data["name"]]", 0)
 
@@ -252,8 +252,8 @@
 
 	var/list/objectives = list("Reinforce active MTF operations", "Secure all containment breaches")
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance.containment_status == "breached")
 				objectives += "Priority: Recontain [scp_id]"
 
@@ -308,8 +308,8 @@
 			objectives += "Establish quarantine perimeter"
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance.containment_status == "breached")
 				objectives += "Priority: Recontain [scp_id]"
 

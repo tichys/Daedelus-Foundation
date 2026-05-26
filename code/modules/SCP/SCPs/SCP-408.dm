@@ -29,6 +29,11 @@
 	health = maxHealth
 	alpha = 200
 
+	add_verb(src, list(
+		/mob/living/scp/scp408/proc/toggle_invisibility,
+		/mob/living/scp/scp408/proc/disrupt_vision,
+	))
+
 /mob/living/scp/scp408/Destroy()
 	deactivate_invisibility()
 	deactivate_disruption()
@@ -88,7 +93,7 @@
 			if(prob(5))
 				healing_aura()
 
-/mob/living/scp/scp408/verb/toggle_invisibility()
+/mob/living/scp/scp408/proc/toggle_invisibility()
 	set name = "Toggle Invisibility"
 	set category = "SCP-408"
 	set desc = "Become invisible to the naked eye."
@@ -104,7 +109,7 @@
 	invisibility_active = TRUE
 	invisibility = INVISIBILITY_OBSERVER
 	alpha = 0
-	visible_message("<span class='notice'>The swarm of butterflies fades from view!</span>")
+	visible_message(span_notice("The swarm of butterflies fades from view!"))
 	playsound(src, 'sound/effects/bamf.ogg', 20, TRUE)
 
 /mob/living/scp/scp408/proc/deactivate_invisibility()
@@ -114,9 +119,9 @@
 	invisibility = 0
 	alpha = 200
 	invisibility_cooldown = 200
-	visible_message("<span class='notice'>A swarm of iridescent butterflies materializes!</span>")
+	visible_message(span_notice("A swarm of iridescent butterflies materializes!"))
 
-/mob/living/scp/scp408/verb/disrupt_vision()
+/mob/living/scp/scp408/proc/disrupt_vision()
 	set name = "Visual Disruption"
 	set category = "SCP-408"
 	set desc = "Disrupt the vision of nearby creatures."
@@ -124,7 +129,7 @@
 
 /mob/living/scp/scp408/proc/activate_disruption()
 	if(disruption_cooldown > 0)
-		to_chat(src, "<span class='warning'>Visual disruption is still recharging.</span>")
+		to_chat(src, span_warning("Visual disruption is still recharging."))
 		return
 
 	disruption_cooldown = 300
@@ -139,9 +144,9 @@
 		if(H.sanity)
 			H.sanity.hallucination_level = min(H.sanity.hallucination_level + 10, H.sanity.max_hallucination)
 
-		to_chat(H, "<span class='warning'>Your vision blurs and distorts as colors shift around you!</span>")
+		to_chat(H, span_warning("Your vision blurs and distorts as colors shift around you!"))
 
-	visible_message("<span class='notice'>The butterflies pulse with iridescent light!</span>")
+	visible_message(span_notice("The butterflies pulse with iridescent light!"))
 
 /mob/living/scp/scp408/proc/deactivate_disruption()
 	for(var/mob/living/carbon/human/H in affected_mobs)
@@ -173,11 +178,11 @@
 			H.adjustFireLoss(-10)
 			if(H.sanity)
 				H.sanity.adjust_sanity(5)
-			to_chat(H, "<span class='notice'>The butterflies settle on you briefly, and you feel refreshed.</span>")
+			to_chat(H, span_notice("The butterflies settle on you briefly, and you feel refreshed."))
 		else
 			if(H.sanity)
 				H.sanity.hallucination_level = min(H.sanity.hallucination_level + 5, H.sanity.max_hallucination)
-			to_chat(H, "<span class='warning'>The butterflies flutter around you, making it hard to focus!</span>")
+			to_chat(H, span_warning("The butterflies flutter around you, making it hard to focus!"))
 		return
 	return ..()
 
@@ -186,7 +191,7 @@
 	if(invisibility_active && !isobserver(user))
 		return
 	if(ishuman(user))
-		to_chat(user, "<span class='notice'>This is SCP-408, a swarm of illusory butterflies. They can become invisible and disrupt visual perception.</span>")
+		to_chat(user, span_notice("This is SCP-408, a swarm of illusory butterflies. They can become invisible and disrupt visual perception."))
 
 /mob/living/scp/scp408/get_status_tab_items()
 	. = ..()

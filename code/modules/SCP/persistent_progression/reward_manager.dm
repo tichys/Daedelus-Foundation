@@ -269,8 +269,8 @@
 /datum/reward_manager/proc/notify_reward_unlock(ckey, datum/reward/reward)
 	for(var/client/C in GLOB.clients)
 		if(C.ckey == ckey)
-			to_chat(C, "<span class='boldnotice'>REWARD UNLOCKED: [reward.reward_name]!</span>")
-			to_chat(C, "<span class='notice'>[reward.reward_description]</span>")
+			to_chat(C, span_boldnotice("REWARD UNLOCKED: [reward.reward_name]!"))
+			to_chat(C, span_notice("[reward.reward_description]"))
 			break
 
 /datum/reward_manager/proc/grant_experience_reward(ckey, amount, reason)

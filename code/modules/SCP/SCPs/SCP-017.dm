@@ -153,14 +153,14 @@
 	engulf_cooldown = world.time + engulf_cooldown_time
 
 	src.visible_message(
-		"<span class='danger'>[src] lunges at [target], engulfing [target.p_them()] in shadow!</span>",
-		"<span class='danger'>You engulf [target] in shadow!</span>"
+		span_danger("[src] lunges at [target], engulfing [target.p_them()] in shadow!"),
+		span_danger("You engulf [target] in shadow!")
 	)
 
 	if(target in view(1, src))
 		target.visible_message(
-			"<span class='userdanger'>[target] is swallowed whole by [src]!</span>",
-			"<span class='userdanger'>The shadow consumes you utterly!</span>"
+			span_userdanger("[target] is swallowed whole by [src]!"),
+			span_userdanger("The shadow consumes you utterly!")
 		)
 
 		target.death()
@@ -173,7 +173,7 @@
 		SCP.award_research(target, "combat", 25)
 
 		var/obj/effect/decal/cleanable/ash/A = new /obj/effect/decal/cleanable/ash(get_turf(target))
-		A.visible_message("<span class='danger'>Only a small pile of ash remains where [target] once stood.</span>")
+		A.visible_message(span_danger("Only a small pile of ash remains where [target] once stood."))
 
 		if(ismob(target))
 			var/mob/M = target
@@ -207,11 +207,11 @@
 
 /mob/living/scp/scp017/examine(mob/user)
 	. = ..()
-	. += "<span class='warning'>A shadowy figure that attacks anything which casts a shadow upon it. Keep it in the dark.</span>"
+	. += span_warning("A shadowy figure that attacks anything which casts a shadow upon it. Keep it in the dark.")
 	if(victims_engulfed > 0)
-		. += "<span class='danger'>It has consumed [victims_engulfed] victim\s.</span>"
+		. += span_danger("It has consumed [victims_engulfed] victim\s.")
 
 /mob/living/scp/scp017/scp_death()
-	visible_message("<span class='danger'>[src] dissolves into darkness!</span>")
+	visible_message(span_danger("[src] dissolves into darkness!"))
 	playsound(src, 'sound/effects/explosion2.ogg', 50)
 	..()

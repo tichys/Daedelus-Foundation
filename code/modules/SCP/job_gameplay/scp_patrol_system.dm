@@ -152,7 +152,7 @@ SUBSYSTEM_DEF(scp_patrol)
 		reward = active["reward_research"]
 		total_patrols_completed++
 		if(SSscp_research?.manager)
-			SSscp_research.manager.adjust_research_points(reward, "patrol_complete:[active["route_id"]]")
+			SSscp_research?.manager?.adjust_research_points(reward, "patrol_complete:[active["route_id"]]")
 	var/list/stats = get_guard_stats(guard_ckey)
 	if(completed)
 		stats["patrols_completed"]++
@@ -209,7 +209,7 @@ SUBSYSTEM_DEF(scp_patrol)
 			research_reward = 25
 			priority_announce("SCP contact reported during patrol in [location]. All security personnel respond immediately.", "SECURITY ALERT", null, ANNOUNCER_ALERT)
 	if(SSscp_research?.manager)
-		SSscp_research.manager.adjust_research_points(research_reward, "anomaly_report:[report["anomaly_id"]]")
+		SSscp_research?.manager?.adjust_research_points(research_reward, "anomaly_report:[report["anomaly_id"]]")
 	return TRUE
 
 /datum/controller/subsystem/scp_patrol/proc/respond_to_breach(guard_ckey, scp_id)
@@ -219,7 +219,7 @@ SUBSYSTEM_DEF(scp_patrol)
 	stats["last_active"] = world.time
 	var/bonus = 20
 	if(SSscp_research?.manager)
-		SSscp_research.manager.adjust_research_points(bonus, "breach_response:[scp_id]")
+		SSscp_research?.manager?.adjust_research_points(bonus, "breach_response:[scp_id]")
 	patrol_log += list(list(
 		"route_id" = "breach_response",
 		"route_name" = "Breach Response: [scp_id]",
@@ -237,7 +237,7 @@ SUBSYSTEM_DEF(scp_patrol)
 	stats["contraband_seized"]++
 	stats["last_active"] = world.time
 	if(SSdclass?.manager)
-		var/datum/dclass_player/player = SSdclass.manager.get_dclass_player(guard_ckey)
+		var/datum/dclass_player/player = SSdclass?.manager?.get_dclass_player(guard_ckey)
 		if(player)
 			player.suspicion_level = min(100, player.suspicion_level + 10)
 	patrol_log += list(list(
@@ -285,7 +285,7 @@ SUBSYSTEM_DEF(scp_patrol)
 /datum/controller/subsystem/scp_patrol/proc/get_zone_threat_level(zone)
 	var/threat = 1
 	if(SSscp_persistence?.manager)
-		var/breaches = SSscp_persistence.manager.active_breaches
+		var/breaches = SSscp_persistence?.manager?.active_breaches
 		switch(zone)
 			if("lcz")
 				threat = 1 + min(2, breaches)
@@ -304,7 +304,7 @@ SUBSYSTEM_DEF(scp_patrol)
 /datum/controller/subsystem/scp_patrol/proc/generate_dynamic_route(zone)
 	var/breaches = 0
 	if(SSscp_persistence?.manager)
-		breaches = SSscp_persistence.manager.active_breaches
+		breaches = SSscp_persistence?.manager?.active_breaches
 	if(breaches <= 0)
 		return null
 	var/waypoints = 3 + min(4, breaches)
@@ -382,7 +382,7 @@ SUBSYSTEM_DEF(scp_patrol)
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)

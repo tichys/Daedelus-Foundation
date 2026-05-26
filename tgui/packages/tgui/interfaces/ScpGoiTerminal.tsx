@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   intel: IntelEntry[];
@@ -56,8 +56,8 @@ export const ScpGoiTerminal = (props) => {
   const [comMessage, setComMessage] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={650}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}>
+      <NtosWindow.Content scrollable>
         <Section title="GOI RELATIONS — GROUPS OF INTEREST">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             INTEL REPORTS: {total_intel} | COMMUNIQUES: {total_communiques}
@@ -149,7 +149,7 @@ export const ScpGoiTerminal = (props) => {
             ))}
           </Section>
         )}
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

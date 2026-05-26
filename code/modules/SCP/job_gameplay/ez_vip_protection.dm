@@ -43,7 +43,7 @@
 /obj/item/vip_beacon/attack_self(mob/user)
 	if(linked_detail)
 		linked_detail.checkin()
-		to_chat(user, "<span class='notice'>VIP check-in logged for [vip_name].</span>")
+		to_chat(user, span_notice("VIP check-in logged for [vip_name]."))
 
 SUBSYSTEM_DEF(vip_protection)
 	name = "VIP Protection"
@@ -68,8 +68,8 @@ SUBSYSTEM_DEF(vip_protection)
 	var/datum/vip_protection_detail/D = new(vip, guard)
 	details += D
 	total_details++
-	to_chat(vip, "<span class='notice'>VIP protection detail assigned. Guard: [guard.real_name]. Check in regularly with your beacon.</span>")
-	to_chat(guard, "<span class='notice'>VIP protection detail assigned. Protect [vip.real_name]. Monitor their check-ins.</span>")
+	to_chat(vip, span_notice("VIP protection detail assigned. Guard: [guard.real_name]. Check in regularly with your beacon."))
+	to_chat(guard, span_notice("VIP protection detail assigned. Protect [vip.real_name]. Monitor their check-ins."))
 	return D.detail_id
 
 /datum/controller/subsystem/vip_protection/proc/release_detail(detail_id)

@@ -58,6 +58,10 @@
 	addtimer(CALLBACK(src, PROC_REF(CreateInitialFires)), 1)
 	RegisterSignal(src, COMSIG_MOVABLE_MOVED, PROC_REF(on_move_absorb_fires))
 
+	add_verb(src, list(
+		/mob/living/scp/scp457/proc/verb_hurl_fireball,
+	))
+
 /mob/living/scp/scp457/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE)
 	return
 
@@ -618,7 +622,7 @@
 	. += "Active Fires: [length(active_fires)]"
 	. += "Containment Level: [containment_level]"
 
-/mob/living/scp/scp457/verb/verb_hurl_fireball()
+/mob/living/scp/scp457/proc/verb_hurl_fireball()
 	set name = "Hurl Fireball"
 	set category = "SCP-457"
 	var/list/targets = list()
@@ -687,7 +691,7 @@
 	var/research_field = "SCP-457_BEHAVIORAL"
 	var/lead_researcher = "System"
 
-	var/datum/research_persistence_project/project = SSresearch_persistence.manager.add_research_project(
+	var/datum/research_persistence_project/project = SSresearch_persistence?.manager?.add_research_project(
 		project_name,
 		project_description,
 		research_field,
@@ -702,7 +706,7 @@
 		if(project.progress >= 100)
 			project.status = "COMPLETED"
 
-			SSresearch_persistence.manager.add_scientific_discovery(
+			SSresearch_persistence?.manager?.add_scientific_discovery(
 				"SCP-457 Behavior Patterns",
 				"Comprehensive analysis of SCP-457's fire spreading mechanics",
 				"SCP_RESEARCH",

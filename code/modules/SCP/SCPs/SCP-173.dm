@@ -56,6 +56,7 @@
 	return ..()
 
 /mob/living/scp/scp173/proc/on_speak(mob/living/source, list/speech_args)
+	SIGNAL_HANDLER
 	speech_args[SPEECH_MESSAGE] = ""
 
 /mob/living/scp/scp173/Move(a, b, flag)
@@ -394,10 +395,12 @@
 		return
 	disable_blink_173()
 	blink_173 = scp
+	add_verb(src, /mob/living/carbon/human/proc/manual_blink)
 	if(!blink_173_cd)
 		blink_173_cd = addtimer(CALLBACK(src, PROC_REF(do_blink_173)), rand(25 SECONDS, 40 SECONDS), TIMER_STOPPABLE | TIMER_LOOP | TIMER_UNIQUE)
 
 /mob/living/carbon/human/proc/disable_blink_173()
+	remove_verb(src, /mob/living/carbon/human/proc/manual_blink)
 	if(blink_173_cd)
 		deltimer(blink_173_cd)
 		blink_173_cd = null
@@ -423,7 +426,7 @@
 	if(blink_173 && stat != DEAD && client)
 		blink_173_cd = addtimer(CALLBACK(src, PROC_REF(do_blink_173)), rand(25 SECONDS, 40 SECONDS), TIMER_STOPPABLE | TIMER_UNIQUE)
 
-/mob/living/carbon/human/verb/manual_blink()
+/mob/living/carbon/human/proc/manual_blink()
 	set name = "Blink"
 	set category = "IC"
 	if(!blink_173)

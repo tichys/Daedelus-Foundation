@@ -85,7 +85,7 @@ SUBSYSTEM_DEF(scp_supply)
 			R["status"] = SCP_REQUISITION_APPROVED
 			if(SSbudget_system?.manager)
 				var/desc = "Supply requisition [requisition_id]: [R["quantity"]]x [R["item_name"]]"
-				SSbudget_system.manager.add_transaction(R["department"], "EXPENSE", R["budget_cost"], "equipment", desc, approver.ckey)
+				SSbudget_system?.manager?.add_transaction(R["department"], "EXPENSE", R["budget_cost"], "equipment", desc, approver.ckey)
 			var/delivery_time = 0
 			switch(R["priority"])
 				if(SCP_PRIORITY_CRITICAL)
@@ -146,7 +146,7 @@ SUBSYSTEM_DEF(scp_supply)
 				to_chat(requestor, span_notice("Your supply requisition [requisition_id] has been delivered."))
 			if(R["item_type"] == SCP_ITEM_ANOMALOUS)
 				if(SSscp_research?.manager)
-					SSscp_research.manager.adjust_research_points(25, "anomalous_delivery:[requisition_id]")
+					SSscp_research?.manager?.adjust_research_points(25, "anomalous_delivery:[requisition_id]")
 			return TRUE
 	return FALSE
 
@@ -205,7 +205,7 @@ SUBSYSTEM_DEF(scp_supply)
 /datum/controller/subsystem/scp_supply/proc/get_department_budget(department)
 	if(!SSbudget_system?.manager)
 		return 0
-	var/datum/budget_data/dept_budget = SSbudget_system.manager.department_budgets[department]
+	var/datum/budget_data/dept_budget = SSbudget_system?.manager?.department_budgets[department]
 	if(!dept_budget)
 		return 0
 	return dept_budget.remaining_budget
@@ -292,7 +292,7 @@ SUBSYSTEM_DEF(scp_supply)
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)

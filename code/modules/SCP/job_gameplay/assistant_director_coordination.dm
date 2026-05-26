@@ -33,8 +33,7 @@
 
 SUBSYSTEM_DEF(department_coordination)
 	name = "Department Coordination"
-	wait = 30 SECONDS
-	priority = FIRE_PRIORITY_DEFAULT
+	flags = SS_NO_FIRE
 	var/list/datum/coordination_task/tasks = list()
 	var/list/interdepartmental_memos = list()
 	var/total_tasks = 0
@@ -49,7 +48,7 @@ SUBSYSTEM_DEF(department_coordination)
 	for(var/datum/coordination_task/T in tasks)
 		if(T.task_id == task_id && T.status == "pending")
 			T.assign(M)
-			to_chat(M, "<span class='notice'>You have been assigned coordination task: [T.description]</span>")
+			to_chat(M, span_notice("You have been assigned coordination task: [T.description]"))
 			return TRUE
 	return FALSE
 
@@ -59,12 +58,12 @@ SUBSYSTEM_DEF(department_coordination)
 			T.complete(notes)
 			completed_tasks++
 			if(SSfoundation_budget)
-				var/datum/department_budget/B = SSfoundation_budget.department_budgets[T.department]
+				var/datum/department_budget/B = SSfoundation_budget?.department_budgets[T.department]
 				if(B)
 					B.allocate(25)
 					SSfoundation_budget.total_budget += 25
 			if(SSscp_research?.manager)
-				SSscp_research.manager.adjust_research_points(3, "coordination_task:[T.task_id]")
+				SSscp_research?.manager?.adjust_research_points(3, "coordination_task:[T.task_id]")
 			return TRUE
 	return FALSE
 

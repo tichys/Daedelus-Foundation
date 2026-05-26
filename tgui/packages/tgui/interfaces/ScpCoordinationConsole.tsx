@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   tasks: Task[];
@@ -46,8 +46,8 @@ export const ScpCoordinationConsole = (props) => {
   const [memoBody, setMemoBody] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={600}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={600}>
+      <NtosWindow.Content scrollable>
         <Section title="DEPARTMENT COORDINATION">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             TASKS: {total_tasks} | COMPLETED: {completed_tasks}
@@ -127,7 +127,7 @@ export const ScpCoordinationConsole = (props) => {
             </Box>
           ))}
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

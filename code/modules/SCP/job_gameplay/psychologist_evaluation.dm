@@ -131,9 +131,9 @@ SUBSYSTEM_DEF(psychology)
 		if(H.sanity)
 			H.sanity.adjust_sanity(15, "counseling")
 		var/doctor_name = doctor ? doctor.real_name : "the Foundation"
-		to_chat(patient, "<span class='notice'>You feel slightly better after your counseling session with [doctor_name].</span>")
+		to_chat(patient, span_notice("You feel slightly better after your counseling session with [doctor_name]."))
 		if(doctor)
-			to_chat(doctor, "<span class='notice'>Counseling session with [patient.real_name] completed. +15 sanity restoration.</span>")
+			to_chat(doctor, span_notice("Counseling session with [patient.real_name] completed. +15 sanity restoration."))
 
 /datum/controller/subsystem/psychology/proc/assess_sanity(mob/living/carbon/human/H)
 	if(!istype(H))

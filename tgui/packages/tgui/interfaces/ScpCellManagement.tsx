@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Stack, Input, LabeledList } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type CellData = {
   area_name: string;
@@ -131,8 +131,8 @@ export const ScpCellManagement = (_props: unknown) => {
   const [incidentLocation, setIncidentLocation] = useState('');
 
   return (
-    <Window width={700} height={650} theme="scp_terminal" backgroundColor={C.bg}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={650}  backgroundColor={C.bg}>
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -565,7 +565,7 @@ export const ScpCellManagement = (_props: unknown) => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

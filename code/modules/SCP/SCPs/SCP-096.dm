@@ -59,7 +59,7 @@
 /mob/living/scp/scp096/proc/process_docile()
 	if(world.time > last_face_cover_emote + SCP096_FACE_COVER_EMOTE_COOLDOWN)
 		if(prob(15))
-			visible_message("<span class='notice'>[src] quietly covers its face with its hands.</span>")
+			visible_message(span_notice("[src] quietly covers its face with its hands."))
 			last_face_cover_emote = world.time
 
 	if(prob(3))
@@ -76,7 +76,7 @@
 		return
 
 	if(prob(25))
-		visible_message("<span class='danger'>[src] screams in utter anguish!</span>")
+		visible_message(span_danger("[src] screams in utter anguish!"))
 
 	if(prob(10))
 		playsound(src, 'sound/scp/096/096-rage.ogg', 100, FALSE, extrarange = 100)
@@ -155,9 +155,9 @@
 			rage_activations++
 			scream_phase_end = world.time + rand(SCP096_SCREAM_PHASE_MIN, SCP096_SCREAM_PHASE_MAX)
 			on_rage_trigger(AI)
-			to_chat(AI, "<span class='userdanger'>You see SCP-096's face through the camera! It begins to scream!</span>")
+			to_chat(AI, span_userdanger("You see SCP-096's face through the camera! It begins to scream!"))
 			playsound(src, 'sound/scp/096/096-rage.ogg', 100, FALSE, extrarange = 100)
-			visible_message("<span class='danger'>[src] begins screaming in utter anguish!</span>")
+			visible_message(span_danger("[src] begins screaming in utter anguish!"))
 		face_viewers += AI
 		new_viewers += AI
 
@@ -209,9 +209,9 @@
 				rage_activations++
 				scream_phase_end = world.time + rand(SCP096_SCREAM_PHASE_MIN, SCP096_SCREAM_PHASE_MAX)
 				on_rage_trigger(M)
-				to_chat(M, "<span class='userdanger'>You see SCP-096's face through the camera! It begins to scream!</span>")
+				to_chat(M, span_userdanger("You see SCP-096's face through the camera! It begins to scream!"))
 				playsound(src, 'sound/scp/096/096-rage.ogg', 100, FALSE, extrarange = 100)
-				visible_message("<span class='danger'>[src] begins screaming in utter anguish!</span>")
+				visible_message(span_danger("[src] begins screaming in utter anguish!"))
 			face_viewers += M
 			new_viewers += M
 
@@ -276,7 +276,7 @@
 		if(state == SCP096_SCREAMING && !(viewer in target_queue))
 			target_queue += viewer
 			face_viewers += viewer
-			to_chat(viewer, "<span class='userdanger'>You see SCP-096's face! It begins to scream!</span>")
+			to_chat(viewer, span_userdanger("You see SCP-096's face! It begins to scream!"))
 			hook_scp_observation(viewer, "SCP-096")
 			start_scp_survival_tracking(viewer, "SCP-096", INTERACTION_RISK_CRITICAL)
 		return
@@ -290,11 +290,11 @@
 
 	on_rage_trigger(viewer)
 
-	to_chat(viewer, "<span class='userdanger'>You see SCP-096's face! It begins to scream!</span>")
+	to_chat(viewer, span_userdanger("You see SCP-096's face! It begins to scream!"))
 
 	playsound(src, 'sound/scp/096/096-rage.ogg', 100, FALSE, extrarange = 100)
 
-	visible_message("<span class='danger'>[src] begins screaming in utter anguish!</span>")
+	visible_message(span_danger("[src] begins screaming in utter anguish!"))
 
 	for(var/mob/M in GLOB.player_list)
 		if(QDELETED(M))
@@ -302,7 +302,7 @@
 		if(M.z == z && M != src && M != viewer)
 			var/dist = get_dist(M, src)
 			if(dist <= 30)
-				to_chat(M, "<span class='danger'>You hear a horrifying scream echoing from somewhere nearby!</span>")
+				to_chat(M, span_danger("You hear a horrifying scream echoing from somewhere nearby!"))
 				if(ishuman(M))
 					var/mob/living/carbon/human/H = M
 					if(H.sanity)
@@ -313,7 +313,7 @@
 
 	add_movespeed_modifier(/datum/movespeed_modifier/scp096_pursuit)
 
-	visible_message("<span class='danger'>[src] lowers its hands and sprints with terrifying speed!</span>")
+	visible_message(span_danger("[src] lowers its hands and sprints with terrifying speed!"))
 	playsound(src, 'sound/scp/096/096-chase.ogg', 100, FALSE, extrarange = 50)
 
 	hook_scp_breach("SCP-096", src)
@@ -326,7 +326,7 @@
 		return
 
 	current_target.adjustBruteLoss(SCP096_PURSUIT_DAMAGE)
-	visible_message("<span class='danger'>[src] tears into [current_target] with devastating force!</span>")
+	visible_message(span_danger("[src] tears into [current_target] with devastating force!"))
 	playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
 
 	if(current_target.stat == DEAD)
@@ -354,7 +354,7 @@
 
 	remove_movespeed_modifier(/datum/movespeed_modifier/scp096_pursuit)
 
-	visible_message("<span class='notice'>[src] covers its face with its hands and returns to a docile state.</span>")
+	visible_message(span_notice("[src] covers its face with its hands and returns to a docile state."))
 
 /mob/living/scp/scp096/UnarmedAttack(atom/A)
 	if(!isliving(A))
@@ -383,11 +383,11 @@
 		return
 
 	if(state == SCP096_DOCILE)
-		. += "<span class='notice'>It is covering its face with its hands.</span>"
+		. += span_notice("It is covering its face with its hands.")
 	else if(state == SCP096_SCREAMING)
-		. += "<span class='danger'>It is screaming in pure anguish!</span>"
+		. += span_danger("It is screaming in pure anguish!")
 	else if(state == SCP096_PURSUING)
-		. += "<span class='danger'>Its face is exposed — DO NOT LOOK!</span>"
+		. += span_danger("Its face is exposed — DO NOT LOOK!")
 
 	if(can_viewer_see_face(H) && state == SCP096_DOCILE)
 		trigger_face_view(H)
@@ -424,11 +424,11 @@
 	. += "Rage Activations: [rage_activations]"
 
 /mob/living/scp/scp096/proc/show_status_verb()
-	to_chat(src, "<span class='notice'>=== SCP-096 Status ===</span>")
-	to_chat(src, "<span class='notice'>State: [state]</span>")
-	to_chat(src, "<span class='notice'>Targets Remaining: [length(target_queue)]</span>")
-	to_chat(src, "<span class='notice'>Total Kills: [kills_count]</span>")
-	to_chat(src, "<span class='notice'>Rage Activations: [rage_activations]</span>")
+	to_chat(src, span_notice("=== SCP-096 Status ==="))
+	to_chat(src, span_notice("State: [state]"))
+	to_chat(src, span_notice("Targets Remaining: [length(target_queue)]"))
+	to_chat(src, span_notice("Total Kills: [kills_count]"))
+	to_chat(src, span_notice("Rage Activations: [rage_activations]"))
 
 /mob/living/scp/scp096/process_ai()
 	if(stat == DEAD)

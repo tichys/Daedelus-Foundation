@@ -60,7 +60,7 @@
 	current_state = SCP076_STATE_DORMANT
 	dormant_timer = world.time + dormant_duration
 	stat = UNCONSCIOUS
-	visible_message("<span class='notice'>[src] collapses back into the sarcophagus, becoming dormant.</span>")
+	visible_message(span_notice("[src] collapses back into the sarcophagus, becoming dormant."))
 	containment_status = "contained"
 	if(summoned_blade)
 		QDEL_NULL(summoned_blade)
@@ -74,7 +74,7 @@
 	current_state = SCP076_STATE_AWAKENING
 	awakening_timer = world.time + awakening_duration
 	stat = CONSCIOUS
-	visible_message("<span class='warning'>[src] begins to stir within the sarcophagus...</span>")
+	visible_message(span_warning("[src] begins to stir within the sarcophagus..."))
 	playsound(src, 'sound/effects/ghost.ogg', 50, TRUE, extrarange = 10)
 
 /mob/living/scp/scp076/proc/process_awakening()
@@ -87,7 +87,7 @@
 	containment_status = "breached"
 	health = maxHealth
 	rage_meter = 0
-	visible_message("<span class='danger'>[src] fully emerges from the sarcophagus, eyes burning with battle fury!</span>")
+	visible_message(span_danger("[src] fully emerges from the sarcophagus, eyes burning with battle fury!"))
 	playsound(src, 'sound/effects/roar.ogg', 60, TRUE, extrarange = 20)
 	hook_scp_breach("SCP-076", src)
 	if(!blade_summoned)
@@ -105,7 +105,7 @@
 
 	if(prob(5) && rage_meter > 30)
 		playsound(src, 'sound/effects/roar.ogg', 30, TRUE, extrarange = 10)
-		visible_message("<span class='danger'>[src] roars with rage!</span>")
+		visible_message(span_danger("[src] roars with rage!"))
 
 	for(var/mob/living/carbon/human/H in range(5, src))
 		if(H == src || H.stat == DEAD)
@@ -122,7 +122,7 @@
 			begin_awakening()
 	else
 		if(world.time >= dormant_timer)
-			visible_message("<span class='notice'>The sarcophagus remains silent. SCP-076-2 does not re-emerge.</span>")
+			visible_message(span_notice("The sarcophagus remains silent. SCP-076-2 does not re-emerge."))
 
 /mob/living/scp/scp076/proc/summon_blade()
 	if(blade_summoned)
@@ -130,12 +130,12 @@
 	summoned_blade = new /obj/item/melee/scp076_blade(src)
 	put_in_hands(summoned_blade)
 	blade_summoned = TRUE
-	visible_message("<span class='danger'>[src] summons a blade of dark energy from thin air!</span>")
+	visible_message(span_danger("[src] summons a blade of dark energy from thin air!"))
 
 /mob/living/scp/scp076/proc/activate_speed_boost()
 	speed_boost_active = TRUE
 	add_or_update_variable_movespeed_modifier(/datum/movespeed_modifier/scp076_rage, TRUE, -1)
-	visible_message("<span class='danger'>[src] moves with blinding speed!</span>")
+	visible_message(span_danger("[src] moves with blinding speed!"))
 	addtimer(CALLBACK(src, .proc/deactivate_speed_boost), 300)
 
 /mob/living/scp/scp076/proc/deactivate_speed_boost()
@@ -278,7 +278,9 @@
 		dormant_timer = world.time + dormant_duration
 		kill_count = 0
 		rage_meter = 0
-		visible_message("<span class='danger'>[src] falls... but the sarcophagus begins to glow.</span>")
+		stat = DEAD
+		visible_message(span_danger("[src] falls... but the sarcophagus begins to glow."))
+		hook_scp_recontainment("SCP-076", list())
 		QDEL_NULL(summoned_blade)
 		blade_summoned = FALSE
 		addtimer(CALLBACK(src, .proc/check_respawn), dormant_duration)
@@ -306,7 +308,7 @@
 			H.sanity.add_trauma(TRAUMA_VIOLENCE, 15)
 		affect_combat_sanity(H)
 
-	visible_message("<span class='danger'>[src] strikes [L] with devastating force!</span>")
+	visible_message(span_danger("[src] strikes [L] with devastating force!"))
 	playsound(src, 'sound/weapons/bladeslice.ogg', 50, TRUE)
 
 	rage_meter = min(rage_meter + 5, max_rage)
@@ -318,7 +320,7 @@
 /mob/living/scp/scp076/examine(mob/user)
 	. = ..()
 	if(ishuman(user))
-		to_chat(user, "<span class='warning'>This is SCP-076-2, 'Abel'. A Keter-class hostile entity with regenerative abilities. Current state: [current_state]. Respawn count: [respawn_count]/[max_respawns]</span>")
+		to_chat(user, span_warning("This is SCP-076-2, 'Abel'. A Keter-class hostile entity with regenerative abilities. Current state: [current_state]. Respawn count: [respawn_count]/[max_respawns]"))
 
 /mob/living/scp/scp076/get_status_tab_items()
 	. = ..()
@@ -352,18 +354,18 @@
 		if(ismob(loc))
 			owner_ref = WEAKREF(loc)
 		else
-			visible_message("<span class='notice'>The abyssal blade dissipates into shadow.</span>")
+			visible_message(span_notice("The abyssal blade dissipates into shadow."))
 			qdel(src)
 			return
 
 	var/mob/owner = owner_ref.resolve()
 	if(!owner || !istype(owner, /mob/living/scp/scp076))
-		visible_message("<span class='notice'>The abyssal blade dissipates into shadow.</span>")
+		visible_message(span_notice("The abyssal blade dissipates into shadow."))
 		qdel(src)
 
 /obj/item/melee/scp076_blade/attack(mob/living/target, mob/living/user)
 	if(!istype(user, /mob/living/scp/scp076))
-		to_chat(user, "<span class='warning'>The blade burns your hand!</span>")
+		to_chat(user, span_warning("The blade burns your hand!"))
 		user.adjustFireLoss(15)
 		user.dropItemToGround(src)
 		return
@@ -394,4 +396,4 @@
 /obj/structure/scp076_sarcophagus/attack_hand(mob/user)
 	. = ..()
 	if(contained_scp && contained_scp.current_state == SCP076_STATE_DORMANT)
-		to_chat(user, "<span class='warning'>You hear faint scratching from inside the sarcophagus...</span>")
+		to_chat(user, span_warning("You hear faint scratching from inside the sarcophagus..."))

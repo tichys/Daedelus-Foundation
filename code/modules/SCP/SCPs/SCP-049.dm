@@ -98,6 +98,14 @@
 	grant_language(/datum/language/common, TRUE, TRUE)
 	load_persistence_data()
 
+	add_verb(src, list(
+		/mob/living/scp/scp049/proc/Greetings,
+		/mob/living/scp/scp049/proc/YetAnotherVictim,
+		/mob/living/scp/scp049/proc/YouAreNotDoctor,
+		/mob/living/scp/scp049/proc/SenseDiseaseInYou,
+		/mob/living/scp/scp049/proc/HereToCureYou,
+	))
+
 /mob/living/scp/scp049/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
 	if(.)
@@ -480,35 +488,35 @@
 			to_chat(H, span_danger("<b>[announcement]</b>"))
 			last_interaction_time = world.time
 
-/mob/living/scp/scp049/verb/Greetings()
+/mob/living/scp/scp049/proc/Greetings()
 	set category = "SCP-049"
 	set name = "Greetings"
 	if(!CanSpecialEmote())
 		return
 	playsound(src, 'sound/scp/scp049/SCP049_1.ogg', 30, FALSE)
 
-/mob/living/scp/scp049/verb/YetAnotherVictim()
+/mob/living/scp/scp049/proc/YetAnotherVictim()
 	set category = "SCP-049"
 	set name = "Yet Another Victim"
 	if(!CanSpecialEmote())
 		return
 	playsound(src, 'sound/scp/scp049/SCP049_2.ogg', 30, FALSE)
 
-/mob/living/scp/scp049/verb/YouAreNotDoctor()
+/mob/living/scp/scp049/proc/YouAreNotDoctor()
 	set category = "SCP-049"
 	set name = "You Are Not A Doctor"
 	if(!CanSpecialEmote())
 		return
 	playsound(src, 'sound/scp/scp049/SCP049_3.ogg', 30, FALSE)
 
-/mob/living/scp/scp049/verb/SenseDiseaseInYou()
+/mob/living/scp/scp049/proc/SenseDiseaseInYou()
 	set category = "SCP-049"
 	set name = "I Sense The Disease"
 	if(!CanSpecialEmote())
 		return
 	playsound(src, 'sound/scp/scp049/SCP049_4.ogg', 30, FALSE)
 
-/mob/living/scp/scp049/verb/HereToCureYou()
+/mob/living/scp/scp049/proc/HereToCureYou()
 	set category = "SCP-049"
 	set name = "I'm Here To Cure You"
 	if(!CanSpecialEmote())
@@ -675,11 +683,11 @@
 		"total_playtime" = total_playtime + (world.time - session_start_time)
 	)
 	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.save_scp_data("SCP-049", persistence_data)
+		SSscp_persistence?.manager?.save_scp_data("SCP-049", persistence_data)
 
 /mob/living/scp/scp049/proc/load_persistence_data()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/list/persistence_data = SSscp_persistence.manager.load_scp_data("SCP-049")
+		var/list/persistence_data = SSscp_persistence?.manager?.load_scp_data("SCP-049")
 		if(persistence_data)
 			pestilence_level = persistence_data["pestilence_level"] || 0
 			cure_potency = persistence_data["cure_potency"] || 1

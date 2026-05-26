@@ -414,29 +414,6 @@
 	if(prob(2))
 		check_scp_interactions()
 
-/mob/living/scp/scp2343/proc/check_scp_interactions()
-	if(stat == DEAD)
-		return
-	if(!SSscp_cross_interactions?.setup_complete)
-		return
-	if(prob(3))
-		for(var/mob/living/simple_animal/hostile/scp610_fleshman/M in range(6, src))
-			if(M.stat != DEAD)
-				SSscp_cross_interactions.execute_interaction("2343_benevolence_610", src, M)
-				break
-	if(prob(3))
-		for(var/mob/living/scp/scp049/M in range(8, src))
-			if(M.stat != DEAD)
-				SSscp_cross_interactions.execute_interaction("2343_benevolence_049", src, M)
-				break
-
-/mob/living/scp/scp2343/Life(delta_time = SSMOBS_DT, times_fired)
-	. = ..()
-	if(stat == DEAD)
-		return
-	if(prob(2))
-		check_scp_interactions()
-
 /mob/living/scp/scp1128/proc/check_scp_interactions()
 	if(stat == DEAD)
 		return

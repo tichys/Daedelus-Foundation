@@ -95,7 +95,7 @@ SUBSYSTEM_DEF(containment_robotics)
 	var/bot_name = "Foundation [bot_type == BOT_TYPE_MONITOR ? "Monitor" : bot_type == BOT_TYPE_CONTAINMENT ? "Containment" : bot_type == BOT_TYPE_DECON ? "Decon" : "Repair"] Bot"
 	to_chat(usr, span_greenannounce("Construction complete: [bot_name] is operational."))
 	if(SSscp_research?.manager)
-		SSscp_research.manager.adjust_research_points(15, "robotic_construction:[usr?.ckey || "unknown"]")
+		SSscp_research?.manager?.adjust_research_points(15, "robotic_construction:[usr?.ckey || "unknown"]")
 	log_maintenance("Bot constructed: [bot_name]", O["builder"] || "Unknown")
 
 /datum/controller/subsystem/containment_robotics/proc/report_containment_assist(bot_name, assist_type)

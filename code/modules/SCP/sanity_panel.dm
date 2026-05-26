@@ -36,9 +36,9 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!H.sanity)
 		return
 	var/datum/sanity/S = H.sanity

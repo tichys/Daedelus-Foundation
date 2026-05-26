@@ -1,6 +1,6 @@
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -147,8 +147,8 @@ export const ScpAnomalousChemistry = () => {
   const [regOrigin, setRegOrigin] = useLocalState<string>('regOrigin', '');
 
   return (
-    <Window title="ANOMALOUS CHEMISTRY" width={700} height={650} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow title="ANOMALOUS CHEMISTRY" width={700} height={650} >
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -658,7 +658,7 @@ export const ScpAnomalousChemistry = () => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

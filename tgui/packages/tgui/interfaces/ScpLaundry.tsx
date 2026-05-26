@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   running: boolean;
@@ -17,8 +17,8 @@ export const ScpLaundry = (props) => {
   const { running, item_count, max_items, anomalous_cleanse, time_remaining } = data;
 
   return (
-    <Window theme="scp_terminal" width={400} height={320}>
-      <Window.Content scrollable>
+    <NtosWindow width={400} height={320}>
+      <NtosWindow.Content scrollable>
         <Section title="FOUNDATION LAUNDRY UNIT">
           <Box
             style={{
@@ -163,7 +163,7 @@ export const ScpLaundry = (props) => {
             </Box>
           </Section>
         )}
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

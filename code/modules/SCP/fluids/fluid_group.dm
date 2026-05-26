@@ -87,9 +87,8 @@
 	var/obj/fluid/existing = locate(/obj/fluid) in T
 	if(existing)
 		return
-	new /obj/fluid(T, fluid_type, color, viscosity)
-	var/obj/fluid/new_fluid = locate(/obj/fluid) in T
-	if(new_fluid)
+	var/obj/fluid/new_fluid = new /obj/fluid(T, fluid_type, color, viscosity)
+	if(new_fluid && !new_fluid.group)
 		add_member(new_fluid)
 
 /datum/fluid_group/proc/get_blocked_dirs(obj/fluid/F)

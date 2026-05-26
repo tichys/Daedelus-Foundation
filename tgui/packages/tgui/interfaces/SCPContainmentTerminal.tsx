@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Resource = {
   key: string;
@@ -215,8 +215,8 @@ export const SCPContainmentTerminal = (props) => {
   ];
 
   return (
-    <Window theme="scp_terminal" width={550} height={620}>
-      <Window.Content scrollable>
+    <NtosWindow width={550} height={620}>
+      <NtosWindow.Content scrollable>
         <Box
           style={{
             background: C.bg,
@@ -810,7 +810,7 @@ export const SCPContainmentTerminal = (props) => {
             </Box>
           </Box>
         </Box>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

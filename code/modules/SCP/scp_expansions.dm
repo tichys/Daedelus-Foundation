@@ -104,17 +104,17 @@
 	data["flood_cooldown"] = max(0, flood_cooldown - world.time)
 	return data
 
-/obj/machinery/scp682_acid_bath_console/ui_act(action, params)
+/obj/machinery/scp682_acid_bath_console/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
-	if(!allowed(usr))
-		to_chat(usr, span_warning("Access denied."))
+	if(!allowed(ui.user))
+		to_chat(ui.user, span_warning("Access denied."))
 		return
 	switch(action)
 		if("flood_acid")
 			if(world.time < flood_cooldown)
-				to_chat(usr, span_warning("Acid systems are recharging."))
+				to_chat(ui.user, span_warning("Acid systems are recharging."))
 				return
 			var/mob/living/scp/scp682/target
 			for(var/mob/living/scp/scp682/S in GLOB.mob_list)
@@ -122,14 +122,14 @@
 					target = S
 					break
 			if(!target)
-				to_chat(usr, span_warning("No SCP-682 detected."))
+				to_chat(ui.user, span_warning("No SCP-682 detected."))
 				return
 			if(!target.acid_bath)
 				target.acid_bath = new /datum/scp682_acid_bath(target)
 			var/datum/scp682_acid_bath/bath = target.acid_bath
 			bath.add_acid(30)
 			flood_cooldown = world.time + flood_cooldown_time
-			to_chat(usr, span_notice("Acid flood released. Level: [round(bath.acid_level)]%"))
+			to_chat(ui.user, span_notice("Acid flood released. Level: [round(bath.acid_level)]%"))
 			priority_announce("SCP-682 acid bath containment protocol activated. All personnel clear the chamber.", "ACID BATH", null, ANNOUNCER_ALERT)
 			. = TRUE
 		if("emergency_flood")
@@ -147,7 +147,7 @@
 			var/datum/scp682_acid_bath/bath = target.acid_bath
 			bath.add_acid(60)
 			flood_cooldown = world.time + flood_cooldown_time * 2
-			to_chat(usr, span_danger("EMERGENCY ACID FLOOD. Maximum concentration deployed."))
+			to_chat(ui.user, span_danger("EMERGENCY ACID FLOOD. Maximum concentration deployed."))
 			priority_announce("SCP-682 EMERGENCY acid bath deployed. Maximum concentration. Chamber sealed.", "EMERGENCY ACID", null, ANNOUNCER_ALERT)
 			. = TRUE
 

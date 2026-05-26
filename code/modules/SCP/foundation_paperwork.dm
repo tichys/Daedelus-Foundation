@@ -447,3 +447,223 @@ ___________________________________________________________________________<br><
 <b>Foundation Representative Signature:</b> ________________________ <b>Date:</b> ________<br>
 <b>GOI Relations Director Review:</b> ________________________ <b>Date:</b> ________<br>
 <br><i>CLASSIFIED - GOI RELATIONS CLEARANCE REQUIRED</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/test_authorization
+	name = "SCP Test Authorization Form"
+	desc = "A Foundation form for authorizing supervised SCP testing."
+
+/obj/item/paper/foundation/test_authorization/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - TEST AUTHORIZATION FORM</h2><hr>
+<b>Project ID:</b> ________<br>
+<b>Date:</b> ________<br>
+<b>Facility:</b> Site-53<br><hr>
+<b>Requesting Researcher:</b> ________________________<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br>
+<b>Department:</b> ________________________<br><hr>
+<b>SCP Designation:</b> SCP-________<br>
+<b>Object Class:</b> Safe / Euclid / Keter / Thaumiel / Apollyon<br>
+<b>Current Containment Location:</b> ________________________<br><hr>
+<b>Test Type:</b><br>
+[ ] Observation<br>
+[ ] Physical Interaction<br>
+[ ] Stress Testing<br>
+[ ] Audio / Visual Exposure<br>
+[ ] Biological Sampling<br>
+[ ] Cognitive / Memetic Exposure<br>
+[ ] Chemical Analysis<br>
+[ ] Other: ________________________<br><hr>
+<b>Risk Assessment:</b><br>
+(_) Level 1 - Minimal Risk<br>
+(_) Level 2 - Low Risk<br>
+(_) Level 3 - Medium Risk (Ethics Review Required)<br>
+(_) Level 4 - High Risk (Ethics Review + Director Approval Required)<br>
+(_) Level 5 - Extreme Risk (O5 Consultation Required)<br><hr>
+<b>D-Class Subject Designation:</b> D-________<br>
+<b>Number of Subjects Required:</b> ________<br><hr>
+<b>Test Objective:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Test Procedure (detailed):</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Required Resources / Equipment:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Safety Precautions:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Contingency Plan (if test deviates):</b><br>
+___________________________________________________________________________<br><hr>
+<b>Ethics Review Required:</b> Yes / No (mandatory if Risk >= 3)<br>
+<b>Ethics Committee Case #:</b> ________<br><hr>
+<b>Researcher Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>Senior Researcher Approval:</b> ________________________ <b>Date:</b> ________<br>
+<b>Supervisor / Director Approval:</b> ________________________ <b>Date:</b> ________<br>
+<b>Ethics Liaison Approval:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - CLEARANCE LEVEL 2+ REQUIRED</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/test_authorization/proc/autofill_from_project(list/project, mob/user)
+	var/researcher_name = "________"
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		researcher_name = H.real_name
+	var/scp_target = project["scp_target"] || "________"
+	var/risk_level = project["risk_level"] || 1
+	var/risk_text = "Level [risk_level] - "
+	risk_text += risk_level >= 5 ? "Extreme Risk (O5 Consultation Required)" : risk_level >= 4 ? "High Risk (Ethics Review + Director Approval Required)" : risk_level >= 3 ? "Medium Risk (Ethics Review Required)" : risk_level >= 2 ? "Low Risk" : "Minimal Risk"
+	var/ethics_required = risk_level >= 3 ? "Yes (mandatory at Risk Level [risk_level])" : "No"
+	var/approved_by = project["approved_by"] || "________"
+	var/approval_date = "________"
+	if(project["approval_time"])
+		approval_date = time2text(project["approval_time"], "MM/DD/YYYY")
+	setText({"<h2>SCP FOUNDATION - TEST AUTHORIZATION FORM</h2><hr>
+<b>Project ID:</b> [project["id"] || project["name"] || "________"]<br>
+<b>Date:</b> [time2text(world.time, "MM/DD/YYYY")]<br>
+<b>Facility:</b> Site-53<br><hr>
+<b>Requesting Researcher:</b> [researcher_name]<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br>
+<b>Department:</b> [project["research_field"] || "Research"]<br><hr>
+<b>SCP Designation:</b> SCP-[scp_target]<br>
+<b>Object Class:</b> Safe / Euclid / Keter / Thaumiel / Apollyon<br>
+<b>Current Containment Location:</b> ________________________<br><hr>
+<b>Test Type:</b><br>
+[ ] Observation<br>
+[ ] Physical Interaction<br>
+[ ] Stress Testing<br>
+[ ] Audio / Visual Exposure<br>
+[ ] Biological Sampling<br>
+[ ] Cognitive / Memetic Exposure<br>
+[ ] Chemical Analysis<br>
+[ ] Other: ________________________<br><hr>
+<b>Risk Assessment:</b><br>
+(_) Level 1 - Minimal Risk<br>
+(_) Level 2 - Low Risk<br>
+(_) Level 3 - Medium Risk (Ethics Review Required)<br>
+(_) Level 4 - High Risk (Ethics Review + Director Approval Required)<br>
+(_) Level 5 - Extreme Risk (O5 Consultation Required)<br>
+<i>Assessed Risk: [risk_text]</i><br><hr>
+<b>D-Class Subject Designation:</b> D-________<br>
+<b>Number of Subjects Required:</b> ________<br><hr>
+<b>Test Objective:</b><br>
+[project["description"] || "___________________________________________________________________________"]<br><hr>
+<b>Test Procedure (detailed):</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Required Resources / Equipment:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Safety Precautions:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Contingency Plan (if test deviates):</b><br>
+___________________________________________________________________________<br><hr>
+<b>Ethics Review Required:</b> [ethics_required]<br>
+<b>Ethics Committee Case #:</b> ________<br><hr>
+<b>Researcher Signature:</b> [researcher_name] <b>Date:</b> [time2text(world.time, "MM/DD/YYYY")]<br>
+<b>Senior Researcher Approval:</b> ________________________ <b>Date:</b> ________<br>
+<b>Supervisor / Director Approval:</b> [approved_by] <b>Date:</b> [approval_date]<br>
+<b>Ethics Liaison Approval:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - CLEARANCE LEVEL 2+ REQUIRED</i><br>"}, FALSE)
+	name = "SCP Test Authorization Form - [project["name"] || "SCP-[scp_target]"]"
+
+/obj/item/paper/foundation/test_result
+	name = "SCP Test Result Report"
+	desc = "A Foundation form for documenting SCP test outcomes."
+
+/obj/item/paper/foundation/test_result/Initialize(mapload)
+	. = ..()
+	setText({"<h2>SCP FOUNDATION - TEST RESULT REPORT</h2><hr>
+<b>Test ID:</b> ________<br>
+<b>Date Completed:</b> ________<br>
+<b>Facility:</b> Site-53<br><hr>
+<b>Researcher:</b> ________________________<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br>
+<b>SCP Designation:</b> SCP-________<br>
+<b>Object Class:</b> Safe / Euclid / Keter / Thaumiel / Apollyon<br>
+<b>Test Type:</b> ________________________<br>
+<b>Risk Level:</b> 1 (Low) / 2 / 3 / 4 / 5 (Extreme)<br>
+<b>D-Class Subject:</b> D-________<br><hr>
+<b>Test Outcome:</b><br>
+[ ] Successful - Objectives Met<br>
+[ ] Partial Success - Some Objectives Met<br>
+[ ] Failure - Objectives Not Met<br>
+[ ] Inconclusive - Insufficient Data<br>
+[ ] Aborted - Safety Concern<br><hr>
+<b>Summary of Results:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Danger Triggered:</b> Yes / No<br>
+<b>Subject Status:</b><br>
+(_) Intact - No injuries sustained<br>
+(_) Injured - Minor / Moderate / Severe injuries<br>
+(_) Deceased - Cause: ________________________<br>
+(_) Missing - Last seen: ________________________<br><hr>
+<b>Research Points Earned:</b> ________<br><hr>
+<b>Notable Observations / Anomalous Effects:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Equipment Status:</b> Intact / Damaged / Destroyed<br>
+<b>Containment Integrity Affected:</b> Yes / No<br><hr>
+<b>Ethics Violation Filed:</b> Yes / No<br>
+<b>Ethics Committee Case #:</b> ________<br><hr>
+<b>Follow-up Actions Required:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Researcher Signature:</b> ________________________ <b>Date:</b> ________<br>
+<b>Senior Researcher Review:</b> ________________________ <b>Date:</b> ________<br>
+<b>Supervisor Review:</b> ________________________ <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - CLEARANCE LEVEL 2+ REQUIRED</i><br>"}, FALSE)
+
+/obj/item/paper/foundation/test_result/proc/autofill_from_project(list/project, mob/user)
+	var/researcher_name = "________"
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		researcher_name = H.real_name
+	var/scp_target = project["scp_target"] || "________"
+	var/risk_level = project["risk_level"] || 1
+	var/approved_by = project["approved_by"] || "________"
+	setText({"<h2>SCP FOUNDATION - TEST RESULT REPORT</h2><hr>
+<b>Test ID:</b> [project["id"] || project["name"] || "________"]<br>
+<b>Date Completed:</b> [time2text(world.time, "MM/DD/YYYY")]<br>
+<b>Facility:</b> Site-53<br><hr>
+<b>Researcher:</b> [researcher_name]<br>
+<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br>
+<b>SCP Designation:</b> SCP-[scp_target]<br>
+<b>Object Class:</b> Safe / Euclid / Keter / Thaumiel / Apollyon<br>
+<b>Test Type:</b> ________________________<br>
+<b>Risk Level:</b> [risk_level] ([risk_level >= 4 ? "Extreme" : risk_level >= 3 ? "High" : risk_level >= 2 ? "Moderate" : "Low"])<br>
+<b>D-Class Subject:</b> D-________<br><hr>
+<b>Test Outcome:</b><br>
+[ ] Successful - Objectives Met<br>
+[ ] Partial Success - Some Objectives Met<br>
+[ ] Failure - Objectives Not Met<br>
+[ ] Inconclusive - Insufficient Data<br>
+[ ] Aborted - Safety Concern<br><hr>
+<b>Summary of Results:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Danger Triggered:</b> Yes / No<br>
+<b>Subject Status:</b><br>
+(_) Intact - No injuries sustained<br>
+(_) Injured - Minor / Moderate / Severe injuries<br>
+(_) Deceased - Cause: ________________________<br>
+(_) Missing - Last seen: ________________________<br><hr>
+<b>Research Points Earned:</b> ________<br><hr>
+<b>Notable Observations / Anomalous Effects:</b><br>
+___________________________________________________________________________<br>
+___________________________________________________________________________<br><hr>
+<b>Equipment Status:</b> Intact / Damaged / Destroyed<br>
+<b>Containment Integrity Affected:</b> Yes / No<br><hr>
+<b>Ethics Violation Filed:</b> Yes / No<br>
+<b>Ethics Committee Case #:</b> ________<br><hr>
+<b>Follow-up Actions Required:</b><br>
+___________________________________________________________________________<br><hr>
+<b>Researcher Signature:</b> [researcher_name] <b>Date:</b> [time2text(world.time, "MM/DD/YYYY")]<br>
+<b>Senior Researcher Review:</b> ________________________ <b>Date:</b> ________<br>
+<b>Supervisor Review:</b> [approved_by] <b>Date:</b> ________<br>
+<br><i>CLASSIFIED - CLEARANCE LEVEL 2+ REQUIRED</i><br>"}, FALSE)
+	name = "SCP Test Result Report - [project["name"] || "SCP-[scp_target]"]"

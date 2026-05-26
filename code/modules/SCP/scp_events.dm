@@ -126,8 +126,8 @@
 	if(length(surge_apcs) && prob(30))
 		var/list/breached = list()
 		if(SSscp_persistence?.manager)
-			for(var/scp_id in SSscp_persistence.manager.scp_instances)
-				var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+			for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+				var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 				if(instance.containment_status == "breached")
 					breached += scp_id
 		if(length(breached))

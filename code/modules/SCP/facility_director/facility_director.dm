@@ -138,8 +138,8 @@
 	var/dead_crew = 0
 	var/total_crew = 0
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			total_scp_count++
 			if(instance.containment_status == "breached")
 				breached_count++
@@ -159,15 +159,18 @@
 /datum/facility_director/proc/deploy_mtf_reinforcements()
 	var/list/breached_scps = list()
 	if(SSscp_persistence && SSscp_persistence.manager)
-		for(var/scp_id in SSscp_persistence.manager.scp_instances)
-			var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		for(var/scp_id in SSscp_persistence?.manager?.scp_instances)
+			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 			if(instance.containment_status == "breached")
 				breached_scps += scp_id
 	var/scp_list = length(breached_scps) ? english_list(breached_scps) : "unknown entities"
 	priority_announce("ALERT: Mobile Task Force dispatch authorized. Active breaches: [scp_list]. All personnel cooperate with MTF operations.", "MTF DEPLOYMENT", null, ANNOUNCER_ALERT)
 	for(var/obj/machinery/mtf_deployment_console/console in world)
-		if(!QDELETED(console))
-			console.deploy_mtf_team("mtf_epsilon11", console.available_teams["mtf_epsilon11"], null)
+		if(QDELETED(console))
+			continue
+		var/list/team_data = console.available_teams?["mtf_epsilon11"]
+		if(team_data)
+			console.deploy_mtf_team("mtf_epsilon11", team_data, null)
 			break
 
 /datum/facility_director/proc/deploy_crew_reinforcements()

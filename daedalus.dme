@@ -1459,7 +1459,6 @@
 #include "code\game\machinery\computer\medical.dm"
 #include "code\game\machinery\computer\pod.dm"
 #include "code\game\machinery\computer\robot.dm"
-#include "code\game\machinery\computer\scp_research_console.dm"
 #include "code\game\machinery\computer\security.dm"
 #include "code\game\machinery\computer\station_alert.dm"
 #include "code\game\machinery\computer\teleporter.dm"

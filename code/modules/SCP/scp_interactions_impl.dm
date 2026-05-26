@@ -385,7 +385,7 @@
 	return TRUE
 
 /proc/interact_610_overrun_3008(mob/living/scp1, mob/living/scp2)
-	for(var/obj/structure/flesh_structure/F in range(5, scp1))
+	for(var/obj/structure/scp610_flesh_structure/F in range(5, scp1))
 		for(var/mob/living/simple_animal/hostile/retaliate/scp1507/staff in range(5, F))
 			staff.visible_message(span_danger("[staff] attacks [F] with territorial fury!"))
 			F.take_damage(15, BRUTE, "melee")
@@ -522,7 +522,7 @@
 	return TRUE
 
 /proc/interact_1507_flock_610(mob/living/scp1, mob/living/scp2)
-	for(var/obj/structure/flesh_structure/F in range(5, scp1))
+	for(var/obj/structure/scp610_flesh_structure/F in range(5, scp1))
 		F.take_damage(10, BRUTE, "melee")
 		F.visible_message(span_warning("A flamingo pecks aggressively at [F]!"))
 		break
@@ -576,7 +576,7 @@
 	return TRUE
 
 /proc/interact_2343_benevolence_610(mob/living/scp1, mob/living/scp2)
-	for(var/obj/structure/flesh_structure/F in range(5, scp1))
+	for(var/obj/structure/scp610_flesh_structure/F in range(5, scp1))
 		F.take_damage(25, BURN, FIRE)
 		F.visible_message(span_notice("The flesh withers and recoils from the benevolent presence!"))
 		break
@@ -808,7 +808,7 @@
 
 /proc/interact_457_burn_610(mob/living/scp1, mob/living/scp2)
 	var/burned = FALSE
-	for(var/obj/structure/flesh_structure/F in range(5, scp1))
+	for(var/obj/structure/scp610_flesh_structure/F in range(5, scp1))
 		F.take_damage(40, BURN, FIRE)
 		F.visible_message(span_danger("[F] burns rapidly in the intense heat!"))
 		burned = TRUE

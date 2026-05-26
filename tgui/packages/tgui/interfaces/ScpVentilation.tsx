@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -79,8 +79,8 @@ export const ScpVentilation = (_props: unknown) => {
   const [reportSource, setReportSource] = useState<string>('');
 
   return (
-    <Window title="SCP Ventilation Control" width={700} height={600} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow title="SCP Ventilation Control" width={700} height={600} >
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -411,8 +411,8 @@ export const ScpVentilation = (_props: unknown) => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };
 

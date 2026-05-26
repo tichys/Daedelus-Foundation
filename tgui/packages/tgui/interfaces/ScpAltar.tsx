@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   meditation_progress: number;
@@ -16,8 +16,8 @@ export const ScpAltar = (props) => {
   const { meditation_progress, ritual_ready, ritual_cooldown } = data;
 
   return (
-    <Window theme="scp_terminal" width={420} height={380}>
-      <Window.Content scrollable>
+    <NtosWindow width={420} height={380}>
+      <NtosWindow.Content scrollable>
         <Section title="FOUNDATION MEDITATION ALTAR">
           <Box
             style={{
@@ -82,7 +82,7 @@ export const ScpAltar = (props) => {
                 >
                   MEDITATE
                 </Box>
-                <Box style={{ fontSize: '9px', color: '#6a6a70' }}>
+                <Box style={{ fontSize: '11px', color: '#6a6a70' }}>
                   Find inner peace. +5 sanity. Progresses meditation.
                 </Box>
               </Box>
@@ -90,7 +90,7 @@ export const ScpAltar = (props) => {
                 onClick={() => act('meditate')}
                 style={{
                   fontFamily: 'monospace',
-                  fontSize: '9px',
+                  fontSize: '11px',
                   background: 'rgba(68,136,255,0.1)',
                   border: '1px solid #4488ff',
                   color: '#4488ff',
@@ -122,7 +122,7 @@ export const ScpAltar = (props) => {
                 >
                   SEEK GUIDANCE
                 </Box>
-                <Box style={{ fontSize: '9px', color: '#6a6a70' }}>
+                <Box style={{ fontSize: '11px', color: '#6a6a70' }}>
                   Receive wisdom from the Foundation creed. +3 sanity.
                 </Box>
               </Box>
@@ -130,7 +130,7 @@ export const ScpAltar = (props) => {
                 onClick={() => act('seek_guidance')}
                 style={{
                   fontFamily: 'monospace',
-                  fontSize: '9px',
+                  fontSize: '11px',
                   background: 'rgba(212,160,23,0.1)',
                   border: '1px solid #d4a017',
                   color: '#d4a017',
@@ -162,7 +162,7 @@ export const ScpAltar = (props) => {
                 >
                   CALMING RITUAL
                 </Box>
-                <Box style={{ fontSize: '9px', color: '#6a6a70' }}>
+                <Box style={{ fontSize: '11px', color: '#6a6a70' }}>
                   {ritual_ready
                     ? 'Channel the altar to calm all nearby. +8 sanity each.'
                     : `Recovering... ${ritual_cooldown}s remaining.`}
@@ -173,7 +173,7 @@ export const ScpAltar = (props) => {
                 disabled={!ritual_ready}
                 style={{
                   fontFamily: 'monospace',
-                  fontSize: '9px',
+                  fontSize: '11px',
                   background: ritual_ready ? 'rgba(68,255,68,0.1)' : 'transparent',
                   border: `1px solid ${ritual_ready ? '#44ff44' : '#6a6a70'}`,
                   color: ritual_ready ? '#44ff44' : '#555560',
@@ -185,7 +185,7 @@ export const ScpAltar = (props) => {
             </Box>
           </Box>
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

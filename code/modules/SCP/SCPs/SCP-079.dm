@@ -66,7 +66,7 @@
 	interaction_history = null
 	persistence_data = null
 	if(SSscp_persistence?.manager)
-		SSscp_persistence.manager.scp_instances -= persistence_id
+		SSscp_persistence?.manager?.scp_instances -= persistence_id
 	QDEL_NULL(SCP)
 	return ..()
 
@@ -412,7 +412,7 @@
 	var/record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [interaction_type] with [target ? "[target]" : "unknown"]"
 	interaction_history += record
 	if(SSscp_persistence?.manager?.scp_instances?[persistence_id])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		instance.add_interaction_record(target, interaction_type)
 
 /mob/living/scp079/death(gibbed)
@@ -421,7 +421,7 @@
 	is_manifested = FALSE
 	hook_scp_recontainment("SCP-079", list())
 	if(SSscp_persistence?.manager?.scp_instances?["SCP-079"])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances["SCP-079"]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-079"]
 		instance.containment_status = "neutralized"
 	..()
 
@@ -751,7 +751,7 @@
 	if(.)
 		return
 
-	var/mob/user = usr
+	var/mob/user = ui.user
 
 	switch(action)
 		if("initiate")

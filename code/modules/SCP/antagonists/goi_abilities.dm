@@ -14,7 +14,7 @@
 	cooldown_time = 30 SECONDS
 
 /datum/action/innate/scp_ability/sarkic_fleshcraft/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -64,7 +64,7 @@
 	cooldown_time = 45 SECONDS
 
 /datum/action/innate/scp_ability/sarkic_blood_heal/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	if(H.blood_volume < 300)
@@ -83,7 +83,7 @@
 	cooldown_time = 25 SECONDS
 
 /datum/action/innate/scp_ability/sarkic_flesh_mold/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -141,7 +141,7 @@
 	cooldown_time = 90 SECONDS
 
 /datum/action/innate/scp_ability/sarkic_corrupt_containment/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	var/list/nearby_scps = list()
@@ -219,7 +219,7 @@
 	cooldown_time = 120 SECONDS
 
 /datum/action/innate/scp_ability/insurgency_equipment/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -256,7 +256,7 @@
 	cooldown_time = 60 SECONDS
 
 /datum/action/innate/scp_ability/ci_disguise/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -280,7 +280,7 @@
 	cooldown_time = 180 SECONDS
 
 /datum/action/innate/scp_ability/ci_safehouse/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -326,7 +326,7 @@
 	cooldown_time = 20 SECONDS
 
 /datum/action/innate/scp_ability/serpents_knowledge/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -353,7 +353,7 @@
 	cooldown_time = 60 SECONDS
 
 /datum/action/innate/scp_ability/serpents_liberate/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	var/list/nearby_scps = list()
@@ -380,7 +380,7 @@
 	cooldown_time = 45 SECONDS
 
 /datum/action/innate/scp_ability/serpents_veil/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -395,7 +395,7 @@
 	cooldown_time = 15 SECONDS
 
 /datum/action/innate/scp_ability/serpents_empathy/Activate()
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return
 	start_cooldown()
@@ -501,4 +501,4 @@
 			else
 				award_amount = 2
 	if(award_amount > 0 && SSscp_research && SSscp_research.manager)
-		SSscp_research.manager.adjust_research_points(award_amount, "scp_interaction:[scp_id]:[interaction_type]")
+		SSscp_research?.manager?.adjust_research_points(award_amount, "scp_interaction:[scp_id]:[interaction_type]")

@@ -320,7 +320,7 @@ SUBSYSTEM_DEF(scp_camera_alerts)
 		for(var/mob/living/scp/S in A)
 			S.containment_resistance = min(S.max_containment_resistance, S.containment_resistance + breach_reduction)
 			if(sanity_resist > 0 && SSscp_research?.manager)
-				SSscp_research.manager.cognitive_bonus += sanity_resist
+				SSscp_research?.manager?.cognitive_bonus += sanity_resist
 	if(breach_reduction > 0)
 		apply_containment_upgrade_to_area(A, breach_reduction)
 	qdel(src)
@@ -457,7 +457,7 @@ SUBSYSTEM_DEF(round_objectives)
 					O.current_progress = 1
 		if(O.objective_id == "command_direct")
 			if(SSscp_persistence?.manager)
-				O.current_progress = (SSscp_persistence.manager.global_containment_stability >= 50) ? 1 : 0
+				O.current_progress = (SSscp_persistence?.manager?.global_containment_stability >= 50) ? 1 : 0
 
 /datum/controller/subsystem/round_objectives/proc/report_objective_progress(obj_id, amount = 1)
 	var/datum/round_objective/O = objectives[obj_id]
@@ -595,7 +595,7 @@ SUBSYSTEM_DEF(round_objectives)
 		if(evacuation_called)
 			return
 		if(SSsecurity_level && SSsecurity_level.current_level < SEC_LEVEL_RED)
-			to_chat(usr, span_warning("Evacuation requires Code Red or higher security level."))
+			to_chat(ui.user, span_warning("Evacuation requires Code Red or higher security level."))
 			return
 		evacuation_called = TRUE
 		evacuation_timer = world.time + evacuation_delay
@@ -742,7 +742,7 @@ SUBSYSTEM_DEF(round_objectives)
 	if(scp_containment_system) { scp_containment_system.perform_interaction("secrete_acid"); return; }
 
 /mob/living/scp/proc/action_endure_torment()
-	set name = "Adapt to Damage"
+	set name = "Endure Torment"
 	set category = "SCP Contained"
 	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("resist_damage"); return; }
@@ -939,6 +939,43 @@ SUBSYSTEM_DEF(round_objectives)
 	msg += "\n[span_notice("State: [CS.containment_state || "Unknown"]")]"
 	msg += "\n[span_notice("Observers: [CS.observer_count]")]"
 	to_chat(src, msg)
+
+/mob/living/scp/proc/grant_containment_verbs()
+	var/list/interaction_ids = list()
+	if(scp_containment_system)
+		var/list/options = scp_containment_system.get_interact_options()
+		for(var/list/opt in options)
+			interaction_ids += opt["id"]
+	var/static/list/verb_map = list(
+		"scratch_wall" = /mob/living/scp/proc/action_scratch_wall,
+		"intimidate" = /mob/living/scp/proc/action_intimidate,
+		"snap_restraints" = /mob/living/scp/proc/action_snap_restraints,
+		"cover_face" = /mob/living/scp/proc/action_cover_face,
+		"sob_quietly" = /mob/living/scp/proc/action_sob_quietly,
+		"press_against_wall" = /mob/living/scp/proc/action_press_wall,
+		"sudden_dash" = /mob/living/scp/proc/action_sudden_dash,
+		"sense_pestilence" = /mob/living/scp/proc/action_sense_pestilence,
+		"request_interview" = /mob/living/scp/proc/action_request_interview,
+		"examine_equipment" = /mob/living/scp/proc/action_examine_equipment,
+		"corrode_wall" = /mob/living/scp/proc/action_corrode_wall,
+		"test_phase" = /mob/living/scp/proc/action_test_phase,
+		"mimic_voice" = /mob/living/scp/proc/action_mimic_voice,
+		"listen_sounds" = /mob/living/scp/proc/action_listen_sounds,
+		"probe_network" = /mob/living/scp/proc/action_probe_network,
+		"brute_force" = /mob/living/scp/proc/action_brute_force,
+		"test_wall" = /mob/living/scp/proc/action_test_wall,
+		"acid_spit" = /mob/living/scp/proc/action_acid_spit,
+		"endure_torment" = /mob/living/scp/proc/action_endure_torment,
+		"rage_burst" = /mob/living/scp/proc/action_rage_burst,
+		"flare_up" = /mob/living/scp/proc/action_flare_up,
+		"reach_flames" = /mob/living/scp/proc/action_reach_flames,
+		"absorb_heat" = /mob/living/scp/proc/action_absorb_heat,
+		"firestorm" = /mob/living/scp/proc/action_firestorm,
+	)
+	for(var/id in interaction_ids)
+		if(verb_map[id])
+			add_verb(src, verb_map[id])
+	add_verb(src, /mob/living/scp/proc/show_containment_status)
 
 /proc/scp_execute_test_outcome(mob/living/carbon/human/test_subject, scp_id, test_type, risk_level)
 	if(!test_subject || test_subject.stat == DEAD)

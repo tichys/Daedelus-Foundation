@@ -41,12 +41,12 @@
 /proc/hook_breach_mtf_auto_deploy(scp_id)
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
-	var/active_breaches = SSscp_persistence.manager.active_breaches
+	var/active_breaches = SSscp_persistence?.manager?.active_breaches
 	var/is_keter = FALSE
 	var/is_biohazard = FALSE
 	var/is_fire = FALSE
 	if(SSscp_persistence?.manager?.scp_instances?[scp_id])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[scp_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[scp_id]
 		if(instance.containment_class == SCP_KETER)
 			is_keter = TRUE
 	if(findtext(scp_id, "008") || findtext(scp_id, "049") || findtext(scp_id, "610"))
@@ -64,15 +64,15 @@
 		mtf_team_key = "mtf_epsilon11"
 	if(!mtf_team_key)
 		return
-	var/list/team_data
 	for(var/obj/machinery/mtf_deployment_console/console in world)
-		if(console.available_teams[mtf_team_key])
-			team_data = console.available_teams[mtf_team_key]
-			if(world.time >= console.deployment_cooldown && active_breaches >= team_data["min_breach"])
-				console.deploy_mtf_team(mtf_team_key, team_data, null)
-				if(SSfoundation_comms)
-					SSfoundation_comms.create_dispatch(null, DISPATCH_MTF, "Automated MTF deployment: [team_data["name"]] dispatched for SCP-[scp_id] breach response.", 2)
-			break
+		var/list/team_data = console.available_teams?[mtf_team_key]
+		if(!team_data)
+			continue
+		if(world.time >= console.deployment_cooldown && active_breaches >= team_data["min_breach"])
+			console.deploy_mtf_team(mtf_team_key, team_data, null)
+			if(SSfoundation_comms)
+				SSfoundation_comms.create_dispatch(null, DISPATCH_MTF, "Automated MTF deployment: [team_data["name"]] dispatched for SCP-[scp_id] breach response.", 2)
+		break
 
 /proc/hook_recontainment_budget_recovery(scp_id, list/participants)
 	if(!SSfoundation_budget)
@@ -98,7 +98,7 @@
 		return
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		return
-	if(SSscp_persistence.manager.active_breaches > 0)
+	if(SSscp_persistence?.manager?.active_breaches > 0)
 		return
 	if(SSsecurity_level.current_level == SEC_LEVEL_DELTA)
 		set_foundation_security_code(SEC_LEVEL_RED, "All SCPs recontained. Downgrading from Delta.")
@@ -108,7 +108,7 @@
 /proc/hook_research_milestone_announcement()
 	if(!SSscp_research || !SSscp_research.manager)
 		return
-	var/points = SSscp_research.manager.total_research_points
+	var/points = SSscp_research?.manager?.total_research_points
 	var/list/thresholds = list(1000, 5000, 15000, 30000, 50000)
 	var/list/messages = list(
 		"Research Division has achieved 1,000 total research points. Foundation science progresses steadily.",
@@ -121,7 +121,7 @@
 	for(var/threshold in thresholds)
 		if(points >= threshold)
 			announced_milestones++
-	var/list/stored_milestones = SSscp_research.manager.research_milestones
+	var/list/stored_milestones = SSscp_research?.manager?.research_milestones
 	if(!stored_milestones["_announced_round_milestones"])
 		stored_milestones["_announced_round_milestones"] = 0
 	var/prev = stored_milestones["_announced_round_milestones"]

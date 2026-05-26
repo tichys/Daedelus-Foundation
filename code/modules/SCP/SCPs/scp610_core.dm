@@ -302,6 +302,9 @@ SUBSYSTEM_DEF(scp610)
 	var/list/infected_mobs = list()
 	var/total_infections = 0
 	var/session_start_time = 0
+	var/signal_biomass = 0
+	var/cognitohazard_cost = 2
+	var/cognitohazard_range = 10
 
 /obj/structure/scp610_core/Initialize()
 	. = ..()
@@ -312,6 +315,9 @@ SUBSYSTEM_DEF(scp610)
 
 /obj/structure/scp610_core/Destroy()
 	SSscp610.cores -= src
+	if(!length(SSscp610.cores))
+		for(var/mob/dead/observer/O in GLOB.player_list)
+			remove_verb(O, /mob/dead/observer/proc/join_scp610_hive)
 	for(var/datum/scp610_flesh_node/node as anything in nodes)
 		qdel(node)
 	nodes.Cut()
@@ -358,6 +364,8 @@ SUBSYSTEM_DEF(scp610)
 	hook_scp_breach("SCP-610", src)
 	update_appearance()
 	notify_ghosts("SCP-610 has activated! The flesh hungers!", source = src, action = NOTIFY_JUMP)
+	for(var/mob/dead/observer/O in GLOB.player_list)
+		add_verb(O, /mob/dead/observer/proc/join_scp610_hive)
 
 /obj/structure/scp610_core/proc/process_biomass()
 	if(core_state < SCP610_CORE_ACTIVE)
@@ -377,6 +385,7 @@ SUBSYSTEM_DEF(scp610)
 	check_core_evolution()
 	heal_nearby_flesh()
 	regen_hive_will()
+	tick_cognitohazard()
 
 /obj/structure/scp610_core/proc/check_core_evolution()
 	var/flesh_count = length(flesh_mobs) + length(flesh_structures)
@@ -414,6 +423,41 @@ SUBSYSTEM_DEF(scp610)
 	hive_will = min(hive_will + regen, hive_will_max)
 	if(core_state >= SCP610_CORE_EXPANDED)
 		hive_will_max = SCP610_HIVE_WILL_MAX_MASTER
+
+/obj/structure/scp610_core/proc/tick_cognitohazard()
+	if(core_state < SCP610_CORE_ACTIVE)
+		return
+	if(signal_biomass < cognitohazard_cost)
+		return
+	var/strength_multiplier = clamp(core_biomass / 50, 0.1, 1.0)
+	for(var/mob/living/carbon/human/H in range(cognitohazard_range, src))
+		if(H.stat == DEAD)
+			continue
+		if(H.SCP)
+			continue
+		if(HAS_TRAIT(H, TRAIT_SCP610_IMMUNE))
+			continue
+		if(H.has_status_effect(/datum/status_effect/scp610_infection))
+			continue
+		var/distance = get_dist(src, get_turf(H))
+		if(distance > cognitohazard_range || distance < 1)
+			continue
+		var/distance_ratio = distance / cognitohazard_range
+		var/effective_chance = (1 - distance_ratio) * 15 * strength_multiplier
+		if(!prob(effective_chance))
+			continue
+		if(signal_biomass < cognitohazard_cost)
+			break
+		var/accumulation_amount = 0
+		if(distance <= 3)
+			accumulation_amount = 8 * strength_multiplier
+		else if(distance <= 7)
+			accumulation_amount = 4 * strength_multiplier
+		else
+			accumulation_amount = 2 * strength_multiplier
+		if(accumulation_amount > 0)
+			H.apply_status_effect(/datum/status_effect/cognitohazard_exposure, accumulation_amount)
+			signal_biomass -= cognitohazard_cost
 
 /obj/structure/scp610_core/proc/use_hive_will(amount)
 	if(hive_will < amount)
@@ -715,8 +759,6 @@ SUBSYSTEM_DEF(scp610)
 		if(!neighbor || !istype(neighbor) || neighbor.density)
 			continue
 		if(isspaceturf(neighbor) || ischasm(neighbor) || islava(neighbor))
-			continue
-		if(locate(/obj/structure/scp610_creep) in neighbor)
 			continue
 		if(locate(/obj/structure/scp610_creep) in neighbor)
 			continue
@@ -1353,7 +1395,7 @@ SUBSYSTEM_DEF(scp610)
 
 // --- Ghost join verb for dead players ---
 
-/mob/dead/observer/verb/join_scp610_hive()
+/mob/dead/observer/proc/join_scp610_hive()
 	set name = "Join SCP-610 Hive"
 	set category = "SCP-610"
 	var/found_core = FALSE

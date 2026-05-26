@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   departments: Department[];
@@ -42,8 +42,8 @@ export const ScpBudgetConsole = (props) => {
   const [reallocateAmount, setReallocateAmount] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={600}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={600}>
+      <NtosWindow.Content scrollable>
         <Section title="BUDGET MANAGEMENT — FOUNDATION OPERATIONS">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             TOTAL BUDGET: {total_budget} CR | SPENT: {total_spent} CR | REMAINING: {total_budget - total_spent} CR
@@ -116,7 +116,7 @@ export const ScpBudgetConsole = (props) => {
             </Button>
           </Box>
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

@@ -114,7 +114,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -141,11 +141,16 @@
 					break
 		if("file_violation")
 			var/accused_name = params["accused"]
+			var/accused_job = params["accused_job"] || ""
 			var/vtype = params["violation_type"]
 			var/desc = params["description"]
+			var/evidence = params["evidence"]
 			var/severity = text2num(params["severity"]) || ETHICS_VIOLATION_MINOR
 			var/datum/ethics_violation/V = new(H, null, vtype, desc, severity)
 			V.accused_name = accused_name
+			V.accused_job = accused_job
+			if(evidence)
+				V.evidence += evidence
 			SSethics_committee.file_violation(V)
 			. = TRUE
 		if("approve_test")
@@ -215,7 +220,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -327,7 +332,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -454,7 +459,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -552,7 +557,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -645,7 +650,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -718,6 +723,28 @@
 		data["access_denied"] = TRUE
 		return data
 	data["access_denied"] = FALSE
+	if(!SSsite_command)
+		data["status"] = list(
+			"total_breaches" = 0,
+			"active_breaches" = 0,
+			"total_recontainments" = 0,
+			"power_status" = "Unknown",
+			"comms_status" = "Unknown",
+			"casualties" = 0,
+			"dclass_alive" = 0,
+			"dclass_escaped" = 0,
+			"research_points" = 0,
+			"time" = 0,
+		)
+		data["directives"] = list()
+		data["total_directives"] = 0
+		data["budget_spent"] = 0
+		data["budget_total"] = 0
+		data["ethics_pending"] = 0
+		data["tribunal_cases"] = 0
+		data["research_points"] = 0
+		data["network_integrity"] = 100
+		return data
 	if(SSsite_command.current_report)
 		var/datum/facility_status_report/R = SSsite_command.current_report
 		data["status"] = list(
@@ -772,11 +799,13 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_ADMIN_LVL5 in id_card.access))
+		return
+	if(!SSsite_command)
 		return
 	switch(action)
 		if("print_status_report")
@@ -846,7 +875,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -962,7 +991,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1043,7 +1072,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1112,7 +1141,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1181,7 +1210,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1207,73 +1236,6 @@
 			var/notes = params["notes"]
 			var/sentence = params["sentencing"]
 			SSlegal_system.render_verdict(case_id, verdict, notes, sentence)
-			. = TRUE
-
-/datum/computer_file/program/scp_testing
-	filename = "scp_testing"
-	filedesc = "SCP Testing Protocol"
-	category = PROGRAM_CATEGORY_SCI
-	program_icon_state = "generic"
-	extended_desc = "Submit and manage SCP testing requests, flag ethics oversight, log observations."
-	size = 3
-	tgui_id = "SCPTestingConsole"
-	program_icon = "flask"
-	usage_flags = PROGRAM_ALL
-	available_on_ntnet = FALSE
-	required_access = list(ACCESS_SCIENCE)
-
-/datum/computer_file/program/scp_testing/ui_data(mob/user)
-	var/list/data = get_header_data()
-	var/list/scp_list = list()
-	for(var/mob/living/L in GLOB.mob_living_list)
-		if(!istype(L, /mob/living/scp))
-			continue
-		if(L.stat == DEAD)
-			continue
-		var/status = "contained"
-		if("containment_status" in L.vars)
-			status = L.vars["containment_status"]
-		scp_list += list(list("name" = L.name, "ref" = REF(L), "status" = status))
-	var/list/subjects = list()
-	for(var/mob/living/carbon/human/H in GLOB.mob_living_list)
-		if(H.stat == DEAD)
-			continue
-		if(H.job != JOB_DCLASS && H.job != "D-Class Personnel")
-			continue
-		subjects += list(list("name" = H.real_name, "ref" = REF(H)))
-	data["scp_list"] = scp_list
-	data["subjects"] = subjects
-	data["can_submit_research"] = SSscp_research?.manager ? TRUE : FALSE
-	data["can_flag_ethics"] = SSethics_committee ? TRUE : FALSE
-	return data
-
-/datum/computer_file/program/scp_testing/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
-	. = ..()
-	if(.)
-		return
-	var/mob/living/carbon/human/H = usr
-	if(!istype(H))
-		return
-	switch(action)
-		if("submit_research")
-			var/points = text2num(params["points"]) || 0
-			if(points <= 0)
-				return
-			if(!SSscp_research?.manager)
-				return
-			SSscp_research.manager.adjust_research_points(points, "testing_app_submission:[usr?.ckey || "unknown"]")
-			to_chat(H, span_notice("Submitted [points] research points."))
-			if(SSraisa)
-				SSraisa.record_observation(H)
-			. = TRUE
-		if("flag_ethics_oversight")
-			if(!SSethics_committee)
-				return
-			var/scp_name = params["scp_name"] || "Unknown"
-			var/risk_level = text2num(params["risk_level"]) || 1
-			var/test_id = "test_[world.time]"
-			SSethics_committee.flag_test_for_oversight(test_id, scp_name, H.real_name, risk_level)
-			to_chat(H, span_notice("High-risk test flagged for Ethics Committee oversight. Case: [test_id]"))
 			. = TRUE
 
 /datum/computer_file/program/scp_it_network
@@ -1331,7 +1293,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1431,7 +1393,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1530,7 +1492,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1661,7 +1623,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1778,8 +1740,8 @@
 		return
 	if(action == "view_camera")
 		var/obj/machinery/camera/C = locate(params["ref"])
-		if(C && !(C.machine_stat & NOPOWER) && ishuman(usr))
-			var/mob/living/carbon/human/H = usr
+		if(C && !(C.machine_stat & NOPOWER) && ishuman(ui.user))
+			var/mob/living/carbon/human/H = ui.user
 			H.reset_perspective(C)
 			addtimer(CALLBACK(H, /mob/proc/reset_perspective), 100)
 			. = TRUE
@@ -1799,9 +1761,9 @@
 /datum/computer_file/program/scp_recontainment_guide/ui_data(mob/user)
 	var/list/data = get_header_data()
 	var/list/all_guides = list()
-	var/datum/scp_recontainment_guide/_G = new()
-	for(var/key in _G.guide_entries)
-		var/list/entry = _G.guide_entries[key]
+	var/list/entries = new /datum/scp_recontainment_guide().guide_entries
+	for(var/key in entries)
+		var/list/entry = entries[key]
 		all_guides += list(list("designation" = entry["designation"], "class" = entry["class"], "threat" = entry["threat"], "procedures" = entry["procedures"], "warning" = entry["warning"]))
 	data["guides"] = all_guides
 	return data
@@ -1877,10 +1839,10 @@
 		if(!H || H.stat != DEAD)
 			return
 		var/cause = params["cause"] || "Pending Autopsy"
-		var/obj/item/paper/death_certificate/cert = new(get_turf(usr))
+		var/obj/item/paper/death_certificate/cert = new(get_turf(ui.user))
 		cert.generate_certificate(H, cause)
 		if(GLOB.scp_admin_log)
-			GLOB.scp_admin_log.log_event("death_cert", "N/A", usr?.ckey || "N/A", H.real_name, "Death certificate issued: [cause]", 2)
+			GLOB.scp_admin_log.log_event("death_cert", "N/A", ui.user?.ckey || "N/A", H.real_name, "Death certificate issued: [cause]", 2)
 		. = TRUE
 
 /datum/computer_file/program/scp_security_codes
@@ -1916,7 +1878,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -1968,9 +1930,9 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!H.sanity)
 		return
 	var/datum/sanity/S = H.sanity
@@ -2021,12 +1983,12 @@
 			var/recipient = params["recipient"] || "All Staff"
 			var/subject = params["subject"] || "No Subject"
 			var/body = params["body"] || ""
-			if(!usr)
+			if(!ui.user)
 				return
-			var/sender_name = usr?.real_name || "Unknown"
+			var/sender_name = ui.user?.real_name || "Unknown"
 			var/sender_job = "Unknown"
-			if(ishuman(usr))
-				var/mob/living/carbon/human/H = usr
+			if(ishuman(ui.user))
+				var/mob/living/carbon/human/H = ui.user
 				sender_job = H.job || "Unknown"
 			var/message = list("sender" = sender_name, "sender_job" = sender_job, "recipient" = recipient, "subject" = subject, "body" = body, "time" = gameTimestamp("hh:mm"), "priority" = params["priority"] || "normal")
 			for(var/obj/machinery/foundation_email_terminal/T in INSTANCES_OF(/obj/machinery/foundation_email_terminal))
@@ -2034,7 +1996,7 @@
 					T.inbox.Cut(1, 2)
 				T.inbox += list(message)
 			if(GLOB.scp_admin_log)
-				GLOB.scp_admin_log.log_event("email", "N/A", usr?.ckey || "N/A", recipient, "[subject]: [body]", 1)
+				GLOB.scp_admin_log.log_event("email", "N/A", ui.user?.ckey || "N/A", recipient, "[subject]: [body]", 1)
 			. = TRUE
 
 /datum/computer_file/program/scp_dclass_work
@@ -2115,7 +2077,7 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
 
 	var/mob/living/carbon/human/H = usr
@@ -2245,16 +2207,16 @@
 	. = ..()
 	if(.)
 		return
-	if(!ishuman(usr))
+	if(!ishuman(ui.user))
 		return
 	switch(action)
 		if("declare_quarantine")
-			var/area/A = get_area(usr)
+			var/area/A = get_area(ui.user)
 			if(A && GLOB.contagion_tracker)
 				GLOB.contagion_tracker.declare_quarantine(A, params["reason"] || "Contagion risk detected")
 			. = TRUE
 		if("lift_quarantine")
-			var/area/A = get_area(usr)
+			var/area/A = get_area(ui.user)
 			if(A && GLOB.contagion_tracker)
 				GLOB.contagion_tracker.lift_quarantine(A)
 			. = TRUE
@@ -2289,7 +2251,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2346,7 +2308,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2411,7 +2373,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2469,7 +2431,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2521,7 +2483,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2612,7 +2574,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2657,7 +2619,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2703,7 +2665,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
@@ -2753,7 +2715,7 @@
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)

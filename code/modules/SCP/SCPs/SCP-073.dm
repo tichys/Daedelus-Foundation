@@ -102,8 +102,8 @@
 			attacker.adjustToxLoss(reflected)
 
 	attacker.visible_message(
-		"<span class='danger'>[attacker]'s attack is reflected back upon themselves!</span>",
-		"<span class='userdanger'>Your attack is reflected back! The pain is your own!</span>"
+		span_danger("[attacker]'s attack is reflected back upon themselves!"),
+		span_userdanger("Your attack is reflected back! The pain is your own!")
 	)
 
 	playsound(src, 'sound/weapons/punch1.ogg', 50, TRUE)
@@ -135,8 +135,8 @@
 		var/mob/living/carbon/human/H = A
 		touched_by[H.ckey] = world.time
 		H.visible_message(
-			"<span class='notice'>[src] touches [H] gently.</span>",
-			"<span class='warning'>[src] touches you. A strange cold sensation washes over you, and your memories seem to blur...</span>"
+			span_notice("[src] touches [H] gently."),
+			span_warning("[src] touches you. A strange cold sensation washes over you, and your memories seem to blur...")
 		)
 		if(H.sanity)
 			H.sanity.add_trauma(TRAUMA_PSYCHOLOGICAL, 5)

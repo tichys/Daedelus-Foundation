@@ -9,7 +9,7 @@ SUBSYSTEM_DEF(dclass)
 
 /datum/controller/subsystem/dclass/Initialize()
 	manager = new /datum/dclass_manager()
-	world.log << "D-Class Management Subsystem: Initialized"
+	log_world("D-Class Management Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/dclass/fire()

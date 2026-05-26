@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useBackend } from '../backend';
 import { Box, Button, Section, Input, TextArea } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 type Data = {
   cases: LegalCase[];
@@ -32,8 +32,8 @@ export const ScpLegalConsole = (props) => {
   const [legalCharges, setLegalCharges] = useState('');
 
   return (
-    <Window theme="scp_terminal" width={700} height={600}>
-      <Window.Content scrollable>
+    <NtosWindow width={700} height={600}>
+      <NtosWindow.Content scrollable>
         <Section title="LEGAL RECORDS — FOUNDATION LAW">
           <Box style={{ fontFamily: 'monospace', fontSize: '10px', color: '#6a6a70', letterSpacing: '0.1em', marginBottom: '8px' }}>
             TOTAL CASES: {total_cases} | RESOLVED: {resolved_cases}
@@ -99,7 +99,7 @@ export const ScpLegalConsole = (props) => {
             </Box>
           ))}
         </Section>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

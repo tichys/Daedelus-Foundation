@@ -5,6 +5,9 @@
 	status_flags = 0
 	hud_possible = list()
 	hud_type = /datum/hud
+	var/scp_designation = ""
+	var/scp_class = ""
+	var/scp_name = ""
 	var/obj_damage = 50
 	melee_damage_lower = 15
 	melee_damage_upper = 25
@@ -122,7 +125,7 @@
 	feature_configs = null
 
 	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence.manager.scp_instances -= persistence_id
+		SSscp_persistence?.manager?.scp_instances -= persistence_id
 
 	return ..()
 
@@ -220,7 +223,7 @@
 	last_breach_time = world.time
 	to_chat(src, span_danger("You have breached containment!"))
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.containment_status = "breached"
 			instance.add_breach_record()
@@ -231,7 +234,7 @@
 	containment_status = "contained"
 	to_chat(src, span_notice("You have returned to containment."))
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.containment_status = "contained"
 
@@ -274,7 +277,7 @@
 	var/resistance_modifier = containment_resistance / 10
 	var/effectiveness_modifier = 0
 	if(SSscp_persistence?.manager?.scp_instances?[persistence_id])
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		effectiveness_modifier = -((instance.containment_effectiveness - 1.0) * 50)
 	var/power_modifier = 0
 	var/area/A = get_area(src)
@@ -282,7 +285,7 @@
 		power_modifier = 15
 	var/cascade_modifier = 0
 	if(SSscp_persistence?.manager)
-		cascade_modifier = SSscp_persistence.manager.active_breaches * 5
+		cascade_modifier = SSscp_persistence?.manager?.active_breaches * 5
 	return min(95, max(5, base_chance + integrity_modifier + level_modifier + resistance_modifier + effectiveness_modifier + power_modifier + cascade_modifier))
 
 /mob/living/scp/proc/enhance_containment_resistance(amount = 10)
@@ -366,7 +369,7 @@
 	var/record = "[time2text(world.time, "YYYY-MM-DD hh:mm:ss")]: [interaction_type] with [target ? "[target]" : "unknown"]"
 	interaction_history += record
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.add_interaction_record(target, interaction_type)
 
@@ -401,7 +404,7 @@
 /mob/living/scp/proc/scp_death()
 	visible_message(span_danger("[src] is neutralized!"))
 	if(SSscp_persistence && SSscp_persistence.manager)
-		var/datum/scp_instance/instance = SSscp_persistence.manager.scp_instances[persistence_id]
+		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.containment_status = "neutralized"
 	hook_scp_recontainment(persistence_id, list())

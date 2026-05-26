@@ -1,6 +1,6 @@
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -181,8 +181,8 @@ export const ScpContainmentRobotics = (_props, context) => {
   } = data;
 
   return (
-    <Window title="Containment Robotics" width={700} height={650} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow title="Containment Robotics" width={700} height={650} >
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section>
@@ -472,7 +472,7 @@ export const ScpContainmentRobotics = (_props, context) => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

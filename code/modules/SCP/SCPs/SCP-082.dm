@@ -38,6 +38,12 @@
 
 	grant_language(/datum/language/common, TRUE, TRUE)
 
+	add_verb(src, list(
+		/mob/living/scp/scp082/proc/verb_greet_nearby,
+		/mob/living/scp/scp082/proc/verb_offer_food,
+		/mob/living/scp/scp082/proc/verb_speak_french,
+	))
+
 /mob/living/scp/scp082/scp_death()
 	icon_state = "082-dead"
 	..()
@@ -78,10 +84,10 @@
 /mob/living/scp/scp082/examine(mob/user)
 	. = ..()
 	if(is_hungry())
-		. += "<span class='warning'>There is a subtle hunger behind his polite demeanor.</span>"
+		. += span_warning("There is a subtle hunger behind his polite demeanor.")
 	else
-		. += "<span class='notice'>He appears content and well-fed.</span>"
-	. += "<span class='notice'>He stands nearly 2.4 meters tall, a gentleman of considerable stature.</span>"
+		. += span_notice("He appears content and well-fed.")
+	. += span_notice("He stands nearly 2.4 meters tall, a gentleman of considerable stature.")
 
 /mob/living/scp/scp082/say(message, bubble_type, list/spans = list(), sanitize = TRUE, datum/language/language = null, ignore_spam = FALSE, forced = null, filterproof = null, range = 7)
 	. = ..()
@@ -130,8 +136,8 @@
 	if(victim.stat == DEAD)
 		consume_victim(victim)
 	else
-		victim.visible_message("<span class='danger'>[src] strikes [victim] with terrible force!</span>", \
-			"<span class='userdanger'>[src] attacks you with terrifying strength!</span>")
+		victim.visible_message(span_danger("[src] strikes [victim] with terrible force!"), \
+			span_userdanger("[src] attacks you with terrifying strength!"))
 		hook_scp_combat(victim, "SCP-082", SCP082_ATTACK_DAMAGE, 0)
 		if(victim.sanity)
 			victim.sanity.adjust_sanity(-10, "scp082_attack")
@@ -144,7 +150,7 @@
 	satiation = min(SCP082_SATIATION_MAX, satiation + 35)
 	adjustBruteLoss(-SCP082_FEED_HEAL_AMOUNT)
 
-	victim.visible_message("<span class='danger'>[src] consumes [victim] with practiced composure.</span>")
+	victim.visible_message(span_danger("[src] consumes [victim] with practiced composure."))
 	hook_scp_combat(victim, "SCP-082", 100, 0)
 	hook_player_death_near_scp(victim, "SCP-082")
 
@@ -161,7 +167,7 @@
 
 /mob/living/scp/scp082/proc/greet_nearby()
 	if(world.time < last_greet_time + SCP082_GREET_COOLDOWN)
-		to_chat(src, "<span class='warning'>You have greeted people too recently.</span>")
+		to_chat(src, span_warning("You have greeted people too recently."))
 		return
 
 	last_greet_time = world.time
@@ -172,12 +178,12 @@
 			nearby += H
 
 	if(!length(nearby))
-		to_chat(src, "<span class='warning'>There is no one nearby to greet.</span>")
+		to_chat(src, span_warning("There is no one nearby to greet."))
 		return
 
 	var/greeting = french_system?.get_greeting() || "Bonjour, my friends."
 
-	visible_message("<span class='notice'><b>[src]</b> says, \"[greeting]\"</span>")
+	visible_message(span_notice("<b>[src]</b> says, \"[greeting]\""))
 
 	for(var/mob/living/carbon/human/H in nearby)
 		hook_scp_interaction(H, "SCP-082", INTERACTION_TYPE_COMMUNICATION)
@@ -190,7 +196,7 @@
 			nearby += H
 
 	if(!length(nearby))
-		to_chat(src, "<span class='warning'>There is no one nearby to offer hospitality.</span>")
+		to_chat(src, span_warning("There is no one nearby to offer hospitality."))
 		return
 
 	var/mob/living/carbon/human/target = input(src, "Whom do you wish to invite?", "Offer Hospitality") as null|anything in nearby
@@ -198,7 +204,7 @@
 		return
 
 	if(world.time < last_offer_time + SCP082_OFFER_COOLDOWN)
-		to_chat(src, "<span class='warning'>You have offered hospitality too recently.</span>")
+		to_chat(src, span_warning("You have offered hospitality too recently."))
 		return
 
 	hospitality_system?.offer_hospitality(target)
@@ -215,19 +221,19 @@
 	if(is_starving())
 		status = "STARVING - you must feed"
 
-	to_chat(src, "<span class='notice'>You are [status]. Satiation: [round(satiation, 1)]/[SCP082_SATIATION_MAX]</span>")
+	to_chat(src, span_notice("You are [status]. Satiation: [round(satiation, 1)]/[SCP082_SATIATION_MAX]"))
 
-/mob/living/scp/scp082/verb/verb_greet_nearby()
+/mob/living/scp/scp082/proc/verb_greet_nearby()
 	set name = "Greet Nearby"
 	set category = "SCP-082"
 	greet_nearby()
 
-/mob/living/scp/scp082/verb/verb_offer_food()
+/mob/living/scp/scp082/proc/verb_offer_food()
 	set name = "Offer Hospitality"
 	set category = "SCP-082"
 	offer_food()
 
-/mob/living/scp/scp082/verb/verb_speak_french()
+/mob/living/scp/scp082/proc/verb_speak_french()
 	set name = "Speak French"
 	set category = "SCP-082"
 	speak_french()
@@ -286,8 +292,8 @@
 	parent.offers_made++
 
 	var/phrase = pick(offer_phrases)
-	parent.visible_message("<span class='notice'><b>[parent]</b> says to [target], \"[phrase]\"</span>", \
-		"<span class='notice'>You offer your hospitality to [target].</span>")
+	parent.visible_message(span_notice("<b>[parent]</b> says to [target], \"[phrase]\""), \
+		span_notice("You offer your hospitality to [target]."))
 
 	hook_scp_interaction(target, "SCP-082", INTERACTION_TYPE_COMMUNICATION)
 	parent.conversations_held++
@@ -299,8 +305,8 @@
 
 /datum/scp082_hospitality_system/proc/whisper_lure(mob/living/carbon/human/target)
 	var/phrase = pick(lure_phrases)
-	parent.visible_message("<span class='notice'><b>[parent]</b> whispers to [target], \"[phrase]\"</span>", \
-		"<span class='notice'>You whisper to [target].</span>")
+	parent.visible_message(span_notice("<b>[parent]</b> whispers to [target], \"[phrase]\""), \
+		span_notice("You whisper to [target]."))
 
 /datum/scp082_hospitality_system/proc/find_isolated_target()
 	var/list/candidates = list()

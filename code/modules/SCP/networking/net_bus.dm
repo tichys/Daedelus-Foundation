@@ -82,10 +82,9 @@ GLOBAL_DATUM_INIT(foundation_network, /datum/net_bus_controller, new)
 
 /datum/net_bus/proc/deliver_signal(atom/movable/device, datum/net_signal/signal)
 	var/datum/component/network_connected/comp = device.GetComponent(/datum/component/network_connected)
-	if(!comp || !comp.connected)
+	if(!comp || !comp.connected || !comp.receive_packet_proc)
 		return
-	if(comp.receive_packet_proc)
-		call(device, comp.receive_packet_proc)(signal)
+	call(device, comp.receive_packet_proc)(signal)
 
 /datum/net_bus/proc/add_firewall(datum/net_firewall/firewall)
 	firewalls |= firewall

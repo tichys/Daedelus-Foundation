@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -203,8 +203,8 @@ export const ScpPathogenResearch = () => {
   } = data;
 
   return (
-    <Window title="Pathogen Research" width={750} height={650} theme="scp_terminal">
-      <Window.Content scrollable>
+    <NtosWindow title="Pathogen Research" width={750} height={650} >
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -693,7 +693,7 @@ export const ScpPathogenResearch = () => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };

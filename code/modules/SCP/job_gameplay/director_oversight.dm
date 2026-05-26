@@ -23,6 +23,7 @@ SUBSYSTEM_DEF(director_oversight)
 	if(!director || !department)
 		return
 	var/directive_id = "dir_[world.time]_[rand(100,999)]"
+	var/deadline_time = world.time + (deadline_minutes MINUTES)
 	directive_queue += list(list(
 		"directive_id" = directive_id,
 		"issuer" = director.real_name,
@@ -31,7 +32,8 @@ SUBSYSTEM_DEF(director_oversight)
 		"directive_type" = directive_type,
 		"target" = target,
 		"description" = description,
-		"deadline" = world.time + (deadline_minutes MINUTES),
+		"deadline" = deadline_time,
+		"deadline_text" = "[deadline_minutes] min",
 		"status" = OVERSIGHT_PENDING,
 		"assigned_to" = "",
 		"progress" = 0,
@@ -73,9 +75,9 @@ SUBSYSTEM_DEF(director_oversight)
 			completed_directives += list(D)
 			active_directives -= list(D)
 			if(SSscp_research?.manager)
-				SSscp_research.manager.adjust_research_points(10, "directive_complete:[D["department"]]")
+				SSscp_research?.manager?.adjust_research_points(10, "directive_complete:[D["department"]]")
 			if(SSbudget_system?.manager)
-				SSbudget_system.manager.add_transaction(D["department"], "REVENUE", 100, "personnel", "Directive completed: [D["directive_type"]]")
+				SSbudget_system?.manager?.add_transaction(D["department"], "REVENUE", 100, "personnel", "Directive completed: [D["directive_type"]]")
 			return TRUE
 	return FALSE
 
@@ -96,7 +98,7 @@ SUBSYSTEM_DEF(director_oversight)
 	return result
 
 /datum/controller/subsystem/director_oversight/proc/department_to_dispatch(department)
-	switch(department)
+	switch(lowertext(department))
 		if("science")
 			return 1
 		if("security")
@@ -105,12 +107,14 @@ SUBSYSTEM_DEF(director_oversight)
 			return 2
 		if("engineering")
 			return 3
-		if("command")
+		if("command","administration")
 			return 1
-		if("service")
+		if("service","logistics")
 			return 1
 		if("supply")
 			return 1
+		if("mtf operations","mtf")
+			return 4
 	return 1
 
 /datum/controller/subsystem/director_oversight/proc/generate_department_review(department)
@@ -121,21 +125,30 @@ SUBSYSTEM_DEF(director_oversight)
 	review["completed_directives"] = 0
 	review["overdue_directives"] = 0
 	for(var/list/D in directive_queue)
-		if(D["department"] == department)
+		if(lowertext(D["department"]) == lowertext(department))
 			review["pending_directives"]++
 	for(var/list/D in active_directives)
-		if(D["department"] == department)
+		if(lowertext(D["department"]) == lowertext(department))
 			if(D["status"] == OVERSIGHT_OVERDUE)
 				review["overdue_directives"]++
 			else
 				review["active_directives"]++
 	for(var/list/D in completed_directives)
-		if(D["department"] == department)
+		if(lowertext(D["department"]) == lowertext(department))
 			review["completed_directives"]++
+	var/budget_key = lowertext(department)
+	if(budget_key == "science")
+		budget_key = "research"
+	if(budget_key == "administration")
+		budget_key = "command"
+	if(budget_key == "logistics")
+		budget_key = "supply"
+	if(budget_key == "mtf operations")
+		budget_key = "security"
 	if(SSscp_research?.manager)
-		review["research_points"] = SSscp_research.manager.total_research_points
+		review["research_points"] = SSscp_research?.manager?.total_research_points
 	if(SSbudget_system?.manager)
-		var/datum/budget_data/B = SSbudget_system.manager.department_budgets[department]
+		var/datum/budget_data/B = SSbudget_system?.manager?.department_budgets[budget_key]
 		if(B)
 			review["budget_remaining"] = B.remaining_budget
 			review["budget_allocated"] = B.allocated_budget
@@ -185,7 +198,7 @@ SUBSYSTEM_DEF(director_oversight)
 		data["total_directives_completed"] = SSdirector_oversight.total_directives_completed
 		data["total_overdue"] = SSdirector_oversight.total_overdue
 		var/list/reviews = list()
-		for(var/dept in list("science", "security", "medical", "engineering", "service", "supply", "command"))
+		for(var/dept in list("Science", "Security", "Medical", "Engineering", "Logistics", "Administration", "MTF Operations"))
 			reviews += list(SSdirector_oversight.generate_department_review(dept))
 		data["department_reviews"] = reviews
 	return data
@@ -194,7 +207,7 @@ SUBSYSTEM_DEF(director_oversight)
 	. = ..()
 	if(.)
 		return
-	var/mob/living/carbon/human/H = usr
+	var/mob/living/carbon/human/H = ui.user
 	if(!istype(H))
 		return
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)

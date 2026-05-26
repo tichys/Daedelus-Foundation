@@ -2,16 +2,15 @@
 // Auto-generated stubs for map-placed instances
 
 /obj/structure/cable/green
-	var/c_tag
 	var/RCon_tag
-	var/initial_gas
 	var/health_resistances
 	var/send_access
 	var/magazine_type
-	var/use_power
 	var/aiControlDisabled
 	var/caliber
 	var/height
+	var/ammo_type
+	var/name_tag
 
 /obj/machinery/door/poddoor
 	var/begins_closed = TRUE
@@ -1710,6 +1709,7 @@
 	name = "Unary Vent Pump"
 	var/external_pressure_bound = ONE_ATMOSPHERE
 	var/external_pressure_bound_default
+	var/internal_pressure_bound
 
 /obj/machinery/atmospherics/unary/vent_pump/high_volume/airlock
 	name = "Unary Vent Pump High Volume Airlock"
@@ -1912,6 +1912,7 @@
 
 /obj/machinery/power/sensor
 	name = "Sensor"
+	var/name_tag
 
 /obj/machinery/power/smes/batteryrack
 	name = "Batteryrack"

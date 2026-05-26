@@ -26,8 +26,7 @@
 
 SUBSYSTEM_DEF(anomalous_investigations)
 	name = "Anomalous Investigations"
-	wait = 30 SECONDS
-	priority = FIRE_PRIORITY_DEFAULT
+	flags = SS_NO_FIRE
 	var/list/datum/anomalous_evidence/evidence_log = list()
 	var/list/active_cases = list()
 	var/total_evidence = 0
@@ -74,9 +73,9 @@ SUBSYSTEM_DEF(anomalous_investigations)
 
 /obj/item/anomalous_evidence_bag/attack_self(mob/user)
 	if(stored_evidence)
-		to_chat(user, "<span class='notice'>Evidence: [stored_evidence.evidence_type] - [stored_evidence.description] [stored_evidence.analyzed ? "(Analyzed: [stored_evidence.analysis_result])" : "(Unanalyzed)"]</span>")
+		to_chat(user, span_notice("Evidence: [stored_evidence.evidence_type] - [stored_evidence.description] [stored_evidence.analyzed ? "(Analyzed: [stored_evidence.analysis_result])" : "(Unanalyzed)"]"))
 	else
-		to_chat(user, "<span class='notice'>The evidence bag is empty. Use it on a crime scene or anomalous location to collect evidence.</span>")
+		to_chat(user, span_notice("The evidence bag is empty. Use it on a crime scene or anomalous location to collect evidence."))
 
 /obj/item/anomalous_evidence_bag/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
 	if(!proximity_flag || stored_evidence)
@@ -95,6 +94,6 @@ SUBSYSTEM_DEF(anomalous_investigations)
 		evidence_type = "Material"
 	stored_evidence = new(user, evidence_type, location, scp_hint, "Collected from [target.name] in [location]")
 	SSanomalous_investigations.log_evidence(stored_evidence)
-	user.visible_message("<span class='notice'>[user] collects evidence from [target].</span>", "<span class='notice'>You collect evidence from [target] and seal it in the bag. Evidence ID: [stored_evidence.evidence_id]</span>")
+	user.visible_message(span_notice("[user] collects evidence from [target]."), span_notice("You collect evidence from [target] and seal it in the bag. Evidence ID: [stored_evidence.evidence_id]"))
 
 

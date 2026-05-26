@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import { Box, Button, Section, Stack, Input } from '../components';
-import { Window } from '../layouts';
+import { NtosWindow } from '../layouts';
 
 const C = {
   bg: '#0a0a0c',
@@ -111,8 +111,8 @@ export const ScpDirectorOversight = (_props, context) => {
   };
 
   return (
-    <Window theme="scp_terminal" width={800} height={700} scrollable>
-      <Window.Content scrollable>
+    <NtosWindow width={800} height={700} scrollable>
+      <NtosWindow.Content scrollable>
         <Stack vertical fill>
           <Stack.Item>
             <Section
@@ -410,7 +410,7 @@ export const ScpDirectorOversight = (_props, context) => {
                                   'color': C.amber,
                                   'font-size': '11px',
                                 }}>
-                                Deadline: {dir.deadline}
+                                Deadline: {dir.deadline_text || dir.deadline}
                               </Box>
                             </Stack.Item>
                           </Stack>
@@ -514,7 +514,7 @@ export const ScpDirectorOversight = (_props, context) => {
                                     'color': C.amber,
                                     'font-size': '11px',
                                   }}>
-                                  Deadline: {dir.deadline}
+                                  Deadline: {dir.deadline_text || dir.deadline}
                                 </Box>
                               </Stack.Item>
                             </Stack>
@@ -522,23 +522,6 @@ export const ScpDirectorOversight = (_props, context) => {
                           <Stack.Item>
                             <Box style={{ 'color': C.text, 'font-size': '12px' }}>
                               {dir.description}
-                            </Box>
-                          </Stack.Item>
-                          <Stack.Item>
-                            <Box
-                              style={{
-                                'color': C.dim,
-                                'font-size': '11px',
-                                'margin-bottom': '4px',
-                              }}>
-                              Assigned:{' '}
-                              <Box
-                                style={{
-                                  'color': C.blue,
-                                  'display': 'inline',
-                                }}>
-                                {dir.assigned_to || 'Unassigned'}
-                              </Box>
                             </Box>
                           </Stack.Item>
                           <Stack.Item>{progressBar(dir.progress)}</Stack.Item>
@@ -799,7 +782,7 @@ export const ScpDirectorOversight = (_props, context) => {
             </Section>
           </Stack.Item>
         </Stack>
-      </Window.Content>
-    </Window>
+      </NtosWindow.Content>
+    </NtosWindow>
   );
 };
