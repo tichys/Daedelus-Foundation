@@ -67,7 +67,13 @@
 	containment_status = "breached"
 	hook_scp_breach("SCP-610", src)
 
-	spread_system.begin_spread(get_turf(src))
+	var/turf/T = get_turf(src)
+	spread_system.begin_spread(T)
+
+	var/obj/structure/scp610_core/core = new(T)
+	core.source_bottle = src
+	core.activate()
+	SSscp610.cores += core
 
 /obj/item/reagent_containers/glass/bottle/scp610/attack(mob/living/target, mob/living/user)
 	if(!containment_breached)

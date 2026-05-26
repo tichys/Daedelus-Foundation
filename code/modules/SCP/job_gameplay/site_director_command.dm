@@ -4,12 +4,12 @@
 	var/issuer_job = ""
 	var/directive_type = ""
 	var/title = ""
-	var	content = ""
-	var	priority = 0
-	var	time_issued = 0
-	var	status = "active"
-	var	acknowledged_by = list()
-	var	expiry_time = 0
+	var/content = ""
+	var/priority = 0
+	var/time_issued = 0
+	var/status = "active"
+	var/acknowledged_by = list()
+	var/expiry_time = 0
 
 /datum/facility_directive/New(issuer, dtype, dir_title, dir_content, prio, expiry)
 	directive_id = "DIR-[world.time]-[rand(100,999)]"
@@ -36,15 +36,15 @@
 /datum/facility_status_report
 	var/total_breaches = 0
 	var/active_breaches = 0
-	var	total_recontainments = 0
-	var	power_status = "Nominal"
-	var	comms_status = "Online"
-	var	security_level = "Green"
-	var	casualties = 0
-	var	dclass_alive = 0
-	var	dclass_escaped = 0
-	var	research_points = 0
-	var	time_generated = 0
+	var/total_recontainments = 0
+	var/power_status = "Nominal"
+	var/comms_status = "Online"
+	var/security_level = "Green"
+	var/casualties = 0
+	var/dclass_alive = 0
+	var/dclass_escaped = 0
+	var/research_points = 0
+	var/time_generated = 0
 
 /datum/facility_status_report/proc/generate()
 	time_generated = world.time
@@ -57,8 +57,8 @@
 	for(var/mob/living/scp/S in GLOB.player_list)
 		if(S.containment_status == "breached")
 			active_breaches++
-	var/area/powerless = 0
-	var/area/total = 0
+	var/powerless = 0
+	var/total = 0
 	for(var/obj/machinery/power/apc/APC as anything in INSTANCES_OF(/obj/machinery/power/apc))
 		if(!QDELETED(APC))
 			total++

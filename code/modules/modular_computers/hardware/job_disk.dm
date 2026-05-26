@@ -77,6 +77,7 @@
 
 	if(disk_flags & DISK_SCP_SCIENCE)
 		progs_to_store += new /datum/computer_file/program/scp_budget_console(src)
+		progs_to_store += new /datum/computer_file/program/scp_research_laboratory(src)
 
 	if(disk_flags & DISK_SCP_MEDICAL)
 		progs_to_store += new /datum/computer_file/program/scp_psychology_console(src)

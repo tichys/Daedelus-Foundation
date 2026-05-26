@@ -17,7 +17,7 @@
 	var/findings = ""
 	var/recommendations = ""
 	var/amnestic_recommended = ""
-	var	status = PSYCH_EVAL_PENDING
+	var/status = PSYCH_EVAL_PENDING
 	var/time_started = 0
 	var/time_completed = 0
 	var/sanity_score = 100
@@ -64,11 +64,11 @@
 	var/person_job = ""
 	var/scp_encountered = ""
 	var/exposure_type = ""
-	var	exposure_time = 0
-	var	symptoms = ""
-	var	treated = FALSE
-	var	treatment = ""
-	var	treatment_time = 0
+	var/exposure_time = 0
+	var/symptoms = ""
+	var/treated = FALSE
+	var/treatment = ""
+	var/treatment_time = 0
 
 /datum/scp_exposure_record/New(name, job, scp, exp_type, symp)
 	person_name = name

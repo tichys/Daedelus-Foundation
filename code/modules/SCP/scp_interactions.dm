@@ -206,11 +206,15 @@ SUBSYSTEM_DEF(scp_cross_interactions)
 			continue
 		if(!prob(I.probability))
 			continue
-		var/mob/living/scp1 = find_scp_mob(I.scp_id_1)
-		var/mob/living/scp2 = find_scp_mob(I.scp_id_2)
+		var/atom/scp1 = find_scp_mob(I.scp_id_1)
+		var/atom/scp2 = find_scp_mob(I.scp_id_2)
 		if(!scp1 || !scp2)
 			continue
-		if(scp1.stat == DEAD || scp2.stat == DEAD)
+		var/mob/living/living1 = isliving(scp1) ? scp1 : null
+		var/mob/living/living2 = isliving(scp2) ? scp2 : null
+		if(living1 && living1.stat == DEAD)
+			continue
+		if(living2 && living2.stat == DEAD)
 			continue
 		if(I.range_required > 0 && get_dist(scp1, scp2) > I.range_required)
 			continue

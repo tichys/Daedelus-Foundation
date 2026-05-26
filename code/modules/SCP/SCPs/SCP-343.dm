@@ -1,4 +1,5 @@
 /mob/living/scp/scp343
+	ai_enabled = TRUE
 	name = "SCP-343"
 	desc = "An elderly man who claims to be God. He radiates an aura of divine power and benevolence."
 	icon = 'icons/scp/scp-343.dmi'
@@ -192,3 +193,32 @@
 			H.adjustFireLoss(-heal_amount)
 		if(H.sanity)
 			H.sanity.adjust_sanity(sanity_amount, "scp343_divine_zone")
+
+/mob/living/scp/scp343/process_ai()
+	if(stat == DEAD)
+		return
+
+	var/mob/living/carbon/human/best_target = null
+	var/best_health_deficit = 0
+	for(var/mob/living/carbon/human/H in view(7, src))
+		if(H == src || H.stat == DEAD)
+			continue
+		var/deficit = H.maxHealth - H.health
+		if(deficit > best_health_deficit)
+			best_target = H
+			best_health_deficit = deficit
+
+	if(best_target)
+		if(get_dist(src, best_target) <= 2)
+			if(world.time >= divine_heal_cooldown && divine_energy >= 30)
+				divine_heal_ability(best_target)
+		else
+			ai_step_towards(best_target)
+		return
+
+	if(prob(5))
+		var/benevolent_phrases = list("Peace be with you.", "Do not be afraid.", "All will be well.", "I am here to help.", "Let me ease your suffering.")
+		say(pick(benevolent_phrases))
+
+	if(prob(10))
+		step_rand(src)

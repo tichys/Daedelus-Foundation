@@ -13,6 +13,7 @@
 	maxHealth = 100
 	health = 100
 	persistence_id = "SCP-3199"
+	ai_enabled = TRUE
 
 	var/egg_cooldown = 0
 	var/egg_time = 3000
@@ -60,12 +61,13 @@
 		return
 	next_containment_check = world.time
 	var/area/A = get_area(src)
-	if(!istype(A, /area))
+	if(!A || istype(A, /area/space))
 		if(!containment_breached)
 			containment_breached = TRUE
 			SCP?.log_interaction(src, "containment_breach")
 			SCP?.award_research(src, "containment", 100)
-			priority_announce("SCP-3199 containment breach detected! All security personnel respond immediately!", "Security Alert", sub_title = "Breach Alert", sound_type = ANNOUNCER_ALERT)
+			// Automated announcements removed - dispatch should announce breaches
+			// priority_announce("SCP-3199 containment breach detected! All security personnel respond immediately!", "Security Alert", sub_title = "Breach Alert", sound_type = ANNOUNCER_ALERT)
 	else
 		if(containment_breached)
 			containment_breached = FALSE
@@ -95,6 +97,103 @@
 		SCP?.award_research(L, "combat", 25)
 		if(ishuman(L))
 			on_liquefaction_attack(L)
+
+/mob/living/scp/scp3199/process_ai()
+	if(stat == DEAD)
+		return
+	if(containment_status != "breached")
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	ProcessReproduction()
+	ProcessAmbient()
+
+	var/mob/living/carbon/human/prey = ai_find_prey()
+	if(prey)
+		ai_attack_prey(prey)
+		return
+
+	if(ai_protect_hatchlings_check())
+		return
+
+	ai_territorial_wander()
+
+/mob/living/scp/scp3199/proc/ai_find_prey()
+	var/mob/living/carbon/human/best = null
+	var/best_dist = INFINITY
+	for(var/mob/living/carbon/human/H in view(9, src))
+		if(H.stat == DEAD || H == src)
+			continue
+		var/d = get_dist(src, H)
+		if(d < best_dist)
+			best_dist = d
+			best = H
+	return best
+
+/mob/living/scp/scp3199/proc/ai_attack_prey(mob/living/carbon/human/prey)
+	if(get_dist(src, prey) <= 1)
+		UnarmedAttack(prey)
+		if(prey.stat == DEAD)
+			if(prob(15))
+				lay_egg_at(get_turf(prey))
+		return
+
+	step_to(src, prey)
+
+	if(prob(10))
+		playsound(src, 'sound/effects/explosion1.ogg', 40, TRUE, extrarange = 5)
+
+/mob/living/scp/scp3199/proc/ai_protect_hatchlings_check()
+	var/mob/living/scp/scp3199/hurt_hatchling = null
+	for(var/mob/living/scp/scp3199/H in range(7, src))
+		if(H != src)
+			if(H.health < H.maxHealth * 0.5)
+				hurt_hatchling = H
+
+	if(hurt_hatchling && prob(40))
+		if(get_dist(src, hurt_hatchling) > 1)
+			step_to(src, hurt_hatchling)
+		else
+			hurt_hatchling.adjustBruteLoss(-10)
+			hurt_hatchling.adjustFireLoss(-10)
+		visible_message(span_danger("[src] lets out a protective screech, defending its young!"))
+		playsound(src, 'sound/effects/explosion1.ogg', 80, TRUE, 5)
+		return TRUE
+
+	return FALSE
+
+/mob/living/scp/scp3199/proc/ai_territorial_wander()
+	if(prob(8) && egg_cooldown <= 0)
+		var/turf/T = get_turf(src)
+		if(T)
+			lay_egg_at(T)
+		return
+
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 2)
+		step_to(src, ai_home_turf)
+	else
+		step_rand(src)
+
+	if(prob(5))
+		var/obj/machinery/door/D = locate() in range(2, src)
+		if(D && D.density)
+			D.open(TRUE)
+			visible_message(span_danger("[src] forces [D] open with its massive frame!"))
+
+/mob/living/scp/scp3199/proc/lay_egg_at(turf/T)
+	if(!T || egg_cooldown > 0)
+		return
+	egg_cooldown = egg_time
+	visible_message(span_danger("[src] convulses violently, producing a screech!"))
+	playsound(src, 'sound/effects/explosion1.ogg', 100, TRUE, 10)
+	var/obj/item/scp3199_egg/egg = new /obj/item/scp3199_egg(T)
+	egg.parent_entity = src
+	eggs_produced++
+	SCP?.log_interaction(src, "egg_production")
+	SCP?.award_research(src, "reproduction", 75)
+	on_egg_laid(egg)
 
 /mob/living/scp/scp3199/verb/verb_protect_hatchlings()
 	set name = "Protect Hatchlings"

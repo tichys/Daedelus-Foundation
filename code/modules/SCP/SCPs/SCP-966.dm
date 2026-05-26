@@ -155,6 +155,105 @@
 /mob/living/scp/scp966/proc/action_stalk_target()
 	verb_stalk_target()
 
+/mob/living/scp/scp966/process_ai()
+	if(stat == DEAD)
+		return
+	if(containment_status != "breached")
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	ProcessSleepDrain()
+	ProcessNightmares()
+
+	var/mob/living/carbon/human/drowsy_prey = ai_find_drowsy_target()
+	if(drowsy_prey)
+		ai_attack_drowsy(drowsy_prey)
+		return
+
+	var/mob/living/carbon/human/stalk_target = ai_find_stalk_target()
+	if(stalk_target)
+		ai_stalk_target(stalk_target)
+		return
+
+	ai_stealth_wander()
+
+/mob/living/scp/scp966/proc/ai_find_drowsy_target()
+	var/mob/living/carbon/human/best = null
+	var/best_drowsy = -1
+	for(var/mob/living/carbon/human/H in view(5, src))
+		if(H == src || H.stat == DEAD)
+			continue
+		if(H.drowsyness >= 30 && H.drowsyness > best_drowsy)
+			best_drowsy = H.drowsyness
+			best = H
+	return best
+
+/mob/living/scp/scp966/proc/ai_attack_drowsy(mob/living/carbon/human/target)
+	if(get_dist(src, target) > 1)
+		step_to(src, target)
+		if(stealth_active && prob(30))
+			stealth_active = FALSE
+			addtimer(CALLBACK(src, PROC_REF(restore_stealth)), 3 SECONDS)
+		return
+
+	target.apply_damage(sleep_intensity * 3, BRUTE)
+	target.visible_message(span_danger("Something invisible slashes at [target]!"), span_danger("You feel claws tear into you!"))
+	hook_scp_combat(target, "SCP-966", sleep_intensity * 3, 10)
+	playsound(target, 'sound/weapons/slash.ogg', 40, TRUE)
+
+	if(prob(20))
+		stealth_active = FALSE
+		addtimer(CALLBACK(src, PROC_REF(restore_stealth)), 2 SECONDS)
+
+/mob/living/scp/scp966/proc/restore_stealth()
+	stealth_active = TRUE
+
+/mob/living/scp/scp966/proc/ai_find_stalk_target()
+	var/mob/living/carbon/human/best = null
+	var/best_dist = INFINITY
+	for(var/mob/living/carbon/human/H in view(8, src))
+		if(H == src || H.stat == DEAD)
+			continue
+		var/d = get_dist(src, H)
+		if(d < best_dist)
+			best_dist = d
+			best = H
+	return best
+
+/mob/living/scp/scp966/proc/ai_stalk_target(mob/living/carbon/human/target)
+	if(get_dist(src, target) <= 2)
+		if(!(target in stalked_targets))
+			stalked_targets += target
+			to_chat(target, span_danger("You feel an unseen gaze upon you..."))
+			hook_scp_interaction(target, "SCP-966", INTERACTION_TYPE_OBSERVATION)
+		return
+
+	var/ideal_dist = 3
+	if(get_dist(src, target) > ideal_dist + 2)
+		step_to(src, target)
+	else if(get_dist(src, target) < ideal_dist)
+		var/atom/flee_dir = get_step_away(src, target)
+		if(flee_dir)
+			Move(get_turf(flee_dir))
+	else if(prob(30))
+		var/atom/flank = get_step(target, pick(GLOB.alldirs))
+		if(flank && !flank.density)
+			step_to(src, flank)
+
+/mob/living/scp/scp966/proc/ai_stealth_wander()
+	if(prob(15))
+		stealth_active = !stealth_active
+
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 2)
+		step_to(src, ai_home_turf)
+	else
+		step_rand(src)
+
+	if(prob(10))
+		visible_message(span_notice("A shimmer reveals something in the air, then fades."))
+
 /mob/living/scp/scp966/examine(mob/user)
 	. = ..()
 	if(ishuman(user))

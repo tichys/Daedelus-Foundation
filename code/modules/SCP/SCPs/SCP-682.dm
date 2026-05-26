@@ -158,23 +158,27 @@
 	breach_phase = new_phase
 
 	if(new_phase == "contained")
+		remove_movespeed_modifier(/datum/movespeed_modifier/scp682_agitated)
+		remove_movespeed_modifier(/datum/movespeed_modifier/scp682_full_breach)
+		remove_movespeed_modifier(/datum/movespeed_modifier/scp682_rage)
 		hook_scp_recontainment("SCP-682", list("method" = "standard", "integrity" = containment_integrity))
+		return
 	switch(breach_phase)
 		if("agitated")
-			add_movespeed_modifier("scp682_agitated")
+			add_movespeed_modifier(/datum/movespeed_modifier/scp682_agitated)
 			to_chat(src, span_warning("You feel agitated and more aggressive."))
 		if("escalating")
-			if(!has_movespeed_modifier("scp682_agitated"))
-				add_movespeed_modifier("scp682_agitated")
+			if(!has_movespeed_modifier(/datum/movespeed_modifier/scp682_agitated))
+				add_movespeed_modifier(/datum/movespeed_modifier/scp682_agitated)
 			to_chat(src, span_danger("Your aggression is escalating!"))
 		if("full_breach")
-			if(!has_movespeed_modifier("scp682_full_breach"))
-				add_movespeed_modifier("scp682_full_breach")
+			if(!has_movespeed_modifier(/datum/movespeed_modifier/scp682_full_breach))
+				add_movespeed_modifier(/datum/movespeed_modifier/scp682_full_breach)
 			to_chat(src, span_danger("You have fully breached containment!"))
 			playsound(src, 'sound/effects/roar.ogg', 80, FALSE, extrarange = 25)
 		if("rampage")
-			if(!has_movespeed_modifier("scp682_rage"))
-				add_movespeed_modifier("scp682_rage")
+			if(!has_movespeed_modifier(/datum/movespeed_modifier/scp682_rage))
+				add_movespeed_modifier(/datum/movespeed_modifier/scp682_rage)
 			to_chat(src, span_danger("You are in a state of complete rampage!"))
 			playsound(src, 'sound/effects/roar.ogg', 100, FALSE, extrarange = 40)
 
@@ -282,6 +286,122 @@
 		total_regen += SCP682_CRITICAL_REGENERATION_BONUS
 	. += "Regeneration Rate: [total_regen] HP/sec"
 
+/mob/living/scp/scp682/process_ai()
+	if(stat == DEAD)
+		return
+	if(containment_status != "breached" && breach_phase == "contained")
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	if(containment_status == "contained" && breach_phase == "contained")
+		if(prob(3))
+			ReduceContainmentIntegrity(5)
+		return
+
+	switch(breach_phase)
+		if("agitated")
+			ai_tick_interval = 15
+		if("escalating")
+			ai_tick_interval = 12
+		if("full_breach")
+			ai_tick_interval = 8
+		if("rampage")
+			ai_tick_interval = 5
+
+	var/mob/living/carbon/human/prey = ai_find_target()
+	if(prey)
+		ai_combat(prey)
+	else
+		ai_rampage_and_destroy()
+
+	if(prob(5) && breach_phase != "contained")
+		playsound(src, 'sound/effects/roar.ogg', 40, TRUE, extrarange = 15)
+
+/mob/living/scp/scp682/proc/ai_find_target()
+	var/mob/living/carbon/human/best = null
+	var/best_score = -INFINITY
+	for(var/mob/living/carbon/human/H in view(12, src))
+		if(H.stat == DEAD || H == src)
+			continue
+		var/score = 100 - get_dist(src, H) * 5
+		if(threat_system && (H in threat_system.threat_memory))
+			score += 30
+		if(H.health < H.maxHealth * 0.5)
+			score += 20
+		if(score > best_score)
+			best_score = score
+			best = H
+	return best
+
+/mob/living/scp/scp682/proc/ai_combat(mob/living/carbon/human/prey)
+	if(get_dist(src, prey) <= 1)
+		UnarmedAttack(prey)
+		if(breach_phase == "rampage" && prob(30))
+			verb_rampage()
+		if(prey.stat == DEAD)
+			ReduceContainmentIntegrity(SCP682_KILL_CONTAINMENT_REDUCTION)
+		return
+
+	if(breach_phase == "rampage" && prob(20))
+		verb_rampage()
+		return
+
+	var/turf/next_turf = get_step_towards(src, prey)
+	var/blocked = FALSE
+	for(var/obj/O in next_turf)
+		if(O.density)
+			blocked = TRUE
+			break
+	if(next_turf.density)
+		blocked = TRUE
+
+	if(blocked)
+		for(var/obj/machinery/door/D in range(1, src))
+			if(D.density)
+				D.open()
+				visible_message(span_danger("[src] forces [D] open!"))
+				return
+		for(var/obj/structure/S in range(1, src))
+			if(S.density)
+				S.take_damage(80, BRUTE, "melee")
+				visible_message(span_danger("[src] smashes through [S]!"))
+				return
+		for(var/turf/closed/wall/W in range(1, src))
+			if(get_dir(src, W) == get_dir(src, prey))
+				W.take_damage(50, BRUTE, "melee")
+				visible_message(span_danger("[src] batters [W]!"))
+				return
+
+	step_to(src, prey)
+
+	if(prob(15) && breach_phase != "contained")
+		playsound(src, 'sound/effects/roar.ogg', 30, TRUE, extrarange = 10)
+
+/mob/living/scp/scp682/proc/ai_rampage_and_destroy()
+	if(prob(25))
+		var/obj/machinery/door/D = locate() in range(3, src)
+		if(D && D.density)
+			D.open()
+			visible_message(span_danger("[src] forces [D] open!"))
+			return
+
+	if(prob(15))
+		var/obj/structure/S = locate() in range(2, src)
+		if(S && S.density)
+			S.take_damage(60, BRUTE, "melee")
+			visible_message(span_danger("[src] smashes [S]!"))
+			return
+
+	if(prob(10))
+		ReduceContainmentIntegrity(2)
+
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 3)
+		step_to(src, ai_home_turf)
+	else
+		step_rand(src)
+
 /mob/living/scp/scp682/verb/verb_rampage()
 	set name = "Rampage"
 	set category = "SCP-682"
@@ -317,6 +437,21 @@
 	id = "scp682_berserk"
 	priority = 100
 	slowdown = -1.5
+
+/datum/movespeed_modifier/scp682_agitated
+	id = "scp682_agitated"
+	priority = 80
+	slowdown = -0.3
+
+/datum/movespeed_modifier/scp682_full_breach
+	id = "scp682_full_breach"
+	priority = 90
+	slowdown = -0.8
+
+/datum/movespeed_modifier/scp682_rage
+	id = "scp682_rage"
+	priority = 95
+	slowdown = -1.2
 
 /mob/living/scp/scp682/examine(mob/user)
 	. = ..()
