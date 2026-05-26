@@ -885,20 +885,17 @@ SUBSYSTEM_DEF(scp_persistence)
 /datum/scp_persistence_manager/proc/apply_management_mode_effects()
 	switch(global_scp_management_mode)
 		if("lockdown")
-			// Disable all non-essential SCPs
-			for(var/scp_id in enabled_scps)
+			for(var/scp_id in enabled_scps.Copy())
 				if(!is_essential_scp(scp_id))
 					disable_scp(scp_id)
 
 		if("research")
-			// Enable research-focused SCPs
-			for(var/scp_id in disabled_scps)
+			for(var/scp_id in disabled_scps.Copy())
 				if(is_research_scp(scp_id))
 					enable_scp(scp_id)
 
 		if("emergency")
-			// Enable only essential SCPs
-			for(var/scp_id in enabled_scps)
+			for(var/scp_id in enabled_scps.Copy())
 				if(!is_essential_scp(scp_id))
 					disable_scp(scp_id)
 

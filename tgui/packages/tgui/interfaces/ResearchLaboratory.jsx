@@ -715,6 +715,21 @@ const TeamsTab = (props) => {
     setShowCreate(false);
   };
 
+  const userTeamId = (() => {
+    for (const team of teamList) {
+      for (const m of team.members || []) {
+        if (m.ckey === user_ckey) return team.id;
+      }
+    }
+    return null;
+  })();
+
+  const handleCreate = () => {
+    act('create_team', { name: teamName || undefined });
+    setTeamName('');
+    setShowCreate(false);
+  };
+
   return (
     <Section title="Research Teams" buttons={
       (is_researcher || is_admin || is_command) && <Button icon="plus" onClick={() => setShowCreate(!showCreate)}>

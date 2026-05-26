@@ -46,8 +46,6 @@
 
 /obj/item/reagent_containers/glass/bottle/scp610/process()
 	infection_system?.tick_infections()
-	spread_system?.do_spread()
-	spread_system?.heal_flesh_mobs()
 
 /obj/item/reagent_containers/glass/bottle/scp610/attack_self(mob/user)
 	if(containment_breached)
@@ -83,7 +81,7 @@
 	if(!isliving(target) || target.stat == DEAD)
 		return ..()
 
-	infection_system.attempt_infection(target, 80)
+	infection_system?.attempt_infection(target, 80)
 	visible_message(span_danger("[user] splashes the contents of [src] onto [target]!"))
 	to_chat(target, span_userdanger("You feel a burning sensation as the flesh touches your skin!"))
 	return ..()
@@ -245,16 +243,15 @@
 		return
 
 	spread_active = TRUE
-	spread_flesh_turf(T)
-	place_flesh_structure(T, /obj/structure/flesh_structure/flesh_generator)
+	flesh_turfs += T
 
 /datum/scp610_spread_system/proc/spread_flesh_turf(turf/T)
-	if(!T || (T in flesh_turfs))
+	if(!T)
 		return
 
-	var/turf/open/flesh/new_turf = T.ChangeTurf(/turf/open/flesh)
-	if(new_turf)
-		flesh_turfs += new_turf
+	var/obj/structure/scp610_core/core = locate() in range(7, T)
+	if(core)
+		core.place_creep(T)
 
 /datum/scp610_spread_system/proc/place_flesh_structure(turf/T, structure_type)
 	if(!T)
@@ -283,7 +280,7 @@
 		return
 
 	for(var/turf/T in RANGE_TURFS(current_spread_radius, center_turf))
-		if(istype(T, /turf/open/flesh))
+		if(T.scp610_corrupted)
 			continue
 		if(T.density)
 			continue
@@ -297,18 +294,24 @@
 	if(current_spread_radius % flesh_node_interval == 0)
 		if(edge_turfs.len > 0)
 			var/turf/node_turf = pick(edge_turfs)
-			place_flesh_structure(node_turf, /obj/structure/flesh_structure/flesh_generator)
-			node_turf.ChangeTurf(/turf/open/flesh/node)
+			var/obj/structure/scp610_core/core = locate() in range(7, node_turf)
+			if(core)
+				core.place_creep(node_turf)
+				core.place_structure(/obj/structure/scp610_flesh_structure/growth_node, node_turf)
 
 	if(current_spread_radius % 2 == 0 && edge_turfs.len > 0)
 		var/turf/cable_turf = pick(edge_turfs)
 		place_flesh_structure(cable_turf, pick(/obj/structure/flesh_structure/flesh_cable_vert, /obj/structure/flesh_structure/flesh_cable_horz, /obj/structure/flesh_structure/flesh_cable_center))
 
 /datum/scp610_spread_system/proc/get_center_turf()
-	if(flesh_turfs.len == 0)
+	if(!owner)
 		return null
-	var/turf/T = get_turf(flesh_turfs[1])
-	return T
+	var/obj/structure/scp610_core/core = locate() in range(20, owner)
+	if(core)
+		return get_turf(core)
+	if(length(flesh_turfs))
+		return get_turf(flesh_turfs[1])
+	return null
 
 /datum/scp610_spread_system/proc/heal_flesh_mobs()
 	if(!spread_active)
@@ -333,11 +336,11 @@
 /mob/living/simple_animal/hostile/scp610_fleshman
 	name = "SCP-610 Fleshman"
 	desc = "A shambling mass of mutated flesh. It was once human."
-	icon = 'icons/scp/scp-610.dmi'
-	icon_state = "flesh610man"
-	icon_living = "flesh610man"
-	icon_dead = "flesh610man"
-	icon_gib = "flesh610man"
+	icon = 'icons/scp/newscp610/slasher.dmi'
+	icon_state = "slasher"
+	icon_living = "slasher"
+	icon_dead = "slasher"
+	icon_gib = "slasher"
 
 	maxHealth = 150
 	health = 150
@@ -403,11 +406,11 @@
 /mob/living/simple_animal/hostile/scp610_flesh_walker
 	name = "SCP-610 Fleshwalker"
 	desc = "A horrifying abomination of flesh and bone, moving on spiky protrusions with terrifying speed."
-	icon = 'icons/scp/scp-610.dmi'
-	icon_state = "flesh_walker"
-	icon_living = "flesh_walker"
-	icon_dead = "flesh_walker"
-	icon_gib = "flesh_walker"
+	icon = 'icons/scp/newscp610/leaper.dmi'
+	icon_state = "leaper"
+	icon_living = "leaper"
+	icon_dead = "leaper"
+	icon_gib = "leaper"
 
 	maxHealth = 100
 	health = 100
@@ -473,10 +476,10 @@
 /mob/living/simple_animal/hostile/scp610_half_infested
 	name = "SCP-610 Half-Infested"
 	desc = "A human being consumed by SCP-610. Flesh bubbles and writhes across half their body."
-	icon = 'icons/scp/scp-610.dmi'
-	icon_state = "example_human_meat_bubble"
-	icon_living = "example_human_meat_bubble"
-	icon_dead = "example_human_meat_bubble"
+	icon = 'icons/scp/newscp610/puker.dmi'
+	icon_state = "puker"
+	icon_living = "puker"
+	icon_dead = "puker"
 
 	maxHealth = 80
 	health = 80
@@ -608,14 +611,14 @@
 	infection_progress += rand(2, 5)
 
 	switch(infection_progress)
-		if(0 to 25)
+		if(0 to 24)
 			if(stage < 1)
 				stage = 1
 			if(prob(10))
 				to_chat(H, span_warning("Your skin itches intolerably..."))
 				H.adjustBruteLoss(1)
 
-		if(25 to 50)
+		if(25 to 49)
 			if(stage < 2)
 				stage = 2
 				to_chat(H, span_userdanger("Your flesh is swelling and shifting!"))
@@ -624,7 +627,7 @@
 				H.adjustBruteLoss(3)
 				H.adjustToxLoss(3)
 
-		if(50 to 75)
+		if(50 to 74)
 			if(stage < 3)
 				stage = 3
 				to_chat(H, span_userdanger("The flesh is taking over your body!"))
@@ -632,8 +635,7 @@
 			if(prob(20))
 				H.adjustBruteLoss(5)
 				H.adjustToxLoss(5)
-				if(H.stamina)
-					H.stamina.adjust(-10)
+				H.setStaminaLoss(50)
 
 		if(75 to 100)
 			if(stage < 4)
@@ -667,7 +669,9 @@
 		flesh_mob.name = "[H.name] (Flesh)"
 		flesh_mob.desc = "What was once [H.name], now consumed by SCP-610."
 
-	T.ChangeTurf(/turf/open/flesh)
+	var/obj/structure/scp610_core/core = locate() in range(7, T)
+	if(core)
+		core.place_creep(T)
 
 	H.visible_message(span_danger("[H] is consumed entirely by the flesh, transforming into a hideous creature!"))
 	to_chat(H, span_userdanger("Your mind dissolves into the flesh..."))
@@ -679,7 +683,7 @@
 /atom/movable/screen/alert/status_effect/scp610_infection
 	name = "SCP-610 Infection"
 	desc = "Flesh is growing across your body. Seek immediate medical attention."
-	icon_state = "scp610"
+	icon_state = "button_fleshhate"
 
 // ============================================================================
 // SCP-610 FLESH STRUCTURES
@@ -688,7 +692,7 @@
 /obj/structure/flesh_structure
 	name = "flesh structure"
 	desc = "A pulsating mass of organic matter. It writhes with unnatural life."
-	icon = 'icons/scp/scp-610.dmi'
+	icon = 'icons/scp/newscp610/scp_610_tall.dmi'
 	icon_state = "flesh_stolb"
 	density = TRUE
 	anchored = TRUE
@@ -784,8 +788,8 @@
 /turf/open/flesh
 	name = "flesh creep"
 	desc = "The ground is covered in a thin layer of pulsating flesh. It's warm to the touch."
-	icon = 'icons/scp/scp-610.dmi'
-	icon_state = "flesh_turf_creep"
+	icon = 'icons/scp/newscp610/flesh_tile.dmi'
+	icon_state = "flesh_tile-0"
 	footstep = FOOTSTEP_MEAT
 	barefootstep = FOOTSTEP_MEAT
 	clawfootstep = FOOTSTEP_MEAT
@@ -837,7 +841,7 @@
 /turf/open/flesh/node
 	name = "flesh node"
 	desc = "A thick knot of flesh and sinew. It seems to be the source of the creeping growth."
-	icon_state = "flesh_turf_node"
+	icon_state = "flesh_tile-0"
 	infection_chance = 15
 	slowdown = 1
 
@@ -848,12 +852,14 @@
 		return
 
 	for(var/turf/T in RANGE_TURFS(1, src))
-		if(istype(T, /turf/open/flesh))
+		if(T.scp610_corrupted)
 			continue
 		if(T.density)
 			continue
 		if(prob(8))
-			T.ChangeTurf(/turf/open/flesh)
+			var/obj/structure/scp610_core/core = locate() in range(7, src)
+			if(core)
+				core.place_creep(T)
 
 // ============================================================================
 // SCP-610 CROSS-SCP INTERACTIONS
@@ -954,6 +960,10 @@
 	containment_status = "contained"
 	containment_breached = FALSE
 	spread_system?.spread_active = FALSE
+	for(var/obj/structure/scp610_core/core in range(7, src))
+		if(core.source_bottle == src)
+			qdel(core)
+			break
 
 // ============================================================================
 // SCP-610 AMNESTIC CURE

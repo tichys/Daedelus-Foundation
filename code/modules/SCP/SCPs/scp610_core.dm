@@ -141,7 +141,7 @@ SUBSYSTEM_DEF(scp610)
 	if(remaining_mass >= 0)
 		amount = min(amount, remaining_mass)
 		remaining_mass -= amount
-		if(remaining_mass <= 0)
+		if(remaining_mass <= 0 && remaining_mass > -1)
 			on_biomass_depletion()
 	return amount
 
