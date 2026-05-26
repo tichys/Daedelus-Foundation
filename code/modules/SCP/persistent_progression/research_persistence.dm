@@ -198,6 +198,15 @@ SUBSYSTEM_DEF(research_persistence)
 	total_research_projects++
 	return project
 
+/datum/research_persistence_manager/proc/remove_research_project(project_id)
+	var/datum/research_persistence_project/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	if(project.status == "ACTIVE")
+		total_research_projects--
+	research_projects -= project_id
+	qdel(project)
+	return TRUE
 /datum/research_persistence_manager/proc/add_scientific_discovery(var/discovery_name, var/discovery_description, var/discovery_type, var/research_field, var/discoverer_ckey, var/significance_level = 1)
 	var/discovery_id = "discovery_[world.time]"
 	var/datum/research_scientific_discovery/discovery = new /datum/research_scientific_discovery(discovery_id, discovery_name, discovery_description, discovery_type, research_field, discoverer_ckey)

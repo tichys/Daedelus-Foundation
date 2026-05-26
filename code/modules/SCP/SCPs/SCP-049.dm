@@ -325,7 +325,6 @@
 	target.update_pestilence_hud()
 
 	target.adjust_jitter(300)
-	adjustBruteLoss(100)
 
 	to_chat(src, span_notice("The cure is being administered..."))
 	playsound(src, 'sound/scp/scp049/SCP049_Cure1.ogg', 60, FALSE)
@@ -333,7 +332,7 @@
 	addtimer(CALLBACK(src, PROC_REF(FinishPlagueDoctorCure), target), 15 SECONDS)
 
 /mob/living/scp/scp049/proc/FinishPlagueDoctorCure(mob/living/carbon/human/target)
-	if(QDELETED(target))
+	if(QDELETED(src) || QDELETED(target))
 		return
 	if(isscp049_1(target))
 		return
@@ -539,6 +538,136 @@
 	status_items += "Evolution: [evolution_stage]/[max_evolution_stage]"
 	status_items += "Research: [research_progress]/[max_research_progress]"
 	return status_items
+
+/mob/living/scp/scp049/process_ai()
+	if(stat == DEAD)
+		return
+	if(containment_status != "breached")
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	anger_timer = max(anger_timer - 1, 0)
+
+	if(prob(5))
+		announce_presence()
+
+	var/mob/living/carbon/human/pestilence_carrier = ai_find_pestilence_carrier()
+	var/mob/living/carbon/human/nearest_corpse = ai_find_dead_body()
+
+	if(pestilence_carrier && get_dist(src, pestilence_carrier) <= 1)
+		ai_attempt_cure(pestilence_carrier)
+		return
+
+	if(nearest_corpse && get_dist(src, nearest_corpse) <= 1)
+		PlagueDoctorCure(nearest_corpse)
+		playsound(src, pick('sound/scp/scp049/SCP049_1.ogg', 'sound/scp/scp049/SCP049_2.ogg'), 40, FALSE)
+		return
+
+	if(pestilence_carrier)
+		ai_pursue_target(pestilence_carrier)
+		return
+
+	if(nearest_corpse)
+		ai_pursue_target(nearest_corpse)
+		return
+
+	if(prob(30))
+		ai_wander_and_pry()
+
+/mob/living/scp/scp049/proc/ai_find_pestilence_carrier()
+	var/mob/living/carbon/human/best = null
+	var/best_dist = INFINITY
+	for(var/mob/living/carbon/human/H in view(10, src))
+		if(H == src || H.stat == DEAD || isscp049_1(H))
+			continue
+		if(!HAS_TRAIT(H, TRAIT_PESTILENCE))
+			continue
+		var/d = get_dist(src, H)
+		if(d < best_dist)
+			best_dist = d
+			best = H
+	return best
+
+/mob/living/scp/scp049/proc/ai_find_dead_body()
+	var/mob/living/carbon/human/best = null
+	var/best_dist = INFINITY
+	for(var/mob/living/carbon/human/H in view(7, src))
+		if(H == src || H.stat != DEAD)
+			continue
+		if(isscp049_1(H))
+			continue
+		var/d = get_dist(src, H)
+		if(d < best_dist)
+			best_dist = d
+			best = H
+	return best
+
+/mob/living/scp/scp049/proc/ai_attempt_cure(mob/living/carbon/human/target)
+	if(!can_touch_bare_skin(target))
+		if(anger_timer >= anger_timer_max * 0.5)
+			target.Paralyze(20)
+			visible_message(span_danger("<i>[src] reaches towards [target], making them stumble!</i>"))
+			attack_voice_line()
+		else
+			visible_message(span_warning("<i>[src] reaches towards [target], but nothing happens...</i>"))
+		return
+	target.visible_message(span_danger("<i>[src] reaches towards [target]!</i>"))
+	attack_voice_line()
+	target.death()
+	cured_count++
+	cures_attempted++
+	cures_successful++
+	cure_potency = min(max_cure_potency, cure_potency + 1)
+	playsound(target, 'sound/scp/scp049/SCP049_Cure1.ogg', 60, FALSE)
+	on_cure_attempt(target)
+	track_scp049_cure(src, target, TRUE)
+	save_persistence_data()
+
+/mob/living/scp/scp049/proc/ai_pursue_target(mob/living/carbon/human/target)
+	if(!target)
+		return
+	var/dist = get_dist(src, target)
+	if(dist > 12)
+		return
+
+	var/turf/next_step = get_step_towards(src, target)
+	var/blocked = FALSE
+	for(var/obj/O in next_step)
+		if(O.density)
+			blocked = TRUE
+			break
+	if(next_step.density)
+		blocked = TRUE
+
+	if(blocked)
+		var/obj/machinery/door/D = locate() in range(1, src)
+		if(D && D.density && D.Adjacent(src))
+			OpenDoor(D)
+			return
+
+	step_to(src, target)
+
+	if(prob(10))
+		attack_voice_line()
+
+/mob/living/scp/scp049/proc/ai_wander_and_pry()
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 2)
+		var/obj/machinery/door/D = locate() in range(3, src)
+		if(D && D.density && world.time >= door_cooldown_track + door_cooldown)
+			OpenDoor(D)
+			return
+		step_to(src, ai_home_turf)
+		return
+
+	if(prob(20))
+		var/obj/machinery/door/D = locate() in range(2, src)
+		if(D && D.density && world.time >= door_cooldown_track + door_cooldown)
+			OpenDoor(D)
+			return
+
+	step_rand(src)
 
 /mob/living/scp/scp049/proc/save_persistence_data()
 	var/list/persistence_data = list(

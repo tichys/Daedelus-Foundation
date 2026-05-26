@@ -1,18 +1,10 @@
 // SCP-082 - Fernand the Cannibal
 // A large, polite, well-mannered humanoid who speaks French and English.
 // Cooperative with staff when well-fed, but will cannibalize those he can isolate.
-
-#define SCP082_HUNGER_THRESHOLD_HUNGRY 40
-#define SCP082_HUNGER_THRESHOLD_STARVING 70
-#define SCP082_SATIATION_MAX 100
-#define SCP082_SATIATION_DECAY_RATE 0.05
-#define SCP082_FEED_HEAL_AMOUNT 25
-#define SCP082_ATTACK_DAMAGE 25
-#define SCP082_GREET_COOLDOWN 300
-#define SCP082_OFFER_COOLDOWN 200
-#define SCP082_CONSUME_COOLDOWN 50
+// Defines moved to code/modules/SCP/scp_defines.dm
 
 /mob/living/scp/scp082
+	ai_enabled = TRUE
 	name = "SCP-082"
 	desc = "A large, well-mannered humanoid standing nearly two and a half meters tall. He carries himself with an air of quiet dignity."
 	icon = 'icons/scp/scp-082.dmi'
@@ -441,12 +433,51 @@
 /datum/scp082_french_system/proc/get_dining_phrase()
 	return pick(dining_phrases)
 
-#undef SCP082_HUNGER_THRESHOLD_HUNGRY
-#undef SCP082_HUNGER_THRESHOLD_STARVING
-#undef SCP082_SATIATION_MAX
-#undef SCP082_SATIATION_DECAY_RATE
-#undef SCP082_FEED_HEAL_AMOUNT
-#undef SCP082_ATTACK_DAMAGE
-#undef SCP082_GREET_COOLDOWN
-#undef SCP082_OFFER_COOLDOWN
-#undef SCP082_CONSUME_COOLDOWN
+/mob/living/scp/scp082/process_ai()
+	if(stat == DEAD)
+		return
+
+	if(is_starving())
+		var/mob/living/carbon/human/target = null
+		var/best_dist = 7
+		for(var/mob/living/carbon/human/H in view(best_dist, src))
+			if(H.stat == DEAD || H == src)
+				continue
+			var/dist = get_dist(src, H)
+			if(dist < best_dist)
+				if(hospitality_system?.find_isolated_target())
+					target = H
+					best_dist = dist
+		if(target)
+			if(get_dist(src, target) <= 1)
+				if(prob(25))
+					attack_victim(target)
+			else
+				ai_step_towards(target)
+			return
+		if(world.time > last_offer_time + SCP082_OFFER_COOLDOWN)
+			for(var/mob/living/carbon/human/H in view(5, src))
+				if(H.stat != DEAD && H != src)
+					offer_food(H)
+					break
+			return
+
+	if(is_hungry())
+		if(world.time > last_offer_time + SCP082_OFFER_COOLDOWN)
+			for(var/mob/living/carbon/human/H in view(4, src))
+				if(H.stat != DEAD && H != src)
+					offer_food(H)
+					break
+		else if(prob(20))
+			step_rand(src)
+		return
+
+	if(world.time > last_greet_time + SCP082_GREET_COOLDOWN)
+		for(var/mob/living/carbon/human/H in view(4, src))
+			if(H.stat != DEAD && H != src)
+				greet_nearby()
+				break
+
+	if(prob(15))
+		step_rand(src)
+

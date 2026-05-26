@@ -2,6 +2,7 @@
 // A fish-man from the SCP-005 "Mr." series
 
 /mob/living/scp/scp527
+	ai_enabled = TRUE
 	name = "Mr. Fish"
 	desc = "A humanoid male with a fish head. He appears to be a specimen from the 'Mr.' series of SCPs."
 	icon = 'icons/scp/scp-527.dmi'
@@ -127,3 +128,25 @@
 
 /datum/scp527_research_system/New(mob/living/carbon/human/P)
 	parent = P
+
+/mob/living/scp/scp527/process_ai()
+	if(stat == DEAD)
+		return
+
+	if(health < maxHealth * 0.5)
+		var/turf/open/water/W = locate() in range(7, src)
+		if(W)
+			if(get_dist(src, W) > 1)
+				ai_step_towards(W)
+			else
+				dive()
+			return
+
+	if(world.time % 50 == 0)
+		var/mob/living/carbon/human/H = locate() in view(4, src)
+		if(H && H.stat != DEAD)
+			var/greetings = list("Glub.", "Bloop.", "Nice weather... for fish.", "Hello there.")
+			say(pick(greetings))
+
+	if(prob(10))
+		step_rand(src)

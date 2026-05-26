@@ -51,7 +51,8 @@
 	endWhen = 20
 
 /datum/round_event/scp_containment_degradation/announce(fake)
-	priority_announce("NOTICE: Containment integrity monitoring detected degradation in structural elements. Engineering personnel inspect containment walls.", "CONTAINMENT WARNING", null, ANNOUNCER_DEFAULT)
+	// Automated announcements removed - engineering/dispatch should announce containment issues
+	// priority_announce("NOTICE: Containment integrity monitoring detected degradation in structural elements. Engineering personnel inspect containment walls.", "CONTAINMENT WARNING", null, ANNOUNCER_DEFAULT)
 
 /datum/round_event/scp_containment_degradation/start()
 	var/damaged = 0
@@ -111,7 +112,8 @@
 	endWhen = 20
 
 /datum/round_event/scp_power_surge/announce(fake)
-	priority_announce("WARNING: Anomalous power surge detected in containment grid. Backup generators standing by.", "POWER SURGE", null, ANNOUNCER_POWEROFF)
+	// Automated announcements removed - engineering/dispatch should announce power issues
+	// priority_announce("WARNING: Anomalous power surge detected in containment grid. Backup generators standing by.", "POWER SURGE", null, ANNOUNCER_POWEROFF)
 
 /datum/round_event/scp_power_surge/start()
 	var/list/surge_apcs = list()

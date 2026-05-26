@@ -243,6 +243,8 @@
 	animate(src, alpha = 0, time = 5)
 	set_last_xyz()
 	sleep(5)
+	if(QDELETED(src))
+		return FALSE
 	animate(src, alpha = 255, time = 5)
 	forceMove(pick(valid_turfs))
 	in_pocket_dimension = TRUE
@@ -468,6 +470,161 @@
 
 /mob/living/scp/scp106/proc/on_recontainment()
 	hook_scp_recontainment("SCP-106", list("method" = "femur_breaker"))
+
+/mob/living/scp/scp106/process_ai()
+	if(stat == DEAD)
+		return
+	if(containment_status != "breached")
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	if(in_pocket_dimension)
+		if(health >= maxHealth * 0.9 && world.time >= pocket_dimension_cooldown)
+			exit_pocket_dimension()
+		return
+
+	var/health_pct = (getBruteLoss() + getFireLoss() + getToxLoss() + getCloneLoss()) / maxHealth
+	if(health_pct > 0.7 && !istype(get_area(src), /area/scp/pocket_dimension))
+		ai_flee_to_pocket()
+		return
+
+	if(prob(8))
+		playsound(src, 'sound/scp/106/breathing.ogg', 25, TRUE, extrarange = 5)
+
+	var/mob/living/carbon/human/prey = ai_find_prey()
+	if(prey)
+		ai_stalk_prey(prey)
+	else
+		ai_wander_and_corrode()
+
+/mob/living/scp/scp106/proc/ai_flee_to_pocket()
+	visible_message(span_danger("[src] sinks into the floor, fleeing to its pocket dimension!"))
+	playsound(src, 'sound/scp/106/decay3.ogg', 50, TRUE)
+	enter_pocket_dimension(TRUE)
+
+/mob/living/scp/scp106/proc/ai_find_prey()
+	var/mob/living/carbon/human/best_target = null
+	var/best_score = -INFINITY
+	for(var/mob/living/carbon/human/H in view(10, src))
+		if(H.stat == DEAD || H == src)
+			continue
+		if(istype(H.buckled, /obj/machinery/scp_femur_breaker))
+			continue
+		var/score = 100 - get_dist(src, H) * 10
+		if(H.IsParalyzed() || H.IsUnconscious())
+			score += 50
+		if(H.health < H.maxHealth * 0.5)
+			score += 25
+		if(istype(get_area(H), /area/scp/pocket_dimension))
+			continue
+		if(score > best_score)
+			best_score = score
+			best_target = H
+	return best_target
+
+/mob/living/scp/scp106/proc/ai_stalk_prey(mob/living/carbon/human/prey)
+	if(get_dist(src, prey) <= 1)
+		if(prey.IsParalyzed() || !ishuman(prey))
+			WarpMob(prey)
+			playsound(src, 'sound/scp/106/laugh.ogg', 40, TRUE)
+		else
+			prey.Paralyze(20)
+			playsound(prey, pick('sound/scp/106/decay1.ogg', 'sound/scp/106/decay2.ogg'), 40, TRUE)
+			visible_message(span_danger("[src] knocks [prey] down!"))
+		return
+
+	var/turf/target_turf = get_step_towards(src, prey)
+	var/blocked = FALSE
+	for(var/obj/O in target_turf)
+		if(O.density)
+			blocked = TRUE
+			break
+	if(target_turf.density)
+		blocked = TRUE
+
+	if(blocked && world.time >= phase_cooldown)
+		dir = get_dir(src, prey)
+		ai_phase_through_barrier()
+		return
+
+	step_to(src, prey)
+
+	if(prob(15))
+		playsound(src, pick('sound/scp/106/decay1.ogg', 'sound/scp/106/decay2.ogg', 'sound/scp/106/decay3.ogg'), 30, TRUE, extrarange = 3)
+
+/mob/living/scp/scp106/proc/ai_phase_through_barrier()
+	var/turf/step_turf = get_step(src, dir)
+	if(!step_turf)
+		return
+
+	if(istype(step_turf, /turf/closed/wall))
+		var/old_alpha = alpha
+		alpha = 128
+		animate(step_turf, color = "#555555", time = 5)
+		var/list/exit_turfs = list()
+		var/turf/current = get_turf(src)
+		for(var/i in 1 to 8)
+			var/turf/check = get_step(current, dir)
+			if(!check)
+				break
+			if(istype(check, /turf/closed/wall))
+				current = check
+				exit_turfs += current
+			else if(istype(check, /turf/open))
+				exit_turfs += check
+				break
+			else
+				break
+		if(length(exit_turfs))
+			forceMove(exit_turfs[length(exit_turfs)])
+			leave_corrosion_pool(get_turf(src))
+			visible_message(span_danger("[src] phases through the wall!"))
+			playsound(src, pick('sound/scp/106/decay1.ogg', 'sound/scp/106/decay2.ogg', 'sound/scp/106/decay3.ogg'), 35, TRUE)
+		animate(step_turf, color = initial(step_turf.color), time = 2 SECONDS)
+		alpha = old_alpha
+		phase_cooldown = world.time + phase_cooldown_time
+		return
+
+	for(var/obj/machinery/door/D in step_turf)
+		if(D.density)
+			corrode_structure(D)
+			phase_cooldown = world.time + phase_cooldown_time
+			return
+	for(var/obj/structure/S in step_turf)
+		if(S.density)
+			corrode_structure(S)
+			phase_cooldown = world.time + phase_cooldown_time
+			return
+
+/mob/living/scp/scp106/proc/ai_wander_and_corrode()
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 2)
+		var/turf/target_turf = get_step_towards(src, ai_home_turf)
+		var/blocked = FALSE
+		for(var/obj/O in target_turf)
+			if(O.density)
+				blocked = TRUE
+				break
+		if(target_turf.density)
+			blocked = TRUE
+		if(blocked && world.time >= phase_cooldown)
+			dir = get_dir(src, ai_home_turf)
+			ai_phase_through_barrier()
+		else
+			step_to(src, ai_home_turf)
+	else if(prob(60))
+		step_rand(src)
+
+	if(prob(25))
+		var/obj/machinery/door/D = locate() in range(2, src)
+		if(D && D.density)
+			corrode_structure(D)
+
+	if(prob(15))
+		var/obj/structure/S = locate() in range(2, src)
+		if(S && S.density)
+			corrode_structure(S)
 
 /mob/living/scp/scp106/get_status_tab_items()
 	var/list/status_items = ..()

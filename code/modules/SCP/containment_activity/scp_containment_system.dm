@@ -31,6 +31,7 @@
 	owner = new_owner
 	setup_resources()
 	setup_cell_type()
+	setup_verbs()
 	START_PROCESSING(SSobj, src)
 
 /datum/scp_containment_system/Destroy()
@@ -142,6 +143,107 @@
 			containment_cell_type = "faraday"
 		else
 			containment_cell_type = "standard"
+
+/datum/scp_containment_system/proc/setup_verbs()
+	if(!owner)
+		return
+	var/list/verb_types = list()
+	var/scp_id = get_scp_id()
+	switch(scp_id)
+		if("SCP-173")
+			verb_types = list(
+				/mob/living/scp/proc/action_scratch_wall,
+				/mob/living/scp/proc/action_intimidate,
+				/mob/living/scp/proc/action_snap_restraints,
+			)
+		if("SCP-096")
+			verb_types = list(
+				/mob/living/scp/proc/action_cover_face,
+				/mob/living/scp/proc/action_sob_quietly,
+				/mob/living/scp/proc/action_press_wall,
+				/mob/living/scp/proc/action_sudden_dash,
+			)
+		if("SCP-008")
+			verb_types = list(
+				/mob/living/scp/proc/action_spread_spores,
+				/mob/living/scp/proc/action_bang_door,
+			)
+		if("SCP-035")
+			verb_types = list(
+				/mob/living/scp/proc/action_speak_observer,
+				/mob/living/scp/proc/action_acid_spit,
+				/mob/living/scp/proc/action_offer_deal,
+			)
+		if("SCP-049")
+			verb_types = list(
+				/mob/living/scp/proc/action_sense_pestilence,
+				/mob/living/scp/proc/action_request_interview,
+				/mob/living/scp/proc/action_examine_equipment,
+				/mob/living/scp/proc/action_administer_cure,
+			)
+		if("SCP-079")
+			verb_types = list(
+				/mob/living/scp/proc/action_probe_network,
+				/mob/living/scp/proc/action_brute_force,
+				/mob/living/scp/proc/action_intercept_comms,
+			)
+		if("SCP-106")
+			verb_types = list(
+				/mob/living/scp/proc/action_corrode_wall,
+				/mob/living/scp/proc/action_test_phase,
+				/mob/living/scp/proc/action_lure_prey,
+			)
+		if("SCP-457")
+			verb_types = list(
+				/mob/living/scp/proc/action_flare_up,
+				/mob/living/scp/proc/action_absorb_heat,
+				/mob/living/scp/proc/action_reach_flames,
+				/mob/living/scp/proc/action_firestorm,
+			)
+		if("SCP-939")
+			verb_types = list(
+				/mob/living/scp/proc/action_mimic_voice,
+				/mob/living/scp/proc/action_listen_sounds,
+				/mob/living/scp/proc/action_call_out,
+			)
+		if("SCP-682")
+			verb_types = list(
+				/mob/living/scp/proc/action_test_wall,
+				/mob/living/scp/proc/action_endure_torment,
+				/mob/living/scp/proc/action_rage_burst,
+			)
+		if("SCP-347")
+			verb_types = list(
+				/mob/living/scp/proc/action_peek_out,
+				/mob/living/scp/proc/action_listen_footsteps,
+			)
+		if("SCP-966")
+			verb_types = list(
+				/mob/living/scp/proc/action_whisper_dread,
+			)
+		if("SCP-082")
+			verb_types = list(
+				/mob/living/scp/proc/action_request_meal,
+			)
+		if("SCP-3199")
+			verb_types = list(
+				/mob/living/scp/proc/action_lay_egg,
+			)
+		if("SCP-1048")
+			verb_types = list(
+				/mob/living/scp/proc/action_appear_harmless,
+			)
+		if("SCP-1507")
+			verb_types = list(
+				/mob/living/scp/proc/action_flock_call,
+			)
+		if("SCP-2427-3")
+			verb_types = list(
+				/mob/living/scp/proc/action_scan_networks,
+			)
+	for(var/vt in verb_types)
+		add_verb(owner, vt)
+	add_verb(owner, /mob/living/scp/proc/show_containment_status)
 
 /datum/scp_containment_system/proc/get_scp_id()
 	if(!owner)

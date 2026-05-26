@@ -82,6 +82,10 @@
 	to_chat(user, span_notice("Despite having no rear half, this cat appears perfectly healthy and content."))
 	to_chat(user, span_notice("It seems to be named 'Josie'."))
 
+/mob/living/simple_animal/scp529/death(gibbed, cause_of_death = "Unknown")
+	hook_scp_recontainment("SCP-529", list())
+	return ..()
+
 /datum/scp529_health_system
 	var/mob/living/simple_animal/parent
 	var/regeneration_rate = 0.5

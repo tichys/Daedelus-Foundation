@@ -394,7 +394,226 @@
 			to_chat(src, span_notice("Your flames consume [L]."))
 		return
 
+	if(isobj(A) && !istype(A, /obj/effect))
+		ConsumeFlammable(A)
+		return
+
 	return ..()
+
+/mob/living/scp/scp457/proc/ConsumeFlammable(atom/target)
+	if(!target || istype(target, /obj/effect/scp457_fire))
+		return FALSE
+
+	var/fuel_value = GetFuelValue(target)
+	if(fuel_value <= 0)
+		to_chat(src, span_warning("[target] has nothing worth consuming."))
+		return FALSE
+
+	var/obj/item/I = target
+	var/consume_time = 2 SECONDS
+	if(istype(I) && I.w_class >= 3)
+		consume_time = 3 SECONDS
+
+	visible_message(span_danger("[src] reaches toward [target], flames licking hungrily!"))
+	to_chat(src, span_notice("You begin consuming [target]..."))
+
+	if(do_after(src, consume_time, target))
+		if(QDELETED(target))
+			return FALSE
+
+		var/consumed_name = target.name
+		AddHeat(fuel_value)
+		heal_fuel(fuel_value)
+		qdel(target)
+
+		visible_message(span_danger("[src] devours [consumed_name] in a burst of intensified flame!"))
+		to_chat(src, span_notice("You consume [consumed_name]. Heat: [current_heat]/[max_heat]"))
+		playsound(src, 'sound/items/modsuit/flamethrower.ogg', 40, TRUE)
+		return TRUE
+
+	return FALSE
+
+/mob/living/scp/scp457/proc/GetFuelValue(atom/target)
+	if(!target)
+		return 0
+
+	var/fuel = 0
+
+	if(istype(target, /obj/item/paper) || istype(target, /obj/item/book) || istype(target, /obj/item/photo))
+		fuel = 3
+	else if(istype(target, /obj/item/clothing))
+		fuel = 5
+	else if(istype(target, /obj/item/stack/sheet/mineral/wood) || istype(target, /obj/structure/table/wood) || istype(target, /obj/structure/bed))
+		fuel = 12
+	else if(istype(target, /obj/item/stack/sheet/cloth) || istype(target, /obj/item/stack/medical))
+		fuel = 8
+	else if(istype(target, /obj/item/stack/sheet/plastic))
+		fuel = 10
+	else if(istype(target, /obj/item/food))
+		fuel = 4
+	else if(istype(target, /obj/item/candle))
+		fuel = 7
+	else if(istype(target, /obj/item/reagent_containers))
+		var/obj/item/reagent_containers/RC = target
+		if(RC.reagents?.has_reagent(/datum/reagent/fuel))
+			fuel = 20
+		else if(RC.reagents?.has_reagent(/datum/reagent/clf3))
+			fuel = 35
+		else if(RC.reagents?.has_reagent(/datum/reagent/phosphorus))
+			fuel = 15
+		else if(RC.reagents?.total_volume > 0)
+			fuel = 2
+		else
+			fuel = 1
+	else if(istype(target, /obj/item/tank/internals/plasma))
+		fuel = 30
+	else if(istype(target, /obj/structure/closet/crate) || istype(target, /obj/structure/closet))
+		fuel = 8
+	else if(istype(target, /obj/structure/rack) || istype(target, /obj/structure/bed))
+		fuel = 6
+	else if(istype(target, /obj/structure/chair))
+		fuel = 5
+	else if(istype(target, /obj/machinery/light))
+		fuel = 3
+	else if(istype(target, /obj/item))
+		var/obj/item/I = target
+		if(I.resistance_flags & FLAMMABLE)
+			fuel = max(4, I.w_class * 2)
+		else
+			fuel = 1
+	else if(istype(target, /obj/structure))
+		fuel = 4
+
+	return fuel
+
+/mob/living/scp/scp457/proc/heal_fuel(amount)
+	var/heal = amount * 1.5
+	adjustBruteLoss(-heal, forced = TRUE)
+
+/mob/living/scp/scp457/process_ai()
+	if(stat == DEAD)
+		return
+	if(containment_status != "breached")
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	if(current_heat < 10)
+		ai_seek_heat()
+		return
+
+	var/mob/living/carbon/human/prey = ai_find_burn_target()
+	if(prey)
+		ai_burn_prey(prey)
+	else
+		ai_spread_and_wander()
+
+	if(current_heat > SCP457_HEAT_THRESHOLD_INTENSE && prob(15))
+		ai_hurl_fireball()
+
+/mob/living/scp/scp457/proc/ai_seek_heat()
+	var/best_dist = INFINITY
+	var/turf/best_turf = null
+	for(var/obj/structure/bonfire/B in range(15, src))
+		if(!B.burning)
+			continue
+		var/d = get_dist(src, B)
+		if(d < best_dist)
+			best_dist = d
+			best_turf = get_turf(B)
+	for(var/obj/machinery/atmospherics/components/unary/cryo_cell/C in range(15, src))
+		var/d = get_dist(src, C)
+		if(d < best_dist && C.on)
+			best_dist = d
+			best_turf = get_turf(C)
+	if(best_turf)
+		step_to(src, best_turf)
+	else
+		step_rand(src)
+
+/mob/living/scp/scp457/proc/ai_find_burn_target()
+	var/mob/living/carbon/human/best = null
+	var/best_score = -INFINITY
+	for(var/mob/living/carbon/human/H in view(10, src))
+		if(H == src || H.stat == DEAD || QDELETED(H))
+			continue
+		var/score = 100 - get_dist(src, H) * 8
+		if(H.on_fire)
+			score += 30
+		if(H.health < H.maxHealth * 0.5)
+			score += 15
+		if(score > best_score)
+			best_score = score
+			best = H
+	return best
+
+/mob/living/scp/scp457/proc/ai_burn_prey(mob/living/carbon/human/prey)
+	if(get_dist(src, prey) <= 1)
+		UnarmedAttack(prey)
+		if(!locate(/obj/effect/scp457_fire) in get_turf(prey))
+			CreateFireAtTurf(get_turf(prey))
+		return
+
+	step_to(src, prey)
+
+	if(current_heat > 25)
+		var/turf/my_turf = get_turf(src)
+		if(my_turf && !(locate(/obj/effect/scp457_fire) in my_turf))
+			CreateFireAtTurf(my_turf)
+
+/mob/living/scp/scp457/proc/ai_spread_and_wander()
+	if(current_heat < 40)
+		var/obj/item/best_fuel = null
+		var/best_fuel_value = 5
+		for(var/obj/item/I in range(3, src))
+			var/val = GetFuelValue(I)
+			if(val > best_fuel_value)
+				best_fuel_value = val
+				best_fuel = I
+		if(best_fuel)
+			if(get_dist(src, best_fuel) <= 1)
+				ConsumeFlammable(best_fuel)
+			else
+				step_to(src, best_fuel)
+			return
+
+	if(prob(30))
+		var/list/adjacent = list()
+		for(var/turf/T in range(2, src))
+			if(CanSpreadToTurf(T))
+				adjacent += T
+		if(length(adjacent))
+			CreateFireAtTurf(pick(adjacent))
+
+	if(prob(20))
+		var/obj/structure/S = locate() in range(3, src)
+		if(S)
+			S.fire_act(1000, 100)
+			AddHeat(2)
+
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 2)
+		var/turf/step_towards_home = get_step_towards(src, ai_home_turf)
+		if(step_towards_home && !step_towards_home.density)
+			Move(step_towards_home)
+		else
+			step_rand(src)
+	else
+		step_rand(src)
+
+/mob/living/scp/scp457/proc/ai_hurl_fireball()
+	var/list/targets = list()
+	for(var/mob/living/L in view(7, src))
+		if(L != src && L.stat != DEAD && !QDELETED(L))
+			targets += L
+	if(!length(targets))
+		return
+	var/mob/living/target = pick(targets)
+	target.adjustFireLoss(35)
+	target.visible_message(span_danger("A fireball from [src] strikes [target]!"), span_userdanger("A fireball hits you!"))
+	AddHeat(10)
+	playsound(src, 'sound/effects/explosion1.ogg', 60, TRUE)
+	on_fire_spread(get_turf(target))
 
 /mob/living/scp/scp457/get_status_tab_items()
 	. = ..()
@@ -421,6 +640,25 @@
 	AddHeat(10)
 	playsound(src, 'sound/effects/explosion1.ogg', 60, TRUE)
 	on_fire_spread(get_turf(target))
+
+/mob/living/scp/scp457/verb/verb_consume_fuel()
+	set name = "Consume Fuel"
+	set category = "SCP-457"
+	set desc = "Consume a nearby flammable object to increase your heat."
+	var/list/fuel_targets = list()
+	for(var/obj/item/I in range(1, src))
+		if(GetFuelValue(I) > 0)
+			fuel_targets += I
+	for(var/obj/structure/S in range(1, src))
+		if(GetFuelValue(S) > 0)
+			fuel_targets += S
+	if(!length(fuel_targets))
+		to_chat(src, span_warning("No flammable objects nearby!"))
+		return
+	var/atom/chosen = input(src, "Choose an object to consume:", "Consume Fuel") as null|anything in fuel_targets
+	if(!chosen || QDELETED(chosen))
+		return
+	ConsumeFlammable(chosen)
 
 /mob/living/scp/scp457/examine(mob/user)
 	. = ..()
@@ -525,6 +763,19 @@
 		AddHeat(absorbed * 2)
 		visible_message(span_danger("[src] absorbs the nearby flames into itself!"))
 		playsound(src, 'sound/items/modsuit/flamethrower.ogg', 40, TRUE)
+
+	if(current_heat < 60)
+		for(var/obj/item/I in range(range_val, T))
+			if(QDELETED(I))
+				continue
+			var/fuel = GetFuelValue(I)
+			if(fuel >= 3 && fuel <= 12)
+				AddHeat(fuel * 0.5)
+				heal_fuel(fuel * 0.5)
+				qdel(I)
+				absorbed++
+		if(absorbed > 0)
+			visible_message(span_danger("[src]'s flames consume nearby flammable debris!"))
 
 /obj/effect/scp457_fire
 	name = "Living Flame"

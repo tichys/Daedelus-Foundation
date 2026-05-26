@@ -9,9 +9,9 @@
 	var/classification = ""
 	var/findings = ""
 	var/recommendations = ""
-	var	time_filed = 0
-	var	analyst_name = ""
-	var	verified = FALSE
+	var/time_filed = 0
+	var/analyst_name = ""
+	var/verified = FALSE
 
 /datum/goi_intel/New(goi, itype, class, findings_text, recs, analyst)
 	intel_id = "GOI-[world.time]-[rand(100,999)]"
@@ -28,14 +28,14 @@
 /datum/goi_communique
 	var/communique_id = ""
 	var/goi_name = ""
-	var	sender_name = ""
-	var	sender_job = ""
-	var	message = ""
-	var	response = ""
-	var	time_sent = 0
-	var	time_responded = 0
-	var	priority = 0
-	var	responded = FALSE
+	var/sender_name = ""
+	var/sender_job = ""
+	var/message = ""
+	var/response = ""
+	var/time_sent = 0
+	var/time_responded = 0
+	var/priority = 0
+	var/responded = FALSE
 
 /datum/goi_communique/New(goi, sender, msg, prio)
 	communique_id = "COM-[world.time]-[rand(10,99)]"
@@ -55,13 +55,13 @@
 
 SUBSYSTEM_DEF(goi_relations)
 	name = "GOI Relations"
-	wait = 30 SECONDS
+	flags = SS_NO_FIRE
 	priority = FIRE_PRIORITY_DEFAULT
 	var/list/datum/goi_intel/intel_database = list()
 	var/list/datum/goi_communique/communiques = list()
 	var/list/goi_standing = list()
-	var	total_intel = 0
-	var	total_communiques = 0
+	var/total_intel = 0
+	var/total_communiques = 0
 
 /datum/controller/subsystem/goi_relations/Initialize(start_timeofday)
 	. = ..()

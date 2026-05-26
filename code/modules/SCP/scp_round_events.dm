@@ -15,7 +15,8 @@
 	endWhen = 50
 
 /datum/round_event/scp_containment_breach/announce(fake)
-	priority_announce("ALERT: Containment failure detected in secure storage. All security personnel respond immediately.", null, null, ANNOUNCER_ALERT)
+	// Automated announcements removed - dispatch should announce containment breaches
+	// priority_announce("ALERT: Containment failure detected in secure storage. All security personnel respond immediately.", null, null, ANNOUNCER_ALERT)
 
 /datum/round_event/scp_containment_breach/start()
 	var/list/breachable_scps = list("SCP-173", "SCP-049", "SCP-096", "SCP-106", "SCP-939", "SCP-457", "SCP-035", "SCP-682")
@@ -40,7 +41,9 @@
 
 /datum/round_event/scp_containment_breach/tick()
 	if(activeFor == 30)
-		priority_announce("ALERT: [breached_scp] containment status: BREACHED. Enact recontainment protocol immediately.", null, null, ANNOUNCER_ALERT)
+		// Automated announcements removed - dispatch should announce containment breaches
+		// priority_announce("ALERT: [breached_scp] containment status: BREACHED. Enact recontainment protocol immediately.", null, null, ANNOUNCER_ALERT)
+		return
 
 /datum/round_event_control/scp_power_fluctuation
 	name = "SCP Facility Power Fluctuation"
@@ -58,7 +61,8 @@
 	endWhen = 30
 
 /datum/round_event/scp_power_fluctuation/announce(fake)
-	priority_announce("WARNING: Power grid instability detected in containment wing. Backup generators standing by.", null, null, ANNOUNCER_POWEROFF)
+	// Automated announcements removed - engineering/dispatch should announce power issues
+	// priority_announce("WARNING: Power grid instability detected in containment wing. Backup generators standing by.", null, null, ANNOUNCER_POWEROFF)
 
 /datum/round_event/scp_power_fluctuation/start()
 	for(var/obj/machinery/power/apc/A as anything in INSTANCES_OF(/obj/machinery/power/apc))
@@ -129,7 +133,8 @@
 	endWhen = 40
 
 /datum/round_event/scp_cascade_warning/announce(fake)
-	priority_announce("CRITICAL: Multiple SCP containment anomalies detected. Facility-wide cascade event possible. All personnel brace for impact.", null, null, ANNOUNCER_ALERT)
+	// Automated announcements removed - dispatch/AIC should announce cascade events
+	// priority_announce("CRITICAL: Multiple SCP containment anomalies detected. Facility-wide cascade event possible. All personnel brace for impact.", null, null, ANNOUNCER_ALERT)
 
 /datum/round_event/scp_cascade_warning/start()
 	var/list/breachable = list("SCP-173", "SCP-106", "SCP-049", "SCP-682", "SCP-096")

@@ -424,7 +424,7 @@
 	var/mob/living/scp/scp457/flame = istype(scp1, /mob/living/scp/scp457) ? scp1 : scp2
 	if(!flame)
 		return FALSE
-	flame.adjustFireLoss(30)
+	flame.adjustFireLoss(30, updating_health = TRUE, forced = TRUE)
 	flame.visible_message(span_danger("[flame] recoils as its own fire is reflected back!"))
 	return TRUE
 

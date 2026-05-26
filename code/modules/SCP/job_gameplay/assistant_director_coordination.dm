@@ -2,14 +2,14 @@
 	var/task_id = ""
 	var/task_type = ""
 	var/department = ""
-	var	issuer_name = ""
-	var	issuer_job = ""
-	var	description = ""
-	var	priority = 0
-	var	time_issued = 0
-	var	status = "pending"
-	var	assignee_name = ""
-	var	completion_notes = ""
+	var/issuer_name = ""
+	var/issuer_job = ""
+	var/description = ""
+	var/priority = 0
+	var/time_issued = 0
+	var/status = "pending"
+	var/assignee_name = ""
+	var/completion_notes = ""
 
 /datum/coordination_task/New(issuer, dept, ttype, desc, prio)
 	task_id = "COORD-[world.time]-[rand(10,99)]"

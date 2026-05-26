@@ -4,6 +4,7 @@
 #define SCP408_STATE_SWARM "swarm"
 
 /mob/living/scp/scp408
+	ai_enabled = TRUE
 	name = "SCP-408"
 	desc = "A swarm of iridescent butterflies that can become invisible and disrupt visual perception."
 	icon = 'icons/mob/animal.dmi'
@@ -197,3 +198,31 @@
 	. += "Swarm State: [swarm_state]"
 	. += "Swarm Size: [swarm_size]/[max_swarm_size]"
 	. += "Invisible: [invisibility_active ? "Yes" : "No"]"
+
+/mob/living/scp/scp408/process_ai()
+	if(stat == DEAD)
+		return
+
+	switch(swarm_state)
+		if(SCP408_STATE_DORMANT)
+			if(prob(10))
+				step_rand(src)
+		if(SCP408_STATE_AWARE)
+			if(prob(20))
+				var/mob/living/carbon/human/H = locate() in view(5, src)
+				if(H)
+					step_towards(src, H)
+				else
+					step_rand(src)
+		if(SCP408_STATE_ACTIVE)
+			var/mob/living/carbon/human/H = locate() in view(5, src)
+			if(H && prob(40))
+				step_towards(src, H)
+			else if(prob(15))
+				step_rand(src)
+		if(SCP408_STATE_SWARM)
+			var/mob/living/carbon/human/H = locate() in view(5, src)
+			if(H && prob(60))
+				step_towards(src, H)
+			else if(prob(20))
+				step_rand(src)

@@ -441,7 +441,7 @@ export const SCPManagementInterface = (props) => {
                     color="yellow"
                     onClick={() => act('export_scp_data')}
                   >
-                    EXPORT
+                    DOWNLOAD
                   </TermButton>
                 </Box>
 
@@ -979,7 +979,7 @@ export const SCPManagementInterface = (props) => {
                     color="yellow"
                     onClick={() => act('export_scp_data')}
                   >
-                    EXPORT ALL DATA
+                    DOWNLOAD ALL DATA
                   </TermButton>
                 </Box>
               </Box>

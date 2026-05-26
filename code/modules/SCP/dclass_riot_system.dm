@@ -336,6 +336,7 @@ SUBSYSTEM_DEF(dclass_riot)
 	set name = "Join Riot"
 	set category = "D-Class"
 	set desc = "Join the D-Class riot."
+	set hidden = TRUE
 	if(!findtext(job, "D-Class"))
 		return
 	if(!SSdclass_riot || !SSdclass_riot.current_riot || !SSdclass_riot.current_riot.riot_active)
@@ -347,6 +348,7 @@ SUBSYSTEM_DEF(dclass_riot)
 	set name = "Refuse Riot"
 	set category = "D-Class"
 	set desc = "Refuse to participate in the D-Class riot."
+	set hidden = TRUE
 	if(!findtext(job, "D-Class"))
 		return
 	if(!SSdclass_riot || !SSdclass_riot.current_riot || !SSdclass_riot.current_riot.riot_active)

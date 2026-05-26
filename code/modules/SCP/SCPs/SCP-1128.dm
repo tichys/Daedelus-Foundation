@@ -3,6 +3,7 @@
 #define SCP1128_PHASE_MANIFEST "manifested"
 
 /mob/living/scp/scp1128
+	ai_enabled = TRUE
 	name = "SCP-1128"
 	desc = "An aquatic predator that manifests when its victims are submerged in water. Those who know of its existence become vulnerable."
 	icon = 'icons/mob/carp.dmi'
@@ -182,3 +183,31 @@
 	. += "Phase: [manifestation_phase]"
 	. += "Aware Victims: [length(aware_victims)]"
 	. += "Water Tiles: [length(water_turfs)]"
+
+/mob/living/scp/scp1128/process_ai()
+	if(stat == DEAD)
+		return
+
+	switch(manifestation_phase)
+		if(SCP1128_PHASE_OBSERVE)
+			if(length(water_turfs))
+				var/turf/open/water/W = pick(water_turfs)
+				if(get_dist(src, W) > 3)
+					step_towards(src, W)
+			else if(length(aware_victims))
+				var/first_ckey = aware_victims[1]
+				var/mob/M = get_mob_by_ckey(first_ckey)
+				if(M && get_dist(src, M) > 5)
+					step_towards(src, M)
+			else if(prob(8))
+				step_rand(src)
+		if(SCP1128_PHASE_HAUNT)
+			return
+		if(SCP1128_PHASE_MANIFEST)
+			for(var/ckey in aware_victims)
+				var/mob/living/carbon/human/H = get_mob_by_ckey(ckey)
+				if(!H || H.stat == DEAD)
+					continue
+				if(get_dist(src, H) > 1)
+					ai_step_towards(H)
+				break

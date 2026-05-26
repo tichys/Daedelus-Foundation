@@ -2013,8 +2013,64 @@
 
 /datum/computer_file/program/scp_dclass_work/ui_data(mob/user)
 	var/list/data = get_header_data()
-	var/list/tasks = list()
-	data["tasks"] = tasks
+
+	var/list/assignments = list()
+	var/list/available = list()
+	var/list/history = list()
+
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		var/datum/dclass_player/player = SSdclass?.manager?.get_dclass_player(H.ckey)
+
+		if(player)
+			data["dclass_name"] = H.real_name
+			data["dclass_id"] = "D-[player.dclass_number || H.ckey]"
+			data["trust_level"] = player.trust_level
+			data["trust_name"] = get_trust_name(player.trust_level)
+			data["credits"] = player.credits
+			data["strikes"] = player.strikes
+			data["tests_completed"] = player.tests_completed
+			data["behavior_score"] = player.good_behavior_points - player.bad_behavior_points
+			data["is_active"] = (H.ckey in SSdclass_experiments?.active_test_subjects)
+
+			if(data["is_active"])
+				var/list/active = SSdclass_experiments.active_test_subjects[H.ckey]
+				if(active)
+					assignments = list(list(
+						"scp_id" = active["scp_id"] || "Unknown",
+						"test_type" = active["test_type"] || "Standard",
+						"danger_level" = active["danger_level"] || 1,
+						"voluntary" = active["voluntary"] || FALSE,
+						"elapsed" = world.time - (active["start_time"] || world.time),
+					))
+
+			var/list/test_list = H.get_available_tests()
+			for(var/test_name in test_list)
+				var/list/test_info = test_list[test_name]
+				available += list(list(
+					"name" = test_name,
+					"scp_id" = test_info["scp_id"],
+					"test_type" = test_info["test_type"],
+					"danger_level" = test_info["danger"],
+					"reward" = test_info["reward"],
+				))
+
+			if(SSdclass_experiments?.test_history)
+				var/start = max(1, length(SSdclass_experiments.test_history) - 9)
+				for(var/i = length(SSdclass_experiments.test_history), i >= start, i--)
+					var/list/record = SSdclass_experiments.test_history[i]
+					if(record["ckey"] == H.ckey)
+						history += list(list(
+							"scp_id" = record["scp_id"] || "Unknown",
+							"outcome" = record["outcome"] || "Unknown",
+							"danger_level" = record["danger_level"] || 1,
+							"reward" = record["reward"] || 0,
+							"time" = record["time"] ? time2text(record["time"], "HH:MM") : "Unknown",
+						))
+
+	data["assignments"] = assignments
+	data["available_tests"] = available
+	data["history"] = history
 	return data
 
 /datum/computer_file/program/scp_dclass_work/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
@@ -2023,6 +2079,34 @@
 		return
 	if(!ishuman(ui.user))
 		return
+
+	var/mob/living/carbon/human/H = usr
+
+	switch(action)
+		if("volunteer")
+			H.volunteer_for_testing()
+			return TRUE
+		if("report_complete")
+			if(H.ckey in SSdclass_experiments?.active_test_subjects)
+				var/list/subject_data = SSdclass_experiments.active_test_subjects[H.ckey]
+				if(subject_data)
+					SSdclass_experiments.complete_subject_participation(H, "success", subject_data["scp_id"], subject_data["danger_level"])
+					return TRUE
+
+/datum/computer_file/program/scp_dclass_work/proc/get_trust_name(trust)
+	switch(trust)
+		if(DCLASS_TRUST_HOSTILE)
+			return "Hostile"
+		if(DCLASS_TRUST_SUSPICIOUS)
+			return "Uncooperative"
+		if(DCLASS_TRUST_NEUTRAL)
+			return "Neutral"
+		if(DCLASS_TRUST_COOPERATIVE)
+			return "Cooperative"
+		if(DCLASS_TRUST_TRUSTED)
+			return "Trusted"
+		else
+			return "Unknown"
 
 /datum/computer_file/program/scp_rehabilitation
 	filename = "scp_rehab"
@@ -2651,4 +2735,175 @@
 			. = TRUE
 		if("register_compound")
 			SSanomalous_chemistry.register_compound(params["name"], params["properties"], params["origin"])
+			. = TRUE
+
+/datum/computer_file/program/scp_research_laboratory
+	filename = "scp_research_lab"
+	filedesc = "SCP Research Laboratory"
+	category = PROGRAM_CATEGORY_SCI
+	program_icon_state = "generic"
+	extended_desc = "Manage research projects, experiments, and team assignments for SCP study."
+	size = 4
+	tgui_id = "ResearchLaboratory"
+	program_icon = "flask"
+	usage_flags = PROGRAM_ALL
+	available_on_ntnet = FALSE
+	required_access = list(ACCESS_SCIENCE)
+
+/datum/computer_file/program/scp_research_laboratory/ui_data(mob/user)
+	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
+		return get_header_data()
+	var/list/data = get_header_data()
+	data += SSresearch_laboratory.manager.get_all_data(user)
+	return data
+
+/datum/computer_file/program/scp_research_laboratory/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+	if(.)
+		return
+	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
+		return
+	var/datum/research_laboratory_manager/mgr = SSresearch_laboratory.manager
+
+	switch(action)
+		if("create_project")
+			if(!mgr.can_manage(usr))
+				return
+			if(!params["name"])
+				return
+			var/list/scp_targets = params["scp_targets"]
+			if(!scp_targets)
+				scp_targets = list()
+			if(!islist(scp_targets))
+				scp_targets = list(scp_targets)
+			mgr.create_research_project(list(
+				"name" = params["name"],
+				"description" = params["description"] || "",
+				"scp_targets" = scp_targets,
+				"research_field" = params["research_field"] || "General",
+			))
+			. = TRUE
+
+		if("approve_project")
+			if(!mgr.can_manage(usr))
+				return
+			if(params["project_id"])
+				mgr.approve_research_project(params["project_id"])
+			. = TRUE
+
+		if("revoke_project")
+			if(!mgr.can_manage(usr))
+				return
+			if(params["project_id"])
+				mgr.revoke_research_project(params["project_id"])
+			. = TRUE
+
+		if("add_project_scp_target")
+			if(!mgr.can_manage(usr))
+				return
+			if(params["project_id"] && params["scp_id"])
+				mgr.add_project_scp_target(params["project_id"], params["scp_id"])
+			. = TRUE
+
+		if("remove_project_scp_target")
+			if(!mgr.can_manage(usr))
+				return
+			if(params["project_id"] && params["scp_id"])
+				mgr.remove_project_scp_target(params["project_id"], params["scp_id"])
+			. = TRUE
+
+		if("assign_project_team")
+			if(!mgr.can_manage(usr))
+				return
+			if(params["project_id"])
+				mgr.assign_project_team(params["project_id"], params["team_id"] || "")
+			. = TRUE
+
+		if("create_team")
+			if(!mgr.can_manage(usr))
+				return
+			var/team_name = params["name"]
+			if(!team_name)
+				team_name = ""
+			mgr.create_research_team(list("name" = team_name))
+			. = TRUE
+
+		if("add_team_member")
+			var/team_id = params["team_id"]
+			if(team_id && ishuman(usr))
+				if(mgr.is_research_personnel(usr))
+					mgr.add_team_member(team_id, usr)
+				else
+					mgr.request_team_join(team_id, usr)
+					to_chat(usr, span_notice("Join request submitted. A researcher must approve it."))
+			. = TRUE
+
+		if("remove_team_member")
+			var/team_id = params["team_id"]
+			var/ckey = params["ckey"]
+			if(!ishuman(usr))
+				return TRUE
+			if(team_id && ckey)
+				mgr.remove_team_member(team_id, ckey)
+			. = TRUE
+
+		if("request_team_join")
+			var/team_id = params["team_id"]
+			if(team_id && ishuman(usr))
+				if(mgr.is_research_personnel(usr))
+					mgr.add_team_member(team_id, usr)
+				else
+					mgr.request_team_join(team_id, usr)
+					to_chat(usr, span_notice("Join request submitted. A researcher must approve it."))
+			. = TRUE
+
+		if("approve_join_request")
+			var/req_id = params["request_id"]
+			if(req_id && mgr.can_manage(usr))
+				mgr.approve_join_request(req_id)
+			. = TRUE
+
+		if("deny_join_request")
+			var/req_id = params["request_id"]
+			if(req_id && mgr.can_manage(usr))
+				mgr.deny_join_request(req_id)
+			. = TRUE
+
+		if("start_experiment")
+			if(!mgr.can_manage(usr))
+				return
+			var/scp_id = params["scp_id"]
+			var/exp_type = text2num(params["experiment_type"])
+			if(scp_id && exp_type && ishuman(usr))
+				var/mob/living/carbon/human/H = usr
+				var/datum/scp_experiment/exp = mgr.start_scp_experiment(H, scp_id, exp_type)
+				if(!exp)
+					to_chat(H, "<span class='warning'>Failed to start experiment.</span>")
+			. = TRUE
+
+		if("suspend_experiment")
+			if(!mgr.can_manage(usr))
+				return
+			var/exp_id = params["experiment_id"]
+			if(exp_id)
+				mgr.suspend_scp_experiment(exp_id, usr)
+			. = TRUE
+
+		if("resume_experiment")
+			if(!mgr.can_manage(usr))
+				return
+			var/exp_id = params["experiment_id"]
+			if(exp_id)
+				mgr.resume_scp_experiment(exp_id, usr)
+			. = TRUE
+
+		if("record_safety_violation")
+			var/protocol_id = params["protocol_id"]
+			if(protocol_id)
+				mgr.record_safety_violation(protocol_id)
+				var/protocol = mgr.safety_protocols[protocol_id]
+				if(protocol)
+					to_chat(usr, "<span class='warning'>Safety violation recorded for [protocol["name"]]. Violations: [protocol["violations"]]/[protocol["violation_threshold"]].</span>")
+					if(protocol["status"] == "emergency")
+						to_chat(usr, "<span class='boldwarning'>EMERGENCY: [protocol["name"]] has exceeded its violation threshold!</span>")
 			. = TRUE

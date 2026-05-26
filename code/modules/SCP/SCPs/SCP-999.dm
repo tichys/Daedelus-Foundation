@@ -22,6 +22,8 @@
 	var/healing_sessions = 0
 	var/mood_improvements = 0
 	var/comfort_provided = 0
+	var/candy_consumed = 0
+	var/candy_happiness_bonus = 0
 
 	var/tickle_cooldown = 0
 	var/tickle_cooldown_time = 8 SECONDS
@@ -97,11 +99,6 @@
 	. = ..()
 
 	provide_comfort()
-
-	if(!client)
-		var/mob/living/carbon/human/target = find_target()
-		if(target)
-			approach_target(target)
 
 	if(prob(8))
 		auto_babble()
@@ -294,7 +291,62 @@
 			tickle_target(H)
 		return
 
+	if(istype(A, /obj/item/food/candy))
+		ConsumeCandy(A)
+		return
+
+	if(istype(A, /obj/item/food))
+		var/obj/item/food/F = A
+		if(F.foodtypes & SUGAR)
+			ConsumeCandy(A, is_candy = FALSE)
+			return
+
 	return ..()
+
+/mob/living/scp/scp999/attackby(obj/item/I, mob/living/user, params)
+	if(istype(I, /obj/item/food/candy))
+		user.visible_message(span_notice("[user] offers [I] to [src]!"))
+		ConsumeCandy(I)
+		return TRUE
+
+	if(istype(I, /obj/item/food))
+		var/obj/item/food/F = I
+		if(F.foodtypes & SUGAR)
+			user.visible_message(span_notice("[user] feeds [I] to [src]!"))
+			ConsumeCandy(I, is_candy = FALSE)
+			return TRUE
+
+	return ..()
+
+/mob/living/scp/scp999/proc/ConsumeCandy(obj/item/food/candy, is_candy = TRUE)
+	if(!candy || QDELETED(candy))
+		return
+
+	var/joy_bonus = is_candy ? 20 : 10
+	var/heal_bonus = is_candy ? 15 : 8
+	var/happiness_gain = is_candy ? 15 : 7
+
+	var/candy_name = candy.name
+	qdel(candy)
+
+	candy_consumed++
+	candy_happiness_bonus = min(50, candy_happiness_bonus + joy_bonus)
+	happiness_level = min(max_happiness, happiness_level + happiness_gain)
+	adjustBruteLoss(-heal_bonus, forced = TRUE)
+
+	if(is_candy)
+		visible_message(span_notice("[src] vibrates with pure joy after eating [candy_name]! Glorp!"))
+		playsound(src, pick(happy_sounds), 50, TRUE)
+		say(generate_glubby_speech())
+		to_chat(src, span_notice("The [candy_name] was delicious! Happiness: [happiness_level]/[max_happiness]"))
+	else
+		visible_message(span_notice("[src] happily absorbs [candy_name]!"))
+		playsound(src, pick(happy_sounds), 30, TRUE)
+
+	addtimer(CALLBACK(src, .proc/candy_happiness_decay), 60 SECONDS)
+
+/mob/living/scp/scp999/proc/candy_happiness_decay()
+	candy_happiness_bonus = max(0, candy_happiness_bonus - 5)
 
 /mob/living/scp/scp999/attack_hand(mob/living/carbon/human/user)
 	if(user.combat_mode)
@@ -323,7 +375,7 @@
 	if(healing_sessions > 0 || comfort_provided > 0)
 		happiness_level = min(max_happiness, happiness_level + 1)
 
-	healing_power = 25 + (happiness_level / 4)
+	healing_power = 25 + (happiness_level / 4) + candy_happiness_bonus
 
 /mob/living/scp/scp999/proc/heal_nearby_ability()
 	if(world.time < healing_cooldown)
@@ -373,6 +425,8 @@
 	. = ..()
 	. += "Healing Power: [healing_power]"
 	. += "Happiness Level: [happiness_level]/[max_happiness]"
+	. += "Candy Bonus: [candy_happiness_bonus]"
+	. += "Candy Consumed: [candy_consumed]"
 	. += "Comfort Radius: [comfort_radius]"
 	. += "Healed Targets: [length(healed_targets)]"
 	. += "Healing Sessions: [healing_sessions]"
@@ -382,6 +436,25 @@
 	set name = "Comfort Zone"
 	set category = "SCP-999"
 	comfort_zone_ability()
+
+/mob/living/scp/scp999/verb/verb_eat_candy()
+	set name = "Eat Candy"
+	set category = "SCP-999"
+	set desc = "Eat nearby candy or sweet food to boost your happiness!"
+	var/list/treats = list()
+	for(var/obj/item/food/candy/C in range(1, src))
+		treats += C
+	for(var/obj/item/food/F in range(1, src))
+		if(F.foodtypes & SUGAR)
+			treats += F
+	if(!length(treats))
+		to_chat(src, span_warning("No candy or sweets nearby!"))
+		return
+	var/obj/item/food/chosen = input(src, "Choose a treat to eat:", "Eat Candy") as null|anything in treats
+	if(!chosen || QDELETED(chosen))
+		return
+	var/is_candy = istype(chosen, /obj/item/food/candy)
+	ConsumeCandy(chosen, is_candy)
 
 /mob/living/scp/scp999/examine(mob/user)
 	. = ..()
@@ -475,7 +548,27 @@
 		return
 	if(containment_status == "breached" && prob(15))
 		calm_enraged_096()
-	apply_mood_aura()
+
+	var/obj/item/food/candy/nearby_candy = locate() in range(3, src)
+	if(nearby_candy)
+		if(get_dist(src, nearby_candy) <= 1)
+			ConsumeCandy(nearby_candy)
+		else
+			step_to(src, nearby_candy)
+		return
+
+	var/obj/item/food/sweet = null
+	for(var/obj/item/food/F in range(3, src))
+		if(F.foodtypes & SUGAR)
+			sweet = F
+			break
+	if(sweet)
+		if(get_dist(src, sweet) <= 1)
+			ConsumeCandy(sweet, is_candy = FALSE)
+		else
+			step_to(src, sweet)
+		return
+
 	var/mob/living/carbon/human/closest_hurt
 	var/closest_dist = INFINITY
 	for(var/mob/living/carbon/human/H in view(7, src))
@@ -494,4 +587,3 @@
 			heal_target(closest_hurt)
 	else if(prob(30))
 		step_rand(src)
-	try_calm_nearby_scps()

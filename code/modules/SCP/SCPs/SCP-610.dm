@@ -70,6 +70,7 @@
 	var/obj/structure/scp610_core/core = new(T)
 	core.source_bottle = src
 	core.activate()
+	SSscp610.cores += core
 
 /obj/item/reagent_containers/glass/bottle/scp610/attack(mob/living/target, mob/living/user)
 	if(!containment_breached)
