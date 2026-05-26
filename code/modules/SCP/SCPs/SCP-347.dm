@@ -2,6 +2,7 @@
 // A female entity that is completely invisible except when consuming food.
 
 /mob/living/scp/scp347
+	ai_enabled = TRUE
 	name = "SCP-347"
 	desc = "A female humanoid entity that is completely invisible to the naked eye."
 	icon = 'icons/scp/scp347/scp-347.dmi'
@@ -207,3 +208,30 @@
 /mob/living/scp/scp347/Destroy()
 	QDEL_NULL(SCP)
 	return ..()
+
+/mob/living/scp/scp347/process_ai()
+	if(stat == DEAD)
+		return
+
+	if(is_revealed)
+		var/turf/safest = null
+		var/most_dist = 0
+		for(var/mob/living/carbon/human/H in view(7, src))
+			if(H == src || H.stat == DEAD)
+				continue
+			var/dist = get_dist(src, H)
+			if(dist > most_dist)
+				most_dist = dist
+				safest = get_step_away(src, H)
+		if(safest)
+			step_towards(src, safest)
+		return
+
+	if(prob(5))
+		for(var/mob/living/carbon/human/H in range(1, src))
+			if(H != src && H.stat != DEAD)
+				stealth_pickpocket(H)
+				return
+
+	if(prob(20))
+		step_rand(src)

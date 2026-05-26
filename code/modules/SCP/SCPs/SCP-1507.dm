@@ -104,6 +104,7 @@
 /mob/living/simple_animal/hostile/retaliate/scp1507/death(gibbed, cause_of_death = "Unknown")
 	visible_message("<span class='danger'>[src] shatters into plastic pieces!</span>")
 	playsound(src, 'sound/effects/glassbr1.ogg', 50, TRUE)
+	hook_scp_recontainment("SCP-1507", list())
 	if(flock_system)
 		flock_system.notify_flock_of_death()
 	return ..()

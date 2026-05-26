@@ -404,9 +404,10 @@
 
 /mob/living/carbon/human/var/list/trade_pending = null
 
-/mob/living/carbon/human/verb/accept_trade()
+/mob/living/carbon/human/proc/accept_trade()
 	set name = "Accept Trade"
 	set category = "D-Class"
+	set hidden = TRUE
 	if(!trade_pending)
 		to_chat(usr, span_warning("No pending trade offer."))
 		return
@@ -437,9 +438,10 @@
 		their_player.gain_experience(3, "trade")
 	trade_pending = null
 
-/mob/living/carbon/human/verb/decline_trade()
+/mob/living/carbon/human/proc/decline_trade()
 	set name = "Decline Trade"
 	set category = "D-Class"
+	set hidden = TRUE
 	if(!trade_pending)
 		to_chat(usr, span_warning("No pending trade offer."))
 		return

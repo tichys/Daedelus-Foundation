@@ -115,6 +115,7 @@
 	affected_viewers = list()
 	approach_targets = list()
 	visible_message("<span class='danger'>The creature collapses, its true form briefly visible - an enormous Bengal tiger!</span>")
+	hook_scp_recontainment("SCP-247", list())
 	..()
 
 /mob/living/simple_animal/hostile/scp247/Destroy()

@@ -827,7 +827,8 @@
 		)
 
 	var/json_data = json_encode(export_data)
-	to_chat(admin_client, "<span class='notice'>SCP Management Data exported. Data length: [length(json_data)] characters</span>")
+	admin_client << ftp(json_data, "scp_management_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+	to_chat(admin_client, span_notice("SCP management data downloaded."))
 
 /datum/scp_management_interface/proc/import_scp_data(data)
 	try

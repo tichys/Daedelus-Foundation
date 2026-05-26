@@ -3,12 +3,12 @@
 	var/vip_name = ""
 	var/vip_job = ""
 	var/assigned_guard = ""
-	var	status = "active"
-	var	time_created = 0
-	var	checkins = 0
-	var	last_checkin = 0
-	var	checkin_interval = 5 MINUTES
-	var	overdue = FALSE
+	var/status = "active"
+	var/time_created = 0
+	var/checkins = 0
+	var/last_checkin = 0
+	var/checkin_interval = 5 MINUTES
+	var/overdue = FALSE
 
 /datum/vip_protection_detail/New(vip, guard)
 	detail_id = "VIP-[world.time]-[rand(10,99)]"

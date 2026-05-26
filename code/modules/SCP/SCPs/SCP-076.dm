@@ -142,20 +142,147 @@
 	speed_boost_active = FALSE
 	remove_movespeed_modifier(/datum/movespeed_modifier/scp076_rage)
 
+/mob/living/scp/scp076/process_ai()
+	if(stat == DEAD)
+		return
+	if(current_state != SCP076_STATE_ACTIVE)
+		return
+	if(world.time < last_ai_tick + ai_tick_interval)
+		return
+	last_ai_tick = world.time
+
+	if(containment_status != "breached")
+		containment_status = "breached"
+
+	if(health < maxHealth * 0.3)
+		rage_meter = min(rage_meter + 2, max_rage)
+
+	if(rage_meter > 70 && !speed_boost_active)
+		activate_speed_boost()
+
+	if(weapon_cooldown > 0)
+		weapon_cooldown -= 1
+
+	var/mob/living/carbon/human/prey = ai_find_combat_target()
+	if(prey)
+		ai_combat_pursue(prey)
+	else
+		ai_combat_wander()
+
+	if(prob(5) && rage_meter > 30)
+		playsound(src, 'sound/effects/roar.ogg', 30, TRUE, extrarange = 10)
+		visible_message("<span class='danger'>[src] roars with rage!</span>")
+
+	affect_rage_aura()
+
+/mob/living/scp/scp076/proc/ai_find_combat_target()
+	var/mob/living/carbon/human/best = null
+	var/best_score = -INFINITY
+	for(var/mob/living/carbon/human/H in view(12, src))
+		if(H.stat == DEAD || H == src)
+			continue
+		var/score = 100 - get_dist(src, H) * 5
+		if(H.health < H.maxHealth * 0.5)
+			score += 20
+		if(H.combat_mode)
+			score += 15
+		if(score > best_score)
+			best_score = score
+			best = H
+	return best
+
+/mob/living/scp/scp076/proc/ai_combat_pursue(mob/living/carbon/human/prey)
+	if(get_dist(src, prey) <= 1)
+		var/damage = 35 + (rage_meter * 0.3)
+		prey.adjustBruteLoss(damage)
+		if(prey.sanity)
+			prey.sanity.add_trauma(TRAUMA_VIOLENCE, 15)
+			affect_combat_sanity(prey)
+		visible_message("<span class='danger'>[src] strikes [prey] with devastating force!</span>")
+		playsound(src, 'sound/weapons/bladeslice.ogg', 50, TRUE)
+		rage_meter = min(rage_meter + 5, max_rage)
+		if(prey.stat == DEAD)
+			kill_count++
+			rage_meter = max(rage_meter - 15, 0)
+		return
+
+	if(rage_meter > 50 && prob(20))
+		scp076_ai_berserk()
+
+	var/turf/next_turf = get_step_towards(src, prey)
+	var/blocked = FALSE
+	for(var/obj/O in next_turf)
+		if(O.density)
+			blocked = TRUE
+			break
+	if(next_turf && next_turf.density)
+		blocked = TRUE
+
+	if(blocked)
+		var/obj/machinery/door/D = locate() in range(1, src)
+		if(D && D.density)
+			D.open(TRUE)
+			visible_message("<span class='danger'>[src] smashes through [D]!</span>")
+			playsound(D, 'sound/machines/door_open.ogg', 50, TRUE)
+			return
+		var/obj/structure/S = locate() in range(1, src)
+		if(S && S.density)
+			S.take_damage(60, BRUTE, "melee")
+			visible_message("<span class='danger'>[src] destroys [S]!</span>")
+			return
+
+	step_to(src, prey)
+
+	if(!blade_summoned && prob(10))
+		summon_blade()
+
+/mob/living/scp/scp076/proc/ai_combat_wander()
+	if(prob(15))
+		var/obj/machinery/door/D = locate() in range(3, src)
+		if(D && D.density)
+			D.open(TRUE)
+			visible_message("<span class='danger'>[src] forces [D] open!</span>")
+			return
+
+	if(prob(10))
+		var/obj/structure/S = locate() in range(2, src)
+		if(S && S.density)
+			S.take_damage(40, BRUTE, "melee")
+			return
+
+	if(ai_home_turf && get_dist(src, ai_home_turf) > ai_wander_range * 3)
+		step_to(src, ai_home_turf)
+	else
+		step_rand(src)
+
+	if(!blade_summoned && prob(5))
+		summon_blade()
+
+/mob/living/scp/scp076/proc/scp076_ai_berserk()
+	add_movespeed_modifier(/datum/movespeed_modifier/scp076_berserk)
+	visible_message("<span class='danger'>[src] enters a berserk frenzy!</span>")
+	addtimer(CALLBACK(src, PROC_REF(scp076_end_berserk)), 20 SECONDS)
+
+/mob/living/scp/scp076/proc/scp076_end_berserk()
+	remove_movespeed_modifier(/datum/movespeed_modifier/scp076_berserk)
+	to_chat(src, "<span class='notice'>Your berserk frenzy subsides.</span>")
+
+/datum/movespeed_modifier/scp076_berserk
+	id = "scp076_berserk"
+	priority = 100
+	slowdown = -1.5
+
 /mob/living/scp/scp076/death(gibbed)
 	if(current_state == SCP076_STATE_ACTIVE)
 		current_state = SCP076_STATE_DECEASED
 		dormant_timer = world.time + dormant_duration
 		kill_count = 0
 		rage_meter = 0
-		stat = DEAD
 		visible_message("<span class='danger'>[src] falls... but the sarcophagus begins to glow.</span>")
-		hook_scp_recontainment("SCP-076", list())
 		QDEL_NULL(summoned_blade)
 		blade_summoned = FALSE
 		addtimer(CALLBACK(src, .proc/check_respawn), dormant_duration)
-		return
-	..()
+	. = ..()
 
 /mob/living/scp/scp076/proc/check_respawn()
 	if(respawn_count >= max_respawns)

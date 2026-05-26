@@ -147,3 +147,7 @@
 /mob/living/simple_animal/hostile/scp2427_3/proc/on_door_breach(obj/machinery/door/door)
 	hook_scp_breach("SCP-2427-3", src)
 	hook_facility_damage_near_scp("SCP-2427-3", 1)
+
+/mob/living/simple_animal/hostile/scp2427_3/death(gibbed, cause_of_death = "Unknown")
+	hook_scp_recontainment("SCP-2427-3", list())
+	return ..()

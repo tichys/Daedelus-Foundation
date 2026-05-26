@@ -1,13 +1,13 @@
 /datum/anomalous_evidence
 	var/evidence_id = ""
 	var/evidence_type = ""
-	var	collector_name = ""
-	var	location_found = ""
-	var	scp_related = ""
-	var	description = ""
-	var	analysis_result = ""
-	var	analyzed = FALSE
-	var	time_collected = 0
+	var/collector_name = ""
+	var/location_found = ""
+	var/scp_related = ""
+	var/description = ""
+	var/analysis_result = ""
+	var/analyzed = FALSE
+	var/time_collected = 0
 
 /datum/anomalous_evidence/New(collector, etype, location, scp, desc)
 	evidence_id = "EVID-[world.time]-[rand(100,999)]"

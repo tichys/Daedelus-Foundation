@@ -267,6 +267,7 @@
 
 /mob/living/simple_animal/scp1048/death(gibbed, cause_of_death = "Unknown")
 	visible_message("<span class='danger'>[src] falls over, its stuffing spilling out!</span>")
+	hook_scp_recontainment("SCP-1048", list())
 	return ..()
 
 /mob/living/simple_animal/scp1048/proc/view_build_status()
