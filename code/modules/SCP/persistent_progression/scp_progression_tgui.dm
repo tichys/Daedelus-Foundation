@@ -112,8 +112,8 @@
 	switch(action)
 		if("export_scp_data")
 			var/data_json = json_encode(list("ckey" = user.ckey, "scp_data" = "export"))
-			user << ftp(data_json, "scp_progression_data.json")
-			to_chat(user, span_notice("SCP progression data exported."))
+			user << ftp(data_json, "scp_progression_[user.ckey]_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+			to_chat(user, span_notice("SCP progression data downloaded."))
 			. = TRUE
 
 		if("refresh_scp_data")

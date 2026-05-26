@@ -636,126 +636,295 @@ SUBSYSTEM_DEF(round_objectives)
 /mob/living/scp/proc/action_scratch_wall()
 	set name = "Scratch Wall"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("scratch_wall"); return; }
 
 /mob/living/scp/proc/action_intimidate()
 	set name = "Intimidate Observer"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("intimidate"); return; }
 
 /mob/living/scp/proc/action_snap_restraints()
 	set name = "Snap Restraints"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("snap_restraints"); return; }
 
 /mob/living/scp/proc/action_cover_face()
 	set name = "Cover Face"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("cover_face"); return; }
 
 /mob/living/scp/proc/action_sob_quietly()
 	set name = "Sob Quietly"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sob_quietly"); return; }
 
 /mob/living/scp/proc/action_press_wall()
 	set name = "Press Against Wall"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("press_against_wall"); return; }
 
 /mob/living/scp/proc/action_sudden_dash()
 	set name = "Sudden Dash"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sudden_dash"); return; }
 
 /mob/living/scp/proc/action_sense_pestilence()
 	set name = "Sense Pestilence"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("sense_pestilence"); return; }
 
 /mob/living/scp/proc/action_request_interview()
 	set name = "Request Interview"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("request_interview"); return; }
 
 /mob/living/scp/proc/action_examine_equipment()
 	set name = "Examine Equipment"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("examine_equipment"); return; }
 
 /mob/living/scp/proc/action_corrode_wall()
 	set name = "Corrode Wall"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("corrode_wall"); return; }
 
 /mob/living/scp/proc/action_test_phase()
 	set name = "Test Phase"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("test_phase"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("phase_test"); return; }
 
 /mob/living/scp/proc/action_mimic_voice()
 	set name = "Mimic Voice"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("mimic_voice"); return; }
 
 /mob/living/scp/proc/action_listen_sounds()
 	set name = "Listen to Sounds"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("listen_sounds"); return; }
 
 /mob/living/scp/proc/action_probe_network()
 	set name = "Probe Network"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("probe_network"); return; }
 
 /mob/living/scp/proc/action_brute_force()
 	set name = "Brute Force Lock"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("brute_force"); return; }
 
 /mob/living/scp/proc/action_test_wall()
-	set name = "Test Wall"
+	set name = "Ram Wall"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("test_wall"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("ram_wall"); return; }
 
 /mob/living/scp/proc/action_acid_spit()
 	set name = "Acid Spit"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("acid_spit"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("secrete_acid"); return; }
 
 /mob/living/scp/proc/action_endure_torment()
 	set name = "Endure Torment"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("endure_torment"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("resist_damage"); return; }
 
 /mob/living/scp/proc/action_rage_burst()
-	set name = "Rage Burst"
+	set name = "Terrifying Roar"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("rage_burst"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("roar"); return; }
 
 /mob/living/scp/proc/action_flare_up()
-	set name = "Flare Up"
+	set name = "Ignite Object"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("flare_up"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("ignite_object"); return; }
 
 /mob/living/scp/proc/action_reach_flames()
-	set name = "Reach Flames"
+	set name = "Melt Barrier"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("reach_flames"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("melt_barrier"); return; }
 
 /mob/living/scp/proc/action_absorb_heat()
 	set name = "Absorb Heat"
 	set category = "SCP Contained"
+	set hidden = TRUE
 	if(scp_containment_system) { scp_containment_system.perform_interaction("absorb_heat"); return; }
 
 /mob/living/scp/proc/action_firestorm()
-	set name = "Firestorm"
+	set name = "Inferno Burst"
 	set category = "SCP Contained"
-	if(scp_containment_system) { scp_containment_system.perform_interaction("firestorm"); return; }
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("inferno_burst"); return; }
+
+/mob/living/scp/proc/action_speak_observer()
+	set name = "Speak to Observer"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("speak_to_observer"); return; }
+
+/mob/living/scp/proc/action_offer_deal()
+	set name = "Offer Deal"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("offer_deal"); return; }
+
+/mob/living/scp/proc/action_dominate_mind()
+	set name = "Dominate Mind"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("dominate_mind"); return; }
+
+/mob/living/scp/proc/action_spread_spores()
+	set name = "Release Spores"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("spread_spores"); return; }
+
+/mob/living/scp/proc/action_bang_door()
+	set name = "Bang on Door"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("bang_door"); return; }
+
+/mob/living/scp/proc/action_flood_contagion()
+	set name = "Flood Contagion"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("flood_contagion"); return; }
+
+/mob/living/scp/proc/action_intercept_comms()
+	set name = "Intercept Comms"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("intercept_comms"); return; }
+
+/mob/living/scp/proc/action_override_systems()
+	set name = "Override Systems"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("override_systems"); return; }
+
+/mob/living/scp/proc/action_lure_prey()
+	set name = "Lure Prey"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("lure_prey"); return; }
+
+/mob/living/scp/proc/action_pocket_dimension()
+	set name = "Pocket Dimension"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("pocket_dimension"); return; }
+
+/mob/living/scp/proc/action_administer_cure()
+	set name = "Administer the Cure"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("administer_cure"); return; }
+
+/mob/living/scp/proc/action_adaptive_breach()
+	set name = "Adaptive Breach"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("adaptive_breach"); return; }
+
+/mob/living/scp/proc/action_call_out()
+	set name = "Call Out"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("call_out"); return; }
+
+/mob/living/scp/proc/action_perfect_deception()
+	set name = "Perfect Deception"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("perfect_deception"); return; }
+
+/mob/living/scp/proc/action_test_movement()
+	set name = "Test Movement"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("test_movement"); return; }
+
+/mob/living/scp/proc/action_peek_out()
+	set name = "Peek Through Door"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("peek_out"); return; }
+
+/mob/living/scp/proc/action_listen_footsteps()
+	set name = "Listen for Footsteps"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("listen_footsteps"); return; }
+
+/mob/living/scp/proc/action_whisper_dread()
+	set name = "Whisper Dread"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("whisper_dread"); return; }
+
+/mob/living/scp/proc/action_lay_egg()
+	set name = "Lay Egg"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("lay_egg"); return; }
+
+/mob/living/scp/proc/action_appear_harmless()
+	set name = "Appear Harmless"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("appear_harmless"); return; }
+
+/mob/living/scp/proc/action_flock_call()
+	set name = "Flock Call"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("flock_call"); return; }
+
+/mob/living/scp/proc/action_request_meal()
+	set name = "Request a Meal"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("request_meal"); return; }
+
+/mob/living/scp/proc/action_scan_networks()
+	set name = "Scan Networks"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("scan_networks"); return; }
+
+/mob/living/scp/proc/action_test_invisibility()
+	set name = "Test Invisibility"
+	set category = "SCP Contained"
+	set hidden = TRUE
+	if(scp_containment_system) { scp_containment_system.perform_interaction("test_invisibility"); return; }
 
 /mob/living/scp/proc/show_containment_status()
 	set name = "Show Containment Status"
-	set category = "SCP"
+	set category = "SCP Contained"
+	set hidden = TRUE
 	set desc = "View your containment tension and available actions."
 	if(!scp_containment_system)
 		to_chat(src, span_notice("<b>--- CONTAINMENT STATUS ---</b>"))

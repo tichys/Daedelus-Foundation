@@ -48,7 +48,7 @@ export const ResearchLaboratory = (props) => {
     return <Box color="red">Loading SCP terminal data...</Box>;
   }
 
-  const { is_admin } = data;
+  const { is_admin, is_command } = data;
 
   return (
     <NtosWindow
@@ -81,7 +81,7 @@ export const ResearchLaboratory = (props) => {
                   </Button>
                 </Flex.Item>
               ))}
-              {!!is_admin && (
+              {!!(is_admin || is_command) && (
                 <Flex.Item mx={0.5}>
                   <Button
                     selected={activeTab === 'admin'}
@@ -105,7 +105,7 @@ export const ResearchLaboratory = (props) => {
             {activeTab === 'techtree' && <TechTreeTab />}
             {activeTab === 'teams' && <TeamsTab />}
             {activeTab === 'safety' && <SafetyTab />}
-            {activeTab === 'admin' && !!is_admin && <AdminTab />}
+            {activeTab === 'admin' && !!(is_admin || is_command) && <AdminTab />}
           </Stack.Item>
         </Stack>
       </NtosWindow.Content>
@@ -586,11 +586,7 @@ const ExperimentsTab = (props) => {
     <Section title="SCP Experiments">
       <Flex>
         <Flex.Item width="55%">
-          <Section title="Active Experiments" level={2} buttons={
-            <Button icon="flask" onClick={() => act('start_experiment', { scp_id: selectedSCP, experiment_type: 1 })} disabled={!selectedSCP || user_access_level < 3}>
-              Start Behavioral Experiment
-            </Button>
-          }>
+          <Section title="Active Experiments" level={2}>
             {experimentList.length > 0 ? (
               <Table>
                 <Table.Row header>
@@ -705,19 +701,34 @@ const ExperimentsTab = (props) => {
   );
 };
 
+const STATUS_COLORS = {
+  PROPOSED: 'average',
+  APPROVED: 'good',
+  ACTIVE: 'blue',
+  COMPLETED: 'green',
+  SUSPENDED: 'bad',
+};
+
 const ProjectsTab = (props) => {
   const { act, data } = useBackend();
-  const { research_projects, scp_targets, is_admin } = data;
+  const { research_projects, scp_targets, research_teams, is_researcher, is_admin, is_command } = data;
+  const canManage = is_researcher || is_admin || is_command;
   const [showCreate, setShowCreate] = React.useState(false);
   const [expandedProject, setExpandedProject] = React.useState(null);
   const [projectName, setProjectName] = React.useState('');
   const [projectDesc, setProjectDesc] = React.useState('');
-  const [scpTarget, setScpTarget] = React.useState('');
+  const [scpTargets, setScpTargets] = React.useState([]);
   const [riskLevel, setRiskLevel] = React.useState(1);
   const [researchPoints, setResearchPoints] = React.useState(100);
+  const [expandedProject, setExpandedProject] = React.useState(null);
+  const [addTargetProject, setAddTargetProject] = React.useState(null);
+  const [addTargetSCP, setAddTargetSCP] = React.useState('');
+  const [assignTeamProject, setAssignTeamProject] = React.useState(null);
+  const [assignTeamId, setAssignTeamId] = React.useState('');
 
   const projectList = Object.entries(research_projects || {}).map(([id, p]) => ({ ...p, id }));
   const scpOptions = (scp_targets || []).map((s) => s.id);
+  const teamList = research_teams ? Object.values(research_teams) : [];
   const riskOptions = [
     { level: 1, name: '1 - Minimal' },
     { level: 2, name: '2 - Low' },
@@ -731,13 +742,13 @@ const ProjectsTab = (props) => {
     act('create_project', {
       name: projectName,
       description: projectDesc || 'SCP research project.',
-      scp_target: scpTarget,
+      scp_targets: scpTargets,
       risk_level: riskLevel,
       research_points: researchPoints,
     });
     setProjectName('');
     setProjectDesc('');
-    setScpTarget('');
+    setScpTargets([]);
     setRiskLevel(1);
     setResearchPoints(100);
     setShowCreate(false);
@@ -745,7 +756,7 @@ const ProjectsTab = (props) => {
 
   return (
     <Section title="Research Projects" buttons={
-      <Button icon="plus" onClick={() => setShowCreate(!showCreate)}>
+      canManage && <Button icon="plus" onClick={() => setShowCreate(!showCreate)}>
         New Project
       </Button>
     }>
@@ -768,12 +779,33 @@ const ProjectsTab = (props) => {
                 fluid
               />
             </LabeledList.Item>
-            <LabeledList.Item label="SCP Target">
-              <Dropdown
-                options={scpOptions.length > 0 ? scpOptions : ['None Available']}
-                selected={scpTarget}
-                onSelected={(value) => setScpTarget(value)}
-              />
+            <LabeledList.Item label="SCP Targets">
+              {scpTargets.length > 0 ? (
+                <Stack vertical>
+                  {scpTargets.map((t) => (
+                    <Stack.Item key={t}>
+                      <Box inline mr={1}>{t}</Box>
+                      <Button icon="times" size="tiny" color="bad" onClick={() => setScpTargets(scpTargets.filter((s) => s !== t))} />
+                    </Stack.Item>
+                  ))}
+                </Stack>
+              ) : (
+                <Box color="label">None selected</Box>
+              )}
+            </LabeledList.Item>
+            <LabeledList.Item label="Add SCP Target">
+              <Flex>
+                <Flex.Item grow={1} mr={1}>
+                  <Dropdown
+                    options={scpOptions.length > 0 ? scpOptions : ['None Available']}
+                    onSelected={(value) => {
+                      if (value && !scpTargets.includes(value)) {
+                        setScpTargets([...scpTargets, value]);
+                      }
+                    }}
+                  />
+                </Flex.Item>
+              </Flex>
             </LabeledList.Item>
             <LabeledList.Item label="Risk Level">
               {riskOptions.map((r) => (
@@ -995,12 +1027,43 @@ const TechTreeTab = (props) => {
 
 const TeamsTab = (props) => {
   const { act, data } = useBackend();
-  const { research_teams, researcher_skills, user_ckey } = data;
+  const { research_teams, researcher_skills, user_ckey, is_researcher, pending_join_requests, is_admin, is_command } = data;
   const [showCreate, setShowCreate] = React.useState(false);
   const [teamName, setTeamName] = React.useState('');
 
   const teamList = research_teams ? Object.values(research_teams) : [];
   const skills = researcher_skills || {};
+  const joinRequests = pending_join_requests || [];
+
+  const userTeamId = (() => {
+    for (const team of teamList) {
+      for (const m of team.members || []) {
+        if (m.ckey === user_ckey) return team.id;
+      }
+    }
+    return null;
+  })();
+
+  const handleCreate = () => {
+    act('create_team', { name: teamName || undefined });
+    setTeamName('');
+    setShowCreate(false);
+  };
+
+  const userTeamId = (() => {
+    for (const team of teamList) {
+      for (const m of team.members || []) {
+        if (m.ckey === user_ckey) return team.id;
+      }
+    }
+    return null;
+  })();
+
+  const handleCreate = () => {
+    act('create_team', { name: teamName || undefined });
+    setTeamName('');
+    setShowCreate(false);
+  };
 
   const userTeamId = (() => {
     for (const team of teamList) {
@@ -1019,7 +1082,7 @@ const TeamsTab = (props) => {
 
   return (
     <Section title="Research Teams" buttons={
-      <Button icon="plus" onClick={() => setShowCreate(!showCreate)}>
+      (is_researcher || is_admin || is_command) && <Button icon="plus" onClick={() => setShowCreate(!showCreate)}>
         New Team
       </Button>
     }>
@@ -1050,6 +1113,8 @@ const TeamsTab = (props) => {
           {teamList.length > 0 ? (
             teamList.map((team) => {
               const isMember = (team.members || []).some((m) => m.ckey === user_ckey);
+              const hasPendingRequest = joinRequests.some((r) => r.ckey === user_ckey && r.team_id === team.id);
+              const teamRequests = joinRequests.filter((r) => r.team_id === team.id);
               return (
                 <Section key={team.id} title={team.name || team.id} level={2} buttons={
                   isMember ? (
@@ -1057,9 +1122,19 @@ const TeamsTab = (props) => {
                       Leave
                     </Button>
                   ) : !userTeamId ? (
-                    <Button icon="user-plus" size="tiny" color="good" onClick={() => act('add_team_member', { team_id: team.id })}>
-                      Join
-                    </Button>
+                    is_researcher ? (
+                      <Button icon="user-plus" size="tiny" color="good" onClick={() => act('add_team_member', { team_id: team.id })}>
+                        Join
+                      </Button>
+                    ) : hasPendingRequest ? (
+                      <Button icon="clock" size="tiny" disabled tooltip="Request pending approval">
+                        Pending
+                      </Button>
+                    ) : (
+                      <Button icon="user-plus" size="tiny" color="average" onClick={() => act('request_team_join', { team_id: team.id })}>
+                        Request to Join
+                      </Button>
+                    )
                   ) : (
                     <Button icon="user-plus" size="tiny" disabled tooltip="Already in a team">
                       Join
@@ -1077,6 +1152,22 @@ const TeamsTab = (props) => {
                       {team.completed_experiments || 0}
                     </LabeledList.Item>
                   </LabeledList>
+                  {(is_researcher || is_admin || is_command) && teamRequests.length > 0 && (
+                    <Section title="Join Requests" level={3} mt={1}>
+                      {teamRequests.map((req) => (
+                        <Box key={req.request_id} mb={1}>
+                          <Box inline color="label">{req.name}</Box>
+                          <Box inline color="label" ml={1}>({req.role})</Box>
+                          <Button icon="check" size="tiny" color="good" ml={1} onClick={() => act('approve_join_request', { request_id: req.request_id })}>
+                            Approve
+                          </Button>
+                          <Button icon="times" size="tiny" color="bad" ml={1} onClick={() => act('deny_join_request', { request_id: req.request_id })}>
+                            Deny
+                          </Button>
+                        </Box>
+                      ))}
+                    </Section>
+                  )}
                 </Section>
               );
             })

@@ -5,6 +5,7 @@
 // literally but never in the way the recipient intends.
 
 /mob/living/scp/scp2343
+	ai_enabled = TRUE
 	name = "strange american man"
 	desc = "A brusk and wiley man of american descent. Something about him feels... off."
 	icon = 'icons/scp/scp_2343.dmi'

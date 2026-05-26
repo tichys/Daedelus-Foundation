@@ -95,6 +95,10 @@
 
 	add_movespeed_modifier(/datum/movespeed_modifier/scp_base)
 
+	if(SSscp_persistence && SSscp_persistence.manager)
+		SSscp_persistence.manager.scp_instances[persistence_id] = new /datum/scp_instance(persistence_id, src)
+
+	setup_containment_system()
 	setup_modular_features()
 
 /datum/movespeed_modifier/scp_base
@@ -155,6 +159,8 @@
 
 /mob/living/scp/Life(delta_time = SSMOBS_DT, times_fired)
 	. = ..()
+	if(QDELETED(src))
+		return
 	process_scp_effects()
 	update_persistence()
 	check_containment()
@@ -182,6 +188,8 @@
 
 /mob/living/scp/proc/update_persistence()
 	if(world.time < last_persistence_save + persistence_save_interval)
+		return
+	if(!persistence_data)
 		return
 	last_persistence_save = world.time
 	persistence_data["health"] = scp_health
@@ -399,6 +407,11 @@
 		var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances[persistence_id]
 		if(instance)
 			instance.containment_status = "neutralized"
+	hook_scp_recontainment(persistence_id, list())
+
+/mob/living/scp/death(gibbed)
+	hook_scp_recontainment(persistence_id, list())
+	return ..()
 
 /mob/living/scp/get_status_tab_items()
 	. = ..()
@@ -599,3 +612,63 @@
 	ai_target = find_ai_target()
 	if(ai_target)
 		ai_state = "pursuing"
+
+/mob/living/scp/proc/ai_open_door()
+	var/obj/machinery/door/D = locate() in range(1, src)
+	if(D && D.density)
+		D.open(TRUE)
+		return TRUE
+	return FALSE
+
+/mob/living/scp/proc/ai_step_towards(atom/target, max_dist = 14)
+	if(!target || get_dist(src, target) > max_dist)
+		return FALSE
+	var/turf/next_step = get_step_towards(src, target)
+	if(!next_step)
+		return FALSE
+	var/blocked = FALSE
+	for(var/obj/O in next_step)
+		if(O.density)
+			if(istype(O, /obj/machinery/door))
+				var/obj/machinery/door/D = O
+				if(D.density)
+					D.open(TRUE)
+					return TRUE
+			else
+				blocked = TRUE
+	if(next_step.density)
+		blocked = TRUE
+	if(blocked)
+		if(ai_open_door())
+			return TRUE
+		var/turf/alt = get_step_rand(src)
+		if(alt && !alt.density)
+			Move(alt)
+		return FALSE
+	return step_to(src, target)
+
+/mob/living/scp/proc/ai_has_los(atom/target)
+	if(!target)
+		return FALSE
+	var/turf/T = get_turf(src)
+	var/turf/U = get_turf(target)
+	if(!T || !U || T.z != U.z)
+		return FALSE
+	var/distance = get_dist(T, U)
+	if(distance > 14)
+		return FALSE
+	var/turf/current = T
+	for(var/i = 1 to distance)
+		current = get_step_towards(current, U)
+		if(current.density)
+			return FALSE
+		for(var/obj/O in current)
+			if(O.density && !istype(O, /obj/machinery/door))
+				return FALSE
+	return TRUE
+
+/mob/living/scp/proc/ai_try_attack(atom/target)
+	if(!target || get_dist(src, target) > 1)
+		return FALSE
+	UnarmedAttack(target)
+	return TRUE

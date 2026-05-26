@@ -441,12 +441,15 @@
 		for(var/project_id in research_projects_list)
 			var/datum/research_persistence_project/project = research_projects_list[project_id]
 			research_data["research_projects"] += list(list(
+				"project_id" = project_id,
 				"project_name" = project.project_name,
+				"description" = project.project_description,
 				"field" = project.research_field,
 				"lead_researcher" = project.lead_researcher,
 				"progress" = project.progress,
 				"status" = project.status,
-				"budget" = project.budget_allocated
+				"budget" = project.budget_allocated,
+				"budget_used" = project.budget_used,
 			))
 
 		// Add scientific discoveries
@@ -1356,6 +1359,20 @@
 			else
 				to_chat(admin_client, span_warning("Research persistence system not available."))
 				log_game("PersistenceMasterPanel: Research persistence system not available for [admin_client.ckey]")
+		if("research_delete_project")
+			var/project_id = params["project_id"]
+			if(!project_id)
+				return
+			if(SSresearch_laboratory?.manager)
+				if(SSresearch_laboratory.manager.delete_research_project(project_id))
+					to_chat(admin_client, span_notice("Research project deleted: [project_id]."))
+				else
+					to_chat(admin_client, span_warning("Failed to delete project: [project_id]."))
+			else if(SSresearch_persistence?.manager)
+				if(SSresearch_persistence.manager.remove_research_project(project_id))
+					to_chat(admin_client, span_notice("Research project deleted: [project_id]."))
+				else
+					to_chat(admin_client, span_warning("Failed to delete project: [project_id]."))
 
 		if("research_add_discovery")
 			log_game("PersistenceMasterPanel: Processing research_add_discovery for [admin_client.ckey]")
@@ -1564,22 +1581,24 @@
 
 		if("player_export_data")
 			if(SSpersistent_progression)
-				var/export_data = "Player Persistence Data Export\n"
-				export_data += "Generated: [time2text(world.time, "YYYY-MM-DD HH:MM:SS")]\n\n"
-
+				var/list/export_list = list()
+				export_list["timestamp"] = world.time
+				export_list["total_players"] = length(SSpersistent_progression.player_data)
+				export_list["players"] = list()
 				for(var/ckey in SSpersistent_progression.player_data)
 					var/datum/persistent_player_data/pdata = SSpersistent_progression.player_data[ckey]
 					if(pdata)
-						export_data += "Player: [ckey]\n"
-						export_data += "  Total Experience: [pdata.total_experience]\n"
-						export_data += "  Current Rank: [pdata.current_rank]\n"
-						export_data += "  Achievements Unlocked: [pdata.total_achievements_unlocked]\n"
-						export_data += "  Last Login: [pdata.last_login]\n\n"
-
-				// Save to file
-				var/filename = "player_data_export_[time2text(world.time, "YYYY-MM-DD_HH-MM-SS")].txt"
-				text2file(export_data, "data/[filename]")
-				to_chat(admin_client, span_notice("Player data exported to [filename]"))
+						export_list["players"][ckey] = list(
+							"total_experience" = pdata.total_experience,
+							"current_rank" = pdata.current_rank,
+							"achievements_unlocked" = pdata.total_achievements_unlocked,
+							"last_login" = pdata.last_login,
+						)
+				var/export_data = json_encode(export_list)
+				admin_client << ftp(export_data, "player_data_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+				to_chat(admin_client, span_notice("Player data downloaded."))
+			else
+				to_chat(admin_client, span_warning("Player persistence system not available."))
 
 		if("player_reset_progress")
 			if(SSpersistent_progression)
@@ -2490,8 +2509,8 @@
 			log_game("PersistenceMasterPanel: Processing progression_export_data for [admin_client.ckey]")
 			if(SSpersistent_progression)
 				var/export_data = SSpersistent_progression.export_all_data()
-				admin_client << ftp(export_data, "progression_export.json")
-				to_chat(admin_client, span_notice("Progression data exported successfully."))
+				admin_client << ftp(export_data, "progression_data_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+				to_chat(admin_client, span_notice("Progression data downloaded."))
 			else
 				to_chat(admin_client, span_warning("Progression system not available."))
 

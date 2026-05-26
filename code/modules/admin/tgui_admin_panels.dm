@@ -401,6 +401,21 @@
 		ui = new(user, src, "AdminViewVariables", "SCP FOUNDATION — ANOMALY INSPECTOR", 750, 650)
 		ui.open()
 
+/datum/admin_view_variables_ui/proc/get_vv_commands()
+	if(!isdatum(target) || islist(target))
+		return list()
+	var/raw_html = target.vv_get_dropdown()
+	var/list/commands = list()
+	var/regex/R = regex(@";(\w+)=TRUE[^>]*>([^<]+)</option>")
+	var/start = 1
+	while(R.Find(raw_html, start))
+		var/action_key = R.group[1]
+		var/label = R.group[2]
+		if(action_key && copytext(label, 1, 4) != "---")
+			commands += list(list("key" = action_key, "label" = label))
+		start = R.index + length(R.match)
+	return commands
+
 /datum/admin_view_variables_ui/ui_data(mob/user)
 	var/list/data = list()
 
@@ -419,6 +434,8 @@
 
 	if(!is_list && isdatum(target))
 		data["tag_index"] = LAZYFIND(user.client?.holder.tagged_datums, target)
+
+	data["commands"] = get_vv_commands()
 
 	var/list/vars_list = list()
 	if(is_list)
@@ -512,5 +529,14 @@
 		if("expose")
 			var/mob/M = ui.user
 			M.client.debug_variables(target)
+		if("vv_action")
+			var/vv_key = params["vv_key"]
+			if(!vv_key || !isdatum(target))
+				return
+			var/list/href_list = list()
+			href_list[vv_key] = "TRUE"
+			href_list[VV_HK_TARGET] = REF(target)
+			usr.client.vv_do_basic(target, href_list)
+			target.vv_do_topic(href_list)
 
 	return TRUE

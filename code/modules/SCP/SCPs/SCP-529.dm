@@ -86,6 +86,10 @@
 	hook_scp_recontainment("SCP-529", list())
 	return ..()
 
+/mob/living/simple_animal/scp529/death(gibbed, cause_of_death = "Unknown")
+	hook_scp_recontainment("SCP-529", list())
+	return ..()
+
 /datum/scp529_health_system
 	var/mob/living/simple_animal/parent
 	var/regeneration_rate = 0.5

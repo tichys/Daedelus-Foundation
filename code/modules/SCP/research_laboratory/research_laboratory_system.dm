@@ -24,6 +24,7 @@ SUBSYSTEM_DEF(research_laboratory)
 	var/list/research_achievements = list()
 	var/datum/tech_tree/tech_tree
 
+	var/list/pending_join_requests = list()
 	var/total_research_points = 0
 	var/total_experiments_conducted = 0
 	var/total_breakthroughs = 0
@@ -161,24 +162,110 @@ SUBSYSTEM_DEF(research_laboratory)
 	var/project_id = "project_[world.time]_[rand(10000, 99999)]"
 	project_data["id"] = project_id
 	project_data["creation_time"] = world.time
-	project_data["status"] = project_data["status"] || "proposed"
+	project_data["status"] = project_data["status"] || "PROPOSED"
 	project_data["progress"] = 0
-	project_data["researcher_ckey"] = project_data["researcher_ckey"] || ""
-	project_data["attached_documents"] = list()
+	if(!project_data["scp_targets"])
+		var/scp_target = project_data["scp_target"]
+		project_data["scp_targets"] = scp_target ? list(scp_target) : list()
+		project_data -= "scp_target"
+	if(!project_data["team_id"])
+		project_data["team_id"] = ""
 	research_projects[project_id] = project_data
 	return project_id
 
 /datum/research_laboratory_manager/proc/approve_research_project(project_id, approved_by)
 	var/list/project = research_projects[project_id]
 	if(!project)
+		if(SSresearch_persistence?.manager)
+			var/datum/research_persistence_project/rp = SSresearch_persistence.manager.research_projects[project_id]
+			if(rp)
+				rp.status = "APPROVED"
+				return TRUE
+		if(SSscp_persistence?.manager)
+			var/datum/research_project/sp = SSscp_persistence.manager.research_projects[project_id]
+			if(sp)
+				sp.research_status = "approved"
+				return TRUE
 		return FALSE
-	project["status"] = "approved"
+	project["status"] = "APPROVED"
 	project["approval_time"] = world.time
-	project["approved_by"] = approved_by
+	var/source = project["source"]
+	if(source == "research_persistence" && SSresearch_persistence?.manager)
+		var/datum/research_persistence_project/rp = SSresearch_persistence.manager.research_projects[project_id]
+		if(rp)
+			rp.status = "APPROVED"
+	else if(source == "scp_persistence" && SSscp_persistence?.manager)
+		var/datum/research_project/sp = SSscp_persistence.manager.research_projects[project_id]
+		if(sp)
+			sp.research_status = "approved"
+	return TRUE
+
+/datum/research_laboratory_manager/proc/revoke_research_project(project_id)
+	var/list/project = research_projects[project_id]
+	if(!project)
+		if(SSresearch_persistence?.manager)
+			var/datum/research_persistence_project/rp = SSresearch_persistence.manager.research_projects[project_id]
+			if(rp && rp.status == "APPROVED")
+				rp.status = "PROPOSED"
+				return TRUE
+		return FALSE
+	if(project["status"] != "APPROVED")
+		return FALSE
+	project["status"] = "PROPOSED"
+	project -= "approval_time"
+	var/source = project["source"]
+	if(source == "research_persistence" && SSresearch_persistence?.manager)
+		var/datum/research_persistence_project/rp = SSresearch_persistence.manager.research_projects[project_id]
+		if(rp)
+			rp.status = "PROPOSED"
 	return TRUE
 
 /datum/research_laboratory_manager/proc/delete_research_project(project_id)
-	research_projects -= project_id
+	var/list/project = research_projects[project_id]
+	if(project)
+		var/source = project["source"]
+		if(source == "scp_persistence" && SSscp_persistence?.manager)
+			SSscp_persistence.manager.remove_research_project(project_id)
+		else if(source == "research_persistence" && SSresearch_persistence?.manager)
+			SSresearch_persistence.manager.remove_research_project(project_id)
+		research_projects -= project_id
+		return TRUE
+	if(SSscp_persistence?.manager && SSscp_persistence.manager.research_projects[project_id])
+		SSscp_persistence.manager.remove_research_project(project_id)
+		return TRUE
+	if(SSresearch_persistence?.manager && SSresearch_persistence.manager.research_projects[project_id])
+		SSresearch_persistence.manager.remove_research_project(project_id)
+		return TRUE
+	return FALSE
+
+/datum/research_laboratory_manager/proc/add_project_scp_target(project_id, scp_id)
+	var/list/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	var/list/targets = project["scp_targets"]
+	if(!targets)
+		targets = list()
+		project["scp_targets"] = targets
+	if(scp_id in targets)
+		return FALSE
+	targets += scp_id
+	return TRUE
+
+/datum/research_laboratory_manager/proc/remove_project_scp_target(project_id, scp_id)
+	var/list/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	var/list/targets = project["scp_targets"]
+	if(!targets)
+		return FALSE
+	targets -= scp_id
+	return TRUE
+
+/datum/research_laboratory_manager/proc/assign_project_team(project_id, team_id)
+	var/list/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	project["team_id"] = team_id
 	return TRUE
 
 /datum/research_laboratory_manager/proc/is_assigned_to_project(project_id, ckey)
@@ -312,6 +399,127 @@ SUBSYSTEM_DEF(research_laboratory)
 	team["members"] = new_members
 	return TRUE
 
+/datum/research_laboratory_manager/proc/request_team_join(team_id, mob/living/carbon/human/requester)
+	var/list/team = research_teams[team_id]
+	if(!team)
+		return FALSE
+	if(!requester.ckey)
+		return FALSE
+	for(var/list/existing in team["members"])
+		if(existing["ckey"] == requester.ckey)
+			return FALSE
+	for(var/other_id in research_teams)
+		var/list/other_team = research_teams[other_id]
+		for(var/list/existing in other_team["members"])
+			if(existing["ckey"] == requester.ckey)
+				return FALSE
+	for(var/list/req in pending_join_requests)
+		if(req["ckey"] == requester.ckey && req["team_id"] == team_id)
+			return FALSE
+	var/req_id = "joinreq_[world.time]_[rand(1000,9999)]"
+	pending_join_requests += list(list(
+		"request_id" = req_id,
+		"team_id" = team_id,
+		"ckey" = requester.ckey,
+		"name" = requester.real_name,
+		"role" = requester.job || "Unknown",
+		"timestamp" = world.time,
+	))
+	return TRUE
+
+/datum/research_laboratory_manager/proc/approve_join_request(req_id)
+	var/list/target_req
+	for(var/list/req in pending_join_requests)
+		if(req["request_id"] == req_id)
+			target_req = req
+			break
+	if(!target_req)
+		return FALSE
+	pending_join_requests -= list(target_req)
+	var/list/team = research_teams[target_req["team_id"]]
+	if(!team)
+		return FALSE
+	for(var/list/existing in team["members"])
+		if(existing["ckey"] == target_req["ckey"])
+			return FALSE
+	team["members"] += list(list(
+		"ckey" = target_req["ckey"],
+		"name" = target_req["name"],
+		"role" = target_req["role"],
+		"join_time" = world.time,
+	))
+	var/mob/target_mob
+	for(var/client/C in GLOB.clients)
+		if(C.ckey == target_req["ckey"])
+			target_mob = C.mob
+			break
+	if(target_mob)
+		to_chat(target_mob, span_notice("Your request to join team [team["name"] || target_req["team_id"]] has been approved."))
+	return TRUE
+
+/datum/research_laboratory_manager/proc/deny_join_request(req_id)
+	var/list/target_req
+	for(var/list/req in pending_join_requests)
+		if(req["request_id"] == req_id)
+			target_req = req
+			break
+	if(!target_req)
+		return FALSE
+	pending_join_requests -= list(target_req)
+	var/mob/target_mob
+	for(var/client/C in GLOB.clients)
+		if(C.ckey == target_req["ckey"])
+			target_mob = C.mob
+			break
+	if(target_mob)
+		to_chat(target_mob, span_warning("Your request to join that research team has been denied."))
+	return TRUE
+
+/datum/research_laboratory_manager/proc/is_research_personnel(mob/user)
+	if(!ishuman(user))
+		return FALSE
+	var/mob/living/carbon/human/H = user
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card)
+		return FALSE
+	if(ACCESS_SCIENCE in id_card.access)
+		return TRUE
+	if(ACCESS_SCIENCE_LVL1 in id_card.access)
+		return TRUE
+	if(ACCESS_SCIENCE_LVL2 in id_card.access)
+		return TRUE
+	if(ACCESS_SCIENCE_LVL3 in id_card.access)
+		return TRUE
+	if(ACCESS_SCIENCE_LVL4 in id_card.access)
+		return TRUE
+	if(ACCESS_SCIENCE_LVL5 in id_card.access)
+		return TRUE
+	return FALSE
+
+/datum/research_laboratory_manager/proc/is_command_personnel(mob/user)
+	if(!ishuman(user))
+		return FALSE
+	if(check_rights(R_ADMIN, FALSE, user))
+		return TRUE
+	var/mob/living/carbon/human/H = user
+	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
+	if(!id_card)
+		return FALSE
+	if(ACCESS_ADMIN_LVL4 in id_card.access)
+		return TRUE
+	if(ACCESS_ADMIN_LVL5 in id_card.access)
+		return TRUE
+	return FALSE
+
+/datum/research_laboratory_manager/proc/can_manage(mob/user)
+	if(check_rights(R_ADMIN, FALSE, user))
+		return TRUE
+	if(is_research_personnel(user))
+		return TRUE
+	if(is_command_personnel(user))
+		return TRUE
+	return FALSE
+
 /datum/research_laboratory_manager/proc/register_research_facility(list/facility_data)
 	var/facility_id = "facility_[world.time]_[rand(1000, 9999)]"
 	facility_data["id"] = facility_id
@@ -392,6 +600,8 @@ SUBSYSTEM_DEF(research_laboratory)
 	)
 
 	data["is_admin"] = check_rights_for(user?.client, R_ADMIN)
+	data["is_researcher"] = is_research_personnel(user)
+	data["is_command"] = is_command_personnel(user)
 	data["user_ckey"] = user?.ckey
 	data["user_name"] = user?.name
 	data["user_job"] = ishuman(user) ? user.job : "Unknown"
@@ -599,11 +809,14 @@ SUBSYSTEM_DEF(research_laboratory)
 				"id" = project_id,
 				"name" = scp_proj.project_name || "Unknown",
 				"description" = scp_proj.description || "",
-				"scp_target" = "",
-				"status" = scp_proj.research_status || "approved",
+				"scp_targets" = list(),
+				"research_field" = "",
+				"lead_researcher" = "",
+				"status" = uppertext(scp_proj.research_status || "APPROVED"),
 				"progress" = scp_proj.progress || 0,
 				"risk_level" = scp_proj.priority_level || 1,
 				"research_points" = scp_proj.research_funding || 100,
+				"team_id" = "",
 				"source" = "scp_persistence",
 			)
 	if(SSresearch_persistence?.manager)
@@ -617,11 +830,15 @@ SUBSYSTEM_DEF(research_laboratory)
 				"id" = project_id,
 				"name" = rp_proj.project_name || "Unknown",
 				"description" = rp_proj.project_description || "",
-				"scp_target" = rp_proj.research_field || "",
-				"status" = rp_proj.status || "approved",
+				"scp_targets" = rp_proj.research_field ? list(rp_proj.research_field) : list(),
+				"research_field" = rp_proj.research_field || "",
+				"lead_researcher" = rp_proj.lead_researcher || "",
+				"status" = uppertext(rp_proj.status || "APPROVED"),
 				"progress" = rp_proj.progress || 0,
-				"risk_level" = 1,
+				"risk_level" = rp_proj.priority || 1,
 				"research_points" = rp_proj.budget_allocated || 100,
+				"budget_used" = rp_proj.budget_used || 0,
+				"team_id" = "",
 				"source" = "research_persistence",
 			)
 	return result
@@ -886,12 +1103,17 @@ SUBSYSTEM_DEF(research_laboratory)
 
 	switch(action)
 		if("create_project")
+			if(!mgr.can_manage(usr))
+				return
 			if(!params["name"])
 				return
+			var/list/scp_targets_list = params["scp_targets"]
+			if(!islist(scp_targets_list))
+				scp_targets_list = list()
 			mgr.create_research_project(list(
 				"name" = params["name"],
 				"description" = params["description"] || "No description provided.",
-				"scp_target" = params["scp_target"] || "",
+				"scp_targets" = scp_targets_list,
 				"research_points" = text2num(params["research_points"]) || 100,
 				"risk_level" = text2num(params["risk_level"]) || 1,
 				"team_id" = params["team_id"] || "",
@@ -903,6 +1125,8 @@ SUBSYSTEM_DEF(research_laboratory)
 			. = TRUE
 
 		if("approve_project")
+			if(!mgr.can_manage(usr))
+				return
 			if(params["project_id"])
 				var/approver = ""
 				if(ishuman(ui.user))
@@ -911,31 +1135,90 @@ SUBSYSTEM_DEF(research_laboratory)
 				mgr.approve_research_project(params["project_id"], approver)
 			. = TRUE
 
+		if("revoke_project")
+			if(!mgr.can_manage(usr))
+				return
+			if(params["project_id"])
+				mgr.revoke_research_project(params["project_id"])
+			. = TRUE
+
 		if("delete_project")
+			if(!mgr.can_manage(usr))
+				return
 			if(params["project_id"])
 				mgr.delete_research_project(params["project_id"])
 			. = TRUE
 
-		if("create_team")
-			if(!params["name"])
+		if("add_project_scp_target")
+			if(params["project_id"] && params["scp_id"])
+				mgr.add_project_scp_target(params["project_id"], params["scp_id"])
+			. = TRUE
+
+		if("remove_project_scp_target")
+			if(params["project_id"] && params["scp_id"])
+				mgr.remove_project_scp_target(params["project_id"], params["scp_id"])
+			. = TRUE
+
+		if("assign_project_team")
+			if(!mgr.can_manage(usr))
 				return
-			mgr.create_research_team(list("name" = params["name"]))
+			if(params["project_id"])
+				mgr.assign_project_team(params["project_id"], params["team_id"] || "")
+			. = TRUE
+
+		if("create_team")
+			if(!mgr.can_manage(usr))
+				return
+			var/team_name = params["name"]
+			if(!team_name)
+				team_name = ""
+			mgr.create_research_team(list("name" = team_name))
 			. = TRUE
 
 		if("add_team_member")
 			var/team_id = params["team_id"]
-			if(team_id && ishuman(ui.user))
-				mgr.add_team_member(team_id, ui.user)
+			if(team_id && ishuman(usr))
+				if(mgr.is_research_personnel(usr))
+					mgr.add_team_member(team_id, usr)
+				else
+					mgr.request_team_join(team_id, usr)
+					to_chat(usr, span_notice("Join request submitted. A researcher must approve it."))
 			. = TRUE
 
 		if("remove_team_member")
 			var/team_id = params["team_id"]
 			var/ckey = params["ckey"]
+			if(!ishuman(usr))
+				return TRUE
 			if(team_id && ckey)
 				mgr.remove_team_member(team_id, ckey)
 			. = TRUE
 
+		if("request_team_join")
+			var/team_id = params["team_id"]
+			if(team_id && ishuman(usr))
+				if(mgr.is_research_personnel(usr))
+					mgr.add_team_member(team_id, usr)
+				else
+					mgr.request_team_join(team_id, usr)
+					to_chat(usr, span_notice("Join request submitted. A researcher must approve it."))
+			. = TRUE
+
+		if("approve_join_request")
+			var/req_id = params["request_id"]
+			if(req_id && mgr.can_manage(usr))
+				mgr.approve_join_request(req_id)
+			. = TRUE
+
+		if("deny_join_request")
+			var/req_id = params["request_id"]
+			if(req_id && mgr.can_manage(usr))
+				mgr.deny_join_request(req_id)
+			. = TRUE
+
 		if("start_experiment")
+			if(!mgr.can_manage(usr))
+				return
 			var/scp_id = params["scp_id"]
 			var/exp_type = text2num(params["experiment_type"])
 			if(scp_id && exp_type && ishuman(ui.user))
@@ -949,24 +1232,32 @@ SUBSYSTEM_DEF(research_laboratory)
 			. = TRUE
 
 		if("suspend_experiment")
+			if(!mgr.can_manage(usr))
+				return
 			var/exp_id = params["experiment_id"]
 			if(exp_id)
 				mgr.suspend_scp_experiment(exp_id, ui.user)
 			. = TRUE
 
 		if("resume_experiment")
+			if(!mgr.can_manage(usr))
+				return
 			var/exp_id = params["experiment_id"]
 			if(exp_id)
 				mgr.resume_scp_experiment(exp_id, ui.user)
 			. = TRUE
 
 		if("terminate_experiment")
+			if(!mgr.can_manage(usr))
+				return
 			var/exp_id = params["experiment_id"]
 			if(exp_id)
 				mgr.terminate_scp_experiment(exp_id, ui.user)
 			. = TRUE
 
 		if("unlock_tech")
+			if(!mgr.can_manage(usr))
+				return
 			var/node_id = params["node_id"]
 			if(node_id)
 				if(!mgr.unlock_tech_node(node_id, ui.user))
@@ -977,6 +1268,11 @@ SUBSYSTEM_DEF(research_laboratory)
 			var/protocol_id = params["protocol_id"]
 			if(protocol_id)
 				mgr.record_safety_violation(protocol_id)
+				var/list/protocol = mgr.safety_protocols[protocol_id]
+				if(protocol)
+					to_chat(usr, "<span class='warning'>Safety violation recorded for [protocol["name"]]. Violations: [protocol["violations"]]/[protocol["violation_threshold"]].</span>")
+					if(protocol["status"] == "emergency")
+						to_chat(usr, "<span class='boldwarning'>EMERGENCY: [protocol["name"]] has exceeded its violation threshold!</span>")
 			. = TRUE
 
 		if("attach_document")

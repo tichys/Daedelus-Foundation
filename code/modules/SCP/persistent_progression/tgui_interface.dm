@@ -356,7 +356,8 @@
 
 		if("export_data")
 			var/data_json = user_mind.persistent_data.export_to_json()
-			user << ftp(data_json, "progression_data.json")
+			user << ftp(data_json, "player_progression_[usr.ckey]_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+			to_chat(user, span_notice("Progression data downloaded."))
 			. = TRUE
 
 		if("save_data")
@@ -610,7 +611,8 @@
 			var/datum/persistent_player_data/player_data = SSpersistent_progression.get_player_data(ckey)
 			if(player_data)
 				var/data_json = player_data.export_to_json()
-				user << ftp(data_json, "progression_data.json")
+				usr << ftp(data_json, "player_progression_[ckey]_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+				to_chat(usr, span_notice("Player data downloaded."))
 				. = TRUE
 
 		if("reset_progress")

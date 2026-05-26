@@ -108,15 +108,11 @@
 	return sections
 
 /datum/scp_documentation_interface/proc/get_section_category(section_key)
-	switch(section_key)
-		if("overview", "components", "human_conversion")
-			return "Core System"
-		if("admin_commands", "troubleshooting")
-			return "Administration"
-		if("technical")
-			return "Technical"
-		else
-			return "General"
+	if(section_key in list("facility_overview", "object_classes", "security_codes", "breach_protocol", "dclass_protocols", "research_protocols", "mtf_protocols", "memetic_hazards"))
+		return "Facility Protocols"
+	if(findtext(section_key, "scp_") == 1)
+		return "SCP Documentation"
+	return "General"
 
 /datum/scp_documentation_interface/proc/refresh_system_status()
 	last_status_update = world.time
@@ -420,7 +416,6 @@
 			return
 
 /datum/scp_documentation_interface/proc/export_documentation_to_file()
-	var/filename = "data/scp_documentation_export_[time2text(world.time, "YYYY-MM-DD_hh-mm-ss")].json"
 	var/list/export_data = list(
 		"system_info" = list(
 			"version" = doc_manager.current_version,
@@ -433,8 +428,9 @@
 		"performance_metrics" = get_performance_metrics()
 	)
 
-	rustg_file_write(json_encode(export_data), filename)
-	to_chat(admin_client, span_notice("Documentation exported to [filename]"))
+	var/json_data = json_encode(export_data)
+	admin_client << ftp(json_data, "scp_documentation_[time2text(world.time, "YYYYMMDD_HHMMSS")].json")
+	to_chat(admin_client, span_notice("Documentation data downloaded."))
 
 /datum/scp_documentation_interface/proc/run_system_diagnostics()
 	to_chat(admin_client, span_boldnotice("=== SCP System Diagnostics ==="))
