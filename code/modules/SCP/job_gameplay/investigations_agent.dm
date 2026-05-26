@@ -26,8 +26,7 @@
 
 SUBSYSTEM_DEF(anomalous_investigations)
 	name = "Anomalous Investigations"
-	wait = 30 SECONDS
-	priority = FIRE_PRIORITY_DEFAULT
+	flags = SS_NO_FIRE
 	var/list/datum/anomalous_evidence/evidence_log = list()
 	var/list/active_cases = list()
 	var/total_evidence = 0

@@ -33,8 +33,7 @@
 
 SUBSYSTEM_DEF(department_coordination)
 	name = "Department Coordination"
-	wait = 30 SECONDS
-	priority = FIRE_PRIORITY_DEFAULT
+	flags = SS_NO_FIRE
 	var/list/datum/coordination_task/tasks = list()
 	var/list/interdepartmental_memos = list()
 	var/total_tasks = 0

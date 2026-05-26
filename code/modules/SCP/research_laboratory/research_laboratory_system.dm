@@ -163,20 +163,87 @@ SUBSYSTEM_DEF(research_laboratory)
 	project_data["creation_time"] = world.time
 	project_data["status"] = project_data["status"] || "proposed"
 	project_data["progress"] = 0
+	project_data["researcher_ckey"] = project_data["researcher_ckey"] || ""
+	project_data["attached_documents"] = list()
 	research_projects[project_id] = project_data
 	return project_id
 
-/datum/research_laboratory_manager/proc/approve_research_project(project_id)
+/datum/research_laboratory_manager/proc/approve_research_project(project_id, approved_by)
 	var/list/project = research_projects[project_id]
 	if(!project)
 		return FALSE
 	project["status"] = "approved"
 	project["approval_time"] = world.time
+	project["approved_by"] = approved_by
 	return TRUE
 
 /datum/research_laboratory_manager/proc/delete_research_project(project_id)
 	research_projects -= project_id
 	return TRUE
+
+/datum/research_laboratory_manager/proc/is_assigned_to_project(project_id, ckey)
+	if(!ckey)
+		return FALSE
+	var/list/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	if(project["researcher_ckey"] == ckey)
+		return TRUE
+	var/project_team_id = project["team_id"]
+	if(project_team_id)
+		var/list/team = research_teams[project_team_id]
+		if(team)
+			for(var/list/member in team["members"])
+				if(member["ckey"] == ckey)
+					return TRUE
+	return FALSE
+
+/datum/research_laboratory_manager/proc/attach_document(project_id, mob/user, obj/item/paper/document)
+	var/list/project = research_projects[project_id]
+	if(!project)
+		return FALSE
+	if(!is_assigned_to_project(project_id, user?.ckey))
+		return FALSE
+	if(!document)
+		return FALSE
+	var/doc_id = "doc_[world.time]_[rand(1000, 9999)]"
+	var/doc_name = document.name || "Untitled Document"
+	var/content_preview = copytext(document.info || "", 1, 80)
+	project["attached_documents"] += list(list(
+		"doc_id" = doc_id,
+		"doc_name" = doc_name,
+		"attached_by" = user.ckey,
+		"attached_by_name" = user.real_name,
+		"attached_time" = world.time,
+		"content_preview" = content_preview,
+		"raw_info" = document.info,
+	))
+	qdel(document)
+	return TRUE
+
+/datum/research_laboratory_manager/proc/remove_document(project_id, mob/user, doc_id)
+	var/list/project = research_projects[project_id]
+	if(!project)
+		return null
+	if(!is_assigned_to_project(project_id, user?.ckey))
+		return null
+	var/list/new_docs = list()
+	var/removed_info
+	var/removed_name
+	for(var/list/doc in project["attached_documents"])
+		if(doc["doc_id"] == doc_id)
+			removed_info = doc["raw_info"]
+			removed_name = doc["doc_name"]
+		else
+			new_docs += list(doc)
+	project["attached_documents"] = new_docs
+	if(isnull(removed_info))
+		return null
+	var/obj/item/paper/released = new(get_turf(user))
+	released.name = removed_name
+	released.setText(removed_info)
+	user.put_in_hands(released)
+	return doc_id
 
 /datum/research_laboratory_manager/var/list/team_name_registry = list()
 
@@ -286,7 +353,7 @@ SUBSYSTEM_DEF(research_laboratory)
 /datum/research_laboratory_manager/proc/get_all_data(mob/user)
 	var/list/data = list()
 
-	data["research_projects"] = get_projects_data()
+	data["research_projects"] = get_projects_data(user)
 	data["active_experiments"] = get_experiments_data()
 	data["research_teams"] = get_teams_data()
 	data["research_facilities"] = get_facilities_data()
@@ -330,6 +397,163 @@ SUBSYSTEM_DEF(research_laboratory)
 	data["user_job"] = ishuman(user) ? user.job : "Unknown"
 	data["user_access_level"] = get_user_access_level(user)
 
+	data["researcher_profile"] = null
+	data["achievements"] = list()
+	data["completed_research"] = list()
+	data["active_projects"] = list()
+	data["inserted_id"] = null
+	data["has_access"] = FALSE
+	data["global_metrics"] = list(
+		"total_points" = 0,
+		"total_funding" = 0,
+		"breakthroughs" = 0,
+		"containment_improvements" = 0,
+	)
+	data["milestones"] = list()
+	data["rewards"] = list()
+	data["test_proposals"] = list()
+	data["active_tests"] = list()
+	data["completed_tests"] = list()
+	data["researcher_stats"] = null
+	data["total_tests_conducted"] = 0
+	data["total_research_earned"] = 0
+	data["total_incidents_during_tests"] = 0
+	data["pending_count"] = 0
+	data["scp_list"] = list()
+	data["subjects"] = list()
+
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.wear_id)
+			var/obj/item/card/id/id_card = H.wear_id.GetID()
+			if(id_card && (ACCESS_SCIENCE in id_card.access))
+				data["has_access"] = TRUE
+
+	if(SSscp_research && SSscp_research.manager)
+		var/datum/scp_research_manager/M = SSscp_research.manager
+
+		data["global_metrics"] = list(
+			"total_points" = M.total_research_points,
+			"total_funding" = M.total_research_funding,
+			"breakthroughs" = M.research_breakthroughs,
+			"containment_improvements" = M.containment_improvements,
+		)
+
+		var/datum/researcher_data/researcher = M.get_researcher_profile(user?.ckey)
+		if(istype(researcher))
+			data["researcher_profile"] = list(
+				"research_points" = researcher.research_points,
+				"research_funding" = researcher.research_funding,
+				"progression_points" = researcher.progression_points,
+				"research_rank" = researcher.research_rank,
+				"total_projects" = researcher.total_projects,
+				"completed_projects" = researcher.completed_projects,
+				"failed_projects" = researcher.failed_projects,
+			)
+			for(var/achievement in researcher.achievements)
+				data["achievements"] += list(list("name" = "[achievement]"))
+			for(var/research in researcher.completed_research)
+				data["completed_research"] += list(list("name" = "[research]"))
+
+		for(var/project_id in M.research_projects)
+			var/datum/research_data/project = M.research_projects[project_id]
+			if(!istype(project))
+				continue
+			if(project.researcher_ckey == user?.ckey && project.status == "ACTIVE")
+				var/progress_percent = 0
+				if(project.research_cost > 0)
+					progress_percent = round((project.research_points / project.research_cost) * 100, 1)
+				var/time_minutes = round((world.time - project.timestamp) / 600)
+				data["active_projects"] += list(list(
+					"project_id" = project_id,
+					"scp_designation" = project.scp_designation,
+					"research_type" = project.research_type,
+					"research_level" = project.research_level,
+					"max_research_level" = project.max_research_level,
+					"research_points" = project.research_points,
+					"research_cost" = project.research_cost,
+					"progress_percent" = progress_percent,
+					"time_minutes" = time_minutes,
+					"discoveries" = length(project.discoveries),
+				))
+
+		for(var/milestone_id in M.research_milestones)
+			var/datum/research_milestone_data/milestone = M.research_milestones[milestone_id]
+			if(!istype(milestone))
+				continue
+			data["milestones"] += list(list(
+				"milestone_id" = milestone_id,
+				"name" = milestone.milestone_name,
+				"description" = milestone.milestone_description,
+				"completed" = milestone.completed,
+				"completed_by" = milestone.completed_by ? "[milestone.completed_by]" : null,
+			))
+
+		for(var/reward_id in M.research_rewards)
+			var/datum/research_reward_data/reward = M.research_rewards[reward_id]
+			if(!istype(reward))
+				continue
+			data["rewards"] += list(list(
+				"reward_id" = reward_id,
+				"reward_type" = reward.reward_type,
+				"reward_amount" = reward.reward_amount,
+				"description" = reward.reward_description,
+				"unlocked" = reward.unlocked,
+			))
+
+		data["researcher_stats"] = null
+		if(researcher)
+			data["researcher_stats"] = list(
+				"total_proposals" = researcher.total_projects,
+				"total_completed" = researcher.completed_projects,
+				"total_research_earned" = researcher.research_points,
+				"total_incidents" = researcher.failed_projects,
+				"last_active" = time2text(world.time, "hh:mm:ss"),
+			)
+		data["total_tests_conducted"] = M.research_breakthroughs + M.containment_improvements
+		data["total_research_earned"] = M.total_research_points
+		data["pending_count"] = length(data["test_proposals"])
+
+	if(SSscp_testing)
+		data["test_proposals"] = SSscp_testing.test_proposals
+		data["active_tests"] = SSscp_testing.active_tests
+		var/list/recent_completed = list()
+		var/completed_ids = list()
+		for(var/id in SSscp_testing.completed_tests)
+			completed_ids += id
+		var/len = length(completed_ids)
+		var/start_idx = max(1, len - 19)
+		for(var/i in start_idx to len)
+			var/cid = completed_ids[i]
+			recent_completed[cid] = SSscp_testing.completed_tests[cid]
+		data["completed_tests"] = recent_completed
+		data["total_tests_conducted"] = SSscp_testing.total_tests_conducted
+		data["total_research_earned"] = SSscp_testing.total_research_earned
+		data["total_incidents_during_tests"] = SSscp_testing.total_incidents_during_tests
+		var/pending_count = 0
+		for(var/id in SSscp_testing.test_proposals)
+			var/list/P = SSscp_testing.test_proposals[id]
+			if(P["status"] == 0)
+				pending_count++
+		data["pending_count"] = pending_count
+
+	for(var/mob/living/L in GLOB.mob_living_list)
+		if(!istype(L, /mob/living/scp))
+			continue
+		if(L.stat == DEAD)
+			continue
+		var/status = "contained"
+		if("containment_status" in L.vars)
+			status = L.vars["containment_status"]
+		data["scp_list"] += list(list("name" = L.name, "ref" = REF(L), "status" = status))
+
+	for(var/mob/living/carbon/human/H in GLOB.mob_living_list)
+		if(H.stat == DEAD)
+			continue
+		if(H.job != JOB_DCLASS && H.job != "D-Class Personnel")
+			continue
+		data["subjects"] += list(list("name" = H.real_name, "ref" = REF(H)))
+
 	return data
 
 /datum/research_laboratory_manager/proc/get_user_access_level(mob/user)
@@ -346,11 +570,24 @@ SUBSYSTEM_DEF(research_laboratory)
 			job_name = H.job
 	return SSscp_experiments?.manager?.get_default_certification(job_name)
 
-/datum/research_laboratory_manager/proc/get_projects_data()
+/datum/research_laboratory_manager/proc/get_projects_data(mob/user)
+	var/user_ckey = user?.ckey
 	var/list/result = list()
 	for(var/project_id in research_projects)
 		var/list/project = research_projects[project_id]
-		result[project_id] = project
+		var/list/project_copy = project.Copy()
+		project_copy["is_assigned"] = is_assigned_to_project(project_id, user_ckey)
+		var/list/docs_out = list()
+		for(var/list/doc in project["attached_documents"])
+			docs_out += list(list(
+				"doc_id" = doc["doc_id"],
+				"doc_name" = doc["doc_name"],
+				"attached_by_name" = doc["attached_by_name"],
+				"attached_time" = doc["attached_time"],
+				"content_preview" = doc["content_preview"],
+			))
+		project_copy["attached_documents"] = docs_out
+		result[project_id] = project_copy
 	if(SSscp_persistence?.manager)
 		for(var/project_id in SSscp_persistence?.manager?.research_projects)
 			if(result[project_id])
@@ -618,38 +855,28 @@ SUBSYSTEM_DEF(research_laboratory)
 			else
 				V.products[item_type] = count
 
-/obj/machinery/computer/research_laboratory_console
-	name = "Research Laboratory Console"
-	desc = "An advanced terminal for managing SCP experiments, research teams, and technology."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "research"
-	circuit = /obj/item/circuitboard/computer/research_laboratory_console
-	req_access = list(ACCESS_SCIENCE)
-	var/admin_virtual = FALSE
+/datum/computer_file/program/research_laboratory
+	filename = "research_lab"
+	filedesc = "Research Laboratory"
+	category = PROGRAM_CATEGORY_SCI
+	program_icon_state = "generic"
+	extended_desc = "Manage SCP experiments, research teams, technology, testing, and researcher profiles."
+	size = 4
+	tgui_id = "ResearchLaboratory"
+	program_icon = "flask"
+	usage_flags = PROGRAM_ALL
+	available_on_ntnet = FALSE
+	required_access = list(ACCESS_SCIENCE)
 
-/obj/machinery/computer/research_laboratory_console/ui_status(mob/user, datum/ui_state/state)
-	if(admin_virtual && check_rights_for(user?.client, R_ADMIN))
-		return UI_INTERACTIVE
-	return ..()
-
-/obj/machinery/computer/research_laboratory_console/ui_close(mob/user)
-	. = ..()
-	if(admin_virtual)
-		qdel(src)
-
-/obj/machinery/computer/research_laboratory_console/ui_interact(mob/user, datum/tgui/ui)
-	. = ..()
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "ResearchLaboratory", "SCP Research Terminal")
-		ui.open()
-
-/obj/machinery/computer/research_laboratory_console/ui_data(mob/user)
+/datum/computer_file/program/research_laboratory/ui_data(mob/user)
+	var/list/data = get_header_data()
 	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
-		return list()
-	return SSresearch_laboratory.manager.get_all_data(user)
+		return data
+	var/list/lab_data = SSresearch_laboratory.manager.get_all_data(user)
+	data += lab_data
+	return data
 
-/obj/machinery/computer/research_laboratory_console/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+/datum/computer_file/program/research_laboratory/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if(.)
 		return
@@ -677,7 +904,11 @@ SUBSYSTEM_DEF(research_laboratory)
 
 		if("approve_project")
 			if(params["project_id"])
-				mgr.approve_research_project(params["project_id"])
+				var/approver = ""
+				if(ishuman(ui.user))
+					var/mob/living/carbon/human/H = ui.user
+					approver = H.real_name
+				mgr.approve_research_project(params["project_id"], approver)
 			. = TRUE
 
 		if("delete_project")
@@ -748,9 +979,192 @@ SUBSYSTEM_DEF(research_laboratory)
 				mgr.record_safety_violation(protocol_id)
 			. = TRUE
 
-/obj/item/circuitboard/computer/research_laboratory_console
-	name = "Research Laboratory Console (Computer Board)"
-	build_path = /obj/machinery/computer/research_laboratory_console
+		if("attach_document")
+			var/project_id = params["project_id"]
+			if(!project_id)
+				return
+			if(!ishuman(ui.user))
+				return
+			var/mob/living/carbon/human/H = ui.user
+			var/obj/item/paper/held_paper = H.get_active_held_item()
+			if(!istype(held_paper))
+				to_chat(H, span_warning("Hold a paper document in your active hand to attach it."))
+				return
+			if(mgr.attach_document(project_id, H, held_paper))
+				to_chat(H, span_notice("Document attached to project."))
+			else
+				to_chat(H, span_warning("Cannot attach document. You must be assigned to this project."))
+			. = TRUE
+
+		if("remove_document")
+			var/project_id = params["project_id"]
+			var/doc_id = params["doc_id"]
+			if(!project_id || !doc_id)
+				return
+			if(!ishuman(ui.user))
+				return
+			var/mob/living/carbon/human/H = ui.user
+			var/removed = mgr.remove_document(project_id, H, doc_id)
+			if(removed)
+				to_chat(H, span_notice("Document removed from project and placed in your hands."))
+			else
+				to_chat(H, span_warning("Cannot remove document. You must be assigned to this project."))
+			. = TRUE
+
+		if("eject_id")
+			if(!ishuman(ui.user))
+				return
+			to_chat(ui.user, span_notice("ID ejection handled by the console slot."))
+			. = TRUE
+
+		if("contribute_points")
+			var/project_id = params["project_id"]
+			var/amount = text2num(params["amount"]) || 0
+			if(!project_id || amount <= 0)
+				return
+			if(!SSscp_research?.manager)
+				return
+			if(SSscp_research.manager.contribute_research_points(project_id, amount, ui.user?.ckey))
+				to_chat(ui.user, span_notice("Contributed [amount] research points to the project."))
+			else
+				to_chat(ui.user, span_warning("Cannot contribute points. Check available points and project status."))
+			. = TRUE
+
+		if("cancel_research")
+			var/project_id = params["project_id"]
+			if(!project_id)
+				return
+			if(!SSscp_research?.manager)
+				return
+			var/datum/research_data/project = SSscp_research.manager.research_projects[project_id]
+			if(!project || project.researcher_ckey != ui.user?.ckey)
+				return
+			project.status = "CANCELLED"
+			var/datum/researcher_data/researcher = SSscp_research.manager.get_researcher_profile(ui.user?.ckey)
+			if(researcher)
+				researcher.failed_projects++
+			to_chat(ui.user, span_warning("Research project on [project.scp_designation] cancelled."))
+			. = TRUE
+
+		if("claim_reward")
+			var/reward_id = params["reward_id"]
+			if(!reward_id)
+				return
+			if(!SSscp_research?.manager)
+				return
+			var/datum/research_reward_data/reward = SSscp_research.manager.research_rewards[reward_id]
+			if(!reward || !reward.unlocked)
+				return
+			to_chat(ui.user, span_notice("Reward claimed: [reward.reward_description]"))
+			SSscp_research.manager.research_rewards -= reward_id
+			. = TRUE
+
+		if("submit_proposal")
+			var/scp_id = params["scp_id"]
+			var/test_type = params["test_type"]
+			var/risk_level = text2num(params["risk_level"]) || 1
+			var/subject_name = params["subject_name"] || ""
+			var/description = params["description"] || ""
+			if(!scp_id || !test_type)
+				return
+			if(!ishuman(ui.user))
+				return
+			var/mob/living/carbon/human/H = ui.user
+			if(SSscp_testing)
+				SSscp_testing.submit_test_proposal(H, scp_id, test_type, risk_level, subject_name, description)
+			else if(SSscp_research?.manager)
+				SSscp_research.manager.adjust_research_points(0, "testing_proposal:[H.ckey]")
+				if(risk_level >= 4 && SSethics_committee)
+					SSethics_committee.flag_test_for_oversight("test_[world.time]", scp_id, H.real_name, risk_level)
+			to_chat(H, span_notice("Test proposal submitted for [scp_id]."))
+			. = TRUE
+
+		if("approve_proposal")
+			var/proposal_id = params["proposal_id"]
+			if(!proposal_id)
+				return
+			if(!ishuman(ui.user))
+				return
+			if(SSscp_testing)
+				SSscp_testing.approve_proposal(proposal_id, ui.user.real_name)
+			else
+				to_chat(ui.user, span_notice("Test proposal approved."))
+			. = TRUE
+
+		if("reject_proposal")
+			var/proposal_id = params["proposal_id"]
+			if(!proposal_id)
+				return
+			if(SSscp_testing)
+				SSscp_testing.reject_proposal(proposal_id, "Rejected via Research Laboratory")
+			else
+				to_chat(ui.user, span_notice("Test proposal rejected."))
+			. = TRUE
+
+		if("start_test")
+			var/proposal_id = params["proposal_id"]
+			if(!proposal_id)
+				return
+			if(!ishuman(ui.user))
+				return
+			if(SSscp_testing)
+				SSscp_testing.start_test(proposal_id, ui.user)
+			else
+				to_chat(ui.user, span_notice("Test started."))
+			. = TRUE
+
+		if("execute_test")
+			var/proposal_id = params["proposal_id"]
+			if(!proposal_id)
+				return
+			if(!ishuman(ui.user))
+				return
+			if(SSscp_testing)
+				SSscp_testing.execute_test(proposal_id, ui.user)
+			else if(SSscp_research?.manager)
+				SSscp_research.manager.adjust_research_points(50, "test_execution:[ui.user?.ckey || "unknown"]")
+				to_chat(ui.user, span_notice("Test executed. +50 research points earned."))
+			. = TRUE
+
+		if("cancel_test")
+			var/proposal_id = params["proposal_id"]
+			if(!proposal_id)
+				return
+			if(SSscp_testing)
+				SSscp_testing.cancel_test(proposal_id)
+			else
+				to_chat(ui.user, span_notice("Test cancelled."))
+			. = TRUE
+
+		if("print_authorization_form")
+			var/project_id = params["project_id"]
+			if(!project_id)
+				return
+			var/list/project = mgr.research_projects[project_id]
+			if(!project)
+				return
+			var/obj/item/paper/foundation/test_authorization/P = new /obj/item/paper/foundation/test_authorization(get_turf(ui.user))
+			P.autofill_from_project(project, ui.user)
+			if(ishuman(ui.user))
+				var/mob/living/carbon/human/H = ui.user
+				H.put_in_hands(P)
+			to_chat(ui.user, span_notice("Authorization form printed for [project["name"] || project_id]."))
+			. = TRUE
+
+		if("print_result_form")
+			var/project_id = params["project_id"]
+			if(!project_id)
+				return
+			var/list/project = mgr.research_projects[project_id]
+			if(!project)
+				return
+			var/obj/item/paper/foundation/test_result/P = new /obj/item/paper/foundation/test_result(get_turf(ui.user))
+			P.autofill_from_project(project, ui.user)
+			if(ishuman(ui.user))
+				var/mob/living/carbon/human/H = ui.user
+				H.put_in_hands(P)
+			to_chat(ui.user, span_notice("Result report printed for [project["name"] || project_id]."))
+			. = TRUE
 
 /client/proc/open_research_laboratory()
 	set name = "Research Laboratory"
@@ -761,6 +1175,5 @@ SUBSYSTEM_DEF(research_laboratory)
 	if(!SSresearch_laboratory || !SSresearch_laboratory.manager)
 		to_chat(src, span_warning("Research laboratory system not available."))
 		return
-	var/obj/machinery/computer/research_laboratory_console/virtual_console = new()
-	virtual_console.admin_virtual = TRUE
-	virtual_console.ui_interact(mob)
+	var/datum/computer_file/program/research_laboratory/virtual_prog = new()
+	virtual_prog.ui_interact(mob)

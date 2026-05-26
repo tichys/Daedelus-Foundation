@@ -224,7 +224,7 @@
 
 /obj/item/scp_document_reader/proc/show_document_menu(mob/user)
 	if(!length(unlocked_documents))
-		to_chat(user, "<span class='notice'>No documents available for your clearance level. Interact with SCPs or gain higher clearance to unlock documentation.</span>")
+		to_chat(user, span_notice("No documents available for your clearance level. Interact with SCPs or gain higher clearance to unlock documentation."))
 		return
 
 	var/list/choices = list("Browse All Documents", "Search", "Cancel")
@@ -240,7 +240,7 @@
 			if(findtext(scp_id, search))
 				display_document(user, scp_id)
 				return
-		to_chat(user, "<span class='warning'>No matching documents found.</span>")
+		to_chat(user, span_warning("No matching documents found."))
 		return
 
 	var/list/doc_options = list()

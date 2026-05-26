@@ -754,7 +754,7 @@
 			if(SSscp_experiments?.manager && scp_id)
 				var/datum/scp_experiment/exp = SSscp_experiments?.manager?.start_experiment(scp_id, exp_type, H)
 				if(exp)
-					to_chat(H, "<span class='notice'>Experiment started on [scp_id].</span>")
+					to_chat(H, span_notice("Experiment started on [scp_id]."))
 			return TRUE
 		if("request_subject")
 			if(!ishuman(ui.user))
@@ -764,7 +764,7 @@
 			var/scp_id = linked_system.get_scp_id()
 			if(SSdclass_experiments && scp_id)
 				SSdclass_experiments.request_test_subject(H, scp_id, "containment_test", danger_level, FALSE)
-				to_chat(H, "<span class='notice'>D-Class test subject requested for [scp_id].</span>")
+				to_chat(H, span_notice("D-Class test subject requested for [scp_id]."))
 			return TRUE
 
 /obj/machinery/computer/scp_containment_terminal/ui_state(mob/user)

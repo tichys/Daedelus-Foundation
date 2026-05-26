@@ -6,7 +6,7 @@ SUBSYSTEM_DEF(facility_persistence)
 
 /datum/controller/subsystem/facility_persistence/Initialize()
 	manager = new /datum/facility_persistence_manager()
-	log_world("Facility Persistence Subsystem: Initialized")
+	log_game("Facility Persistence Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/facility_persistence/fire()

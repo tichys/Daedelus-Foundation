@@ -152,6 +152,8 @@
 			return "[jobtitle] is already filled to capacity."
 		if(JOB_UNAVAILABLE_ANTAG_INCOMPAT)
 			return "[jobtitle] is not compatible with some antagonist role assigned to you."
+		if(JOB_UNAVAILABLE_RANK)
+			return "Your persistent rank is too low for [jobtitle]. Earn more experience to unlock this position."
 	return "Error: Unknown job availability."
 
 /mob/dead/new_player/proc/IsJobUnavailable(rank, latejoin = FALSE)

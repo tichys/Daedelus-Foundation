@@ -103,7 +103,7 @@
 		progs_to_store += new /datum/computer_file/program/scp_legal(src)
 
 	if(disk_flags & DISK_SCP_TESTING)
-		progs_to_store += new /datum/computer_file/program/scp_testing(src)
+		progs_to_store += new /datum/computer_file/program/research_laboratory(src)
 
 	if(disk_flags & DISK_SCP_IT)
 		progs_to_store += new /datum/computer_file/program/scp_it_network(src)
@@ -118,7 +118,7 @@
 		progs_to_store += new /datum/computer_file/program/scp_intercom(src)
 
 	if(disk_flags & DISK_SCP_SCIENCE)
-		progs_to_store += new /datum/computer_file/program/scp_testing_protocol(src)
+		progs_to_store += new /datum/computer_file/program/research_laboratory(src)
 
 	if(disk_flags & DISK_SCP_PATROL)
 		progs_to_store += new /datum/computer_file/program/scp_patrol(src)

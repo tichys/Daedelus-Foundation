@@ -95,9 +95,6 @@
 
 	add_movespeed_modifier(/datum/movespeed_modifier/scp_base)
 
-	if(SSscp_persistence && SSscp_persistence.manager)
-		SSscp_persistence?.manager?.scp_instances[persistence_id] = new /datum/scp_instance(persistence_id, src)
-
 	setup_modular_features()
 
 /datum/movespeed_modifier/scp_base

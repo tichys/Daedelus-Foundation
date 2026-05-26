@@ -304,13 +304,13 @@
 	if(reality_distortion_level > 0)
 		for(var/mob/living/carbon/human/H in range(environmental_effects_radius, owner))
 			if(prob(5))
-				to_chat(H, "<span class='notice'>You notice subtle changes in the environment around SCP-914...</span>")
+				to_chat(H, span_notice("You notice subtle changes in the environment around SCP-914..."))
 
 	// Temporal distortion effects
 	if(temporal_distortion_level > 0)
 		for(var/mob/living/carbon/human/H in range(environmental_effects_radius, owner))
 			if(prob(3))
-				to_chat(H, "<span class='notice'>Time seems to flow differently near SCP-914...</span>")
+				to_chat(H, span_notice("Time seems to flow differently near SCP-914..."))
 
 	// Energy fluctuation effects
 	if(energy_fluctuation_level > 0)

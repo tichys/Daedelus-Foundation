@@ -410,7 +410,7 @@ export const ScpDirectorOversight = (_props, context) => {
                                   'color': C.amber,
                                   'font-size': '11px',
                                 }}>
-                                Deadline: {dir.deadline}
+                                Deadline: {dir.deadline_text || dir.deadline}
                               </Box>
                             </Stack.Item>
                           </Stack>
@@ -514,7 +514,7 @@ export const ScpDirectorOversight = (_props, context) => {
                                     'color': C.amber,
                                     'font-size': '11px',
                                   }}>
-                                  Deadline: {dir.deadline}
+                                  Deadline: {dir.deadline_text || dir.deadline}
                                 </Box>
                               </Stack.Item>
                             </Stack>
@@ -522,23 +522,6 @@ export const ScpDirectorOversight = (_props, context) => {
                           <Stack.Item>
                             <Box style={{ 'color': C.text, 'font-size': '12px' }}>
                               {dir.description}
-                            </Box>
-                          </Stack.Item>
-                          <Stack.Item>
-                            <Box
-                              style={{
-                                'color': C.dim,
-                                'font-size': '11px',
-                                'margin-bottom': '4px',
-                              }}>
-                              Assigned:{' '}
-                              <Box
-                                style={{
-                                  'color': C.blue,
-                                  'display': 'inline',
-                                }}>
-                                {dir.assigned_to || 'Unassigned'}
-                              </Box>
                             </Box>
                           </Stack.Item>
                           <Stack.Item>{progressBar(dir.progress)}</Stack.Item>

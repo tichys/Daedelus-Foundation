@@ -14,7 +14,7 @@
 
 	database = new /datum/persistent_progression_database()
 	initialized = TRUE
-	log_world("Persistent Progression Database Adapter: Initialized successfully")
+	log_game("Persistent Progression Database Adapter: Initialized successfully")
 
 // Convert database row to persistent_player_data format
 /datum/persistent_progression_database_adapter/proc/db_row_to_player_data(db_row)

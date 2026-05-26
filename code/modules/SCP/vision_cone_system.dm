@@ -405,7 +405,7 @@
 	set category = "Debug"
 	if(!check_rights_for(src, R_DEBUG))
 		return
-	to_chat(src, "<span class='notice'>Testing vision cone system...</span>")
+	to_chat(src, span_notice("Testing vision cone system..."))
 	fovangle = FOV_DEFAULT
 	update_cone_show()
 
@@ -417,11 +417,11 @@
 	if(fovangle)
 		fovangle = 0
 		hide_cone()
-		to_chat(src, "<span class='notice'>Vision cone disabled.</span>")
+		to_chat(src, span_notice("Vision cone disabled."))
 	else
 		fovangle = FOV_DEFAULT
 		show_cone()
-		to_chat(src, "<span class='notice'>Vision cone enabled.</span>")
+		to_chat(src, span_notice("Vision cone enabled."))
 
 /mob/living/proc/remove_vision_cone()
 	set name = "Remove Vision Cone"
@@ -430,7 +430,7 @@
 		return
 	fovangle = 0
 	hide_cone()
-	to_chat(src, "<span class='notice'>Vision cone removed.</span>")
+	to_chat(src, span_notice("Vision cone removed."))
 
 /mob/living/proc/set_fov_left()
 	set name = "Set FOV Left"
@@ -439,7 +439,7 @@
 		return
 	fovangle = FOV_LEFT
 	update_vision_cone()
-	to_chat(src, "<span class='notice'>FOV set to left only.</span>")
+	to_chat(src, span_notice("FOV set to left only."))
 
 /mob/living/proc/set_fov_right()
 	set name = "Set FOV Right"
@@ -448,7 +448,7 @@
 		return
 	fovangle = FOV_RIGHT
 	update_vision_cone()
-	to_chat(src, "<span class='notice'>FOV set to right only.</span>")
+	to_chat(src, span_notice("FOV set to right only."))
 
 /mob/living/proc/set_fov_behind()
 	set name = "Set FOV Behind"
@@ -457,4 +457,4 @@
 		return
 	fovangle = FOV_BEHIND
 	update_vision_cone()
-	to_chat(src, "<span class='notice'>FOV set to behind only.</span>")
+	to_chat(src, span_notice("FOV set to behind only."))

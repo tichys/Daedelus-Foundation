@@ -20,7 +20,7 @@ SUBSYSTEM_DEF(containment_evaluation)
 
 /datum/controller/subsystem/containment_evaluation/Initialize()
 	manager = new /datum/containment_evaluation_manager()
-	log_world("Containment Evaluation System: Initialized")
+	log_game("Containment Evaluation System: Initialized")
 	return ..()
 
 /datum/controller/subsystem/containment_evaluation/fire()

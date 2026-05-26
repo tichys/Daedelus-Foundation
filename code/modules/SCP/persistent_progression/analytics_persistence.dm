@@ -145,12 +145,12 @@ SUBSYSTEM_DEF(analytics_persistence)
 
 // Subsystem initialization
 /datum/controller/subsystem/analytics_persistence/Initialize()
-	log_world("Analytics persistence subsystem initializing...")
+	log_game("Analytics persistence subsystem initializing...")
 	manager = new /datum/analytics_persistence_manager()
 	log_game("Analytics persistence manager created")
 
 	// Load existing analytics data from game systems
-	log_world("Loading existing analytics data...")
+	log_game("Loading existing analytics data...")
 	manager.load_existing_analytics_data()
 
 	log_game("Performance metrics count at initialization: [length(manager.performance_metrics)]")
@@ -162,7 +162,7 @@ SUBSYSTEM_DEF(analytics_persistence)
 
 // Load existing analytics data from game systems
 /datum/analytics_persistence_manager/proc/load_existing_analytics_data()
-	log_world("Analytics: Loading existing analytics data...")
+	log_game("Analytics: Loading existing analytics data...")
 
 	// Initialize core performance metrics
 	initialize_core_metrics()
@@ -173,7 +173,7 @@ SUBSYSTEM_DEF(analytics_persistence)
 	// Initialize KPI framework
 	initialize_kpi_framework()
 
-	log_world("Analytics: Core analytics framework initialized")
+	log_game("Analytics: Core analytics framework initialized")
 
 // Initialize core performance metrics
 /datum/analytics_persistence_manager/proc/initialize_core_metrics()
@@ -732,4 +732,8 @@ SUBSYSTEM_DEF(analytics_persistence)
 // Save analytics data
 /datum/analytics_persistence_manager/proc/save_analytics_data()
 	// This would save data to persistent storage
-	log_world("Analytics: Saving analytics data to persistent storage")
+	log_game("Analytics: Saving analytics data to persistent storage")
+
+/datum/analytics_persistence_manager/proc/load_analytics_data()
+	// This would load data from persistent storage
+	log_game("Analytics: Loading analytics data from persistent storage")

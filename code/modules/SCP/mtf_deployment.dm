@@ -87,7 +87,7 @@
 				return
 			var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 			if(!id_card || !(ACCESS_ADMIN in id_card.access))
-				to_chat(H, "<span class='warning'>Requires Command access to authorize MTF deployment.</span>")
+				to_chat(H, span_warning("Requires Command access to authorize MTF deployment."))
 				return
 			if(world.time < deployment_cooldown)
 				to_chat(H, span_warning("MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)]."))
@@ -97,7 +97,7 @@
 			if(SSscp_persistence && SSscp_persistence.manager)
 				active_breaches = SSscp_persistence?.manager?.active_breaches
 			if(active_breaches < team["min_breach"])
-				to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
+				to_chat(H, span_warning("Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]"))
 				return
 			last_deployment = team["name"]
 			deploy_mtf_team(team_key, team, H)
@@ -134,11 +134,11 @@
 
 	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 	if(!id_card || !(ACCESS_ADMIN in id_card.access))
-		to_chat(H, "<span class='warning'>Requires Command access to authorize MTF deployment.</span>")
+		to_chat(H, span_warning("Requires Command access to authorize MTF deployment."))
 		return
 
 	if(world.time < deployment_cooldown)
-		to_chat(H, "<span class='warning'>MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)].</span>")
+		to_chat(H, span_warning("MTF deployment systems recharging. Available in [DisplayTimeText(deployment_cooldown - world.time)]."))
 		return
 
 	var/list/options = list()
@@ -158,7 +158,7 @@
 		active_breaches = SSscp_persistence?.manager?.active_breaches
 
 	if(active_breaches < team["min_breach"])
-		to_chat(H, "<span class='warning'>Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]</span>")
+		to_chat(H, span_warning("Insufficient threat level. [team["name"]] requires at least [team["min_breach"]] active breach(es). Current: [active_breaches]"))
 		return
 
 	var/confirm = alert(H, "Deploy [team["name"]]? Team size: [team["size"]]. This action cannot be undone.", "MTF Deployment", "Deploy", "Cancel")
@@ -221,7 +221,7 @@
 
 	for(var/mob/living/carbon/human/H in deployed_members)
 		for(var/obj in objectives)
-			to_chat(H, "<span class='notice'>MTF Objective: [obj]</span>")
+			to_chat(H, span_notice("MTF Objective: [obj]"))
 
 	report_lockdown_to_round_log("MTF Deployment: [team_data["name"]]", 0)
 

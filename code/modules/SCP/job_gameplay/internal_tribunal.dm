@@ -87,24 +87,24 @@
 		if(M)
 			switch(sanction)
 				if(SANCTION_REPRIMAND)
-					to_chat(M, "<span class='warning'>The Tribunal has found you GUILTY. Sanction: Formal Reprimand.</span>")
+					to_chat(M, span_warning("The Tribunal has found you GUILTY. Sanction: Formal Reprimand."))
 				if(SANCTION_SUSPENSION)
-					to_chat(M, "<span class='warning'>The Tribunal has found you GUILTY. Sanction: Suspension of duties pending review.</span>")
+					to_chat(M, span_warning("The Tribunal has found you GUILTY. Sanction: Suspension of duties pending review."))
 					apply_suspension(M)
 				if(SANCTION_DEMOTION)
-					to_chat(M, "<span class='danger'>The Tribunal has found you GUILTY. Sanction: Demotion. Report to HR for reassignment.</span>")
+					to_chat(M, span_danger("The Tribunal has found you GUILTY. Sanction: Demotion. Report to HR for reassignment."))
 					apply_demotion(M)
 				if(SANCTION_TERMINATION)
-					to_chat(M, "<span class='userdanger'>The Tribunal has found you GUILTY. Sanction: Employment Termination. Security will escort you out.</span>")
+					to_chat(M, span_userdanger("The Tribunal has found you GUILTY. Sanction: Employment Termination. Security will escort you out."))
 					apply_termination(M)
 				if(SANCTION_AMNESTIC)
-					to_chat(M, "<span class='userdanger'>The Tribunal has found you GUILTY. Sanction: Mandatory Amnestic Treatment.</span>")
+					to_chat(M, span_userdanger("The Tribunal has found you GUILTY. Sanction: Mandatory Amnestic Treatment."))
 					apply_amnestic(M)
 	else
 		status = TRIBUNAL_CASE_NOT_GUILTY
 		var/mob/M = get_mob_by_name(defendant_name)
 		if(M)
-			to_chat(M, "<span class='notice'>The Tribunal has found you NOT GUILTY. Charges dismissed.</span>")
+			to_chat(M, span_notice("The Tribunal has found you NOT GUILTY. Charges dismissed."))
 	priority_announce("Tribunal verdict rendered for case [case_id]: [defendant_name] - [get_status_text()].", "Internal Tribunal Department", null, ANNOUNCER_DEFAULT)
 	return TRUE
 
@@ -150,7 +150,7 @@
 	var/mob/living/carbon/human/H = M
 	if(H.sanity)
 		H.sanity.adjust_sanity(-30, "tribunal_amnestic")
-	to_chat(H, "<span class='userdanger'>Your memories feel hazy and distant... something has been taken from you.</span>")
+	to_chat(H, span_userdanger("Your memories feel hazy and distant... something has been taken from you."))
 	if(SSpsychology)
 		SSpsychology.record_exposure(H, "Tribunal", "amnestic_treatment", "Forced amnestic administration by tribunal order")
 		SSpsychology.amnestics_administered++

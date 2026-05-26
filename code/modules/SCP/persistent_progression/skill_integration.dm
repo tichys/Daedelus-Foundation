@@ -10,7 +10,7 @@ SUBSYSTEM_DEF(skill_integration)
 
 /datum/controller/subsystem/skill_integration/Initialize()
 	manager = new /datum/skill_integration_manager()
-	log_world("Skill Integration Subsystem: Initialized")
+	log_game("Skill Integration Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/skill_integration/fire()
@@ -293,7 +293,7 @@ SUBSYSTEM_DEF(skill_integration)
 
 /datum/skill_integration_manager/proc/award_research_achievement(mob/living/carbon/human/researcher, achievement_id, achievement_name)
 	research_milestones += achievement_id
-	to_chat(researcher, "<span class='achievement'>Achievement Unlocked: [achievement_name]!</span>")
+	to_chat(researcher, span_boldnotice("Achievement Unlocked: [achievement_name]!"))
 
 /datum/skill_integration_manager/proc/award_research_rewards(mob/living/carbon/human/researcher, research_type)
 	if(!researcher || !researcher.mind)

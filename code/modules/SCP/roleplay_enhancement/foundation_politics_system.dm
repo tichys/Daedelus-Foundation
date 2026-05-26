@@ -398,7 +398,7 @@ SUBSYSTEM_DEF(foundation_politics)
 				for(var/ckey in dept.department_members)
 					var/mob/living/carbon/human/H = dept.get_mob_by_ckey(ckey)
 					if(H && !QDELETED(H) && H.stat != DEAD)
-						to_chat(H, "<span class='notice'>Intelligence report: All SCPs currently contained. Budget spent: [actual_cost]</span>")
+						to_chat(H, span_notice("Intelligence report: All SCPs currently contained. Budget spent: [actual_cost]"))
 	create_political_event("expenditure", "Budget: [purchase_type]", "[dept.department_name] purchased [purchase_type] for [actual_cost].", list(dept_id), -5)
 	return TRUE
 
@@ -423,7 +423,7 @@ SUBSYSTEM_DEF(foundation_politics)
 				if(dept && dept.is_head_online() && length(dept.department_rivals) > 0)
 					var/mob/M = dept.get_head_mob()
 					if(M)
-						to_chat(M, "<span class='warning'>Your department's political tensions are elevated. Consider diplomacy with rival departments.</span>")
+						to_chat(M, span_warning("Your department's political tensions are elevated. Consider diplomacy with rival departments."))
 	if(political_tensions <= TENSION_LOW)
 		if(prob(5))
 			priority_announce("STATUS: Facility political tensions are low. All departments operating smoothly.", null, null, ANNOUNCER_DEFAULT)
@@ -436,12 +436,12 @@ SUBSYSTEM_DEF(foundation_politics)
 		return
 	if(dept.department_budget <= 0 && !dept._budget_warning_issued)
 		dept._budget_warning_issued = TRUE
-		to_chat(M, "<span class='warning'>[dept.department_name] budget is depleted! Operations are at risk.</span>")
+		to_chat(M, span_warning("[dept.department_name] budget is depleted! Operations are at risk."))
 	else if(dept.department_budget > 5000)
 		dept._budget_warning_issued = FALSE
 	if(dept.goals_completed_this_round > 0 && !dept._recent_goal_event)
 		dept._recent_goal_event = TRUE
-		to_chat(M, "<span class='notice'>[dept.department_name] has completed [dept.goals_completed_this_round] goal(s) this shift. Use the Politics console to review.</span>")
+		to_chat(M, span_notice("[dept.department_name] has completed [dept.goals_completed_this_round] goal(s) this shift. Use the Politics console to review."))
 
 /datum/foundation_politics_manager/proc/recalculate_department_members()
 	for(var/department_id in departments)
@@ -660,9 +660,9 @@ SUBSYSTEM_DEF(foundation_politics)
 	var/mob/MA = dept_a?.get_head_mob()
 	var/mob/MB = dept_b?.get_head_mob()
 	if(MA)
-		to_chat(MA, "<span class='warning'>Political conflict with [dept_b?.department_name || dept_id_b]: [reason]</span>")
+		to_chat(MA, span_warning("Political conflict with [dept_b?.department_name || dept_id_b]: [reason]"))
 	if(MB)
-		to_chat(MB, "<span class='warning'>Political conflict with [dept_a?.department_name || dept_id_a]: [reason]</span>")
+		to_chat(MB, span_warning("Political conflict with [dept_a?.department_name || dept_id_a]: [reason]"))
 
 /datum/department
 	var/department_id = ""
@@ -748,13 +748,13 @@ SUBSYSTEM_DEF(foundation_politics)
 			continue
 		if(H.job == head_job)
 			department_head = H.ckey
-			to_chat(H, "<span class='notice'>You are now the head of the [department_name]. Use the Politics console to manage your department.</span>")
+			to_chat(H, span_notice("You are now the head of the [department_name]. Use the Politics console to manage your department."))
 			return
 	for(var/ckey in department_members)
 		var/mob/living/carbon/human/H = get_mob_by_ckey(ckey)
 		if(H && !QDELETED(H) && H.stat != DEAD)
 			department_head = ckey
-			to_chat(H, "<span class='notice'>You are now the head of the [department_name]. Use the Politics console to manage your department.</span>")
+			to_chat(H, span_notice("You are now the head of the [department_name]. Use the Politics console to manage your department."))
 			return
 
 /datum/department/proc/get_mob_by_ckey(target_ckey)
@@ -918,7 +918,7 @@ SUBSYSTEM_DEF(foundation_politics)
 	department_influence = min(100, department_influence + 5)
 	var/mob/M = get_head_mob()
 	if(M)
-		to_chat(M, "<span class='notice'>Department goal '[goal]' completed! Influence increased, budget +2000.</span>")
+		to_chat(M, span_notice("Department goal '[goal]' completed! Influence increased, budget +2000."))
 	if(SSfoundation_politics && SSfoundation_politics.manager)
 		SSfoundation_politics.manager.create_political_event("policy_change", "Goal Completed: [goal]", "[department_name] has achieved the goal: [goal]. Influence rises.", list(department_id), 15)
 
@@ -1080,9 +1080,9 @@ SUBSYSTEM_DEF(foundation_politics)
 		var/mob/MA = dept_a?.get_head_mob()
 		var/mob/MB = dept_b?.get_head_mob()
 		if(MA)
-			to_chat(MA, "<span class='notice'>Conflict with [dept_b?.department_name || parties[2]] resolved through negotiation.</span>")
+			to_chat(MA, span_notice("Conflict with [dept_b?.department_name || parties[2]] resolved through negotiation."))
 		if(MB)
-			to_chat(MB, "<span class='notice'>Conflict with [dept_a?.department_name || parties[1]] resolved through negotiation.</span>")
+			to_chat(MB, span_notice("Conflict with [dept_a?.department_name || parties[1]] resolved through negotiation."))
 	conflict_resolution_rate = min(100, conflict_resolution_rate + 5)
 	create_political_event("policy_change", "Conflict Resolved", "Conflict [conflict_id] resolved through negotiation.", parties, 10)
 
@@ -1272,9 +1272,9 @@ SUBSYSTEM_DEF(foundation_politics)
 	var/mob/MA = dept_a.get_head_mob()
 	var/mob/MB = dept_b.get_head_mob()
 	if(MA)
-		to_chat(MA, "<span class='notice'>Alliance formed with [dept_b.department_name]!</span>")
+		to_chat(MA, span_notice("Alliance formed with [dept_b.department_name]!"))
 	if(MB)
-		to_chat(MB, "<span class='notice'>Alliance formed with [dept_a.department_name]!</span>")
+		to_chat(MB, span_notice("Alliance formed with [dept_a.department_name]!"))
 	return alliance_id
 
 /datum/foundation_politics_manager/proc/break_alliance(alliance_id)

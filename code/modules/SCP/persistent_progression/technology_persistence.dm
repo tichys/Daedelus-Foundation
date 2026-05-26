@@ -6,7 +6,7 @@ SUBSYSTEM_DEF(technology_persistence)
 
 /datum/controller/subsystem/technology_persistence/Initialize()
 	manager = new /datum/technology_persistence_manager()
-	log_world("Technology Persistence Subsystem: Initialized")
+	log_game("Technology Persistence Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/technology_persistence/fire()

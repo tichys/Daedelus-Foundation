@@ -152,6 +152,7 @@
 
 /turf/open/floor/iron/white/smooth
 	name = "white smooth floor"
+	var/id_tag
 
 /turf/open/floor/shuttle
 	name = "shuttle floor"
@@ -253,12 +254,14 @@
 /obj/machinery/airlock_controller
 	name = "airlock controller"
 	var/tag_exterior_door
+	var/tag_interior_door
 
 /obj/machinery/airlock_controller/airlock_controller
 	name = "airlock controller"
 
 /obj/machinery/alarm
 	name = "air alarm"
+	var/alarm_id
 
 /obj/machinery/artifact
 	name = "artifact"
@@ -381,6 +384,7 @@
 	name = "organ printer"
 	desc = "A machine for synthesizing organic organs."
 	density = TRUE
+	var/max_stored_matter
 
 /obj/machinery/pager
 	name = "pager"
@@ -416,6 +420,7 @@
 	density = TRUE
 	var/active = FALSE
 	var/max_range
+	var/storedpower
 
 /obj/machinery/suit_cycler
 	name = "suit cycler"

@@ -10,7 +10,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 
 /datum/controller/subsystem/scp_progression_integration/Initialize()
 	manager = new /datum/scp_progression_manager()
-	log_world("SCP Progression Integration Subsystem: Initialized")
+	log_game("SCP Progression Integration Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_progression_integration/fire()
@@ -301,7 +301,7 @@ SUBSYSTEM_DEF(scp_progression_integration)
 		// Notify player
 		for(var/client/C in GLOB.clients)
 			if(C.ckey == ckey)
-				to_chat(C, "<span class='achievement'>Achievement Unlocked: [achievement_name] - [achievement_desc]</span>")
+				to_chat(C, span_boldnotice("Achievement Unlocked: [achievement_name] - [achievement_desc]"))
 				break
 
 		// Log achievement

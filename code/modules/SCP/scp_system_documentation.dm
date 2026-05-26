@@ -174,12 +174,12 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 	var/list/section = GLOB_SCP_DOCS.get_documentation(section_key)
 
 	if(section)
-		to_chat(src, "<span class='boldnotice'>=== [section["title"]] ===</span>")
+		to_chat(src, span_boldnotice("=== [section["title"]] ==="))
 		for(var/line in section["content"])
 			if(line == "")
 				to_chat(src, "")
 			else
-				to_chat(src, "<span class='notice'>[line]</span>")
+				to_chat(src, span_notice("[line]"))
 
 // System Status Overview
 /mob/proc/scp_system_status()
@@ -190,27 +190,27 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 	if(!client || !check_rights(R_ADMIN))
 		return
 
-	to_chat(src, "<span class='boldnotice'>=== SCP Advanced Component System Status ===</span>")
-	to_chat(src, "<span class='notice'>Version: [GLOB_SCP_DOCS.current_version]</span>")
-	to_chat(src, "<span class='notice'>Last Updated: [GLOB_SCP_DOCS.last_updated]</span>")
+	to_chat(src, span_boldnotice("=== SCP Advanced Component System Status ==="))
+	to_chat(src, span_notice("Version: [GLOB_SCP_DOCS.current_version]"))
+	to_chat(src, span_notice("Last Updated: [GLOB_SCP_DOCS.last_updated]"))
 	to_chat(src, "")
 
 	// Component System Status
-	to_chat(src, "<span class='boldnotice'>Core Systems:</span>")
-	to_chat(src, "<span class='notice'>• Advanced Components: [ispath(/datum/scp_advanced_component) ? "✅ Available" : "❌ Missing"]</span>")
-	to_chat(src, "<span class='notice'>• Component Manager: [ispath(/datum/component_manager_advanced) ? "✅ Available" : "❌ Missing"]</span>")
-	to_chat(src, "<span class='notice'>• SCP Extensions: [ispath(/datum/scp) ? "✅ Available" : "❌ Missing"]</span>")
+	to_chat(src, span_boldnotice("Core Systems:"))
+	to_chat(src, span_notice("• Advanced Components: [ispath(/datum/scp_advanced_component) ? "OK Available" : "X Missing"]"))
+	to_chat(src, span_notice("• Component Manager: [ispath(/datum/component_manager_advanced) ? "OK Available" : "X Missing"]"))
+	to_chat(src, span_notice("• SCP Extensions: [ispath(/datum/scp) ? "OK Available" : "X Missing"]"))
 	to_chat(src, "")
 
 	// Network Systems
-	to_chat(src, "<span class='boldnotice'>Network Systems:</span>")
-	to_chat(src, "<span class='notice'>• SCP Network Hub: [GLOB_SCP_NETWORK ? "✅ Active ([length(GLOB_SCP_NETWORK.connected_scps)] SCPs)" : "❌ Inactive"]</span>")
-	to_chat(src, "<span class='notice'>• Effect System: [ispath(/datum/scp_component_effect) ? "✅ Available" : "❌ Missing"]</span>")
-	to_chat(src, "<span class='notice'>• Component Database: [GLOB_COMPONENT_DB ? "✅ Active" : "❌ Inactive"]</span>")
+	to_chat(src, span_boldnotice("Network Systems:"))
+	to_chat(src, span_notice("• SCP Network Hub: [GLOB_SCP_NETWORK ? "OK Active ([length(GLOB_SCP_NETWORK.connected_scps)] SCPs)" : "X Inactive"]"))
+	to_chat(src, span_notice("• Effect System: [ispath(/datum/scp_component_effect) ? "OK Available" : "X Missing"]"))
+	to_chat(src, span_notice("• Component Database: [GLOB_COMPONENT_DB ? "OK Active" : "X Inactive"]"))
 	to_chat(src, "")
 
 	// Converted SCPs Status
-	to_chat(src, "<span class='boldnotice'>Human-Converted SCPs:</span>")
+	to_chat(src, span_boldnotice("Human-Converted SCPs:"))
 	var/list/converted_scps = list(
 		"SCP-049" = /mob/living/scp/scp049,
 		"SCP-082" = /mob/living/scp/scp082,
@@ -223,11 +223,11 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 	for(var/scp_name in converted_scps)
 		var/scp_type = converted_scps[scp_name]
 		var/status = ispath(scp_type) && ispath(scp_type, /mob/living/carbon/human) ? "✅ Converted" : "❌ Not Converted"
-		to_chat(src, "<span class='notice'>• [scp_name]: [status]</span>")
+		to_chat(src, span_notice("• [scp_name]: [status]"))
 
 	to_chat(src, "")
-	to_chat(src, "<span class='notice'>Use 'SCP System Help' for detailed documentation</span>")
-	to_chat(src, "<span class='notice'>Use 'Validate SCP Integration' for system testing</span>")
+	to_chat(src, span_notice("Use 'SCP System Help' for detailed documentation"))
+	to_chat(src, span_notice("Use 'Validate SCP Integration' for system testing"))
 
 // Quick system statistics
 /mob/proc/scp_quick_stats()
@@ -250,11 +250,11 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 			if(M.SCP.uses_advanced_components)
 				component_scps++
 
-	to_chat(src, "<span class='boldnotice'>=== Quick SCP Statistics ===</span>")
-	to_chat(src, "<span class='notice'>Active SCPs: [active_scps]</span>")
-	to_chat(src, "<span class='notice'>Component-Based SCPs: [component_scps]</span>")
-	to_chat(src, "<span class='notice'>Network Registered: [GLOB_SCP_NETWORK ? length(GLOB_SCP_NETWORK.connected_scps) : 0]</span>")
-	to_chat(src, "<span class='notice'>System Status: [component_scps > 0 ? "✅ Active" : "⚠️ No Components Active"]</span>")
+	to_chat(src, span_boldnotice("=== Quick SCP Statistics ==="))
+	to_chat(src, span_notice("Active SCPs: [active_scps]"))
+	to_chat(src, span_notice("Component-Based SCPs: [component_scps]"))
+	to_chat(src, span_notice("Network Registered: [GLOB_SCP_NETWORK ? length(GLOB_SCP_NETWORK.connected_scps) : 0]"))
+	to_chat(src, span_notice("System Status: [component_scps > 0 ? "OK Active" : "! No Components Active"]"))
 
 // Component examination helper
 /mob/proc/examine_scp_components()
@@ -268,24 +268,24 @@ var/global/datum/scp_documentation_manager/GLOB_SCP_DOCS = new /datum/scp_docume
 	var/mob/living/target = input(src, "Select SCP to examine:", "Component Examination") as null|mob in GLOB.mob_list
 
 	if(!target || !target.SCP)
-		to_chat(src, "<span class='warning'>Target is not an SCP.</span>")
+		to_chat(src, span_warning("Target is not an SCP."))
 		return
 
 	if(!target.SCP.uses_advanced_components)
-		to_chat(src, "<span class='warning'>Target SCP does not use advanced components.</span>")
+		to_chat(src, span_warning("Target SCP does not use advanced components."))
 		return
 
-	to_chat(src, "<span class='boldnotice'>=== SCP Component Analysis: [target.SCP.designation] ===</span>")
-	to_chat(src, "<span class='notice'>Name: [target.SCP.name]</span>")
-	to_chat(src, "<span class='notice'>Classification: [target.SCP.classification]</span>")
+	to_chat(src, span_boldnotice("=== SCP Component Analysis: [target.SCP.designation] ==="))
+	to_chat(src, span_notice("Name: [target.SCP.name]"))
+	to_chat(src, span_notice("Classification: [target.SCP.classification]"))
 	to_chat(src, "")
 
 	// List all components
 	if(target.SCP.advanced_components)
-		to_chat(src, "<span class='boldnotice'>Active Components:</span>")
+		to_chat(src, span_boldnotice("Active Components:"))
 		for(var/component_id in target.SCP.advanced_components.components)
 			var/datum/scp_advanced_component/component = target.SCP.advanced_components.components[component_id]
-			to_chat(src, "<span class='notice'>• [component.name] ([component.version])</span>")
-			to_chat(src, "<span class='notice'>  Status: [component.get_status_info()]</span>")
+			to_chat(src, span_notice("• [component.name] ([component.version])"))
+			to_chat(src, span_notice("  Status: [component.get_status_info()]"))
 	else
-		to_chat(src, "<span class='warning'>No component manager found.</span>")
+		to_chat(src, span_warning("No component manager found."))

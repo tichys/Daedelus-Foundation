@@ -66,7 +66,7 @@ SUBSYSTEM_DEF(scp_testing)
 	else
 		proposal["status"] = SCP_TEST_APPROVED
 		proposal["time_approved"] = world.time
-		to_chat(researcher, "<span class='notice'>Test proposal [proposal_id] has been auto-approved (low risk).</span>")
+		to_chat(researcher, span_notice("Test proposal [proposal_id] has been auto-approved (low risk)."))
 	return proposal_id
 
 /datum/controller/subsystem/scp_testing/proc/approve_proposal(proposal_id, approved_by)
@@ -82,7 +82,7 @@ SUBSYSTEM_DEF(scp_testing)
 	var/researcher_ckey = proposal["researcher_ckey"]
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.ckey == researcher_ckey)
-			to_chat(H, "<span class='notice'>Your test proposal [proposal_id] for [proposal["scp_id"]] has been approved by [approved_by].</span>")
+			to_chat(H, span_notice("Your test proposal [proposal_id] for [proposal["scp_id"]] has been approved by [approved_by]."))
 			break
 	return TRUE
 
@@ -99,7 +99,7 @@ SUBSYSTEM_DEF(scp_testing)
 	var/researcher_ckey = proposal["researcher_ckey"]
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.ckey == researcher_ckey)
-			to_chat(H, "<span class='warning'>Your test proposal [proposal_id] for [proposal["scp_id"]] has been rejected. Reason: [reason]</span>")
+			to_chat(H, span_warning("Your test proposal [proposal_id] for [proposal["scp_id"]] has been rejected. Reason: [reason]"))
 			break
 	return TRUE
 
@@ -118,7 +118,7 @@ SUBSYSTEM_DEF(scp_testing)
 		if(findtext(area_name, lowertext(proposal["scp_id"])) || findtext(area_name, "containment") || findtext(area_name, "research") || findtext(area_name, "lab"))
 			near_scp = TRUE
 	if(!near_scp)
-		to_chat(researcher, "<span class='warning'>You must be near the SCP containment area or a research lab to start this test.</span>")
+		to_chat(researcher, span_warning("You must be near the SCP containment area or a research lab to start this test."))
 		return FALSE
 	proposal["status"] = SCP_TEST_IN_PROGRESS
 	active_tests[proposal_id] = proposal
@@ -126,9 +126,9 @@ SUBSYSTEM_DEF(scp_testing)
 	var/subject_name = proposal["subject_name"]
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.real_name == subject_name || H.name == subject_name)
-			to_chat(H, "<span class='warning'>You have been selected as a test subject for [proposal["scp_id"]] testing. Report to the containment chamber immediately.</span>")
+			to_chat(H, span_warning("You have been selected as a test subject for [proposal["scp_id"]] testing. Report to the containment chamber immediately."))
 			break
-	to_chat(researcher, "<span class='notice'>Test [proposal_id] on [proposal["scp_id"]] is now in progress. Proceed with the test protocol.</span>")
+	to_chat(researcher, span_notice("Test [proposal_id] on [proposal["scp_id"]] is now in progress. Proceed with the test protocol."))
 	return TRUE
 
 /datum/controller/subsystem/scp_testing/proc/execute_test(proposal_id, mob/living/carbon/human/researcher)
@@ -153,7 +153,7 @@ SUBSYSTEM_DEF(scp_testing)
 		completed_tests[proposal_id] = proposal
 		active_tests -= proposal_id
 		total_tests_conducted++
-		to_chat(researcher, "<span class='warning'>Test [proposal_id] could not be completed: subject unavailable or deceased.</span>")
+		to_chat(researcher, span_warning("Test [proposal_id] could not be completed: subject unavailable or deceased."))
 		return TRUE
 	var/list/outcome = scp_execute_test_outcome(test_subject, proposal["scp_id"], proposal["test_type"], proposal["risk_level"])
 	hook_scp_interaction(researcher, proposal["scp_id"], INTERACTION_TYPE_EXPERIMENT)
@@ -177,7 +177,7 @@ SUBSYSTEM_DEF(scp_testing)
 			total_ethics_violations_from_tests++
 		priority_announce("Test incident reported: [proposal["scp_id"]] test resulted in subject injury. Researcher: [researcher.real_name].", "TESTING ALERT", null, ANNOUNCER_ALERT)
 	else
-		to_chat(researcher, "<span class='notice'>Test [proposal_id] completed successfully. Research points earned: [points_earned].</span>")
+		to_chat(researcher, span_notice("Test [proposal_id] completed successfully. Research points earned: [points_earned]."))
 	var/list/stats = get_researcher_stats(researcher.ckey)
 	stats["total_completed"]++
 	stats["total_research_earned"] += points_earned
@@ -201,7 +201,7 @@ SUBSYSTEM_DEF(scp_testing)
 	var/researcher_ckey = proposal["researcher_ckey"]
 	for(var/mob/living/carbon/human/H in GLOB.mob_list)
 		if(H.ckey == researcher_ckey)
-			to_chat(H, "<span class='warning'>Test [proposal_id] has been cancelled and returned to pending status.</span>")
+			to_chat(H, span_warning("Test [proposal_id] has been cancelled and returned to pending status."))
 			break
 	return TRUE
 
@@ -270,164 +270,4 @@ SUBSYSTEM_DEF(scp_testing)
 			return TRUE
 	return FALSE
 
-/obj/item/paper/foundation/test_proposal_form
-	name = "SCP Test Proposal Form"
-	desc = "A Foundation form for submitting supervised SCP test proposals."
 
-/obj/item/paper/foundation/test_proposal_form/Initialize(mapload)
-	. = ..()
-	setText({"<h2>SCP FOUNDATION - TEST PROPOSAL FORM</h2><hr>
-<b>Proposal ID:</b> ________<br>
-<b>Date:</b> ________<br><hr>
-<b>Requesting Researcher:</b> ________________________<br>
-<b>Clearance Level:</b> 1 / 2 / 3 / 4 / 5<br><hr>
-<b>SCP Designation:</b> SCP-________<br>
-<b>Test Type:</b> Observation / Physical / Stress / Audio / Biological / Cognitive / Chemical<br>
-<b>Risk Level:</b> 1 (Low) / 2 / 3 / 4 / 5 (Extreme)<br><hr>
-<b>D-Class Subject:</b> ________________________<br><hr>
-<b>Test Description:</b><br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br><hr>
-<b>Safety Precautions:</b><br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br><hr>
-<b>Ethics Review Required:</b> Yes / No (mandatory if Risk >= 3)<br><hr>
-<b>Researcher Signature:</b> ________________________ <b>Date:</b> ________<br>
-<b>Supervisor Approval:</b> ________________________ <b>Date:</b> ________<br>
-<b>Ethics Liaison Approval:</b> ________________________ <b>Date:</b> ________<br>"}, FALSE)
-
-/obj/item/paper/foundation/test_result_report
-	name = "SCP Test Result Report"
-	desc = "A Foundation form for documenting SCP test outcomes."
-
-/obj/item/paper/foundation/test_result_report/Initialize(mapload)
-	. = ..()
-	setText({"<h2>SCP FOUNDATION - TEST RESULT REPORT</h2><hr>
-<b>Test ID:</b> ________<br>
-<b>Date Completed:</b> ________<br><hr>
-<b>Researcher:</b> ________________________<br>
-<b>SCP Designation:</b> SCP-________<br>
-<b>Test Type:</b> ________________________<br>
-<b>Risk Level:</b> ________<br>
-<b>D-Class Subject:</b> ________________________<br><hr>
-<b>Test Outcome:</b><br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br><hr>
-<b>Danger Triggered:</b> Yes / No<br>
-<b>Subject Status:</b> Intact / Injured / Deceased / Missing<br><hr>
-<b>Research Points Earned:</b> ________<br>
-<b>Notable Observations:</b><br>
-___________________________________________________________________________<br>
-___________________________________________________________________________<br><hr>
-<b>Ethics Violation Filed:</b> Yes / No<br>
-<b>Follow-up Required:</b> Yes / No<br><hr>
-<b>Researcher Signature:</b> ________________________ <b>Date:</b> ________<br>
-<b>Supervisor Review:</b> ________________________ <b>Date:</b> ________<br>"}, FALSE)
-
-/datum/computer_file/program/scp_testing_protocol
-	filename = "scp_testing"
-	filedesc = "SCP Testing Protocol"
-	category = PROGRAM_CATEGORY_MISC
-	program_icon_state = "generic"
-	extended_desc = "Submit and execute SCP test proposals, track researcher productivity."
-	size = 3
-	tgui_id = "ScpTestingProtocol"
-	program_icon = "flask"
-	usage_flags = PROGRAM_ALL
-	available_on_ntnet = FALSE
-	required_access = list(ACCESS_SCIENCE)
-
-/datum/computer_file/program/scp_testing_protocol/ui_data(mob/user)
-	var/list/data = get_header_data()
-	var/mob/living/carbon/human/H = user
-	if(!istype(H))
-		data["access_denied"] = TRUE
-		return data
-	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
-	if(!id_card || !(ACCESS_SCIENCE in id_card.access))
-		data["access_denied"] = TRUE
-		return data
-	data["access_denied"] = FALSE
-	if(!SSscp_testing)
-		return data
-	data["test_proposals"] = SSscp_testing.test_proposals
-	data["active_tests"] = SSscp_testing.active_tests
-	var/list/recent_completed = list()
-	var/completed_ids = list()
-	for(var/id in SSscp_testing.completed_tests)
-		completed_ids += id
-	var/len = length(completed_ids)
-	var/start_idx = max(1, len - 19)
-	for(var/i in start_idx to len)
-		var/cid = completed_ids[i]
-		recent_completed[cid] = SSscp_testing.completed_tests[cid]
-	data["completed_tests"] = recent_completed
-	data["researcher_stats"] = SSscp_testing.get_researcher_stats(H.ckey)
-	data["total_tests_conducted"] = SSscp_testing.total_tests_conducted
-	data["total_research_earned"] = SSscp_testing.total_research_earned
-	data["total_incidents_during_tests"] = SSscp_testing.total_incidents_during_tests
-	var/pending_count = 0
-	for(var/id in SSscp_testing.test_proposals)
-		var/list/P = SSscp_testing.test_proposals[id]
-		if(P["status"] == SCP_TEST_PENDING)
-			pending_count++
-	data["pending_count"] = pending_count
-	return data
-
-/datum/computer_file/program/scp_testing_protocol/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
-	. = ..()
-	if(.)
-		return
-	var/mob/living/carbon/human/H = ui.user
-	if(!istype(H))
-		return
-	var/obj/item/card/id/id_card = H.get_idcard(TRUE)
-	if(!id_card || !(ACCESS_SCIENCE in id_card.access))
-		return
-	if(!SSscp_testing)
-		return
-	switch(action)
-		if("submit_proposal")
-			var/scp_id = params["scp_id"] || ""
-			var/test_type = params["test_type"] || "observation"
-			var/risk_level = text2num(params["risk_level"]) || 1
-			var/subject_name = params["subject_name"] || ""
-			var/description = params["description"] || ""
-			if(!scp_id)
-				return
-			SSscp_testing.submit_test_proposal(H, scp_id, test_type, risk_level, subject_name, description)
-			. = TRUE
-		if("approve_proposal")
-			var/proposal_id = params["proposal_id"]
-			if(!proposal_id)
-				return
-			SSscp_testing.approve_proposal(proposal_id, H.real_name)
-			. = TRUE
-		if("reject_proposal")
-			var/proposal_id = params["proposal_id"]
-			var/reason = params["reason"] || "No reason provided"
-			if(!proposal_id)
-				return
-			SSscp_testing.reject_proposal(proposal_id, reason)
-			. = TRUE
-		if("start_test")
-			var/proposal_id = params["proposal_id"]
-			if(!proposal_id)
-				return
-			SSscp_testing.start_test(proposal_id, H)
-			. = TRUE
-		if("execute_test")
-			var/proposal_id = params["proposal_id"]
-			if(!proposal_id)
-				return
-			SSscp_testing.execute_test(proposal_id, H)
-			. = TRUE
-		if("cancel_test")
-			var/proposal_id = params["proposal_id"]
-			if(!proposal_id)
-				return
-			SSscp_testing.cancel_test(proposal_id)
-			. = TRUE

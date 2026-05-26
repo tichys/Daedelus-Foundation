@@ -277,5 +277,5 @@ GLOBAL_VAR_INIT(faction_integration, null)
 		addtimer(CALLBACK(GLOBAL_PROC, /proc/initialize_global_faction_integration), 5 SECONDS)
 		return
 	GLOB.faction_integration = new /datum/faction_integration()
-	log_world("Faction Integration: Initialized global faction integration")
+	log_game("Faction Integration: Initialized global faction integration")
 

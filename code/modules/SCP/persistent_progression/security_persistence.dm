@@ -714,17 +714,17 @@ SUBSYSTEM_DEF(security_persistence)
 		access_logs[log_id] = log
 	qdel(query_load_logs)
 
-	log_world("Security Persistence: Loaded [length(security_records)] security records, [length(security_incidents)] incidents, [length(clearance_requests)] requests, [length(security_protocols)] protocols, and [length(access_logs)] access logs from database")
+	log_game("Security Persistence: Loaded [length(security_records)] security records, [length(security_incidents)] incidents, [length(clearance_requests)] requests, [length(security_protocols)] protocols, and [length(access_logs)] access logs from database")
 */
 
 // Subsystem initialization
 /datum/controller/subsystem/security_persistence/Initialize()
-	log_world("Security persistence subsystem initializing...")
+	log_game("Security persistence subsystem initializing...")
 	manager = new /datum/security_persistence_manager()
 	log_game("Security persistence manager created")
 
 	// Load existing security records from datacore
-	log_world("Loading existing security records from datacore...")
+	log_game("Loading existing security records from datacore...")
 	manager.load_existing_security_records()
 
 	log_game("Security records count at initialization: [length(manager.security_records)]")
@@ -759,7 +759,7 @@ SUBSYSTEM_DEF(security_persistence)
 	if(!SSdatacore)
 		return
 
-	log_world("Security: Loading existing security records from datacore...")
+	log_game("Security: Loading existing security records from datacore...")
 
 	// Load from general records (station records)
 	for(var/datum/data/record/general_record in SSdatacore.get_records(DATACORE_RECORDS_STATION))
@@ -803,7 +803,7 @@ SUBSYSTEM_DEF(security_persistence)
 
 				log_game("Security: Created new security record for [security_record.fields[DATACORE_NAME]]")
 
-	log_world("Security: Loaded [length(security_records)] security records from datacore")
+	log_game("Security: Loaded [length(security_records)] security records from datacore")
 
 // Add security personnel
 /datum/security_persistence_manager/proc/add_security_personnel(var/ckey, var/real_name, var/clearance_level = 1)

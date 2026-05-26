@@ -75,13 +75,13 @@
 
 /obj/machinery/scp_femur_breaker/proc/activate(mob/activator)
 	if(!occupied)
-		to_chat(activator, "<span class='warning'>The Femur Breaker requires a subject.</span>")
+		to_chat(activator, span_warning("The Femur Breaker requires a subject."))
 		return
 
 	for(var/mob/living/carbon/human/H in src)
 		H.adjustBruteLoss(80)
 		H.emote("scream")
-		visible_message("<span class='danger'>The Femur Breaker activates! [H] screams in agony!</span>")
+		visible_message(span_danger("The Femur Breaker activates! [H] screams in agony!"))
 
 		if(SSscp_persistence && SSscp_persistence.manager)
 			var/datum/scp_instance/instance = SSscp_persistence?.manager?.scp_instances["SCP-106"]
@@ -124,17 +124,17 @@
 	var/found_scp = FALSE
 	for(var/mob/living/scp/scp096/S in oview(1, H))
 
-		user.visible_message("<span class='danger'>[user] attempts to place the containment bag over SCP-096's head!</span>")
+		user.visible_message(span_danger("[user] attempts to place the containment bag over SCP-096's head!"))
 		if(do_after(user, 30, target = S))
 			var/hood = new /obj/item/clothing/head/scp096_hood()
 			S.equip_to_slot_or_del(hood, ITEM_SLOT_HEAD)
 			S.emote("scream")
-			to_chat(user, "<span class='notice'>You place the containment bag over SCP-096's head!</span>")
+			to_chat(user, span_notice("You place the containment bag over SCP-096's head!"))
 			qdel(src)
 		found_scp = TRUE
 		break
 	if(!found_scp)
-		to_chat(user, "<span class='warning'>No nearby SCP-096 without head covering.</span>")
+		to_chat(user, span_warning("No nearby SCP-096 without head covering."))
 
 /obj/item/clothing/head/scp096_hood
 	name = "SCP-096 Containment Hood"
@@ -148,7 +148,7 @@
 	. = ..()
 	if(slot == ITEM_SLOT_HEAD && istype(H, /mob/living/scp/scp096))
 		can_trigger = FALSE
-		H.visible_message("<span class='notice'>SCP-096's face is now covered.</span>")
+		H.visible_message(span_notice("SCP-096's face is now covered."))
 
 /obj/item/scp173_blink_kit
 	name = "SCP-173 Observation Kit"
@@ -159,14 +159,14 @@
 	if(!ishuman(user))
 		return
 	if(uses <= 0)
-		to_chat(user, "<span class='warning'>The kit is empty.</span>")
+		to_chat(user, span_warning("The kit is empty."))
 		return
 
 	uses--
 	var/mob/living/carbon/human/H = user
 	if(H.stamina)
 		H.stamina.adjust(30)
-	to_chat(H, "<span class='notice'>You apply the eye drops and stimulants. Your eyes feel refreshed!</span>")
+	to_chat(H, span_notice("You apply the eye drops and stimulants. Your eyes feel refreshed!"))
 	H.set_drugginess(10)
 
 /obj/machinery/scp457_suppression
@@ -191,7 +191,7 @@
 		return
 
 	if(suppression_charge < 30)
-		to_chat(user, "<span class='warning'>Insufficient charge. Current: [round(suppression_charge)]%</span>")
+		to_chat(user, span_warning("Insufficient charge. Current: [round(suppression_charge)]%"))
 		return
 
 	var/confirm = alert(user, "Activate fire suppression? Charge: [round(suppression_charge)]%", "Suppression", "Activate", "Cancel")

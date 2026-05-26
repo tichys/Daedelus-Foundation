@@ -714,11 +714,11 @@ SUBSYSTEM_DEF(budget_system)
 
 // Subsystem initialization
 /datum/controller/subsystem/budget_system/Initialize()
-	log_world("Budget system initializing...")
+	log_game("Budget system initializing...")
 	manager = new /datum/budget_manager()
 	manager.initialize_department_budgets()
 	manager.load_budget_data()
-	log_world("Budget system initialized with [length(manager.department_budgets)] departments")
+	log_game("Budget system initialized with [length(manager.department_budgets)] departments")
 	return ..()
 
 /datum/controller/subsystem/budget_system/fire()

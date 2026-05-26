@@ -458,11 +458,11 @@
 
 /obj/item/scp_specimen_kit/attack_self(mob/user)
 	if(!length(collected_specimens))
-		to_chat(user, "<span class='notice'>The specimen collection kit has [vials_remaining] vial(s) remaining. Use it on an SCP entity to collect a specimen.</span>")
+		to_chat(user, span_notice("The specimen collection kit has [vials_remaining] vial(s) remaining. Use it on an SCP entity to collect a specimen."))
 		return
-	to_chat(user, "<span class='notice'>Specimen kit: [vials_remaining] vial(s) remaining. Collected specimens:</span>")
+	to_chat(user, span_notice("Specimen kit: [vials_remaining] vial(s) remaining. Collected specimens:"))
 	for(var/specimen in collected_specimens)
-		to_chat(user, "<span class='notice'>- [specimen]</span>")
+		to_chat(user, span_notice("- [specimen]"))
 
 /obj/item/scp_specimen_kit/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
 	if(!proximity_flag || vials_remaining <= 0)
@@ -500,13 +500,13 @@
 	else
 		return
 	if(specimen_name in collected_specimens)
-		to_chat(user, "<span class='warning'>You already have a sample of [specimen_name].</span>")
+		to_chat(user, span_warning("You already have a sample of [specimen_name]."))
 		return
 	vials_remaining--
 	collected_specimens += specimen_name
-	user.visible_message("<span class='notice'>[user] collects a specimen sample from [target] using the collection kit.</span>", "<span class='notice'>You collect: [specimen_name]. [vials_remaining] vial(s) remaining.</span>")
+	user.visible_message(span_notice("[user] collects a specimen sample from [target] using the collection kit."), span_notice("You collect: [specimen_name]. [vials_remaining] vial(s) remaining."))
 	if(SSscp_research?.manager)
 		SSscp_research?.manager?.adjust_research_points(research_value, "specimen_collection:[specimen_type]")
-		to_chat(user, "<span class='notice'>+[research_value] research points from specimen collection.</span>")
+		to_chat(user, span_notice("+[research_value] research points from specimen collection."))
 	if(SSraisa)
 		SSraisa.record_observation(user)

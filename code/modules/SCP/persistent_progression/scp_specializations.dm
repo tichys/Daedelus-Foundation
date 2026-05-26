@@ -18,7 +18,7 @@ SUBSYSTEM_DEF(scp_specializations)
 /datum/controller/subsystem/scp_specializations/Initialize()
 	manager = new /datum/specialization_manager()
 	manager.initialize_specializations()
-	log_world("SCP Specialization System: Initialized")
+	log_game("SCP Specialization System: Initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_specializations/fire()

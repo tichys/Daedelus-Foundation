@@ -151,12 +151,12 @@ SUBSYSTEM_DEF(incident_persistence)
 
 // Subsystem initialization
 /datum/controller/subsystem/incident_persistence/Initialize()
-	log_world("Incident persistence subsystem initializing...")
+	log_game("Incident persistence subsystem initializing...")
 	manager = new /datum/incident_persistence_manager()
 	log_game("Incident persistence manager created")
 
 	// Load existing incident data from game systems
-	log_world("Loading existing incident data...")
+	log_game("Loading existing incident data...")
 	manager.load_existing_incident_data()
 
 	log_game("Incident records count at initialization: [length(manager.incident_records)]")
@@ -168,7 +168,7 @@ SUBSYSTEM_DEF(incident_persistence)
 
 // Load existing incident data from game systems
 /datum/incident_persistence_manager/proc/load_existing_incident_data()
-	log_world("Incident: Loading existing incident data...")
+	log_game("Incident: Loading existing incident data...")
 
 	// Monitor for active incidents in the game world
 	// This would integrate with existing game systems to detect incidents
@@ -365,3 +365,7 @@ SUBSYSTEM_DEF(incident_persistence)
 /datum/incident_persistence_manager/proc/save_incident_data()
 	// This would save data to persistent storage
 	log_game("Incident: Saving incident data to persistent storage")
+
+/datum/incident_persistence_manager/proc/load_incident_data()
+	// This would load data from persistent storage
+	log_game("Incident: Loading incident data from persistent storage")

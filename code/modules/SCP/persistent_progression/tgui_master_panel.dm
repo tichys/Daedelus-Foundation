@@ -2108,6 +2108,185 @@
 			else
 				to_chat(admin_client, span_warning("Psychological persistence system not available."))
 
+		// Chemical Save/Load/Reset
+		if("chemical_save_data")
+			log_game("PersistenceMasterPanel: Processing chemical_save_data for [admin_client.ckey]")
+			if(SSchemical_persistence && SSchemical_persistence.manager)
+				SSchemical_persistence?.manager?.save_chemical_data()
+				to_chat(admin_client, span_notice("Chemical data saved successfully."))
+			else
+				to_chat(admin_client, span_warning("Chemical persistence system not available."))
+
+		if("chemical_load_data")
+			log_game("PersistenceMasterPanel: Processing chemical_load_data for [admin_client.ckey]")
+			if(SSchemical_persistence && SSchemical_persistence.manager)
+				SSchemical_persistence?.manager?.load_chemical_data()
+				to_chat(admin_client, span_notice("Chemical data loaded successfully."))
+			else
+				to_chat(admin_client, span_warning("Chemical persistence system not available."))
+
+		// Incident Save/Load/Reset
+		if("incident_save_data")
+			log_game("PersistenceMasterPanel: Processing incident_save_data for [admin_client.ckey]")
+			if(SSincident_persistence && SSincident_persistence.manager)
+				SSincident_persistence?.manager?.save_incident_data()
+				to_chat(admin_client, span_notice("Incident data saved successfully."))
+			else
+				to_chat(admin_client, span_warning("Incident persistence system not available."))
+
+		if("incident_load_data")
+			log_game("PersistenceMasterPanel: Processing incident_load_data for [admin_client.ckey]")
+			if(SSincident_persistence && SSincident_persistence.manager)
+				SSincident_persistence?.manager?.load_incident_data()
+				to_chat(admin_client, span_notice("Incident data loaded successfully."))
+			else
+				to_chat(admin_client, span_warning("Incident persistence system not available."))
+
+		if("incident_reset_data")
+			log_game("PersistenceMasterPanel: Processing incident_reset_data for [admin_client.ckey]")
+			if(SSincident_persistence && SSincident_persistence.manager)
+				if(alert(admin_client, "Are you sure you want to reset all incident persistence data?", "Confirm Reset", "Yes", "No") == "Yes")
+					var/datum/incident_persistence_manager/manager = SSincident_persistence.manager
+					manager.total_incidents = 0
+					manager.active_incidents = 0
+					manager.average_response_time = 0
+					manager.total_casualties = 0
+					manager.total_damage_cost = 0
+					manager.containment_success_rate = 0
+					to_chat(admin_client, span_notice("Incident persistence data reset."))
+					log_game("PersistenceMasterPanel: Incident data reset by [admin_client.ckey]")
+			else
+				to_chat(admin_client, span_warning("Incident persistence system not available."))
+
+		// Psychological Save/Load/Reset
+		if("psychological_save_data")
+			log_game("PersistenceMasterPanel: Processing psychological_save_data for [admin_client.ckey]")
+			if(SSpsychological_persistence && SSpsychological_persistence.manager)
+				SSpsychological_persistence?.manager?.save_psychological_data()
+				to_chat(admin_client, span_notice("Psychological data saved successfully."))
+			else
+				to_chat(admin_client, span_warning("Psychological persistence system not available."))
+
+		if("psychological_load_data")
+			log_game("PersistenceMasterPanel: Processing psychological_load_data for [admin_client.ckey]")
+			if(SSpsychological_persistence && SSpsychological_persistence.manager)
+				SSpsychological_persistence?.manager?.load_psychological_data()
+				to_chat(admin_client, span_notice("Psychological data loaded successfully."))
+			else
+				to_chat(admin_client, span_warning("Psychological persistence system not available."))
+
+		if("psychological_reset_data")
+			log_game("PersistenceMasterPanel: Processing psychological_reset_data for [admin_client.ckey]")
+			if(SSpsychological_persistence && SSpsychological_persistence.manager)
+				if(alert(admin_client, "Are you sure you want to reset all psychological persistence data?", "Confirm Reset", "Yes", "No") == "Yes")
+					var/datum/psychological_persistence_manager/manager = SSpsychological_persistence.manager
+					manager.total_staff_assessed = 0
+					manager.average_mental_health = 0
+					manager.stress_level = "LOW"
+					manager.therapy_success_rate = 0
+					manager.scp_exposure_cases = 0
+					manager.mental_health_budget = 0
+					to_chat(admin_client, span_notice("Psychological persistence data reset."))
+					log_game("PersistenceMasterPanel: Psychological data reset by [admin_client.ckey]")
+			else
+				to_chat(admin_client, span_warning("Psychological persistence system not available."))
+
+		// Infrastructure Actions
+		if("infrastructure_view_status")
+			log_game("PersistenceMasterPanel: Processing infrastructure_view_status for [admin_client.ckey]")
+			if(SSinfrastructure_persistence && SSinfrastructure_persistence.manager)
+				var/datum/infrastructure_persistence_manager/manager = SSinfrastructure_persistence.manager
+				var/message = "<h2>Infrastructure Status</h2>"
+				message += "<b>Total Equipment:</b> [manager.total_equipment]<br>"
+				message += "<b>Operational Equipment:</b> [manager.operational_equipment]<br>"
+				message += "<b>Power Efficiency:</b> [manager.power_efficiency * 100]%<br>"
+				message += "<b>Structural Health:</b> [manager.structural_health]%<br>"
+				message += "<b>Maintenance Budget:</b> $[manager.maintenance_budget]<br>"
+				message += "<b>Repair Backlog:</b> [manager.repair_backlog]<br>"
+				to_chat(admin_client, span_notice("[message]"))
+				log_game("PersistenceMasterPanel: Infrastructure status viewed by [admin_client.ckey]")
+			else
+				to_chat(admin_client, span_warning("Infrastructure persistence system not available."))
+
+		if("infrastructure_save_data")
+			log_game("PersistenceMasterPanel: Processing infrastructure_save_data for [admin_client.ckey]")
+			if(SSinfrastructure_persistence && SSinfrastructure_persistence.manager)
+				SSinfrastructure_persistence?.manager?.save_infrastructure_data()
+				to_chat(admin_client, span_notice("Infrastructure data saved successfully."))
+			else
+				to_chat(admin_client, span_warning("Infrastructure persistence system not available."))
+
+		if("infrastructure_load_data")
+			log_game("PersistenceMasterPanel: Processing infrastructure_load_data for [admin_client.ckey]")
+			if(SSinfrastructure_persistence && SSinfrastructure_persistence.manager)
+				SSinfrastructure_persistence?.manager?.load_infrastructure_data()
+				to_chat(admin_client, span_notice("Infrastructure data loaded successfully."))
+			else
+				to_chat(admin_client, span_warning("Infrastructure persistence system not available."))
+
+		if("infrastructure_reset_data")
+			log_game("PersistenceMasterPanel: Processing infrastructure_reset_data for [admin_client.ckey]")
+			if(SSinfrastructure_persistence && SSinfrastructure_persistence.manager)
+				if(alert(admin_client, "Are you sure you want to reset all infrastructure persistence data?", "Confirm Reset", "Yes", "No") == "Yes")
+					var/datum/infrastructure_persistence_manager/manager = SSinfrastructure_persistence.manager
+					manager.total_equipment = 0
+					manager.operational_equipment = 0
+					manager.power_efficiency = 0
+					manager.structural_health = 0
+					manager.maintenance_budget = 0
+					manager.repair_backlog = 0
+					to_chat(admin_client, span_notice("Infrastructure persistence data reset."))
+					log_game("PersistenceMasterPanel: Infrastructure data reset by [admin_client.ckey]")
+			else
+				to_chat(admin_client, span_warning("Infrastructure persistence system not available."))
+
+		// Analytics Actions
+		if("analytics_view_status")
+			log_game("PersistenceMasterPanel: Processing analytics_view_status for [admin_client.ckey]")
+			if(SSanalytics_persistence && SSanalytics_persistence.manager)
+				var/datum/analytics_persistence_manager/manager = SSanalytics_persistence.manager
+				var/message = "<h2>Analytics & Performance Status</h2>"
+				message += "<b>Overall Efficiency:</b> [manager.overall_efficiency * 100]%<br>"
+				message += "<b>Performance Score:</b> [manager.performance_score]<br>"
+				message += "<b>Trend Direction:</b> [manager.trend_direction]<br>"
+				message += "<b>Data Quality Score:</b> [manager.data_quality_score]<br>"
+				message += "<b>Analytics Budget:</b> $[manager.analytics_budget]<br>"
+				to_chat(admin_client, span_notice("[message]"))
+				log_game("PersistenceMasterPanel: Analytics status viewed by [admin_client.ckey]")
+			else
+				to_chat(admin_client, span_warning("Analytics persistence system not available."))
+
+		if("analytics_save_data")
+			log_game("PersistenceMasterPanel: Processing analytics_save_data for [admin_client.ckey]")
+			if(SSanalytics_persistence && SSanalytics_persistence.manager)
+				SSanalytics_persistence?.manager?.save_analytics_data()
+				to_chat(admin_client, span_notice("Analytics data saved successfully."))
+			else
+				to_chat(admin_client, span_warning("Analytics persistence system not available."))
+
+		if("analytics_load_data")
+			log_game("PersistenceMasterPanel: Processing analytics_load_data for [admin_client.ckey]")
+			if(SSanalytics_persistence && SSanalytics_persistence.manager)
+				SSanalytics_persistence?.manager?.load_analytics_data()
+				to_chat(admin_client, span_notice("Analytics data loaded successfully."))
+			else
+				to_chat(admin_client, span_warning("Analytics persistence system not available."))
+
+		if("analytics_reset_data")
+			log_game("PersistenceMasterPanel: Processing analytics_reset_data for [admin_client.ckey]")
+			if(SSanalytics_persistence && SSanalytics_persistence.manager)
+				if(alert(admin_client, "Are you sure you want to reset all analytics persistence data?", "Confirm Reset", "Yes", "No") == "Yes")
+					var/datum/analytics_persistence_manager/manager = SSanalytics_persistence.manager
+					manager.overall_efficiency = 0
+					manager.performance_score = 0
+					manager.trend_direction = "STABLE"
+					manager.data_quality_score = 0
+					manager.analytics_budget = 0
+					to_chat(admin_client, span_notice("Analytics persistence data reset."))
+					log_game("PersistenceMasterPanel: Analytics data reset by [admin_client.ckey]")
+			else
+				to_chat(admin_client, span_warning("Analytics persistence system not available."))
+
 		// Budget Actions
 		if("budget_request_increase")
 			log_game("PersistenceMasterPanel: Processing budget_request_increase for [admin_client.ckey]")

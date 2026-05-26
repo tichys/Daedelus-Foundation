@@ -7,7 +7,7 @@ SUBSYSTEM_DEF(scp_experiments)
 /datum/controller/subsystem/scp_experiments/Initialize()
 	manager = new /datum/scp_experiment_manager()
 	manager.initialize_experiments()
-	log_world("SCP Experiment System: Initialized")
+	log_game("SCP Experiment System: Initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_experiments/fire()
@@ -32,11 +32,11 @@ SUBSYSTEM_DEF(scp_experiments)
 /datum/scp_experiment_manager/proc/initialize_experiments()
 	load_experiment_templates()
 	initialize_certifications()
-	log_world("SCP Experiment Manager: Loaded [length(experiment_templates)] experiment templates")
+	log_game("SCP Experiment Manager: Loaded [length(experiment_templates)] experiment templates")
 
 /datum/scp_experiment_manager/proc/load_experiment_templates()
 	initialize_all_scp_experiments()
-	log_world("SCP Experiment Manager: Template loading initialized")
+	log_game("SCP Experiment Manager: Template loading initialized")
 
 /datum/scp_experiment_manager/proc/initialize_certifications()
 	for(var/job in list("Scientist", "Research Director", "Senior Researcher", "Research Assistant", 

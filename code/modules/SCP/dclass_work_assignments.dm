@@ -65,7 +65,7 @@
 	if(!assigned_to)
 		return
 
-	to_chat(assigned_to, "<span class='notice'>Task complete: [description]. Reward: +[reward_credits] credits, +[reward_trust] trust.</span>")
+	to_chat(assigned_to, span_notice("Task complete: [description]. Reward: +[reward_credits] credits, +[reward_trust] trust."))
 
 /datum/dclass_work_assignment/proc/get_progress_percent()
 	if(completed)

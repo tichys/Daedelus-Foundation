@@ -206,7 +206,7 @@ SUBSYSTEM_DEF(roleplay_character)
 	// Note: This will be implemented when character reference is available
 	// for(var/client/C in GLOB.clients)
 	// 	if(C.ckey == character.ckey)
-	// 		to_chat(C, "<span class='notice'>Your character has reached level [character_level]!</span>")
+	// 		to_chat(C, span_notice("Your character has reached level [character_level]!"))
 	// 		break
 
 /datum/roleplay_character_growth/proc/check_growth_milestones(datum/mind/mind)

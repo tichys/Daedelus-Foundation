@@ -194,12 +194,12 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 
 // Subsystem initialization
 /datum/controller/subsystem/infrastructure_persistence/Initialize()
-	log_world("Infrastructure persistence subsystem initializing...")
+	log_game("Infrastructure persistence subsystem initializing...")
 	manager = new /datum/infrastructure_persistence_manager()
 	log_game("Infrastructure persistence manager created")
 
 	// Load existing infrastructure data from game systems
-	log_world("Loading existing infrastructure data...")
+	log_game("Loading existing infrastructure data...")
 	manager.load_existing_infrastructure_data()
 
 	log_game("Equipment status count at initialization: [length(manager.equipment_status)]")
@@ -211,7 +211,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 
 // Load existing infrastructure data from game systems
 /datum/infrastructure_persistence_manager/proc/load_existing_infrastructure_data()
-	log_world("Infrastructure: Loading existing infrastructure data...")
+	log_game("Infrastructure: Loading existing infrastructure data...")
 
 	// Initialize with some basic equipment
 	var/datum/equipment_status/status1 = new /datum/equipment_status(
@@ -247,7 +247,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 	system1.efficiency = 1.0
 	power_systems["PWR_SMES"] = system1
 
-	log_world("Infrastructure: Loaded [length(equipment_status)] equipment status records")
+	log_game("Infrastructure: Loaded [length(equipment_status)] equipment status records")
 	log_game("Infrastructure: Loaded [length(power_systems)] power systems")
 
 // Add maintenance record
@@ -530,3 +530,7 @@ SUBSYSTEM_DEF(infrastructure_persistence)
 /datum/infrastructure_persistence_manager/proc/save_infrastructure_data()
 	// This would save data to persistent storage
 	log_game("Infrastructure: Saving infrastructure data to persistent storage")
+
+/datum/infrastructure_persistence_manager/proc/load_infrastructure_data()
+	// This would load data from persistent storage
+	log_game("Infrastructure: Loading infrastructure data from persistent storage")

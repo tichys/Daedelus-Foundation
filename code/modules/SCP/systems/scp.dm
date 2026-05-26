@@ -117,6 +117,9 @@
 	if(SSscp_persistence && SSscp_persistence.manager)
 		var/id = get_scp_id()
 		SSscp_persistence?.manager?.scp_instances[id] = new /datum/scp_instance(id, parent)
+		if(istype(parent, /mob/living/scp))
+			var/mob/living/scp/S = parent
+			S.persistence_id = id
 
 ///Helper to record an interaction in persistence
 /datum/scp/proc/log_interaction(mob/user, interaction_type)

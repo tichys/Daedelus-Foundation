@@ -13,7 +13,7 @@ SUBSYSTEM_DEF(scp_persistence)
 	initialize_chain_breaches()
 	init_zone_lighting_controllers()
 	minimap_renderer = new()
-	log_world("SCP Persistence Subsystem: Initialized")
+	log_game("SCP Persistence Subsystem: Initialized")
 	return ..()
 
 /datum/controller/subsystem/scp_persistence/fire()
@@ -25,15 +25,12 @@ SUBSYSTEM_DEF(scp_persistence)
 /datum/controller/subsystem/scp_persistence/proc/rebuild_scp_cache()
 	cached_scp_atoms = list()
 	cached_scp_mobs = list()
-	for(var/mob/living/scp/S in GLOB.mob_list)
-		var/id = manager?.get_scp_id(S)
+	for(var/atom/A in GLOB.SCP_list)
+		var/id = manager?.get_scp_id(A)
 		if(id)
-			cached_scp_atoms[id] = S
-			cached_scp_mobs[id] = S
-	for(var/obj/O in GLOB.SCP_list)
-		var/id = manager?.get_scp_id(O)
-		if(id && !(id in cached_scp_atoms))
-			cached_scp_atoms[id] = O
+			cached_scp_atoms[id] = A
+			if(ismob(A))
+				cached_scp_mobs[id] = A
 	cache_dirty = FALSE
 
 /datum/controller/subsystem/scp_persistence/proc/mark_cache_dirty()
@@ -145,15 +142,19 @@ SUBSYSTEM_DEF(scp_persistence)
 				if(inst_a) inst_a.add_interaction_record(null, "proximity:[id_b]")
 				if(inst_b) inst_b.add_interaction_record(null, "proximity:[id_a]")
 
-/datum/scp_persistence_manager/proc/get_scp_id(var/obj/O)
-	// Extract SCP ID from object name or properties
-	if(istype(O, /obj/item/paper)) // Check if it's a document with SCP info
-		return "SCP-000"
-	else if(findtext(O.name, "SCP-"))
-		var/list/parts = splittext(O.name, " ")
-		for(var/part in parts)
-			if(findtext(part, "SCP-"))
-				return part
+/datum/scp_persistence_manager/proc/get_scp_id(var/atom/A)
+	if(ismob(A))
+		var/mob/M = A
+		if(M.SCP)
+			return M.SCP.get_scp_id()
+	if(isobj(A))
+		var/obj/O = A
+		if(O.SCP)
+			return O.SCP.get_scp_id()
+	if(istype(A, /mob/living/scp))
+		var/mob/living/scp/S = A
+		if(S.persistence_id && S.persistence_id != "[S.type]")
+			return S.persistence_id
 	return null
 
 /datum/scp_persistence_manager/proc/update_research_projects()
@@ -237,9 +238,50 @@ SUBSYSTEM_DEF(scp_persistence)
 				"priority_level" = project.priority_level
 			)
 
+		var/list/serializable_protocols = list()
+		for(var/protocol_id in containment_protocols)
+			var/datum/containment_protocol/protocol = containment_protocols[protocol_id]
+			serializable_protocols[protocol_id] = list(
+				"protocol_id" = protocol.protocol_id,
+				"protocol_name" = protocol.protocol_name,
+				"effectiveness" = protocol.effectiveness,
+				"protocol_status" = protocol.protocol_status,
+				"last_maintenance" = protocol.last_maintenance,
+				"next_maintenance" = protocol.next_maintenance
+			)
+
+		var/list/serializable_effects = list()
+		for(var/effect_id in anomaly_effects)
+			var/datum/anomaly_effect/effect = anomaly_effects[effect_id]
+			serializable_effects[effect_id] = list(
+				"effect_id" = effect.effect_id,
+				"effect_name" = effect.effect_name,
+				"effect_type" = effect.effect_type,
+				"effect_strength" = effect.effect_strength,
+				"effect_radius" = effect.effect_radius,
+				"duration" = effect.duration,
+				"effect_status" = effect.effect_status
+			)
+
+		var/list/serializable_env = list()
+		for(var/change_id in environmental_changes)
+			var/datum/environmental_change/change = environmental_changes[change_id]
+			serializable_env[change_id] = list(
+				"change_id" = change.change_id,
+				"change_name" = change.change_name,
+				"change_type" = change.change_type,
+				"change_strength" = change.change_strength,
+				"duration" = change.duration,
+				"change_status" = change.change_status
+			)
+
 		var/list/data = list(
 			"scp_instances" = serializable_instances,
 			"research_projects" = serializable_research,
+			"containment_protocols" = serializable_protocols,
+			"anomaly_effects" = serializable_effects,
+			"environmental_changes" = serializable_env,
+			"communication_logs" = communication_logs,
 			"global_containment_stability" = global_containment_stability,
 			"active_breaches" = active_breaches,
 			"research_progress" = research_progress,
@@ -294,6 +336,22 @@ SUBSYSTEM_DEF(scp_persistence)
 						instance.threat_level = raw["threat_level"]
 					if(raw["last_breach"])
 						instance.last_breach = raw["last_breach"]
+					if(islist(raw["breach_history"]))
+						instance.breach_history = raw["breach_history"]
+					if(islist(raw["interaction_history"]))
+						instance.interaction_history = raw["interaction_history"]
+					if(raw["reproduction_count"])
+						instance.reproduction_count = raw["reproduction_count"]
+					if(islist(raw["persisted_skill_levels"]))
+						instance.persisted_skill_levels = raw["persisted_skill_levels"]
+					if(islist(raw["persisted_skill_experience"]))
+						instance.persisted_skill_experience = raw["persisted_skill_experience"]
+					if(islist(raw["persisted_skill_cooldowns"]))
+						instance.persisted_skill_cooldowns = raw["persisted_skill_cooldowns"]
+					if(raw["last_skill_use"])
+						instance.last_skill_use = raw["last_skill_use"]
+					if(raw["level_up_cooldown"])
+						instance.level_up_cooldown = raw["level_up_cooldown"]
 					scp_instances[scp_id] = instance
 				else
 					scp_instances[scp_id] = new /datum/scp_instance(scp_id, null)
@@ -415,26 +473,36 @@ SUBSYSTEM_DEF(scp_persistence)
 		update_status(O)
 
 /datum/scp_instance/proc/update_status(var/obj/O)
-	if(O)
-		if(istype(O, /mob/living))
-			var/mob/living/L = O
-			containment_health = round((L.health / L.maxHealth) * 100)
-			if(L.stat == DEAD)
-				containment_status = "terminated"
-				current_state = "dead"
-			else if(containment_health < 50)
+	if(!O)
+		return
+
+	if(istype(O, /mob/living))
+		var/mob/living/L = O
+
+		if(L.SCP)
+			containment_class = L.SCP.classification
+			scp_id = L.SCP.get_scp_id()
+
+		containment_health = round((L.health / L.maxHealth) * 100)
+		if(L.stat == DEAD)
+			containment_status = "terminated"
+			current_state = "dead"
+		else
+			var/area/A = get_area(L)
+			var/in_containment = FALSE
+			if(A)
+				var/area_name = lowertext(A.name)
+				if(findtext(area_name, "contain") || findtext(area_name, "scp") || findtext(area_name, "chamber") || findtext(area_name, "cell"))
+					in_containment = TRUE
+			if(in_containment)
+				containment_status = "contained"
+				current_state = "normal"
+			else
 				if(containment_status != "breached")
 					containment_status = "breached"
 					last_breach = world.time
 					add_breach_record()
 				current_state = "agitated"
-			else
-				containment_status = "contained"
-				current_state = "normal"
-		else
-			containment_status = "contained"
-			containment_health = 100
-			current_state = "normal"
 
 		containment_effectiveness = containment_health / 100
 
@@ -445,6 +513,11 @@ SUBSYSTEM_DEF(scp_persistence)
 			persisted_skill_cooldowns = islist(S.skill_cooldowns) ? S.skill_cooldowns.Copy() : list()
 			last_skill_use = S.last_skill_use
 			level_up_cooldown = S.level_up_cooldown
+	else
+		containment_status = "contained"
+		containment_health = 100
+		current_state = "normal"
+		containment_effectiveness = 1.0
 
 
 // Apply persisted state back onto a live SCP mob
@@ -737,7 +810,7 @@ SUBSYSTEM_DEF(scp_persistence)
 
 /mob/proc/manage_scp_persistence()
 	set name = "Manage SCP Persistence"
-	set category = "SCP"
+	set category = "Admin"
 
 	if(!check_rights(R_ADMIN))
 		to_chat(src, span_warning("You don't have permission to manage SCP persistence."))
@@ -1028,7 +1101,7 @@ SUBSYSTEM_DEF(scp_persistence)
 // SCP Management Verbs
 /mob/proc/manage_scp_system()
 	set name = "Manage SCP System"
-	set category = "SCP"
+	set category = "Admin"
 
 	if(!check_rights(R_ADMIN))
 		to_chat(src, span_warning("You don't have permission to manage the SCP system."))
@@ -1080,11 +1153,13 @@ SUBSYSTEM_DEF(scp_persistence)
 
 		if("Toggle Auto-Containment")
 			manager.auto_containment_enabled = !manager.auto_containment_enabled
-			to_chat(src, "span_notice("Auto-containment [manager.auto_containment_enabled ? "enabled" : "disabled"].")")
+			var/auto_status = manager.auto_containment_enabled ? "enabled" : "disabled"
+			to_chat(src, span_notice("Auto-containment [auto_status]."))
 
 		if("Toggle SCP Rotation")
 			manager.scp_rotation_enabled = !manager.scp_rotation_enabled
-			to_chat(src, "span_notice("SCP rotation [manager.scp_rotation_enabled ? "enabled" : "disabled"].")")
+			var/rotation_status = manager.scp_rotation_enabled ? "enabled" : "disabled"
+			to_chat(src, span_notice("SCP rotation [rotation_status]."))
 
 		if("View SCP Status")
 			view_scp_management_status()
@@ -1110,7 +1185,7 @@ SUBSYSTEM_DEF(scp_persistence)
 // View SCP management status
 /mob/proc/view_scp_management_status()
 	set name = "View SCP Management Status"
-	set category = "SCP"
+	set category = "Admin"
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		to_chat(src, span_warning("SCP Persistence system not available."))
@@ -1166,12 +1241,14 @@ SUBSYSTEM_DEF(scp_persistence)
 		if("Toggle Research Access")
 			var/current = manager.get_scp_configuration(scp_id, "research_allowed")
 			manager.set_scp_configuration(scp_id, "research_allowed", !current)
-			to_chat(usr, "span_notice("Research access for [scp_id] [current ? "disabled" : "enabled"].")")
+			var/research_status = current ? "disabled" : "enabled"
+			to_chat(usr, span_notice("Research access for [scp_id] [research_status]."))
 
 		if("Toggle Interaction Access")
 			var/current = manager.get_scp_configuration(scp_id, "interaction_allowed")
 			manager.set_scp_configuration(scp_id, "interaction_allowed", !current)
-			to_chat(usr, "span_notice("Interaction access for [scp_id] [current ? "disabled" : "enabled"].")")
+			var/interaction_status = current ? "disabled" : "enabled"
+			to_chat(usr, span_notice("Interaction access for [scp_id] [interaction_status]."))
 
 		if("Add Restriction")
 			var/restriction = input(usr, "Enter restriction:", "Add Restriction") as text
@@ -1252,7 +1329,7 @@ SUBSYSTEM_DEF(scp_persistence)
 // Admin commands for player performance management
 /mob/proc/manage_player_performance()
 	set name = "Manage Player Performance"
-	set category = "SCP"
+	set category = "Admin"
 
 	if(!SSscp_persistence || !SSscp_persistence.manager)
 		to_chat(src, span_warning("SCP Persistence system not available."))

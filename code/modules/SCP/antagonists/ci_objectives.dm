@@ -228,11 +228,11 @@
 	var/mob/living/carbon/human/H = user
 	var/datum/antagonist/chaos_insurgency/ci = H.mind?.has_antag_datum(/datum/antagonist/chaos_insurgency)
 	if(!ci)
-		to_chat(H, "<span class='warning'>You don't know how to use this device.</span>")
+		to_chat(H, span_warning("You don't know how to use this device."))
 		return
 
 	if(length(captured_intel) >= intel_capacity)
-		to_chat(H, "<span class='warning'>Camera memory full. [length(captured_intel)]/[intel_capacity] intel gathered.</span>")
+		to_chat(H, span_warning("Camera memory full. [length(captured_intel)]/[intel_capacity] intel gathered."))
 		return
 
 	var/list/nearby_scps = list()
@@ -241,18 +241,18 @@
 			nearby_scps += M
 
 	if(!length(nearby_scps))
-		to_chat(H, "<span class='warning'>No SCP entities in view to document.</span>")
+		to_chat(H, span_warning("No SCP entities in view to document."))
 		return
 
 	var/mob/living/target_scp = pick(nearby_scps)
 	var/scp_name = target_scp.SCP.designation ? "SCP-[target_scp.SCP.designation]" : target_scp.name
 	captured_intel += scp_name
-	to_chat(H, "<span class='notice'>Intelligence captured on [scp_name]. ([length(captured_intel)]/[intel_capacity])</span>")
+	to_chat(H, span_notice("Intelligence captured on [scp_name]. ([length(captured_intel)]/[intel_capacity])"))
 
 	for(var/datum/objective/ci_intel_gather/O in ci.objectives)
 		O.intel_collected++
 		if(O.intel_collected >= O.intel_required)
-			to_chat(H, "<span class='green'>Intelligence objective complete!</span>")
+			to_chat(H, span_nicegreen("Intelligence objective complete!"))
 
 // CI Breach Assist Device
 /obj/item/ci_breach_device
@@ -266,27 +266,27 @@
 	if(!ishuman(user))
 		return
 	if(uses <= 0)
-		to_chat(user, "<span class='warning'>Device depleted.</span>")
+		to_chat(user, span_warning("Device depleted."))
 		return
 
 	var/mob/living/carbon/human/H = user
 	var/datum/antagonist/chaos_insurgency/ci = H.mind?.has_antag_datum(/datum/antagonist/chaos_insurgency)
 	if(!ci)
-		to_chat(H, "<span class='warning'>You don't know how to use this device.</span>")
+		to_chat(H, span_warning("You don't know how to use this device."))
 		return
 
 	uses--
-	to_chat(H, "<span class='notice'>Containment override activated! [uses] uses remaining.</span>")
+	to_chat(H, span_notice("Containment override activated! [uses] uses remaining."))
 
 	var/list/breachable_scps = list("SCP-173", "SCP-049", "SCP-096", "SCP-035", "SCP-939")
 	hook_scp_breach(pick(breachable_scps), H)
 
 	for(var/datum/objective/ci_breach_assist/O in ci.objectives)
-		to_chat(H, "<span class='notice'>Breach assist objective progress updated.</span>")
+		to_chat(H, span_notice("Breach assist objective progress updated."))
 
 /obj/item/ci_breach_device/examine(mob/user)
 	. = ..()
-	. += "<span class='notice'>[uses] uses remaining.</span>"
+	. += span_notice("[uses] uses remaining.")
 
 /datum/objective/ci_budget_drain
 	name = "drain department budget"

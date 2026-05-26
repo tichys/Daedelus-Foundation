@@ -549,12 +549,12 @@ SUBSYSTEM_DEF(medical_persistence)
 
 // Subsystem initialization
 /datum/controller/subsystem/medical_persistence/Initialize()
-	log_world("Medical persistence subsystem initializing...")
+	log_game("Medical persistence subsystem initializing...")
 	manager = new /datum/medical_persistence_manager()
 	log_game("Medical persistence manager created")
 
 	// Load existing medical records from datacore
-	log_world("Loading existing medical records from datacore...")
+	log_game("Loading existing medical records from datacore...")
 	manager.load_existing_medical_records()
 
 	log_game("Medical records count at initialization: [length(manager.medical_records)]")
@@ -590,7 +590,7 @@ SUBSYSTEM_DEF(medical_persistence)
 	if(!SSdatacore)
 		return
 
-	log_world("Medical: Loading existing medical records from datacore...")
+	log_game("Medical: Loading existing medical records from datacore...")
 
 	// Load from general records (station records)
 	for(var/datum/data/record/general_record in SSdatacore.get_records(DATACORE_RECORDS_STATION))
@@ -658,7 +658,7 @@ SUBSYSTEM_DEF(medical_persistence)
 
 				log_game("Medical: Created new medical record for [medical_record.fields[DATACORE_NAME]]")
 
-	log_world("Medical: Loaded [length(medical_records)] medical records from datacore")
+	log_game("Medical: Loaded [length(medical_records)] medical records from datacore")
 
 // Add treatment log
 /datum/medical_persistence_manager/proc/add_treatment_log(var/patient_ckey, var/treatment_type, var/doctor_ckey)

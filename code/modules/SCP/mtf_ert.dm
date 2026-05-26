@@ -57,7 +57,7 @@
 
 /datum/antagonist/mtf/greet()
 	. = ..()
-	to_chat(owner, "<span class='boldannounce'>You are a Mobile Task Force operative of the SCP Foundation.</span>")
+	to_chat(owner, span_boldannounce("You are a Mobile Task Force operative of the SCP Foundation."))
 	to_chat(owner, "<span class='warningplain'>Secure. Contain. Protect.</span>")
 	if(mtf_team && mtf_team.mission)
 		to_chat(owner, "<span class='warningplain'>Mission: [mtf_team.mission.explanation_text]</span>")

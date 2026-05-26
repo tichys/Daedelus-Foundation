@@ -111,7 +111,7 @@
 		if(zone == "lcz" || zone == "hcz")
 			if(H.sanity && prob(40))
 				H.sanity.adjust_sanity(-15, "memetic_hazard_event")
-				to_chat(H, "<span class='warning'>Your mind feels violated by an unseen force!</span>")
+				to_chat(H, span_warning("Your mind feels violated by an unseen force!"))
 
 /datum/round_event_control/scp_cascade_warning
 	name = "SCP Cascade Warning"
@@ -210,7 +210,7 @@
 			if(H.stat == DEAD || !H.client)
 				continue
 			if(H.job && (H.job == JOB_RESEARCH_DIRECTOR || H.job == JOB_SENIOR_RESEARCHER || H.job == JOB_RESEARCHER || H.job == JOB_JUNIOR_RESEARCHER))
-				to_chat(H, "<span class='notice'>Research breakthrough detected! +[bonus_points] research points allocated to your department.</span>")
+				to_chat(H, span_notice("Research breakthrough detected! +[bonus_points] research points allocated to your department."))
 				researchers_notified += H
 				if(SSpersistent_progression && H.ckey)
 					SSpersistent_progression.award_experience(H.ckey, "scp_research_contribution", 50, "Research Breakthrough Event")
@@ -243,7 +243,7 @@
 			continue
 		var/obj/item/card/id/id_card = H.get_idcard(TRUE)
 		if(id_card && (ACCESS_SECURITY in id_card.access))
-			to_chat(H, "<span class='danger'>Your security headset crackles: Priority alert in effect. Report to containment wing.</span>")
+			to_chat(H, span_danger("Your security headset crackles: Priority alert in effect. Report to containment wing."))
 			if(H.sanity)
 				H.sanity.adjust_sanity(-5, "security_alert_stress")
 		if(findtext(H.job, "D-Class") && SSdclass && SSdclass.manager)
@@ -279,7 +279,7 @@
 		var/area/A = get_area(H)
 		if(istype(A, /area/scp/dclass))
 			dclass_count++
-			to_chat(H, "<span class='warning'>The air of tension in the cell block is palpable. Something is about to happen.</span>")
+			to_chat(H, span_warning("The air of tension in the cell block is palpable. Something is about to happen."))
 			if(SSdclass && SSdclass.manager)
 				var/datum/dclass_player/player = SSdclass?.manager?.dclass_players[H.ckey]
 				if(player)

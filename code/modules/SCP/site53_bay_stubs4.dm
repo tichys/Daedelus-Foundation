@@ -70,6 +70,7 @@
 	name = "secure locker"
 	var/icon_closed
 	var/icon_locked
+	var/icon_off
 
 /obj/structure/closet/secure/administration/commsofficer
 	name = "comms officer's locker"
